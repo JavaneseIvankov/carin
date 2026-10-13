@@ -185,8 +185,15 @@ def validate_bundle(bundle, repo_root):
             if not urlsplit(str(source.get("url", ""))).hostname or not urlsplit(
                     str(source.get("url", ""))).hostname.endswith(".invalid"):
                 errors.append(f"synthetic source {source_id} must use a .invalid URL")
-        elif not source.get("url"):
-            errors.append(f"non-synthetic source {source_id} requires a URL")
+        else:
+            parsed_url = urlsplit(str(source.get("url", "")))
+            host = (parsed_url.hostname or "").rstrip(".").lower()
+            if (parsed_url.scheme.lower() not in ("http", "https") or not host
+                    or host == "invalid" or host.endswith(".invalid")):
+                errors.append(
+                    f"non-synthetic source {source_id} requires an HTTP(S) citation URL "
+                    "with a nonempty non-.invalid host"
+                )
         if not source.get("license", {}).get("name"):
             errors.append(f"source {source_id} requires license metadata")
 
@@ -210,7 +217,12 @@ def validate_bundle(bundle, repo_root):
                     errors.append(f"food {food_id} source for {key} is not a nutrition source")
                 if source.get("datasetVersion") != nutrition.get("datasetVersion"):
                     errors.append(f"food {food_id} source for {key} has wrong dataset version")
+        serving_ids = set()
         for serving in food.get("servings", []):
+            serving_id = serving.get("id")
+            if serving_id in serving_ids:
+                errors.append(f"food {food_id} has duplicate serving ID {serving_id!r}")
+            serving_ids.add(serving_id)
             grams = serving.get("grams")
             if isinstance(grams, bool) or not isinstance(grams, (int, float)) or not math.isfinite(grams) or grams <= 0:
                 errors.append(f"food {food_id} serving grams must be finite and greater than zero")

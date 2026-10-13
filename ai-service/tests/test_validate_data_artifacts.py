@@ -64,6 +64,20 @@ def synthetic_rule():
     }
 
 
+def placeholder_real_source(url):
+    return {
+        "id": "source.invalid-citation-test",
+        "kind": "nutrition",
+        "title": "Test placeholder for citation URL validation",
+        "datasetVersion": "nutrition-unpublished-0.1.0",
+        "itemRef": "test-only placeholder; no nutrition data",
+        "url": url,
+        "license": {"name": "test-only placeholder", "url": None},
+        "basis": "Citation URL validation only",
+        "synthetic": False,
+    }
+
+
 def approval_for(record, version):
     content = json.dumps(record, ensure_ascii=False, allow_nan=False,
                          sort_keys=True, separators=(",", ":")).encode("utf-8")
@@ -216,6 +230,73 @@ class ValidateDataArtifactsTests(unittest.TestCase):
 
         self.assertTrue(any("source.synthetic-test" in error and "dataset version" in error.lower()
                             for error in errors))
+
+    def test_approved_published_source_rejects_reserved_or_non_web_urls(self):
+        for url in (
+            "https://example.invalid/fictional",
+            "https://invalid/fictional",
+            "urn:foo",
+            "https:///missing-host",
+        ):
+            with self.subTest(url=url):
+                bad = copy.deepcopy(self.bundle)
+                source = placeholder_real_source(url)
+                bad["nutrition-dataset"]["sources"] = [source]
+                food = synthetic_food()
+                bad["catalog"]["foods"] = [food]
+                for index, nutrient in enumerate(NUTRIENTS[:4], start=1):
+                    food["per100g"][nutrient] = float(index * 10)
+                    food["nutrientSourceIds"][nutrient] = source["id"]
+                manifest = bad["capability-manifest"]
+                manifest["publicationStatus"] = "published"
+                manifest["dataMode"] = "real"
+                manifest["supportedPhotoFoodIds"] = [food["id"]]
+                manifest["nutrients"] = list(NUTRIENTS[:4])
+                artifacts = bad["review-metadata"]["artifacts"]
+                for name, record, version in (
+                    ("catalog", bad["catalog"], bad["catalog"]["catalogVersion"]),
+                    ("nutrition-dataset", bad["nutrition-dataset"], bad["nutrition-dataset"]["datasetVersion"]),
+                    ("rules", bad["rules"], bad["rules"]["ruleSetVersion"]),
+                    ("capability-manifest", manifest, manifest["artifactVersion"]),
+                ):
+                    artifacts[name] = approval_for(record, version)
+                artifacts["sources"][source["id"]] = approval_for(
+                    source, source["datasetVersion"]
+                )
+
+                errors = validator.validate_bundle(bad, ROOT.parent)
+
+                self.assertTrue(any("http(s)" in error.lower() and source["id"] in error
+                                    for error in errors))
+
+    def test_duplicate_serving_ids_are_rejected_within_a_food(self):
+        bad = copy.deepcopy(self.bundle)
+        source = synthetic_source(kind="portion")
+        food = synthetic_food()
+        food["servings"] = [
+            {"id": "serving.bowl", "label": "Bowl", "grams": 100, "sourceId": source["id"]},
+            {"id": "serving.bowl", "label": "Bowl", "grams": 200, "sourceId": source["id"]},
+        ]
+        bad["nutrition-dataset"]["sources"] = [source]
+        bad["catalog"]["foods"] = [food]
+
+        errors = validator.validate_bundle(bad, ROOT.parent)
+
+        self.assertTrue(any("duplicate serving ID" in error for error in errors))
+
+    def test_same_serving_id_is_allowed_on_different_foods(self):
+        good = copy.deepcopy(self.bundle)
+        source = synthetic_source(kind="portion")
+        first = synthetic_food()
+        first["id"] = "food.synthetic-one"
+        second = synthetic_food()
+        second["id"] = "food.synthetic-two"
+        first["servings"] = [{"id": "serving.bowl", "label": "Bowl", "grams": 100, "sourceId": source["id"]}]
+        second["servings"] = [{"id": "serving.bowl", "label": "Bowl", "grams": 200, "sourceId": source["id"]}]
+        good["nutrition-dataset"]["sources"] = [source]
+        good["catalog"]["foods"] = [first, second]
+
+        self.assertEqual(validator.validate_bundle(good, ROOT.parent), [])
 
     def test_rejects_stale_artifact_approval_version_or_content(self):
         version_keys = {

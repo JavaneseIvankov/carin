@@ -50,14 +50,16 @@ synthetic-to-real promotion, and wire projections against
 `specs/contracts/ai-service.openapi.yaml`. It returns schema failures before
 semantic traversal of malformed artifact shapes. Approved records containing
 non-finite numbers produce validation findings instead of aborting while
-computing their content hash. Synthetic records in tests use `.invalid` URLs and
-are test data only. Passing validation does not approve content, train/select a
-model, or establish recognition or portion accuracy.
+computing their content hash. Non-synthetic source citations require HTTP(S)
+URLs with hosts and reject reserved `.invalid` hosts; synthetic test records use
+`.invalid` URLs. Serving IDs must be unique within each food, while different
+foods may reuse a serving ID. Passing validation does not approve content,
+train/select a model, or establish recognition or portion accuracy.
 
 Focused verification after review corrections:
 
 ```text
-PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -s ai-service/tests — 16 passed
+PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -s ai-service/tests — 19 passed
 PYTHONDONTWRITEBYTECODE=1 python ai-service/validate_data_artifacts.py — PASS
 git diff --check — PASS
 ```
