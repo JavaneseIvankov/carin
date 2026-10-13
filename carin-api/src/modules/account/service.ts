@@ -104,7 +104,7 @@ export async function updateMe(db: Database, input: MeUpdate) {
       .where(and(
         eq(session.id, input.sessionId),
         eq(session.userId, input.userId),
-        gt(session.expiresAt, new Date()),
+        gt(session.expiresAt, sql`clock_timestamp()`),
       ));
     if (!activeSession) throw new InactiveAccountSessionError();
 
