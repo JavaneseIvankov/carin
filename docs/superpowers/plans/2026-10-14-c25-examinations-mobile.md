@@ -16,7 +16,7 @@
 - Create `carin-app/components/exams/ExaminationForm.tsx` and `ExaminationSeriesChart.tsx` with colocated unit or integration tests.
 - Replace `carin-app/app/(tabs)/exams.tsx` placeholder with query-backed list, type filters, and series summaries.
 - Create `carin-app/app/exams/new.tsx`, `carin-app/app/exams/[id].tsx`, and `carin-app/app/exams/[id]/edit.tsx` for create, detail, and revision-aware edit/delete.
-- Add Expo-compatible `@react-native-community/datetimepicker` through `pnpm exec expo install` and regenerate the app lockfile.
+- Add Expo-compatible `@react-native-community/datetimepicker` and `expo-crypto` through `pnpm exec expo install` and regenerate the app lockfile.
 - Create `docs/handoffs/t25-examinations-mobile.md` with results, platform limits, and branch state.
 
 ## Task 1: Pure examination presentation helpers
@@ -36,7 +36,7 @@
 - [ ] Add tests for required measurement date, optional time staying null, decimal comma normalization, glucose unknown context, subtype selection, and preview showing exact unit/date/context before write.
 - [ ] Run the focused test to verify it fails for the absent form.
 - [ ] Install the Expo-compatible date/time picker, then implement accessible controls using it natively and date/time inputs on web; format selected calendar values locally, never through UTC conversion.
-- [ ] Load the account timezone with `getProfile`; keep create/update disabled while timezone is unavailable. Do not invent a time default or abnormal-value thresholds.
+- [ ] Load the account timezone with `useAppRead('getMe', {})`; keep create/update disabled while timezone is unavailable. Do not invent a time default or abnormal-value thresholds.
 - [ ] Verify create/edit values serialize to the generated discriminated union, preview requires explicit confirmation, and one idempotency key is retained across retries of the same action.
 - [ ] Run form tests, typecheck, and lint for changed files; commit `feat(mobile): add examination entry form`.
 
