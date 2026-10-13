@@ -43,3 +43,5 @@ jobs:
           cache-dependency-path: specs/requirements-contracts.txt
       - run: python -m pip install -r specs/requirements-contracts.txt
       - run: python specs/validate-contracts.py
+      - run: python -B -m unittest discover -s ai-service/tests
+      - run: python -B ai-service/validate_data_artifacts.py
