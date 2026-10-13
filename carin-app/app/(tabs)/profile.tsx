@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { useAuth } from '@/lib/auth/provider';
 import { useAppRead } from '@/lib/api/query';
-import { getAiConsentStatus, getKnowledgeStateLabel } from '@/lib/profile/profile';
+import { getKnowledgeStateLabel, getProfileConsentSummary } from '@/lib/profile/profile';
 import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
@@ -22,10 +22,25 @@ export default function ProfileScreen() {
   const registry = legalQuery.data?.data;
   const currentRegistryVersion =
     registry && !legalQuery.isFetching && !legalQuery.error ? registry.aiProcessing.version : null;
-  const consentStatus = getAiConsentStatus(
-    account?.aiConsent ?? { version: null, granted: false },
+  const consentSummary = getProfileConsentSummary(
+    account?.aiConsent,
+    accountQuery.error ? 'error' : accountQuery.isPending ? 'pending' : 'ready',
     currentRegistryVersion
   );
+  const consentMessage =
+    consentSummary.kind === 'loading'
+      ? 'Memuat status persetujuan akun…'
+      : consentSummary.kind === 'error'
+        ? 'Status persetujuan akun tidak dapat dimuat.'
+        : consentSummary.kind === 'unavailable'
+          ? 'Status persetujuan akun belum tersedia.'
+          : consentSummary.status === 'active'
+            ? 'Aktif untuk versi pemberitahuan saat ini'
+            : consentSummary.status === 'stale'
+              ? `Perlu diperbarui (persetujuan versi ${account?.aiConsent.version ?? 'lama'})`
+              : consentSummary.status === 'version_unavailable'
+                ? 'Status belum dapat diverifikasi terhadap versi pemberitahuan saat ini'
+                : 'Belum diberikan';
 
   const openLegal = (document: 'terms' | 'privacy' | 'ai-processing') => {
     router.push({ pathname: '/legal/[document]', params: { document } } as Href);
@@ -118,16 +133,7 @@ export default function ProfileScreen() {
       <View className="gap-3 rounded-xl border border-border bg-card p-4">
         <Text variant="h4">Pengaturan dan persetujuan</Text>
         <Text variant="muted">Zona waktu: {account?.timezone ?? 'Belum tersedia'}</Text>
-        <Text variant="muted">
-          Persetujuan pemrosesan AI:{' '}
-          {consentStatus === 'active'
-            ? 'Aktif untuk versi pemberitahuan saat ini'
-            : consentStatus === 'stale'
-              ? `Perlu diperbarui (persetujuan versi ${account?.aiConsent.version ?? 'lama'})`
-              : consentStatus === 'version_unavailable'
-                ? 'Status belum dapat diverifikasi terhadap versi pemberitahuan saat ini'
-                : 'Belum diberikan'}
-        </Text>
+        <Text variant="muted">Persetujuan pemrosesan AI: {consentMessage}</Text>
         {legalQuery.isPending && !registry ? (
           <View className="flex-row items-center gap-2">
             <ActivityIndicator accessibilityLabel="Memeriksa versi persetujuan AI" />

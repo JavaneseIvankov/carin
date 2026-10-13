@@ -5,6 +5,7 @@ import {
   createStableActionKey,
   getAiConsentValue,
   getAiConsentStatus,
+  getProfileConsentSummary,
   getKnowledgeStateLabel,
   getMissingFieldTarget,
   isAiConsentDraftDirty,
@@ -119,6 +120,19 @@ describe('AI consent version handling', () => {
     expect(reconcileAiConsentDraft({ version: 'ai-v2', granted: false }, 'ai-v2', 'ai-v2')).toEqual(
       { version: 'ai-v2', granted: false }
     );
+  });
+});
+
+describe('profile consent summary account loading', () => {
+  it('keeps consent unknown while the account query is pending or failed', () => {
+    expect(getProfileConsentSummary(undefined, 'pending', 'ai-v2')).toEqual({ kind: 'loading' });
+    expect(getProfileConsentSummary(undefined, 'error', 'ai-v2')).toEqual({ kind: 'error' });
+    expect(getProfileConsentSummary({ version: 'ai-v2', granted: true }, 'error', 'ai-v2')).toEqual(
+      { kind: 'error' }
+    );
+    expect(getProfileConsentSummary(undefined, 'ready', 'ai-v2')).toEqual({
+      kind: 'unavailable',
+    });
   });
 });
 
