@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://carin.invalid/ai-data/rule.schema.json",
+  "title": "Internal versioned health rule artifact",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "version", "conditionId", "requiredProfileFields", "requiredNutrients", "scope", "reason", "adjustments", "criticalMissingFields", "conflictSet", "citationSourceIds", "limitations", "ruleBody"],
+  "properties": {
+    "id": {"type": "string", "minLength": 1},
+    "version": {"type": "string", "minLength": 1},
+    "conditionId": {"type": "string", "minLength": 1},
+    "requiredProfileFields": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "requiredNutrients": {"type": "array", "items": {"enum": ["energyKcal", "carbohydrateG", "proteinG", "fatG", "fiberG", "sugarsG", "sodiumMg"]}, "uniqueItems": true},
+    "scope": {
+      "type": "object", "additionalProperties": false, "required": ["foodIds", "preparation", "portionBasis"],
+      "properties": {"foodIds": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}, "preparation": {"type": ["string", "null"]}, "portionBasis": {"type": ["string", "null"]}}
+    },
+    "reason": {"type": "string", "minLength": 1},
+    "adjustments": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "criticalMissingFields": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "conflictSet": {"type": ["string", "null"]},
+    "citationSourceIds": {"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 1, "uniqueItems": true},
+    "limitations": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "ruleBody": {"type": "object", "minProperties": 1, "description": "Implementation-defined rule expression; must be reviewed and cited before publication."}
+  }
+}

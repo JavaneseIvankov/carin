@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://carin.invalid/ai-data/review-metadata.schema.json",
+  "title": "Out-of-band review and publication approvals",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "artifacts"],
+  "properties": {
+    "schemaVersion": {"type": "string", "minLength": 1},
+    "artifacts": {
+      "type": "object", "additionalProperties": false,
+      "required": ["catalog", "nutrition-dataset", "rules", "capability-manifest", "sources", "rulesById"],
+      "properties": {
+        "catalog": {"$ref": "#/$defs/approval"},
+        "nutrition-dataset": {"$ref": "#/$defs/approval"},
+        "rules": {"$ref": "#/$defs/approval"},
+        "capability-manifest": {"$ref": "#/$defs/approval"},
+        "sources": {"type": "object", "additionalProperties": {"$ref": "#/$defs/approval"}},
+        "rulesById": {"type": "object", "additionalProperties": {"$ref": "#/$defs/approval"}}
+      }
+    }
+  },
+  "$defs": {
+    "approval": {
+      "type": "object", "additionalProperties": false,
+      "required": ["status", "reviewer", "approvedAt", "approvalId"],
+      "properties": {
+        "status": {"enum": ["draft", "approved"]},
+        "reviewer": {"type": ["string", "null"]},
+        "approvedAt": {"type": ["string", "null"], "format": "date-time"},
+        "approvalId": {"type": ["string", "null"]}
+      }
+    }
+  }
+}
