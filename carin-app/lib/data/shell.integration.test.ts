@@ -225,6 +225,58 @@ describe('mobile shell and data boundary', () => {
     expect(await storage.getItem(storageKey(alice, 'read', '/api/v1/dashboard'))).toBeNull();
   });
 
+  it('waits for the secure session cookie and sends it without implicit credentials', async () => {
+    let resolveCookie!: (cookie: string) => void;
+    const cookie = new Promise<string>((resolve) => {
+      resolveCookie = resolve;
+    });
+    const fetcher = vi.fn(async () => Response.json({ sample: true }));
+    const repo = createAppRepository({
+      scope: alice,
+      storage: memoryStorage(),
+      connectivity: () => 'online',
+      onUnauthorized: async () => {},
+      getCookie: () => cookie,
+      fetcher: fetcher as unknown as typeof fetch,
+      baseUrl: 'https://api.test',
+    });
+    const request = repo.read('getDashboard', {});
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const fetchCallsBeforeCookie = fetcher.mock.calls.length;
+
+    resolveCookie('carin-dev.session=alice-cookie');
+    await request;
+
+    const [, init] = fetcher.mock.calls[0] as unknown as [string, RequestInit];
+    expect(fetchCallsBeforeCookie).toBe(0);
+    expect(new Headers(init.headers).get('cookie')).toBe('carin-dev.session=alice-cookie');
+    expect(init.credentials).toBe('omit');
+  });
+
+  it('preserves idempotency headers and multipart bodies when adding the session cookie', async () => {
+    const fetcher = vi.fn(async () => Response.json({ id: 'photo-1' }, { status: 201 }));
+    const repo = createAppRepository({
+      scope: alice,
+      storage: memoryStorage(),
+      connectivity: () => 'online',
+      onUnauthorized: async () => {},
+      getCookie: async () => 'carin-dev.session=alice-cookie',
+      fetcher: fetcher as unknown as typeof fetch,
+      baseUrl: 'https://api.test',
+    });
+
+    await repo.write('uploadPhoto', {
+      headers: { 'Idempotency-Key': 'photo-action-1' },
+      body: { file: new Blob(['jpeg'], { type: 'image/jpeg' }) },
+    });
+
+    const [, init] = fetcher.mock.calls[0] as unknown as [string, RequestInit];
+    expect(new Headers(init.headers).get('idempotency-key')).toBe('photo-action-1');
+    expect(new Headers(init.headers).get('cookie')).toBe('carin-dev.session=alice-cookie');
+    expect(init.body).toBeInstanceOf(FormData);
+    expect(init.credentials).toBe('omit');
+  });
+
   it.each(['logout', 'account switch'])(
     'does not restore a departing user cache when a read write settles after %s',
     async (transition) => {

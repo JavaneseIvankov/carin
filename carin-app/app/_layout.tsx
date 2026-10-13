@@ -7,6 +7,8 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'nativewind';
 import { AppDataProvider } from '@/lib/data/provider';
+import { AuthProvider } from '@/lib/auth/provider';
+import { AuthGate } from '@/components/auth/auth-gate';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -20,8 +22,11 @@ export default function RootLayout() {
     <ThemeProvider value={NAV_THEME[colorScheme ?? 'light']}>
       <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
       <AppDataProvider>
-        <Stack screenOptions={{ headerShown: false }} />
-        <PortalHost />
+        <AuthProvider>
+          <Stack screenOptions={{ headerShown: false }} />
+          <PortalHost />
+          <AuthGate />
+        </AuthProvider>
       </AppDataProvider>
     </ThemeProvider>
   );

@@ -12,6 +12,7 @@
     "test:ai-fixture-runtime": "pnpm run build && node scripts/smoke-ai-fixtures.mjs",
     "catalog:sync": "pnpm run build && node dist/catalog/import-cli.js",
     "start": "node dist/index.js",
+    "start:email-worker": "node dist/email-worker.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings 0",
     "test": "pnpm run test:unit && pnpm run test:integration",
