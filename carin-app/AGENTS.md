@@ -17,14 +17,19 @@ Keep route-specific UI close to its route; move reusable behavior into `componen
 Run commands from `carin-app/` with pnpm:
 
 ```bash
-pnpm install             # install dependencies
+pnpm install --frozen-lockfile # install pinned dependencies
+pnpm run typecheck        # check TypeScript types
+pnpm run lint             # lint source and configuration
+pnpm run test             # run Vitest tests
 pnpm run dev             # start Expo with a cleared cache
 pnpm run android         # start the Android target
 pnpm run ios             # start the iOS target (macOS required)
 pnpm run web             # start the web target
 ```
 
-There is currently no test or lint script. Add automated checks as production behavior is introduced; verify the affected platform manually through Expo before opening a pull request.
+Vitest currently has no product tests; add tests with each feature. Verify affected
+platforms manually through Expo before opening a pull request. These tooling checks
+do not establish Android/iOS compatibility.
 
 ## Coding Style & Naming Conventions
 
@@ -32,7 +37,9 @@ Use TypeScript with strict mode enabled, two-space indentation, single quotes, a
 
 ## Testing Guidelines
 
-No test framework or coverage threshold is configured yet. When adding tests, colocate them with the feature or use a dedicated `__tests__/` directory, name files `*.test.ts` or `*.test.tsx`, and cover both interaction logic and platform-sensitive behavior.
+Vitest is configured without a coverage threshold. When adding tests, colocate them
+with the feature or use a dedicated `__tests__/` directory, name files `*.test.ts`
+or `*.test.tsx`, and cover both interaction logic and platform-sensitive behavior.
 
 ## Commit & Pull Request Guidelines
 
