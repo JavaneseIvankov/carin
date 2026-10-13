@@ -3,6 +3,7 @@ import { LegalContent } from '@/components/legal/legal-content';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { useAppRead } from '@/lib/api/query';
+import { getLegalRegistryState } from '@/lib/profile/profile';
 import type { components } from '@/lib/api/generated/app-api';
 import type { LegalDocument } from '@/lib/auth/legal';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -29,6 +30,13 @@ export default function LegalDocumentScreen() {
     : undefined;
   const legalQuery = useAppRead('getLegalRegistry', {});
   const registry = legalQuery.data?.data;
+  const legalRegistryState = getLegalRegistryState({
+    hasData: !!registry,
+    stale: legalQuery.data?.stale ?? false,
+    isPending: legalQuery.isPending,
+    isFetching: legalQuery.isFetching,
+    hasError: !!legalQuery.error,
+  });
   const document = validKey && registry ? selectDocument(validKey, registry) : null;
 
   if (legalQuery.isPending && !registry) {
@@ -65,10 +73,30 @@ export default function LegalDocumentScreen() {
     <View className="flex-1 bg-background">
       <View className="gap-2 border-b border-border px-5 pb-4 pt-7">
         <Text variant="h2">{document.title}</Text>
+        {legalRegistryState === 'stale' ? (
+          <Text variant="muted">Dokumen tersimpan dari cache dan mungkin bukan versi terbaru.</Text>
+        ) : null}
+        {legalRegistryState === 'refreshing' ? (
+          <Text variant="muted">Memeriksa versi dokumen terbaru…</Text>
+        ) : null}
+        {legalRegistryState === 'error' ? (
+          <Text variant="muted">Versi terbaru belum dapat diverifikasi.</Text>
+        ) : null}
         <Text variant="muted">
           Versi {document.version} · berlaku{' '}
           {new Date(document.effectiveAt).toLocaleDateString('id-ID')}
         </Text>
+        {legalQuery.error ? (
+          <ServiceError error={legalQuery.error} onRetry={() => void legalQuery.refetch()} />
+        ) : legalRegistryState === 'stale' ? (
+          <Button
+            variant="outline"
+            size="sm"
+            onPress={() => void legalQuery.refetch()}
+            disabled={legalQuery.isFetching}>
+            <Text>{legalQuery.isFetching ? 'Memuat versi terbaru…' : 'Muat versi terbaru'}</Text>
+          </Button>
+        ) : null}
         <Button variant="outline" size="sm" onPress={() => router.back()}>
           <Text>Kembali</Text>
         </Button>

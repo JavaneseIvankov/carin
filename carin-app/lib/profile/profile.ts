@@ -63,6 +63,26 @@ export type ProfileConsentSummary =
   | { kind: 'error' }
   | { kind: 'unavailable' }
   | { kind: 'status'; status: AiConsentStatus };
+export type LegalRegistryState =
+  'loading' | 'current' | 'stale' | 'refreshing' | 'error' | 'unavailable';
+
+export function getLegalRegistryState(query: {
+  hasData: boolean;
+  stale: boolean;
+  isPending: boolean;
+  isFetching: boolean;
+  hasError: boolean;
+}): LegalRegistryState {
+  if (query.hasData && query.stale) return 'stale';
+  if (query.hasError) return 'error';
+  if (query.isFetching) return query.hasData ? 'refreshing' : 'loading';
+  if (!query.hasData) return query.isPending ? 'loading' : 'unavailable';
+  return 'current';
+}
+
+export function isCurrentLegalRegistry(state: LegalRegistryState): boolean {
+  return state === 'current';
+}
 
 export function isSuccessfulQueryRefresh(result: {
   data: unknown;

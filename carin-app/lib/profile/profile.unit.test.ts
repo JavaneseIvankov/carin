@@ -5,10 +5,12 @@ import {
   createStableActionKey,
   getAiConsentValue,
   getAiConsentStatus,
+  getLegalRegistryState,
   getProfileConsentSummary,
   getKnowledgeStateLabel,
   getMissingFieldTarget,
   isAiConsentDraftDirty,
+  isCurrentLegalRegistry,
   isSuccessfulQueryRefresh,
   parseOptionalPositiveNumber,
   reconcileAiConsentDraft,
@@ -136,6 +138,63 @@ describe('profile consent summary account loading', () => {
     expect(getProfileConsentSummary(undefined, 'ready', 'ai-v2')).toEqual({
       kind: 'unavailable',
     });
+  });
+});
+
+describe('legal registry freshness', () => {
+  it('does not use cached stale registry versions for Profile or enable Settings consent actions', () => {
+    const staleState = getLegalRegistryState({
+      hasData: true,
+      stale: true,
+      isPending: false,
+      isFetching: false,
+      hasError: false,
+    });
+    const currentVersion = isCurrentLegalRegistry(staleState) ? 'ai-v1' : null;
+
+    expect(staleState).toBe('stale');
+    expect(isCurrentLegalRegistry(staleState)).toBe(false);
+    expect(
+      getProfileConsentSummary({ version: 'ai-v1', granted: true }, 'ready', currentVersion)
+    ).toEqual({ kind: 'status', status: 'version_unavailable' });
+    expect(
+      getLegalRegistryState({
+        hasData: false,
+        stale: false,
+        isPending: true,
+        isFetching: true,
+        hasError: false,
+      })
+    ).toBe('loading');
+    expect(
+      getLegalRegistryState({
+        hasData: false,
+        stale: false,
+        isPending: false,
+        isFetching: false,
+        hasError: true,
+      })
+    ).toBe('error');
+    expect(
+      getLegalRegistryState({
+        hasData: false,
+        stale: true,
+        isPending: false,
+        isFetching: false,
+        hasError: false,
+      })
+    ).toBe('unavailable');
+    expect(
+      isCurrentLegalRegistry(
+        getLegalRegistryState({
+          hasData: true,
+          stale: false,
+          isPending: false,
+          isFetching: false,
+          hasError: false,
+        })
+      )
+    ).toBe(true);
   });
 });
 

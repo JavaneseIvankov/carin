@@ -4,7 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { useAuth } from '@/lib/auth/provider';
 import { useAppRead } from '@/lib/api/query';
-import { getKnowledgeStateLabel, getProfileConsentSummary } from '@/lib/profile/profile';
+import {
+  getKnowledgeStateLabel,
+  getLegalRegistryState,
+  getProfileConsentSummary,
+  isCurrentLegalRegistry,
+} from '@/lib/profile/profile';
 import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
@@ -20,8 +25,15 @@ export default function ProfileScreen() {
   const profile = profileQuery.data?.data;
   const account = accountQuery.data?.data;
   const registry = legalQuery.data?.data;
+  const legalRegistryState = getLegalRegistryState({
+    hasData: !!registry,
+    stale: legalQuery.data?.stale ?? false,
+    isPending: legalQuery.isPending,
+    isFetching: legalQuery.isFetching,
+    hasError: !!legalQuery.error,
+  });
   const currentRegistryVersion =
-    registry && !legalQuery.isFetching && !legalQuery.error ? registry.aiProcessing.version : null;
+    registry && isCurrentLegalRegistry(legalRegistryState) ? registry.aiProcessing.version : null;
   const consentSummary = getProfileConsentSummary(
     account?.aiConsent,
     accountQuery.error
@@ -140,7 +152,7 @@ export default function ProfileScreen() {
         <Text variant="h4">Pengaturan dan persetujuan</Text>
         <Text variant="muted">Zona waktu: {account?.timezone ?? 'Belum tersedia'}</Text>
         <Text variant="muted">Persetujuan pemrosesan AI: {consentMessage}</Text>
-        {legalQuery.isPending && !registry ? (
+        {legalRegistryState === 'loading' ? (
           <View className="flex-row items-center gap-2">
             <ActivityIndicator accessibilityLabel="Memeriksa versi persetujuan AI" />
             <Text variant="muted">Memeriksa versi pemberitahuan…</Text>
@@ -149,7 +161,25 @@ export default function ProfileScreen() {
         {legalQuery.error ? (
           <ServiceError error={legalQuery.error} onRetry={() => void legalQuery.refetch()} />
         ) : null}
-        {registry && legalQuery.isFetching ? (
+        {legalRegistryState === 'stale' ? (
+          <View className="gap-2">
+            <Text variant="muted">
+              Versi pemberitahuan tersimpan mungkin belum terbaru. Status persetujuan belum dapat
+              diverifikasi.
+            </Text>
+            {!legalQuery.error ? (
+              <Button
+                variant="outline"
+                onPress={() => void legalQuery.refetch()}
+                disabled={legalQuery.isFetching}>
+                <Text>
+                  {legalQuery.isFetching ? 'Memuat versi terbaru…' : 'Muat versi terbaru'}
+                </Text>
+              </Button>
+            ) : null}
+          </View>
+        ) : null}
+        {legalRegistryState === 'refreshing' ? (
           <Text variant="muted">Memeriksa versi pemberitahuan terbaru…</Text>
         ) : null}
         <Button variant="outline" onPress={() => router.push('/settings' as Href)}>

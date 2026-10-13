@@ -10,7 +10,9 @@ import {
   createStableActionKey,
   getAiConsentValue,
   getAiConsentStatus,
+  getLegalRegistryState,
   isAiConsentDraftDirty,
+  isCurrentLegalRegistry,
   isSuccessfulQueryRefresh,
   reconcileAiConsentDraft,
   type AiConsentDraft,
@@ -36,13 +38,21 @@ export default function SettingsScreen() {
   const [actionKeys] = React.useState(() => createStableActionKey());
   const account = meQuery.data?.data;
   const registry = legalQuery.data?.data;
+  const legalRegistryState = getLegalRegistryState({
+    hasData: !!registry,
+    stale: legalQuery.data?.stale ?? false,
+    isPending: legalQuery.isPending,
+    isFetching: legalQuery.isFetching,
+    hasError: !!legalQuery.error,
+  });
+  const registryCurrent = isCurrentLegalRegistry(legalRegistryState);
   const timezone = timezoneDraft ?? account?.timezone ?? '';
   const consentStatus = getAiConsentStatus(
     account?.aiConsent ?? { version: null, granted: false },
-    registry?.aiProcessing.version
+    registryCurrent ? registry?.aiProcessing.version : null
   );
   const consentActive = consentStatus === 'active';
-  const consentVersion = registry?.aiProcessing.version;
+  const consentVersion = registryCurrent ? registry?.aiProcessing.version : undefined;
   const consentValue = getAiConsentValue(consentDraft, consentVersion, consentActive);
 
   const openConsentDocument = () => {
@@ -97,7 +107,7 @@ export default function SettingsScreen() {
   };
 
   const saveConsent = async () => {
-    if (!account || !registry) return;
+    if (!account || !registry || !registryCurrent) return;
     setConsentMessage(null);
     const body = { version: registry.aiProcessing.version, granted: consentValue };
     try {
@@ -127,10 +137,9 @@ export default function SettingsScreen() {
   };
 
   const reloadConsentVersion = async () => {
-    const previousVersion = registry?.aiProcessing.version ?? null;
+    const previousVersion = registryCurrent ? (registry?.aiProcessing.version ?? null) : null;
     const result = await legalQuery.refetch();
-    if (isSuccessfulQueryRefresh(result)) {
-      if (!result.data) return;
+    if (isSuccessfulQueryRefresh(result) && result.data && !result.data.stale) {
       const latestVersion = result.data.data.aiProcessing.version;
       setConsentDraft((draft) => reconcileAiConsentDraft(draft, previousVersion, latestVersion));
       setConsentConflict(false);
@@ -228,21 +237,53 @@ export default function SettingsScreen() {
         {legalQuery.error ? (
           <ServiceError error={legalQuery.error} onRetry={() => void legalQuery.refetch()} />
         ) : null}
+        {registry && legalRegistryState === 'stale' ? (
+          <View className="gap-2">
+            <Text variant="muted">
+              Pemberitahuan tersimpan dari cache dan mungkin bukan versi terbaru. Muat versi terbaru
+              sebelum mengubah persetujuan.
+            </Text>
+            {!legalQuery.error ? (
+              <Button
+                variant="outline"
+                onPress={() => void legalQuery.refetch()}
+                disabled={legalQuery.isFetching}>
+                <Text>
+                  {legalQuery.isFetching ? 'Memuat versi terbaru…' : 'Muat versi terbaru'}
+                </Text>
+              </Button>
+            ) : null}
+          </View>
+        ) : null}
+        {registry && legalRegistryState === 'refreshing' ? (
+          <Text variant="muted">
+            Memeriksa versi pemberitahuan terbaru. Perubahan persetujuan sementara dinonaktifkan.
+          </Text>
+        ) : null}
+        {registry && legalRegistryState === 'error' ? (
+          <Text variant="muted">
+            Versi pemberitahuan belum dapat diverifikasi. Perubahan persetujuan dinonaktifkan.
+          </Text>
+        ) : null}
         {registry ? (
           <>
             <View className="gap-3 rounded-lg border border-border bg-muted/30 p-3">
-              <Text className="font-semibold">Pemberitahuan yang berlaku</Text>
+              <Text className="font-semibold">
+                {registryCurrent ? 'Pemberitahuan yang berlaku' : 'Pemberitahuan tersimpan'}
+              </Text>
               <LegalContent document={registry.aiProcessing} />
             </View>
-            <LegalCheckbox
-              label="Persetujuan pemrosesan AI"
-              version={registry.aiProcessing.version}
-              checked={consentValue}
-              onCheckedChange={(granted) =>
-                setConsentDraft({ version: registry.aiProcessing.version, granted })
-              }
-              onOpenDocument={openConsentDocument}
-            />
+            {registryCurrent ? (
+              <LegalCheckbox
+                label="Persetujuan pemrosesan AI"
+                version={registry.aiProcessing.version}
+                checked={consentValue}
+                onCheckedChange={(granted) =>
+                  setConsentDraft({ version: registry.aiProcessing.version, granted })
+                }
+                onOpenDocument={openConsentDocument}
+              />
+            ) : null}
           </>
         ) : legalQuery.isPending ? (
           <View className="flex-row items-center gap-2">
@@ -258,17 +299,19 @@ export default function SettingsScreen() {
         </Text>
         <Button
           onPress={() => void saveConsent()}
-          disabled={!registry || !dirtyConsent || consentConflict || setAiConsent.isPending}>
+          disabled={!registryCurrent || !dirtyConsent || consentConflict || setAiConsent.isPending}>
           <Text>
             {setAiConsent.isPending
               ? 'Menyimpan…'
-              : consentValue
-                ? 'Simpan persetujuan'
-                : consentActive
-                  ? 'Cabut persetujuan'
-                  : consentStatus === 'stale'
-                    ? 'Setujui versi terbaru'
-                    : 'Belum ada perubahan'}
+              : !registryCurrent
+                ? 'Muat versi terbaru sebelum mengubah'
+                : consentValue
+                  ? 'Simpan persetujuan'
+                  : consentActive
+                    ? 'Cabut persetujuan'
+                    : consentStatus === 'stale'
+                      ? 'Setujui versi terbaru'
+                      : 'Belum ada perubahan'}
           </Text>
         </Button>
         {consentMessage ? (
