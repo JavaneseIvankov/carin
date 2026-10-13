@@ -37,7 +37,8 @@ beforeAll(async () => {
     db,
     baseURL: 'http://test.local',
     secret: authSecret,
-    trustedOrigins: ['carin://', 'http://test.local'],
+    trustedOrigins: ['carin-dev://', 'http://test.local'],
+    cookiePrefix: 'carin-dev',
     sendEmail: async (message) => {
       mail.push(message);
       await enqueueAuthMail(db, authSecret, message);
@@ -49,7 +50,7 @@ beforeAll(async () => {
     auth: runtime.auth,
     account: { db, resolveSession: runtime.resolveSession },
     legalConsent: { db, resolveSession: runtime.resolveSession },
-    appLinkScheme: 'carin',
+    appLinkScheme: 'carin-dev',
   });
 }, 120_000);
 
@@ -245,7 +246,7 @@ describe('Better Auth registration boundary', () => {
     expect(resetUrl.searchParams.has('callbackURL')).toBe(false);
     const landing = await app.request(`${resetUrl.pathname}${resetUrl.search}`);
     expect(landing.headers.get('referrer-policy')).toBe('no-referrer');
-    expect(await landing.text()).toContain('carin://auth/reset?token=');
+    expect(await landing.text()).toContain('carin-dev://auth/reset?token=');
 
     const token = resetUrl.searchParams.get('token')!;
     const reset = (newPassword: string) => app.request('/api/auth/reset-password', {
@@ -335,12 +336,12 @@ describe('Better Auth registration boundary', () => {
     expect(await me.json()).toEqual(expect.objectContaining({ email, emailVerified: true, birthDate: '1976-10-14', aiConsent: { version: null, granted: false, updatedAt: null } }));
     const bypass = await app.request('/api/auth/update-user', {
       method: 'POST',
-      headers: { cookie, origin: 'carin://', 'content-type': 'application/json' },
+      headers: { cookie, origin: 'carin-dev://', 'content-type': 'application/json' },
       body: JSON.stringify({ birthDate: '2000-01-01', acceptedTermsVersion: 'forged' }),
     });
     expect(bypass.status).toBeGreaterThanOrEqual(400);
     expect((await pool.query('SELECT birth_date,accepted_terms_version FROM "user" WHERE email=$1', [email])).rows[0]).toEqual({ birth_date: '1976-10-14', accepted_terms_version: getLegalRegistry().terms.version });
-    const signedOut = await app.request('/api/auth/sign-out', { method: 'POST', headers: { cookie, origin: 'carin://' } });
+    const signedOut = await app.request('/api/auth/sign-out', { method: 'POST', headers: { cookie, origin: 'carin-dev://' } });
     expect(signedOut.status).toBe(200);
     expect((await app.request('/api/v1/me', { headers: { cookie } })).status).toBe(401);
   });

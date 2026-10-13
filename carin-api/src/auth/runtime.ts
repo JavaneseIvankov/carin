@@ -1,5 +1,5 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
-import { betterAuth } from 'better-auth';
+import { betterAuth, type BetterAuthOptions } from 'better-auth';
 import type { Database } from '../db/client.js';
 import type { SessionResolver } from '../http/access.js';
 import type { Session } from '../http/types.js';
@@ -31,7 +31,10 @@ export function createResetLandingUrl(token: string, baseURL: string): string {
 }
 
 export type AuthRuntime = {
-  auth: { handler: (request: Request) => Promise<Response> };
+  auth: {
+    handler: (request: Request) => Promise<Response>;
+    options: Pick<BetterAuthOptions, 'advanced' | 'trustedOrigins'>;
+  };
   resolveSession: SessionResolver;
 };
 
@@ -40,6 +43,7 @@ export type AuthRuntimeOptions = {
   baseURL: string;
   secret: string;
   trustedOrigins: string[];
+  cookiePrefix: string;
   sendEmail: (mail: AuthMail) => Promise<void>;
   onEmailQueueFailure?: (kind: AuthMail['kind']) => void;
 };
@@ -49,6 +53,7 @@ export function createAuthRuntime({
   baseURL,
   secret,
   trustedOrigins,
+  cookiePrefix,
   sendEmail,
   onEmailQueueFailure,
 }: AuthRuntimeOptions): AuthRuntime {
@@ -68,7 +73,7 @@ export function createAuthRuntime({
     baseURL,
     secret,
     trustedOrigins,
-    advanced: { ...authOptions.advanced, disableOriginCheck: false },
+    advanced: { ...authOptions.advanced, cookiePrefix, disableOriginCheck: false },
     database: createAuthDatabaseAdapter(db),
     emailVerification: {
       ...authOptions.emailVerification,
@@ -152,5 +157,5 @@ export function createAuthRuntime({
     return session;
   };
 
-  return { auth: { handler }, resolveSession };
+  return { auth: { handler, options: auth.options }, resolveSession };
 }

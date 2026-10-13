@@ -19,8 +19,19 @@ phone on the same trusted LAN can call it.
 
 Copy `infra/.env.example` to `infra/.env`, replace the local-only passwords,
 set a unique `BETTER_AUTH_SECRET`, and use the same reachable API base in
-`BETTER_AUTH_URL` and `EXPO_PUBLIC_API_URL`. Keep `APP_LINK_SCHEME` aligned with
-`carin-app/app.json`; list only approved exact origins in `AUTH_TRUSTED_ORIGINS`.
+`BETTER_AUTH_URL` and `EXPO_PUBLIC_API_URL`. Keep the API's `APP_LINK_SCHEME` and
+`AUTH_TRUSTED_ORIGINS` aligned with the mobile environment in
+`carin-app/app.config.ts`. The API sets Better Auth's cookie prefix to
+`carin-${APP_ENV}`, which must match the mobile client's cookie and storage prefixes.
+Use these values for each deployment:
+
+| API `APP_ENV` / mobile `EXPO_PUBLIC_ENV` | `APP_LINK_SCHEME` / `AUTH_TRUSTED_ORIGINS` | Cookie and storage prefix |
+| --- | --- | --- |
+| `dev` / `development` | `carin-dev` / `carin-dev://` | `carin-dev` |
+| `staging` | `carin-staging` / `carin-staging://` | `carin-staging` |
+| `prod` / `production` | `carin` / `carin://` | `carin-prod` |
+
+List only approved exact origins in `AUTH_TRUSTED_ORIGINS`.
 To deliver auth email locally, set `RESEND_API_KEY` and `EMAIL_FROM` to a sender
 on a domain verified for this Resend environment.
 Then run these commands from the repository root. If a password contains URL

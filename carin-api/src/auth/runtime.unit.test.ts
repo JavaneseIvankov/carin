@@ -12,12 +12,36 @@ describe('Better Auth runtime', () => {
       db: undefined as unknown as Database,
       baseURL: 'http://test.local',
       secret: 'test-secret-that-is-long-enough-for-auth',
-      trustedOrigins: ['carin://'],
+      trustedOrigins: ['carin-dev://'],
+      cookiePrefix: 'carin-dev',
       sendEmail: async () => undefined,
     });
 
     expect(runtime.auth.handler).toBeTypeOf('function');
     expect(runtime.resolveSession).toBeTypeOf('function');
+  });
+
+  it.each([
+    { appEnv: 'dev', cookiePrefix: 'carin-dev', appLinkScheme: 'carin-dev' },
+    { appEnv: 'staging', cookiePrefix: 'carin-staging', appLinkScheme: 'carin-staging' },
+    { appEnv: 'prod', cookiePrefix: 'carin-prod', appLinkScheme: 'carin' },
+  ])('uses the $appEnv cookie prefix while preserving auth options', ({ cookiePrefix, appLinkScheme }) => {
+    const trustedOrigin = `${appLinkScheme}://`;
+    const runtime = createAuthRuntime({
+      db: undefined as unknown as Database,
+      baseURL: 'http://test.local',
+      secret: 'test-secret-that-is-long-enough-for-auth',
+      trustedOrigins: [trustedOrigin],
+      cookiePrefix,
+      sendEmail: async () => undefined,
+    });
+
+    expect(runtime.auth.options.advanced).toMatchObject({
+      cookiePrefix,
+      database: { generateId: 'uuid' },
+      disableOriginCheck: false,
+    });
+    expect(runtime.auth.options.trustedOrigins).toEqual([trustedOrigin]);
   });
 
   it('pins verification and reset links to the fixed HTTPS landing routes', () => {

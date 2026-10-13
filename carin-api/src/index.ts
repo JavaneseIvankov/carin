@@ -22,6 +22,7 @@ const authRuntime = createAuthRuntime({
   baseURL: authURL,
   secret: authSecret,
   trustedOrigins: config.authTrustedOrigins ?? [],
+  cookiePrefix: `carin-${config.appEnv}`,
   sendEmail: async (mail) => {
     const result = await enqueueAuthMail(db, authSecret, mail);
     if (result === 'expired') process.stdout.write(`${JSON.stringify({ event: 'AUTH_EMAIL_TOKEN_EXPIRED' })}\n`);
