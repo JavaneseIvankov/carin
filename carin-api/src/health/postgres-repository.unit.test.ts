@@ -1,12 +1,59 @@
-import type { Pool } from 'pg';
-import { describe, expect, it, vi } from 'vitest';
+import type { Pool, PoolClient } from 'pg';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { postgresReadinessRepository } from './postgres-repository.js';
 
 describe('PostgreSQL readiness repository', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('bounds a checkout that never resolves', async () => {
+    vi.useFakeTimers();
+    const connect = vi.fn(() => new Promise<PoolClient>(() => {}));
+    const repository = postgresReadinessRepository({ connect } as unknown as Pool);
+    const check = repository.checkDatabase();
+    const rejection = expect(check).rejects.toThrow('database probe timed out');
+
+    await vi.advanceTimersByTimeAsync(3000);
+    await rejection;
+    expect(connect).toHaveBeenCalledOnce();
+  });
+
+  it('releases a client checked out after timeout without running the probe', async () => {
+    vi.useFakeTimers();
+    let resolveCheckout!: (client: PoolClient) => void;
+    const connect = vi.fn(() => new Promise<PoolClient>((resolve) => {
+      resolveCheckout = resolve;
+    }));
+    const query = vi.fn();
+    const release = vi.fn();
+    const repository = postgresReadinessRepository({ connect } as unknown as Pool);
+    const check = repository.checkDatabase();
+    const rejection = expect(check).rejects.toThrow('database probe timed out');
+
+    await vi.advanceTimersByTimeAsync(3000);
+    await rejection;
+    resolveCheckout({ query, release } as unknown as PoolClient);
+    await Promise.resolve();
+
+    expect(release).toHaveBeenCalledOnce();
+    expect(query).not.toHaveBeenCalled();
+  });
+
   it('sets a finite query deadline on its connectivity probe', async () => {
+    vi.useFakeTimers();
     const query = vi.fn(async () => ({ rows: [{ '?column?': 1 }] }));
-    const repository = postgresReadinessRepository({ query } as unknown as Pool);
-    expect(await repository.checkDatabase()).toBe(true);
-    expect(query).toHaveBeenCalledWith({ text: 'SELECT 1', query_timeout: 3000 });
+    const release = vi.fn();
+    const repository = postgresReadinessRepository({
+      connect: vi.fn(() => new Promise<PoolClient>((resolve) => {
+        setTimeout(() => resolve({ query, release } as unknown as PoolClient), 1000);
+      })),
+    } as unknown as Pool);
+    const check = repository.checkDatabase();
+
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(await check).toBe(true);
+    expect(query).toHaveBeenCalledWith({ text: 'SELECT 1', query_timeout: 2000 });
+    expect(release).toHaveBeenCalledOnce();
   });
 });

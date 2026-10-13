@@ -18,11 +18,13 @@ matched each JSON body. Integration tests use Hono `app.request` and injected
 probes/fixture handlers.
 
 Review follow-up (2026-10-13): idle PostgreSQL pool errors are handled and logged
-with the fixed code `DATABASE_IDLE_CLIENT_ERROR`; readiness `SELECT 1` uses a
-3-second `query_timeout`. From `carin-api/`, `pnpm run typecheck`, `pnpm run
-lint`, `pnpm run test:unit` (15 passed), `pnpm run test:integration` (9 passed),
-and `pnpm run build` all passed. Unit tests verify error details are not logged
-and the readiness query receives its finite timeout.
+with the fixed code `DATABASE_IDLE_CLIENT_ERROR`. The readiness probe has a
+3-second end-to-end deadline starting before pool checkout; `SELECT 1` receives
+only the remaining time as `query_timeout`, and a client checked out after the
+deadline is released without running the query. From `carin-api/`, `pnpm run
+typecheck`, `pnpm run lint`, `pnpm run test:unit` (17 passed), `pnpm run
+test:integration` (9 passed), and `pnpm run build` all passed. Unit tests cover
+checkout timeout, late checkout cleanup, and sanitized pool error logging.
 
 Unverified work / blockers: No real PostgreSQL schema or migration exists yet,
 so production readiness intentionally remains 503 even if PostgreSQL accepts
