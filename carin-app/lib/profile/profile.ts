@@ -58,6 +58,14 @@ export function parseOptionalPositiveNumber(
 export type AiConsentStatus = 'active' | 'stale' | 'not_granted' | 'version_unavailable';
 export type AiConsentDraft = { version: string; granted: boolean };
 
+export function isSuccessfulQueryRefresh(result: {
+  data: unknown;
+  isError: boolean;
+  error?: unknown;
+}): boolean {
+  return result.data !== undefined && !result.isError && result.error == null;
+}
+
 export function getAiConsentStatus(
   consent: { version: string | null; granted: boolean },
   currentVersion: string | null | undefined

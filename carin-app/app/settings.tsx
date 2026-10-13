@@ -11,6 +11,7 @@ import {
   getAiConsentValue,
   getAiConsentStatus,
   isAiConsentDraftDirty,
+  isSuccessfulQueryRefresh,
   reconcileAiConsentDraft,
   type AiConsentDraft,
 } from '@/lib/profile/profile';
@@ -85,7 +86,7 @@ export default function SettingsScreen() {
 
   const reloadTimezoneRevision = async () => {
     const result = await meQuery.refetch();
-    if (result.data) {
+    if (isSuccessfulQueryRefresh(result)) {
       setTimezoneConflict(false);
       setTimezoneMessage(
         'Versi terbaru dimuat. Draft zona waktu tetap ada; simpan kembali untuk menerapkannya.'
@@ -128,7 +129,8 @@ export default function SettingsScreen() {
   const reloadConsentVersion = async () => {
     const previousVersion = registry?.aiProcessing.version ?? null;
     const result = await legalQuery.refetch();
-    if (result.data) {
+    if (isSuccessfulQueryRefresh(result)) {
+      if (!result.data) return;
       const latestVersion = result.data.data.aiProcessing.version;
       setConsentDraft((draft) => reconcileAiConsentDraft(draft, previousVersion, latestVersion));
       setConsentConflict(false);

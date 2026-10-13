@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { useAuth } from '@/lib/auth/provider';
 import { useAppRead } from '@/lib/api/query';
-import { getKnowledgeStateLabel } from '@/lib/profile/profile';
+import { getAiConsentStatus, getKnowledgeStateLabel } from '@/lib/profile/profile';
 import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
@@ -15,9 +15,17 @@ export default function ProfileScreen() {
   const { signOut } = useAuth();
   const profileQuery = useAppRead('getProfile', {});
   const accountQuery = useAppRead('getMe', {});
+  const legalQuery = useAppRead('getLegalRegistry', {});
   const [actionError, setActionError] = React.useState<string | null>(null);
   const profile = profileQuery.data?.data;
   const account = accountQuery.data?.data;
+  const registry = legalQuery.data?.data;
+  const currentRegistryVersion =
+    registry && !legalQuery.isFetching && !legalQuery.error ? registry.aiProcessing.version : null;
+  const consentStatus = getAiConsentStatus(
+    account?.aiConsent ?? { version: null, granted: false },
+    currentRegistryVersion
+  );
 
   const openLegal = (document: 'terms' | 'privacy' | 'ai-processing') => {
     router.push({ pathname: '/legal/[document]', params: { document } } as Href);
@@ -111,8 +119,27 @@ export default function ProfileScreen() {
         <Text variant="h4">Pengaturan dan persetujuan</Text>
         <Text variant="muted">Zona waktu: {account?.timezone ?? 'Belum tersedia'}</Text>
         <Text variant="muted">
-          Persetujuan pemrosesan AI: {account?.aiConsent.granted ? 'Aktif' : 'Belum diberikan'}
+          Persetujuan pemrosesan AI:{' '}
+          {consentStatus === 'active'
+            ? 'Aktif untuk versi pemberitahuan saat ini'
+            : consentStatus === 'stale'
+              ? `Perlu diperbarui (persetujuan versi ${account?.aiConsent.version ?? 'lama'})`
+              : consentStatus === 'version_unavailable'
+                ? 'Status belum dapat diverifikasi terhadap versi pemberitahuan saat ini'
+                : 'Belum diberikan'}
         </Text>
+        {legalQuery.isPending && !registry ? (
+          <View className="flex-row items-center gap-2">
+            <ActivityIndicator accessibilityLabel="Memeriksa versi persetujuan AI" />
+            <Text variant="muted">Memeriksa versi pemberitahuan…</Text>
+          </View>
+        ) : null}
+        {legalQuery.error ? (
+          <ServiceError error={legalQuery.error} onRetry={() => void legalQuery.refetch()} />
+        ) : null}
+        {registry && legalQuery.isFetching ? (
+          <Text variant="muted">Memeriksa versi pemberitahuan terbaru…</Text>
+        ) : null}
         <Button variant="outline" onPress={() => router.push('/settings' as Href)}>
           <Text>Buka pengaturan</Text>
         </Button>

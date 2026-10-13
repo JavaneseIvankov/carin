@@ -8,6 +8,7 @@ import {
   getKnowledgeStateLabel,
   getMissingFieldTarget,
   isAiConsentDraftDirty,
+  isSuccessfulQueryRefresh,
   parseOptionalPositiveNumber,
   reconcileAiConsentDraft,
   transitionKnowledgeState,
@@ -92,6 +93,7 @@ describe('AI consent version handling', () => {
     const historical = { version: 'ai-v1', granted: true };
 
     expect(getAiConsentValue(null, undefined, false)).toBe(false);
+    expect(getAiConsentStatus(historical, null)).toBe('version_unavailable');
     expect(getAiConsentStatus(historical, 'ai-v2')).toBe('stale');
     expect(getAiConsentValue({ version: 'ai-v1', granted: true }, 'ai-v2', false)).toBe(false);
     expect(isAiConsentDraftDirty(null, 'ai-v2', false)).toBe(false);
@@ -117,5 +119,24 @@ describe('AI consent version handling', () => {
     expect(reconcileAiConsentDraft({ version: 'ai-v2', granted: false }, 'ai-v2', 'ai-v2')).toEqual(
       { version: 'ai-v2', granted: false }
     );
+  });
+});
+
+describe('query refresh handling', () => {
+  it('does not accept cached data as fresh when the refetch failed', () => {
+    expect(
+      isSuccessfulQueryRefresh({ data: { version: 4 }, isError: true, error: new Error('offline') })
+    ).toBe(false);
+    expect(
+      isSuccessfulQueryRefresh({
+        data: { version: 4 },
+        isError: false,
+        error: new Error('offline'),
+      })
+    ).toBe(false);
+    expect(isSuccessfulQueryRefresh({ data: { version: 4 }, isError: false, error: null })).toBe(
+      true
+    );
+    expect(isSuccessfulQueryRefresh({ data: undefined, isError: false })).toBe(false);
   });
 });

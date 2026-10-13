@@ -13,6 +13,7 @@ import {
   createStableActionKey,
   getKnowledgeStateLabel,
   getMissingFieldTarget,
+  isSuccessfulQueryRefresh,
   parseOptionalPositiveNumber,
   transitionKnowledgeState,
 } from '@/lib/profile/profile';
@@ -309,7 +310,7 @@ export default function HealthProfileScreen() {
 
   const reloadConflict = async () => {
     const result = await profileQuery.refetch();
-    if (result.data) {
+    if (isSuccessfulQueryRefresh(result)) {
       setConflict(false);
       setConflictMessage(
         'Versi terbaru sudah dimuat. Draft tetap ada; tinjau lalu simpan kembali.'
