@@ -3,18 +3,15 @@ import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { useAuth } from '@/lib/auth/provider';
 import { requireApiUrl } from '@/lib/config';
+import { buildVerificationCallbackUrl } from '@/lib/auth/verification';
 import { Href, useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
 import { Linking, View } from 'react-native';
 
 const GENERIC_RESEND_MESSAGE =
   'Jika alamat ini dapat menerima verifikasi, email akan dikirim. Periksa kotak masuk dan folder spam.';
-
-function verificationCallbackUrl() {
-  const callback = new URL('/auth/verified', requireApiUrl());
-  if (callback.protocol !== 'https:') throw new Error('HTTPS verification callback is required');
-  return callback.toString();
-}
+const CALLBACK_UNAVAILABLE_MESSAGE =
+  'Permintaan kirim ulang belum dikirim karena alamat layanan harus memakai HTTPS. Periksa konfigurasi layanan Carin lalu coba lagi.';
 
 export default function VerifyEmailScreen() {
   const params = useLocalSearchParams<{ email?: string | string[] }>();
@@ -37,6 +34,17 @@ export default function VerifyEmailScreen() {
 
   const resend = async () => {
     if (resendInFlight.current || cooldownSeconds > 0 || !submittedEmail) return;
+    let callbackURL: string | null = null;
+    try {
+      callbackURL = buildVerificationCallbackUrl(requireApiUrl());
+    } catch {
+      callbackURL = null;
+    }
+    if (!callbackURL) {
+      setResendFeedback(CALLBACK_UNAVAILABLE_MESSAGE);
+      return;
+    }
+
     resendInFlight.current = true;
     setIsResending(true);
     setCooldownSeconds(60);
@@ -44,7 +52,7 @@ export default function VerifyEmailScreen() {
     try {
       await resendVerificationEmail({
         email: submittedEmail,
-        callbackURL: verificationCallbackUrl(),
+        callbackURL,
       });
     } catch {
       // Keep the same feedback for delivery failures and unknown account state.
