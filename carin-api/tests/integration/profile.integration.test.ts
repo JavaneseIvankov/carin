@@ -185,7 +185,7 @@ describe('profile API', () => {
     expect((await pool.query('SELECT version FROM health_profile WHERE user_id=$1', [raceId])).rows).toEqual([{ version: 1 }]);
   });
 
-  it('does not reveal another account profile', async () => {
+  it('scopes each profile read to its authenticated account', async () => {
     await pool.query(
       `INSERT INTO health_profile (user_id,height_cm) VALUES ($1,180)`,
       [otherId],
@@ -193,6 +193,10 @@ describe('profile API', () => {
     const response = await request('/api/v1/profile', {}, otherId);
     expect(response.status).toBe(200);
     expect((await response.json()).fields.heightCm).toBe(180);
+
+    const ownerResponse = await request('/api/v1/profile');
+    expect(ownerResponse.status).toBe(200);
+    expect((await ownerResponse.json()).fields.heightCm).toBe(172.123456789);
   });
 
   it('rejects inconsistent knowledge state and list combinations', async () => {
