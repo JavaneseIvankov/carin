@@ -1,7 +1,9 @@
 """Tests for fail-closed AI data artifact validation. All values are synthetic."""
 
 import copy
+import hashlib
 import importlib.util
+import json
 import math
 from pathlib import Path
 import unittest
@@ -13,6 +15,63 @@ SPEC = importlib.util.spec_from_file_location(
 )
 validator = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(validator)
+
+NUTRIENTS = ("energyKcal", "carbohydrateG", "proteinG", "fatG", "fiberG", "sugarsG", "sodiumMg")
+
+
+def synthetic_source(kind="synthetic", source_id="source.synthetic-test"):
+    return {
+        "id": source_id,
+        "kind": kind,
+        "title": "Synthetic test source; not evidence",
+        "datasetVersion": ("rules-unpublished-0.1.0" if kind == "health_rule"
+                           else "nutrition-unpublished-0.1.0"),
+        "itemRef": "test-only synthetic value",
+        "url": "https://example.invalid/synthetic-test",
+        "license": {"name": "test-only synthetic", "url": None},
+        "basis": "Generated only for validator tests",
+        "synthetic": True,
+    }
+
+
+def synthetic_food():
+    return {
+        "id": "food.synthetic-test",
+        "displayName": "Synthetic test food",
+        "aliases": [],
+        "preparation": "synthetic test preparation",
+        "per100g": {key: None for key in NUTRIENTS},
+        "servings": [],
+        "nutrientSourceIds": {key: None for key in NUTRIENTS},
+    }
+
+
+def synthetic_rule():
+    return {
+        "id": "rule.synthetic-test",
+        "version": "rules-unpublished-0.1.0",
+        "conditionId": "condition.synthetic-test",
+        "requiredProfileFields": [],
+        "requiredNutrients": [],
+        "scope": {"foodIds": [], "preparation": None, "portionBasis": None},
+        "reason": "Synthetic test rule only; not guidance",
+        "adjustments": [],
+        "criticalMissingFields": [],
+        "conflictSet": None,
+        "citationSourceIds": ["source.synthetic-test"],
+        "limitations": ["test-only synthetic rule"],
+        "ruleBody": {"kind": "synthetic_test_only"},
+    }
+
+
+def approval_for(record, version):
+    content = json.dumps(record, ensure_ascii=False, allow_nan=False,
+                         sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return {
+        "status": "approved", "reviewer": "reviewer.test",
+        "approvedAt": "2026-10-13T00:00:00Z", "approvalId": "approval.test",
+        "boundVersion": version, "contentSha256": hashlib.sha256(content).hexdigest(),
+    }
 
 
 class ValidateDataArtifactsTests(unittest.TestCase):
@@ -36,6 +95,22 @@ class ValidateDataArtifactsTests(unittest.TestCase):
 
         self.assertTrue(any("unknown catalog food" in error for error in errors))
 
+    def test_unpublished_manifest_cannot_claim_supported_scope(self):
+        bad = copy.deepcopy(self.bundle)
+        bad["capability-manifest"]["supportedPhotoFoodIds"] = ["food.candidate"]
+        bad["capability-manifest"]["nutrients"] = ["energyKcal"]
+        condition = {
+            "id": "condition.candidate", "displayName": "Candidate condition",
+            "personalizationSupported": False, "requiredProfileFields": [],
+            "requiredNutrients": [], "supportedAgeMinimum": None, "supportedAgeMaximum": None,
+        }
+        bad["rules"]["conditions"] = [condition]
+        bad["capability-manifest"]["conditions"] = [copy.deepcopy(condition)]
+
+        errors = validator.validate_bundle(bad, ROOT.parent)
+
+        self.assertTrue(any("unpublished manifest" in error.lower() for error in errors))
+
     def test_rejects_inconsistent_artifact_versions(self):
         bad = copy.deepcopy(self.bundle)
         bad["nutrition-dataset"]["datasetVersion"] = "nutrition-other"
@@ -46,7 +121,7 @@ class ValidateDataArtifactsTests(unittest.TestCase):
 
     def test_rejects_invalid_numeric_data(self):
         bad = copy.deepcopy(self.bundle)
-        bad["catalog"]["foods"] = [validator.synthetic_food()]
+        bad["catalog"]["foods"] = [synthetic_food()]
         bad["catalog"]["foods"][0]["per100g"]["energyKcal"] = -1
 
         errors = validator.validate_bundle(bad, ROOT.parent)
@@ -55,20 +130,18 @@ class ValidateDataArtifactsTests(unittest.TestCase):
 
     def test_synthetic_food_projection_matches_shared_wire_schema(self):
         staged = copy.deepcopy(self.bundle)
-        source = validator.synthetic_source()
-        food = validator.synthetic_food()
+        source = synthetic_source()
+        food = synthetic_food()
         food["per100g"]["energyKcal"] = 123.5
         food["nutrientSourceIds"]["energyKcal"] = source["id"]
         staged["nutrition-dataset"]["sources"] = [source]
         staged["catalog"]["foods"] = [food]
-        staged["capability-manifest"]["supportedPhotoFoodIds"] = [food["id"]]
-        staged["capability-manifest"]["nutrients"] = ["energyKcal"]
 
         self.assertEqual(validator.validate_bundle(staged, ROOT.parent), [])
 
     def test_rejects_non_finite_numeric_data(self):
         bad = copy.deepcopy(self.bundle)
-        bad["catalog"]["foods"] = [validator.synthetic_food()]
+        bad["catalog"]["foods"] = [synthetic_food()]
         bad["catalog"]["foods"][0]["per100g"]["energyKcal"] = math.nan
 
         errors = validator.validate_bundle(bad, ROOT.parent)
@@ -86,7 +159,7 @@ class ValidateDataArtifactsTests(unittest.TestCase):
 
     def test_rejects_synthetic_source_promoted_to_real(self):
         bad = copy.deepcopy(self.bundle)
-        bad["nutrition-dataset"]["sources"] = [validator.synthetic_source()]
+        bad["nutrition-dataset"]["sources"] = [synthetic_source()]
         bad["capability-manifest"]["publicationStatus"] = "published"
         bad["capability-manifest"]["dataMode"] = "real"
 
@@ -96,12 +169,109 @@ class ValidateDataArtifactsTests(unittest.TestCase):
 
     def test_rejects_rule_citation_to_unknown_source(self):
         bad = copy.deepcopy(self.bundle)
-        bad["rules"]["rules"] = [validator.synthetic_rule()]
+        bad["rules"]["rules"] = [synthetic_rule()]
         bad["rules"]["rules"][0]["citationSourceIds"] = ["source.missing"]
 
         errors = validator.validate_bundle(bad, ROOT.parent)
 
         self.assertTrue(any("unknown source" in error.lower() for error in errors))
+
+    def test_rejects_unversioned_source_even_when_unreferenced(self):
+        bad = copy.deepcopy(self.bundle)
+        source = synthetic_source(kind="portion")
+        source["datasetVersion"] = "wrong-unreferenced-version"
+        bad["nutrition-dataset"]["sources"] = [source]
+
+        errors = validator.validate_bundle(bad, ROOT.parent)
+
+        self.assertTrue(any("source.synthetic-test" in error and "dataset version" in error.lower()
+                            for error in errors))
+
+    def test_health_rule_source_uses_rule_set_version(self):
+        bad = copy.deepcopy(self.bundle)
+        source = synthetic_source(kind="health_rule")
+        source["datasetVersion"] = "nutrition-unpublished-0.1.0"
+        bad["nutrition-dataset"]["sources"] = [source]
+
+        errors = validator.validate_bundle(bad, ROOT.parent)
+
+        self.assertTrue(any("source.synthetic-test" in error and "dataset version" in error.lower()
+                            for error in errors))
+
+    def test_rejects_stale_artifact_approval_version_or_content(self):
+        version_keys = {
+            "catalog": "catalogVersion",
+            "nutrition-dataset": "datasetVersion",
+            "rules": "ruleSetVersion",
+            "capability-manifest": "artifactVersion",
+        }
+        for name, version_key in version_keys.items():
+            with self.subTest(artifact=name, mutation="version"):
+                bad_version = copy.deepcopy(self.bundle)
+                record = bad_version[name]
+                bad_version["review-metadata"]["artifacts"][name] = approval_for(
+                    record, "older-version"
+                )
+                version_errors = validator.validate_bundle(bad_version, ROOT.parent)
+                self.assertTrue(any(f"{name} approval" in error.lower() and "version" in error.lower()
+                                    for error in version_errors))
+
+            with self.subTest(artifact=name, mutation="content"):
+                bad_content = copy.deepcopy(self.bundle)
+                record = bad_content[name]
+                bad_content["review-metadata"]["artifacts"][name] = approval_for(
+                    record, record[version_key]
+                )
+                bad_content[name]["artifactVersion"] = "changed-after-review"
+                content_errors = validator.validate_bundle(bad_content, ROOT.parent)
+                self.assertTrue(any(f"{name} approval" in error.lower() and "content" in error.lower()
+                                    for error in content_errors))
+
+    def test_rejects_stale_source_and_rule_approvals(self):
+        bad = copy.deepcopy(self.bundle)
+        source = synthetic_source(kind="health_rule")
+        rule = synthetic_rule()
+        bad["nutrition-dataset"]["sources"] = [source]
+        bad["rules"]["conditions"] = [{
+            "id": rule["conditionId"], "displayName": "Synthetic test condition",
+            "personalizationSupported": False, "requiredProfileFields": [],
+            "requiredNutrients": [], "supportedAgeMinimum": None, "supportedAgeMaximum": None,
+        }]
+        bad["rules"]["rules"] = [rule]
+        bad["capability-manifest"]["conditions"] = copy.deepcopy(bad["rules"]["conditions"])
+        bad["review-metadata"]["artifacts"]["sources"][source["id"]] = approval_for(
+            source, source["datasetVersion"]
+        )
+        bad["review-metadata"]["artifacts"]["rulesById"][rule["id"]] = approval_for(
+            rule, rule["version"]
+        )
+
+        stale_version = copy.deepcopy(bad)
+        stale_version["review-metadata"]["artifacts"]["sources"][source["id"]]["boundVersion"] = "old-source-version"
+        stale_version["review-metadata"]["artifacts"]["rulesById"][rule["id"]]["boundVersion"] = "old-rule-version"
+        version_errors = validator.validate_bundle(stale_version, ROOT.parent)
+        self.assertTrue(any("source approval" in error.lower() and "version" in error.lower()
+                            for error in version_errors))
+        self.assertTrue(any("rule approval" in error.lower() and "version" in error.lower()
+                            for error in version_errors))
+
+        bad["nutrition-dataset"]["sources"][0]["basis"] = "edited after approval"
+        bad["rules"]["rules"][0]["reason"] = "edited after approval"
+
+        errors = validator.validate_bundle(bad, ROOT.parent)
+
+        self.assertTrue(any("source approval" in error.lower() and "content" in error.lower()
+                            for error in errors))
+        self.assertTrue(any("rule approval" in error.lower() and "content" in error.lower()
+                            for error in errors))
+
+    def test_malformed_artifact_shapes_return_schema_errors_without_traversal(self):
+        bad = copy.deepcopy(self.bundle)
+        bad["nutrition-dataset"]["sources"] = None
+
+        errors = validator.validate_bundle(bad, ROOT.parent)
+
+        self.assertTrue(any("nutrition-dataset.schema.json" in error for error in errors))
 
 
 if __name__ == "__main__":

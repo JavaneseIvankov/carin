@@ -23,13 +23,25 @@
   "$defs": {
     "approval": {
       "type": "object", "additionalProperties": false,
-      "required": ["status", "reviewer", "approvedAt", "approvalId"],
+      "required": ["status", "reviewer", "approvedAt", "approvalId", "boundVersion", "contentSha256"],
       "properties": {
         "status": {"enum": ["draft", "approved"]},
         "reviewer": {"type": ["string", "null"]},
         "approvedAt": {"type": ["string", "null"], "format": "date-time"},
-        "approvalId": {"type": ["string", "null"]}
-      }
+        "approvalId": {"type": ["string", "null"]},
+        "boundVersion": {"type": ["string", "null"]},
+        "contentSha256": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"}
+      },
+      "allOf": [{
+        "if": {"properties": {"status": {"const": "approved"}}, "required": ["status"]},
+        "then": {"properties": {
+          "reviewer": {"type": "string", "minLength": 1},
+          "approvedAt": {"type": "string", "format": "date-time"},
+          "approvalId": {"type": "string", "minLength": 1},
+          "boundVersion": {"type": "string", "minLength": 1},
+          "contentSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+        }}
+      }]
     }
   }
 }

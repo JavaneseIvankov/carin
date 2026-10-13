@@ -6,7 +6,7 @@ schemas. It does not approve clinical content or establish model quality.
 Dependencies are the repository's existing PyYAML and jsonschema tooling.
 """
 
-from copy import deepcopy
+import hashlib
 import json
 import math
 from pathlib import Path
@@ -31,50 +31,6 @@ ARTIFACT_FILES = {
 }
 
 
-def synthetic_source():
-    return {
-        "id": "source.synthetic-test",
-        "kind": "synthetic",
-        "title": "Synthetic test source; not nutritional evidence",
-        "datasetVersion": "nutrition-unpublished-0.1.0",
-        "itemRef": "test-only synthetic value",
-        "url": "https://example.invalid/synthetic-test",
-        "license": {"name": "test-only synthetic", "url": None},
-        "basis": "Generated only for validator tests",
-        "synthetic": True,
-    }
-
-
-def synthetic_food():
-    return {
-        "id": "food.synthetic-test",
-        "displayName": "Synthetic test food",
-        "aliases": [],
-        "preparation": "synthetic test preparation",
-        "per100g": {key: None for key in NUTRIENTS},
-        "servings": [],
-        "nutrientSourceIds": {key: None for key in NUTRIENTS},
-    }
-
-
-def synthetic_rule():
-    return {
-        "id": "rule.synthetic-test",
-        "version": "rules-unpublished-0.1.0",
-        "conditionId": "condition.synthetic-test",
-        "requiredProfileFields": [],
-        "requiredNutrients": [],
-        "scope": {"foodIds": [], "preparation": None, "portionBasis": None},
-        "reason": "Synthetic test rule only; not health guidance",
-        "adjustments": [],
-        "criticalMissingFields": [],
-        "conflictSet": None,
-        "citationSourceIds": ["source.synthetic-test"],
-        "limitations": ["test-only synthetic rule"],
-        "ruleBody": {"kind": "synthetic_test_only"},
-    }
-
-
 def load_bundle(data_dir):
     return {
         name: json.loads((data_dir / filename).read_text())
@@ -90,6 +46,23 @@ def _wire_schema(contract, name, registry):
 
 def _errors_for_schema(validator, instance, label):
     return [f"{label}: {error.message}" for error in validator.iter_errors(instance)]
+
+
+def _canonical_sha256(value):
+    encoded = json.dumps(value, ensure_ascii=False, allow_nan=False,
+                         sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _check_approval(errors, label, approval, version, record):
+    if approval.get("status") != "approved":
+        if approval.get("boundVersion") is not None or approval.get("contentSha256") is not None:
+            errors.append(f"{label} draft approval must not retain a version or content binding")
+        return
+    if approval.get("boundVersion") != version:
+        errors.append(f"{label} approval version binding is stale")
+    if approval.get("contentSha256") != _canonical_sha256(record):
+        errors.append(f"{label} approval content binding is stale")
 
 
 def _wire_source(source):
@@ -110,6 +83,9 @@ def _wire_food(food, catalog_version, sources):
 
 def validate_bundle(bundle, repo_root):
     """Return all validation errors; an empty list means this bundle is internally valid."""
+    missing = sorted(set(ARTIFACT_FILES) - set(bundle))
+    if missing:
+        return [f"missing artifact bundle entries: {', '.join(missing)}"]
     errors = []
     data_dir = repo_root / "ai-service" / "data"
     schemas_dir = data_dir / "schemas"
@@ -139,6 +115,10 @@ def validate_bundle(bundle, repo_root):
                                                 format_checker=FormatChecker())
         errors.extend(_errors_for_schema(schema_validator, value, schema_name))
 
+    # Do not traverse artifacts whose shape has already failed schema validation.
+    if errors:
+        return errors
+
     catalog = bundle["catalog"]
     nutrition = bundle["nutrition-dataset"]
     rules = bundle["rules"]
@@ -166,7 +146,36 @@ def validate_bundle(bundle, repo_root):
         errors.append("duplicate condition ID")
     rule_ids = set()
 
+    source_roles = {}
+    for food in catalog.get("foods", []):
+        for source_id in food.get("nutrientSourceIds", {}).values():
+            if source_id is not None:
+                source_roles.setdefault(source_id, set()).add("nutrition")
+        for serving in food.get("servings", []):
+            source_roles.setdefault(serving["sourceId"], set()).add("portion")
+    for rule in rules.get("rules", []):
+        for source_id in rule.get("citationSourceIds", []):
+            source_roles.setdefault(source_id, set()).add("health_rule")
+
     for source_id, source in sources.items():
+        roles = source_roles.get(source_id, set())
+        if source.get("kind") in ("nutrition", "portion"):
+            expected_versions = {nutrition.get("datasetVersion")}
+        elif source.get("kind") == "health_rule":
+            expected_versions = {rules.get("ruleSetVersion")}
+        elif roles:
+            expected_versions = {
+                rules.get("ruleSetVersion") if role == "health_rule"
+                else nutrition.get("datasetVersion") for role in roles
+            }
+        else:
+            # An unreferenced synthetic record is still versioned, but its role
+            # cannot be inferred until an artifact uses it.
+            expected_versions = {nutrition.get("datasetVersion"), rules.get("ruleSetVersion")}
+        if roles and len(expected_versions) > 1:
+            errors.append(f"source {source_id} spans roles with different dataset versions; split the source record")
+        elif source.get("datasetVersion") not in expected_versions:
+            errors.append(f"source {source_id} has wrong dataset version for its role")
         if source.get("synthetic") or source.get("kind") == "synthetic":
             if not urlsplit(str(source.get("url", ""))).hostname or not urlsplit(
                     str(source.get("url", ""))).hostname.endswith(".invalid"):
@@ -238,6 +247,27 @@ def validate_bundle(bundle, repo_root):
         errors.append("manifest conditions must match versioned rules conditions")
 
     published = manifest.get("publicationStatus") == "published"
+    if not published and (manifest.get("supportedPhotoFoodIds") or manifest.get("nutrients")
+                          or manifest.get("conditions")):
+        errors.append("unpublished manifest cannot claim supported foods, nutrients, or conditions")
+
+    artifact_bindings = (
+        ("catalog", catalog.get("catalogVersion"), catalog),
+        ("nutrition-dataset", nutrition.get("datasetVersion"), nutrition),
+        ("rules", rules.get("ruleSetVersion"), rules),
+        ("capability-manifest", manifest.get("artifactVersion"), manifest),
+    )
+    for artifact_name, version, record in artifact_bindings:
+        _check_approval(errors, f"{artifact_name} approval", reviews.get(artifact_name, {}), version, record)
+    source_approvals = reviews.get("sources", {})
+    for source_id, source in sources.items():
+        _check_approval(errors, f"source approval {source_id}", source_approvals.get(source_id, {}),
+                        source.get("datasetVersion"), source)
+    rule_approvals = reviews.get("rulesById", {})
+    for rule in rules.get("rules", []):
+        _check_approval(errors, f"rule approval {rule.get('id')}", rule_approvals.get(rule.get("id"), {}),
+                        rule.get("version"), rule)
+
     if published:
         if manifest.get("dataMode") != "real":
             errors.append("published manifest must use real dataMode")

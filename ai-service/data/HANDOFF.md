@@ -19,6 +19,21 @@ condition IDs, food scope, citations, required inputs, limitations, and conflict
 sets. The current `ruleBody` is only a schema placeholder; do not use it as
 clinical logic without approval.
 
+Approval records in `review-metadata.json` bind to both a version and the
+artifact's deterministic SHA-256: UTF-8 JSON with sorted keys, compact
+separators, and non-finite numbers rejected. The hash covers the artifact
+record itself and excludes the sidecar, avoiding a circular digest. Source and
+rule approvals use the same binding. Any version or content edit makes an
+existing approval stale and blocks validation until a reviewer re-approves it.
+Draft records have null bindings. Nutrition and portion sources bind to the
+nutrition dataset version; health-rule sources bind to the rule-set version.
+Synthetic sources follow their referenced role, and unreferenced synthetic
+draft sources may only carry one of those two current versions.
+
+An unpublished manifest must keep supported foods, nutrient claims, and
+conditions empty. Wire-shape tests use synthetic catalog rows without adding
+those claims to the manifest.
+
 ## Validation
 
 From the repository root:
@@ -28,13 +43,26 @@ python -m unittest discover -s ai-service/tests
 python ai-service/validate_data_artifacts.py
 ```
 
-The validator checks internal JSON schemas, cross-artifact versions, food,
-nutrient, serving, rule and source references, finite nonnegative numeric
-values, publication approvals, prevention of synthetic-to-real promotion, and
-wire projections against `specs/contracts/ai-service.openapi.yaml`. Synthetic
-records in tests use `.invalid` URLs and are test data only. Passing validation
-does not approve content, train/select a model, or establish recognition or
-portion accuracy.
+The validator checks internal JSON schemas, cross-artifact and source-role
+versions, food, nutrient, serving, rule and source references, finite
+nonnegative numeric values, approval version/content bindings, prevention of
+synthetic-to-real promotion, and wire projections against
+`specs/contracts/ai-service.openapi.yaml`. It returns schema failures before
+semantic traversal of malformed artifact shapes. Synthetic records in tests
+use `.invalid` URLs and are test data only. Passing validation does not approve
+content, train/select a model, or establish recognition or portion accuracy.
+
+Focused verification after review corrections:
+
+```text
+PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -s ai-service/tests — 15 passed
+PYTHONDONTWRITEBYTECODE=1 python ai-service/validate_data_artifacts.py — PASS
+git diff --check — PASS
+```
+
+The repository contract validator was not rerun in this worktree because its
+system Python lacks `openapi_spec_validator`; T1 owns validation through the
+pinned root virtual environment.
 
 ## Remaining T31 release gate
 
