@@ -126,6 +126,9 @@ describe('AI consent version handling', () => {
 describe('profile consent summary account loading', () => {
   it('keeps consent unknown while the account query is pending or failed', () => {
     expect(getProfileConsentSummary(undefined, 'pending', 'ai-v2')).toEqual({ kind: 'loading' });
+    expect(
+      getProfileConsentSummary({ version: null, granted: false }, 'fetching', 'ai-v2')
+    ).toEqual({ kind: 'loading' });
     expect(getProfileConsentSummary(undefined, 'error', 'ai-v2')).toEqual({ kind: 'error' });
     expect(getProfileConsentSummary({ version: 'ai-v2', granted: true }, 'error', 'ai-v2')).toEqual(
       { kind: 'error' }

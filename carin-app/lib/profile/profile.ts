@@ -57,7 +57,7 @@ export function parseOptionalPositiveNumber(
 
 export type AiConsentStatus = 'active' | 'stale' | 'not_granted' | 'version_unavailable';
 export type AiConsentDraft = { version: string; granted: boolean };
-export type ProfileAccountQueryState = 'pending' | 'error' | 'ready';
+export type ProfileAccountQueryState = 'pending' | 'fetching' | 'error' | 'ready';
 export type ProfileConsentSummary =
   | { kind: 'loading' }
   | { kind: 'error' }
@@ -86,7 +86,9 @@ export function getProfileConsentSummary(
   accountQueryState: ProfileAccountQueryState,
   currentVersion: string | null | undefined
 ): ProfileConsentSummary {
-  if (accountQueryState === 'pending') return { kind: 'loading' };
+  if (accountQueryState === 'pending' || accountQueryState === 'fetching') {
+    return { kind: 'loading' };
+  }
   if (accountQueryState === 'error') return { kind: 'error' };
   if (!consent) return { kind: 'unavailable' };
   return { kind: 'status', status: getAiConsentStatus(consent, currentVersion) };

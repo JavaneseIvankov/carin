@@ -24,7 +24,13 @@ export default function ProfileScreen() {
     registry && !legalQuery.isFetching && !legalQuery.error ? registry.aiProcessing.version : null;
   const consentSummary = getProfileConsentSummary(
     account?.aiConsent,
-    accountQuery.error ? 'error' : accountQuery.isPending ? 'pending' : 'ready',
+    accountQuery.error
+      ? 'error'
+      : accountQuery.isPending
+        ? 'pending'
+        : accountQuery.isFetching
+          ? 'fetching'
+          : 'ready',
     currentRegistryVersion
   );
   const consentMessage =
