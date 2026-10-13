@@ -1,0 +1,171 @@
+{
+  "contractVersion": "1.0.0",
+  "dataMode": "synthetic",
+  "operationId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+  "inputKind": "photo",
+  "supportStatus": "partial",
+  "overallAttention": "insufficient_information",
+  "profileVersion": 1,
+  "catalogVersion": "synthetic-catalog-1",
+  "nutritionDatasetVersion": "synthetic-nutrition-1",
+  "ruleSetVersion": "synthetic-rules-1",
+  "computedAt": "2026-10-13T05:00:00Z",
+  "components": [
+    {
+      "id": "11111111-1111-4111-8111-111111111111",
+      "displayName": "Makanan contoh sintetis 100 g",
+      "catalogFoodId": "fixture-food-001",
+      "preparation": "Contoh uji",
+      "matchStatus": "matched",
+      "portion": {
+        "quantity": 1,
+        "unit": "serving",
+        "servingId": "fixture-serving-100g",
+        "grams": 100,
+        "origin": "photo_estimate",
+        "basis": "Takaran sintetis 100 gram untuk pengujian",
+        "sourceId": "synthetic-nutrition"
+      },
+      "nutrients": {
+        "energyKcal": 200,
+        "carbohydrateG": 30,
+        "proteinG": 10,
+        "fatG": 5,
+        "fiberG": 3,
+        "sugarsG": 2,
+        "sodiumMg": 100
+      },
+      "per100g": {
+        "energyKcal": 200,
+        "carbohydrateG": 30,
+        "proteinG": 10,
+        "fatG": 5,
+        "fiberG": 3,
+        "sugarsG": 2,
+        "sodiumMg": 100
+      },
+      "nutrientSourceIds": {
+        "energyKcal": "synthetic-nutrition",
+        "carbohydrateG": "synthetic-nutrition",
+        "proteinG": "synthetic-nutrition",
+        "fatG": "synthetic-nutrition",
+        "fiberG": "synthetic-nutrition",
+        "sugarsG": "synthetic-nutrition",
+        "sodiumMg": "synthetic-nutrition"
+      },
+      "sourceIds": [
+        "synthetic-nutrition"
+      ]
+    },
+    {
+      "id": "22222222-2222-4222-8222-222222222222",
+      "displayName": "Komponen yang belum dikenali",
+      "catalogFoodId": null,
+      "preparation": null,
+      "matchStatus": "unrecognized",
+      "portion": {
+        "quantity": null,
+        "unit": null,
+        "servingId": null,
+        "grams": null,
+        "origin": "photo_estimate",
+        "basis": null,
+        "sourceId": null
+      },
+      "nutrients": {
+        "energyKcal": null,
+        "carbohydrateG": null,
+        "proteinG": null,
+        "fatG": null,
+        "fiberG": null,
+        "sugarsG": null,
+        "sodiumMg": null
+      },
+      "per100g": {
+        "energyKcal": null,
+        "carbohydrateG": null,
+        "proteinG": null,
+        "fatG": null,
+        "fiberG": null,
+        "sugarsG": null,
+        "sodiumMg": null
+      },
+      "nutrientSourceIds": {
+        "energyKcal": null,
+        "carbohydrateG": null,
+        "proteinG": null,
+        "fatG": null,
+        "fiberG": null,
+        "sugarsG": null,
+        "sodiumMg": null
+      },
+      "sourceIds": []
+    }
+  ],
+  "totals": {
+    "energyKcal": 200,
+    "carbohydrateG": 30,
+    "proteinG": 10,
+    "fatG": 5,
+    "fiberG": 3,
+    "sugarsG": 2,
+    "sodiumMg": 100
+  },
+  "coverage": {
+    "energyKcal": {
+      "knownComponentCount": 1,
+      "totalComponentCount": 2
+    },
+    "carbohydrateG": {
+      "knownComponentCount": 1,
+      "totalComponentCount": 2
+    },
+    "proteinG": {
+      "knownComponentCount": 1,
+      "totalComponentCount": 2
+    },
+    "fatG": {
+      "knownComponentCount": 1,
+      "totalComponentCount": 2
+    },
+    "fiberG": {
+      "knownComponentCount": 1,
+      "totalComponentCount": 2
+    },
+    "sugarsG": {
+      "knownComponentCount": 1,
+      "totalComponentCount": 2
+    },
+    "sodiumMg": {
+      "knownComponentCount": 1,
+      "totalComponentCount": 2
+    }
+  },
+  "attentions": [],
+  "limitations": [
+    {
+      "code": "SYNTHETIC_DATA",
+      "message": "Data contoh sintetis; bukan hasil AI nyata atau informasi kesehatan.",
+      "componentIds": [],
+      "critical": false
+    },
+    {
+      "code": "UNRECOGNIZED_COMPONENT",
+      "message": "Sebagian makanan belum dikenali. Total gizi hanya mencakup komponen yang diketahui.",
+      "componentIds": [
+        "22222222-2222-4222-8222-222222222222"
+      ],
+      "critical": true
+    }
+  ],
+  "sources": [
+    {
+      "id": "synthetic-nutrition",
+      "kind": "synthetic",
+      "title": "Data angka sintetis untuk pengujian kontrak, bukan data gizi nyata",
+      "datasetVersion": "synthetic-nutrition-1",
+      "itemRef": "fixture-food-001 per 100 g",
+      "url": "https://fixtures.carin.invalid/nutrition/fixture-food-001"
+    }
+  ]
+}

@@ -87,6 +87,7 @@ services:
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:?Set MINIO_SECRET_KEY in infra/.env}
       AI_SERVICE_URL: ${AI_SERVICE_URL:-http://ai-service:8000}
       AI_SERVICE_KEY: ${AI_SERVICE_KEY:-local-placeholder-change-before-use}
+      AI_SERVICE_ALLOWED_HOSTS: ${AI_SERVICE_ALLOWED_HOSTS:-ai-service}
       AI_MODE: ${AI_MODE:-fixture}
     depends_on:
       migrate:
