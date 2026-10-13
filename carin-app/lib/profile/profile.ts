@@ -55,6 +55,44 @@ export function parseOptionalPositiveNumber(
   return { value };
 }
 
+export type AiConsentStatus = 'active' | 'stale' | 'not_granted' | 'version_unavailable';
+export type AiConsentDraft = { version: string; granted: boolean };
+
+export function getAiConsentStatus(
+  consent: { version: string | null; granted: boolean },
+  currentVersion: string | null | undefined
+): AiConsentStatus {
+  if (!consent.granted) return 'not_granted';
+  if (!currentVersion) return 'version_unavailable';
+  return consent.version === currentVersion ? 'active' : 'stale';
+}
+
+export function getAiConsentValue(
+  draft: AiConsentDraft | null,
+  currentVersion: string | null | undefined,
+  currentConsentActive: boolean
+): boolean {
+  return draft && draft.version === currentVersion ? draft.granted : currentConsentActive;
+}
+
+export function isAiConsentDraftDirty(
+  draft: AiConsentDraft | null,
+  currentVersion: string | null | undefined,
+  currentConsentActive: boolean
+): boolean {
+  return (
+    draft !== null && draft.version === currentVersion && draft.granted !== currentConsentActive
+  );
+}
+
+export function reconcileAiConsentDraft(
+  draft: AiConsentDraft | null,
+  previousVersion: string | null | undefined,
+  latestVersion: string
+): AiConsentDraft | null {
+  return previousVersion === latestVersion ? draft : null;
+}
+
 const KNOWLEDGE_LABELS: Record<KnowledgeArea, Record<string, string>> = {
   diagnoses: {
     not_provided: 'Belum diisi',

@@ -6,7 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { useAppRead, useAppWrite } from '@/lib/api/query';
 import { ApiError } from '@/lib/api/repository';
-import { createStableActionKey } from '@/lib/profile/profile';
+import {
+  createStableActionKey,
+  getAiConsentValue,
+  getAiConsentStatus,
+  isAiConsentDraftDirty,
+  reconcileAiConsentDraft,
+  type AiConsentDraft,
+} from '@/lib/profile/profile';
 import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
@@ -19,7 +26,7 @@ export default function SettingsScreen() {
   const updateMe = useAppWrite('updateMe');
   const setAiConsent = useAppWrite('setAiConsent');
   const [timezoneDraft, setTimezoneDraft] = React.useState<string | null>(null);
-  const [consentDraft, setConsentDraft] = React.useState<boolean | null>(null);
+  const [consentDraft, setConsentDraft] = React.useState<AiConsentDraft | null>(null);
   const [timezoneError, setTimezoneError] = React.useState<string | null>(null);
   const [timezoneConflict, setTimezoneConflict] = React.useState(false);
   const [timezoneMessage, setTimezoneMessage] = React.useState<string | null>(null);
@@ -29,7 +36,13 @@ export default function SettingsScreen() {
   const account = meQuery.data?.data;
   const registry = legalQuery.data?.data;
   const timezone = timezoneDraft ?? account?.timezone ?? '';
-  const consentValue = consentDraft ?? account?.aiConsent.granted ?? false;
+  const consentStatus = getAiConsentStatus(
+    account?.aiConsent ?? { version: null, granted: false },
+    registry?.aiProcessing.version
+  );
+  const consentActive = consentStatus === 'active';
+  const consentVersion = registry?.aiProcessing.version;
+  const consentValue = getAiConsentValue(consentDraft, consentVersion, consentActive);
 
   const openConsentDocument = () => {
     router.push({ pathname: '/legal/[document]', params: { document: 'ai-processing' } } as Href);
@@ -92,7 +105,10 @@ export default function SettingsScreen() {
         body,
       });
       actionKeys.clear();
-      setConsentDraft(updated.aiConsent.granted);
+      setConsentDraft({
+        version: updated.aiConsent.version ?? body.version,
+        granted: updated.aiConsent.granted,
+      });
       setConsentConflict(false);
       setConsentMessage(
         consentValue ? 'Persetujuan pemrosesan AI aktif.' : 'Persetujuan pemrosesan AI dicabut.'
@@ -110,8 +126,11 @@ export default function SettingsScreen() {
   };
 
   const reloadConsentVersion = async () => {
+    const previousVersion = registry?.aiProcessing.version ?? null;
     const result = await legalQuery.refetch();
     if (result.data) {
+      const latestVersion = result.data.data.aiProcessing.version;
+      setConsentDraft((draft) => reconcileAiConsentDraft(draft, previousVersion, latestVersion));
       setConsentConflict(false);
       setConsentMessage(
         'Dokumen terbaru dimuat. Baca kembali dokumen sebelum menyimpan persetujuan.'
@@ -140,8 +159,15 @@ export default function SettingsScreen() {
   }
   if (!account) return null;
 
-  const currentConsent = account.aiConsent.granted;
-  const dirtyConsent = consentDraft !== null && consentDraft !== currentConsent;
+  const dirtyConsent = isAiConsentDraftDirty(consentDraft, consentVersion, consentActive);
+  const consentStatusMessage =
+    consentStatus === 'active'
+      ? 'Persetujuan aktif untuk versi saat ini'
+      : consentStatus === 'stale'
+        ? `Persetujuan versi ${account.aiConsent.version ?? 'lama'} sudah tidak berlaku. Setujui versi ${registry?.aiProcessing.version} untuk mengaktifkan pemrosesan AI.`
+        : consentStatus === 'version_unavailable'
+          ? 'Versi persetujuan belum dapat diverifikasi.'
+          : 'Belum memberikan persetujuan';
 
   return (
     <ScrollView className="flex-1 bg-background" contentContainerClassName="gap-5 px-5 pb-10 pt-7">
@@ -210,7 +236,9 @@ export default function SettingsScreen() {
               label="Persetujuan pemrosesan AI"
               version={registry.aiProcessing.version}
               checked={consentValue}
-              onCheckedChange={setConsentDraft}
+              onCheckedChange={(granted) =>
+                setConsentDraft({ version: registry.aiProcessing.version, granted })
+              }
               onOpenDocument={openConsentDocument}
             />
           </>
@@ -221,20 +249,24 @@ export default function SettingsScreen() {
           </View>
         ) : null}
         <Text variant="muted">
-          Status saat ini: {currentConsent ? 'Persetujuan aktif' : 'Belum memberikan persetujuan'}
+          Status saat ini: {consentStatusMessage}
           {account.aiConsent.updatedAt
             ? ` · diperbarui ${new Date(account.aiConsent.updatedAt).toLocaleString('id-ID')}`
             : ''}
         </Text>
         <Button
           onPress={() => void saveConsent()}
-          disabled={!registry || !dirtyConsent || setAiConsent.isPending}>
+          disabled={!registry || !dirtyConsent || consentConflict || setAiConsent.isPending}>
           <Text>
             {setAiConsent.isPending
               ? 'Menyimpan…'
               : consentValue
                 ? 'Simpan persetujuan'
-                : 'Cabut persetujuan'}
+                : consentActive
+                  ? 'Cabut persetujuan'
+                  : consentStatus === 'stale'
+                    ? 'Setujui versi terbaru'
+                    : 'Belum ada perubahan'}
           </Text>
         </Button>
         {consentMessage ? (

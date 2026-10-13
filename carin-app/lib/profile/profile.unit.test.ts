@@ -3,9 +3,13 @@ import {
   createIdempotencyKey,
   createOtherDiagnosisEntry,
   createStableActionKey,
+  getAiConsentValue,
+  getAiConsentStatus,
   getKnowledgeStateLabel,
   getMissingFieldTarget,
+  isAiConsentDraftDirty,
   parseOptionalPositiveNumber,
+  reconcileAiConsentDraft,
   transitionKnowledgeState,
 } from './profile';
 
@@ -80,5 +84,38 @@ describe('health profile presentation rules', () => {
       error: 'Masukkan angka lebih besar dari 0.',
     });
     expect(parseOptionalPositiveNumber('tinggi')).toEqual({ error: 'Masukkan angka yang valid.' });
+  });
+});
+
+describe('AI consent version handling', () => {
+  it('does not treat a historical grant as active for a newer legal version', () => {
+    const historical = { version: 'ai-v1', granted: true };
+
+    expect(getAiConsentValue(null, undefined, false)).toBe(false);
+    expect(getAiConsentStatus(historical, 'ai-v2')).toBe('stale');
+    expect(getAiConsentValue({ version: 'ai-v1', granted: true }, 'ai-v2', false)).toBe(false);
+    expect(isAiConsentDraftDirty(null, 'ai-v2', false)).toBe(false);
+    expect(isAiConsentDraftDirty({ version: 'ai-v1', granted: true }, 'ai-v2', false)).toBe(false);
+    expect(isAiConsentDraftDirty({ version: 'ai-v2', granted: true }, 'ai-v2', false)).toBe(true);
+  });
+
+  it('keeps current-version revoke actions dirty until they are saved', () => {
+    const current = { version: 'ai-v2', granted: true };
+
+    expect(getAiConsentStatus(current, 'ai-v2')).toBe('active');
+    expect(isAiConsentDraftDirty({ version: 'ai-v2', granted: false }, 'ai-v2', true)).toBe(true);
+    expect(isAiConsentDraftDirty(null, 'ai-v2', true)).toBe(false);
+  });
+
+  it('requires a new explicit choice when a conflict reload changes legal version', () => {
+    expect(
+      reconcileAiConsentDraft({ version: 'ai-v1', granted: true }, 'ai-v1', 'ai-v2')
+    ).toBeNull();
+    expect(
+      reconcileAiConsentDraft({ version: 'ai-v1', granted: false }, 'ai-v1', 'ai-v2')
+    ).toBeNull();
+    expect(reconcileAiConsentDraft({ version: 'ai-v2', granted: false }, 'ai-v2', 'ai-v2')).toEqual(
+      { version: 'ai-v2', granted: false }
+    );
   });
 });

@@ -55,7 +55,7 @@
 - [x] Add timezone editing with `settingsRevision` compare-and-swap and conflict recovery.
 - [x] Render current AI-processing registry text beside an explicit consent checkbox; link to full document; grant with the active version and allow explicit revoke.
 - [x] Add full legal route for terms, privacy, and AI processing with readable parsed Markdown and version/effective date.
-- [x] Verify missing-field mapping, settings/legal request metadata, consent grant/revoke, and legal Markdown parsing with helper/repository tests.
+- [x] Verify missing-field mapping, settings/legal request metadata, consent grant/revoke, current-version consent status, version-refresh draft reset, and legal Markdown parsing with helper/repository tests.
 
 ## Task 5: Verify and hand off
 
