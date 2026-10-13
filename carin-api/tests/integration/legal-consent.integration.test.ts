@@ -337,4 +337,78 @@ describe("legal registry and consent API", () => {
     expect(evaluation.rows[0].state).toBe("not_requested");
     expect(evaluation.rows[0].limitations).toContain("ai_consent_withdrawn");
   });
+
+  it("cancels processing AI work, fences its lease, and withdraws its evaluation", async () => {
+    const processingJobId = randomUUID();
+    const processingConsumptionId = randomUUID();
+    const processingSnapshotId = randomUUID();
+    const processingEvaluationId = randomUUID();
+    const leaseToken = randomUUID();
+    await pool.query(
+      `INSERT INTO consumption (id,user_id,source,consumed_at) VALUES ($1,$2,'manual',now())`,
+      [processingConsumptionId, userId],
+    );
+    await pool.query(
+      `INSERT INTO consumption_snapshot (id,user_id,consumption_id,revision,profile_snapshot_id,snapshot)
+       VALUES ($1,$2,$3,1,$4,'{}')`,
+      [processingSnapshotId, userId, processingConsumptionId, profileSnapshotId],
+    );
+    await pool.query(
+      "UPDATE consumption SET current_snapshot_id=$1 WHERE id=$2",
+      [processingSnapshotId, processingConsumptionId],
+    );
+    await pool.query(
+      `INSERT INTO analysis_job
+        (id,user_id,operation_id,kind,input_snapshot,profile_snapshot_id,consumption_id,target_revision,status,lease_token,lease_expires_at)
+       VALUES ($1,$2,$3,'consumption_evaluation','{}',$4,$5,1,'processing',$6,now()+interval '5 minutes')`,
+      [
+        processingJobId,
+        userId,
+        randomUUID(),
+        profileSnapshotId,
+        processingConsumptionId,
+        leaseToken,
+      ],
+    );
+    await pool.query(
+      `INSERT INTO consumption_evaluation (id,user_id,consumption_id,revision,snapshot_id,state,job_id)
+       VALUES ($1,$2,$3,1,$4,'pending',$5)`,
+      [
+        processingEvaluationId,
+        userId,
+        processingConsumptionId,
+        processingSnapshotId,
+        processingJobId,
+      ],
+    );
+
+    const response = await app.request("/api/v1/consents/ai-processing", {
+      method: "PUT",
+      headers: {
+        "content-type": "application/json",
+        "idempotency-key": randomUUID(),
+      },
+      body: JSON.stringify({
+        version: getLegalRegistry().aiProcessing.version,
+        granted: false,
+      }),
+    });
+    const job = await pool.query(
+      "SELECT status,lease_token,lease_expires_at FROM analysis_job WHERE id=$1",
+      [processingJobId],
+    );
+    const evaluation = await pool.query(
+      "SELECT state,limitations FROM consumption_evaluation WHERE id=$1",
+      [processingEvaluationId],
+    );
+
+    expect(response.status).toBe(200);
+    expect(job.rows[0]).toMatchObject({
+      status: "cancelled",
+      lease_token: null,
+      lease_expires_at: null,
+    });
+    expect(evaluation.rows[0].state).toBe("not_requested");
+    expect(evaluation.rows[0].limitations).toContain("ai_consent_withdrawn");
+  });
 });

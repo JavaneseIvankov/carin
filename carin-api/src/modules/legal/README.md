@@ -23,11 +23,11 @@ consent is not part of this step.
 `PUT /api/v1/consents/ai-processing` validates the OpenAPI body/header, rejects a
 stale document version, stores grant/revoke events with PostgreSQL's server-side
 timestamp, and persists idempotent responses for the contract's 24-hour window.
-Withdrawal and cancellation of queued jobs share a transaction. Pending
-consumption evaluations linked to those queued jobs become `not_requested` with
-an `ai_consent_withdrawn` limitation. Processing jobs are left for the worker
-publication guard; this module does not cancel worker attempts or change lease
-state.
+Withdrawal and cancellation of queued and processing jobs share a transaction.
+Pending consumption evaluations linked to those jobs become `not_requested` with
+an `ai_consent_withdrawn` limitation. Processing jobs are fenced by clearing
+their lease token and expiry; the worker publication guard still prevents an
+in-flight attempt from publishing after withdrawal.
 
 ## C16 publication requirement
 

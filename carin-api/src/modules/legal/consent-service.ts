@@ -204,12 +204,14 @@ export async function setAiConsent(
         .update(analysisJob)
         .set({
           status: "cancelled",
+          leaseToken: null,
+          leaseExpiresAt: null,
           updatedAt: sql`now()`,
         })
         .where(
           and(
             eq(analysisJob.userId, input.userId),
-            eq(analysisJob.status, "queued"),
+            inArray(analysisJob.status, ["queued", "processing"]),
           ),
         )
         .returning({ id: analysisJob.id });
