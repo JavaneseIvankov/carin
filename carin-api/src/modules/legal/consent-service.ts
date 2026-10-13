@@ -206,6 +206,7 @@ export async function setAiConsent(
           status: "cancelled",
           leaseToken: null,
           leaseExpiresAt: null,
+          finishedAt: sql`clock_timestamp()`,
           updatedAt: sql`now()`,
         })
         .where(

@@ -235,6 +235,11 @@ describe('analysis job status invariants', () => {
       finishedAt: null,
       error: null,
     })).toBe(true);
+    expect(isValidAnalysisJobState({
+      ...failed,
+      startedAt: null,
+      error: { code: 'DEADLINE_EXCEEDED', message: 'Deadline passed before claim.', retryable: true },
+    })).toBe(true);
     expect(isValidAnalysisJobState({ ...failed, status: 'processing', finishedAt: 'bad' })).toBe(false);
   });
 });
