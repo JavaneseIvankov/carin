@@ -1,57 +1,51 @@
 # T15 / C15 AI adapter handoff
 
 Task / scope: Implement the Carin API AI integration interface, a schema-validated
-internal HTTP client, and an explicitly selected development/test fixture adapter.
-No AI service endpoints, worker/job behavior, database changes, or task-board
-updates are included.
+internal HTTP client, and an explicitly configured development fixture adapter.
+No AI service endpoints, worker/job behavior, or database changes are included.
 
 Changes and affected files:
 
-- `carin-api/src/integrations/ai/index.ts`: typed `AiClient`, internal HTTP adapter
-  using contract operation paths, service-key authentication, bounded requests,
-  shared T5 request/response validation, and response provenance checks. The
-  fixture adapter permits only `dev`/`test`, exposes explicit complete/partial/
-  unrecognized/correction/service-failure scenarios, and projects catalog data
-  from the existing synthetic analysis fixture. Fixture values and synthetic
-  provenance remain unchanged; requested operation/profile/catalog/rule-set
-  versions are echoed. Correction scenarios require the fixture food and portion
-  input so its deterministic example math cannot silently apply elsewhere. The
-  five canonical AI fixtures are copied byte-for-byte into `carin-api/fixtures/ai/`
-  so adapters can load them when the package is built as the Docker context.
-- `carin-api/Dockerfile` copies `fixtures/` into the runtime image;
-  `carin-api/scripts/smoke-ai-fixtures.mjs` and the
-  `test:ai-fixture-runtime` package script exercise the compiled adapter.
-- `carin-api/src/integrations/ai/adapters.unit.test.ts`: consumer tests for fixture
-  scenarios, environment restrictions, synthetic capability/catalog responses,
-  HTTP schema handling, invalid JSON/schema/version/provenance, timeout, and
-  network failure with an injected fake internal provider.
+- `carin-api/src/integrations/ai/index.ts`: typed `AiClient`, HTTP adapter using
+  generated contract operation paths and shared T5 validation, service-key auth,
+  bounded requests, schema/version/provenance checks, and deterministic fixture
+  scenarios. Internal-host validation rejects public and link-local addresses;
+  URL credentials/query/fragment are rejected and redirects fail closed.
+- Fixture selection uses validated `APP_ENV` and `AI_MODE` configuration and is
+  permitted only for development. Fixture analysis/correction rejects versions
+  absent from the packaged dataset and retains canonical synthetic provenance.
+  Recalculation preserves all selected component fields. Unknown portions must
+  remain unknown (`quantity`, `unit`, `servingId`, and `grams` are null).
+- The five canonical fixtures are copied byte-for-byte into
+  `carin-api/fixtures/ai/`; the Docker image packages them for runtime use.
+  `test:ai-fixture-runtime` exercises the compiled adapter.
+- Independent review found and drove fixes for public-host credential exposure,
+  redirects, fixture provenance/version relabeling, recalculation field drift,
+  runtime fixture gating, and unknown-portion handling.
 
-Verification: Node 24 / pnpm 10.33.0. Commands ran in the T15 worktree.
+Verification on integrated `dev` (14 October 2026):
 
 | Working directory | Command | Result |
 | --- | --- | --- |
-| `carin-api/` | `pnpm install --frozen-lockfile` | Pass |
-| `carin-app/` | `pnpm install --frozen-lockfile` | Pass; needed by the existing API app-consumer integration test |
-| `carin-api/` | `pnpm run typecheck` | Pass |
-| `carin-api/` | `pnpm run lint` | Pass |
-| `carin-api/` | `pnpm run build` | Pass |
-| `carin-api/` | `pnpm run test:unit` | 62 tests pass, including canonical fixture copy checks |
-| `carin-api/` | `pnpm run test:integration` | 95 tests pass |
-| `carin-api/` | `pnpm run test:ai-fixture-runtime` | Build plus compiled-adapter fixture smoke passes |
-| `carin-api/` | `docker build -t carin-api-t15-fixture-smoke .` | Pass using the package directory as build context |
-| Container | Run compiled adapter against all three photo scenarios, correction, and service failure; inspect all five files | Pass; successful results remain synthetic |
-| Worktree root | `git diff --check` | Pass |
+| `carin-api/` | `pnpm test` | 77 unit and 103 integration tests passed |
+| `carin-api/` | `pnpm run typecheck` | Passed |
+| `carin-api/` | `pnpm run lint` | Passed |
+| `carin-api/` | `pnpm run test:ai-fixture-runtime` | Build and fixture smoke passed |
+| `carin-api/` | `docker build -t carin-api-t15-final-smoke .` | Passed; compiled adapter loaded packaged fixtures in the image |
+| Repository root | `.venv/bin/python specs/validate-contracts.py` | Passed: 2 OpenAPI documents, 38 operations, 5 fixtures, math/coverage/provenance and negative probes |
+| Repository root | `docker compose -f infra/compose.yaml config --quiet` | Passed with temporary non-secret local placeholders; `infra/.env` is absent |
+| Repository root | `git diff --check` | Passed |
 
-Unverified work / blockers: No real AI service was available; the HTTP client was
-exercised against an injected fake provider. This work does not establish model
-quality, approved real catalog/rule coverage, nutrition values, or clinical
-thresholds. T32 service endpoints and C16 worker/job handling remain separate.
-The fixture capability manifest intentionally reports no supported foods or
-conditions; its synthetic catalog entry exists only to exercise the shared wire
-contract. Android/iOS are unrelated to this backend adapter.
+Unverified work / blockers: No live AI provider or approved real nutrition/rule
+dataset was available. The HTTP adapter was tested with injected fake responses;
+this does not establish model quality or real-photo accuracy. T8 auth/session
+wiring, C16 durable worker/publication behavior, T32 service endpoints, and legal
+approval remain outside this task. The contract validator and Compose check do
+not prove a live deployment or real AI integration.
 
-Next step: Parent review and integration of the focused commit on `feat/t15-ai-adapter`.
+Next step: C16 should call T7's consent guard in the same publication transaction
+as lease/status/generation/ownership/deletion checks, using a consistent lock
+order. T8 must wire the authenticated consent route and signup transaction.
 
-Worktree state: Focused commit on `feat/t15-ai-adapter`; no merge or task-board
-status/notes changes. The original checkout's pre-existing untracked `.superpowers/`
-directory was preserved.
+Worktree state: Feature commit `3167ba6` on `feat/t15-ai-adapter` was integrated
+into `dev` by merge commit `a0757a8`. Task T15 is handed back as `review`.
