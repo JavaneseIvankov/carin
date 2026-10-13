@@ -1,5 +1,5 @@
 {
-  "id": "dae2dae1-2920-486b-a273-1149f25e77f1",
+  "id": "554a2fda-2854-418e-a218-89b8c9a55033",
   "prevId": "67b72603-7994-4fd1-bffd-b1ad64b86973",
   "version": "7",
   "dialect": "postgresql",
@@ -932,93 +932,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.catalog_condition": {
-      "name": "catalog_condition",
-      "schema": "",
-      "columns": {
-        "catalog_version": {
-          "name": "catalog_version",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "condition_id": {
-          "name": "condition_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "display_name": {
-          "name": "display_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "condition": {
-          "name": "condition",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "catalog_condition_search": {
-          "name": "catalog_condition_search",
-          "columns": [
-            {
-              "expression": "catalog_version",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "display_name",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "condition_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "catalog_condition_catalog_version_catalog_version_version_fk": {
-          "name": "catalog_condition_catalog_version_catalog_version_version_fk",
-          "tableFrom": "catalog_condition",
-          "tableTo": "catalog_version",
-          "columnsFrom": [
-            "catalog_version"
-          ],
-          "columnsTo": [
-            "version"
-          ],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "catalog_condition_catalog_version_condition_id_pk": {
-          "name": "catalog_condition_catalog_version_condition_id_pk",
-          "columns": [
-            "catalog_version",
-            "condition_id"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.catalog_food": {
       "name": "catalog_food",
       "schema": "",
@@ -1040,13 +953,6 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
-        },
-        "aliases": {
-          "name": "aliases",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'[]'::jsonb"
         },
         "preparation": {
           "name": "preparation",
@@ -1102,13 +1008,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "nutrient_source_ids": {
-          "name": "nutrient_source_ids",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{\"energyKcal\":null,\"carbohydrateG\":null,\"proteinG\":null,\"fatG\":null,\"fiberG\":null,\"sugarsG\":null,\"sodiumMg\":null}'::jsonb"
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -1146,21 +1045,7 @@
           "with": {}
         }
       },
-      "foreignKeys": {
-        "catalog_food_version_catalog_version_version_fk": {
-          "name": "catalog_food_version_catalog_version_version_fk",
-          "tableFrom": "catalog_food",
-          "tableTo": "catalog_version",
-          "columnsFrom": [
-            "version"
-          ],
-          "columnsTo": [
-            "version"
-          ],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {
         "catalog_food_version_id_pk": {
           "name": "catalog_food_version_id_pk",
@@ -1176,123 +1061,6 @@
         "catalog_nutrients_nonnegative": {
           "name": "catalog_nutrients_nonnegative",
           "value": "(\"catalog_food\".\"energy_kcal\" IS NULL OR \"catalog_food\".\"energy_kcal\" >= 0 AND \"catalog_food\".\"energy_kcal\" <> 'NaN'::numeric) AND (\"catalog_food\".\"carbohydrate_g\" IS NULL OR \"catalog_food\".\"carbohydrate_g\" >= 0 AND \"catalog_food\".\"carbohydrate_g\" <> 'NaN'::numeric) AND (\"catalog_food\".\"protein_g\" IS NULL OR \"catalog_food\".\"protein_g\" >= 0 AND \"catalog_food\".\"protein_g\" <> 'NaN'::numeric) AND (\"catalog_food\".\"fat_g\" IS NULL OR \"catalog_food\".\"fat_g\" >= 0 AND \"catalog_food\".\"fat_g\" <> 'NaN'::numeric) AND (\"catalog_food\".\"fiber_g\" IS NULL OR \"catalog_food\".\"fiber_g\" >= 0 AND \"catalog_food\".\"fiber_g\" <> 'NaN'::numeric) AND (\"catalog_food\".\"sugars_g\" IS NULL OR \"catalog_food\".\"sugars_g\" >= 0 AND \"catalog_food\".\"sugars_g\" <> 'NaN'::numeric) AND (\"catalog_food\".\"sodium_mg\" IS NULL OR \"catalog_food\".\"sodium_mg\" >= 0 AND \"catalog_food\".\"sodium_mg\" <> 'NaN'::numeric)"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.catalog_search_cursor": {
-      "name": "catalog_search_cursor",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "catalog_version": {
-          "name": "catalog_version",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "query": {
-          "name": "query",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "limit": {
-          "name": "limit",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "after_display_name": {
-          "name": "after_display_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "after_food_id": {
-          "name": "after_food_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "expires_at": {
-          "name": "expires_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "catalog_search_cursor_expiry": {
-          "name": "catalog_search_cursor_expiry",
-          "columns": [
-            {
-              "expression": "expires_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "catalog_search_cursor_user_id_user_id_fk": {
-          "name": "catalog_search_cursor_user_id_user_id_fk",
-          "tableFrom": "catalog_search_cursor",
-          "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "catalog_search_cursor_catalog_version_catalog_version_version_fk": {
-          "name": "catalog_search_cursor_catalog_version_catalog_version_version_fk",
-          "tableFrom": "catalog_search_cursor",
-          "tableTo": "catalog_version",
-          "columnsFrom": [
-            "catalog_version"
-          ],
-          "columnsTo": [
-            "version"
-          ],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "catalog_search_cursor_limit": {
-          "name": "catalog_search_cursor_limit",
-          "value": "\"catalog_search_cursor\".\"limit\" BETWEEN 1 AND 100"
         }
       },
       "isRLSEnabled": false
@@ -1372,91 +1140,6 @@
         "serving_grams_positive": {
           "name": "serving_grams_positive",
           "value": "\"catalog_serving\".\"grams\" > 0 AND \"catalog_serving\".\"grams\" <> 'NaN'::numeric"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.catalog_version": {
-      "name": "catalog_version",
-      "schema": "",
-      "columns": {
-        "version": {
-          "name": "version",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "nutrition_dataset_version": {
-          "name": "nutrition_dataset_version",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "rule_set_version": {
-          "name": "rule_set_version",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "data_mode": {
-          "name": "data_mode",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "published_at": {
-          "name": "published_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "digest": {
-          "name": "digest",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "is_current": {
-          "name": "is_current",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "catalog_version_one_current": {
-          "name": "catalog_version_one_current",
-          "columns": [
-            {
-              "expression": "is_current",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "where": "\"catalog_version\".\"is_current\"",
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "catalog_version_data_mode": {
-          "name": "catalog_version_data_mode",
-          "value": "\"catalog_version\".\"data_mode\" IN ('real','synthetic')"
         }
       },
       "isRLSEnabled": false
@@ -2686,13 +2369,13 @@
         },
         "height_cm": {
           "name": "height_cm",
-          "type": "numeric(20, 6)",
+          "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
         "weight_kg": {
           "name": "weight_kg",
-          "type": "numeric(20, 6)",
+          "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },

@@ -12,6 +12,7 @@ import {
 import { registerCatalogRoutes, type CatalogRouteDependencies } from "./catalog/routes.js";
 import { registerAccountRoutes } from './modules/account/routes.js';
 import { registerEmailLandingRoutes } from './modules/email/landing.js';
+import { registerProfileRoutes } from './modules/profile/routes.js';
 
 export type RequestLog = {
   requestId: string;
@@ -63,7 +64,10 @@ export function createApp({
   registerLegalRegistryRoute(app);
   if (legalConsent) registerAiConsentRoute(app, legalConsent);
   if (catalog) registerCatalogRoutes(app, catalog);
-  if (account) registerAccountRoutes(app, account);
+  if (account) {
+    registerAccountRoutes(app, account);
+    registerProfileRoutes(app, account);
+  }
   if (appLinkScheme) registerEmailLandingRoutes(app, appLinkScheme);
   if (auth) app.all('/api/auth/*', (c) => auth.handler(c.req.raw));
 
