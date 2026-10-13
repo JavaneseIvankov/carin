@@ -1,5 +1,5 @@
 import { DarkTheme, DefaultTheme, type Theme } from 'expo-router/react-navigation';
- 
+
 export const THEME = {
   light: {
     background: 'hsl(0 0% 100%)',
@@ -8,18 +8,18 @@ export const THEME = {
     cardForeground: 'hsl(0 0% 3.9%)',
     popover: 'hsl(0 0% 100%)',
     popoverForeground: 'hsl(0 0% 3.9%)',
-    primary: 'hsl(0 0% 9%)',
-    primaryForeground: 'hsl(0 0% 98%)',
+    primary: 'hsl(162 55% 31%)',
+    primaryForeground: 'hsl(0 0% 100%)',
     secondary: 'hsl(0 0% 96.1%)',
     secondaryForeground: 'hsl(0 0% 9%)',
     muted: 'hsl(0 0% 96.1%)',
     mutedForeground: 'hsl(0 0% 45.1%)',
-    accent: 'hsl(0 0% 96.1%)',
-    accentForeground: 'hsl(0 0% 9%)',
+    accent: 'hsl(158 28% 93%)',
+    accentForeground: 'hsl(162 55% 22%)',
     destructive: 'hsl(0 84.2% 60.2%)',
     border: 'hsl(0 0% 89.8%)',
     input: 'hsl(0 0% 89.8%)',
-    ring: 'hsl(0 0% 63%)',
+    ring: 'hsl(162 55% 31%)',
     radius: '0.625rem',
     chart1: 'hsl(12 76% 61%)',
     chart2: 'hsl(173 58% 39%)',
@@ -34,18 +34,18 @@ export const THEME = {
     cardForeground: 'hsl(0 0% 98%)',
     popover: 'hsl(0 0% 3.9%)',
     popoverForeground: 'hsl(0 0% 98%)',
-    primary: 'hsl(0 0% 98%)',
-    primaryForeground: 'hsl(0 0% 9%)',
+    primary: 'hsl(158 48% 65%)',
+    primaryForeground: 'hsl(162 55% 12%)',
     secondary: 'hsl(0 0% 14.9%)',
     secondaryForeground: 'hsl(0 0% 98%)',
     muted: 'hsl(0 0% 14.9%)',
     mutedForeground: 'hsl(0 0% 63.9%)',
-    accent: 'hsl(0 0% 14.9%)',
-    accentForeground: 'hsl(0 0% 98%)',
+    accent: 'hsl(162 23% 20%)',
+    accentForeground: 'hsl(158 48% 85%)',
     destructive: 'hsl(0 70.9% 59.4%)',
     border: 'hsl(0 0% 14.9%)',
     input: 'hsl(0 0% 14.9%)',
-    ring: 'hsl(300 0% 45%)',
+    ring: 'hsl(158 48% 65%)',
     radius: '0.625rem',
     chart1: 'hsl(220 70% 50%)',
     chart2: 'hsl(160 60% 45%)',
@@ -54,7 +54,7 @@ export const THEME = {
     chart5: 'hsl(340 75% 55%)',
   },
 };
- 
+
 export const NAV_THEME: Record<'light' | 'dark', Theme> = {
   light: {
     ...DefaultTheme,

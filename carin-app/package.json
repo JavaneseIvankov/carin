@@ -17,8 +17,11 @@
     "contracts:check": "node ../scripts/generate-contracts.mjs --check"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^2.2.0",
+    "@react-native-community/netinfo": "^12.0.1",
     "@rn-primitives/portal": "1.4.0",
     "@rn-primitives/slot": "1.5.2",
+    "@tanstack/react-query": "^5.104.2",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "expo": "56.0.23",
