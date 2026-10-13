@@ -1,0 +1,107 @@
+name: carin-dev
+
+services:
+  postgres:
+    image: postgres:18.3-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-carin_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-carin_dev}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in infra/.env}
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - private
+    restart: unless-stopped
+
+  minio:
+    # Silo preserves MinIO S3/API/env compatibility; pin the exact release manifest.
+    image: docker.io/pgsty/silo@sha256:635197cb9f36d01bee221d34d1c7d7960f6a95c48b0b6c01d99cd13bdae51a46
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?Set MINIO_ROOT_USER in infra/.env}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD in infra/.env}
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "silo", "healthcheck", "live"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks:
+      - private
+    restart: unless-stopped
+
+  migrate:
+    build:
+      context: ../carin-api
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-carin_dev}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in infra/.env}@postgres:5432/${POSTGRES_DB:-carin_dev}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["node", "dist/db/migrate.js"]
+    networks:
+      - private
+    restart: "no"
+
+  api:
+    build:
+      context: ../carin-api
+      dockerfile: Dockerfile
+    environment:
+      APP_ENV: dev
+      DATABASE_URL: postgresql://${POSTGRES_USER:-carin_dev}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in infra/.env}@postgres:5432/${POSTGRES_DB:-carin_dev}
+      PORT: "3000"
+    ports:
+      - "${API_BIND_ADDRESS:-0.0.0.0}:${API_PORT:-3000}:3000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health/live').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    networks:
+      - private
+    restart: unless-stopped
+
+  # Prepared for C16. Do not start this profile before its worker entrypoint exists.
+  worker:
+    build:
+      context: ../carin-api
+      dockerfile: Dockerfile
+    profiles: ["worker"]
+    environment:
+      APP_ENV: dev
+      DATABASE_URL: postgresql://${POSTGRES_USER:-carin_dev}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in infra/.env}@postgres:5432/${POSTGRES_DB:-carin_dev}
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_BUCKET: ${MINIO_BUCKET:-carin-dev}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:?Set MINIO_ACCESS_KEY in infra/.env}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:?Set MINIO_SECRET_KEY in infra/.env}
+      AI_SERVICE_URL: ${AI_SERVICE_URL:-http://ai-service:8000}
+      AI_SERVICE_KEY: ${AI_SERVICE_KEY:-local-placeholder-change-before-use}
+      AI_MODE: ${AI_MODE:-fixture}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      minio:
+        condition: service_started
+    command: ["node", "dist/worker.js"]
+    networks:
+      - private
+    restart: unless-stopped
+
+networks:
+  private:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  minio-data:
