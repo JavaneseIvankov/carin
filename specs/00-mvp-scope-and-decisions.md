@@ -32,7 +32,7 @@ adalah kontrak bersama tim aplikasi dan AI.
 | Produk | MVP hackathon dengan backend dan autentikasi nyata |
 | Mobile | Expo/React Native yang sudah ada; Android dan iOS menjadi sasaran kompatibilitas. Platform/perangkat acceptance demo dicatat pada release checklist ketika tersedia; belum dianggap kedua platform sudah diuji. |
 | Akses jaringan | Online-required. Cache read dan draft lokal seperlunya; tidak ada antrean write offline. |
-| Backend | Hono, Node.js, TypeScript; lokasi baru `backend/` ketika implementasi dimulai |
+| Carin API | Backend aplikasi memakai Hono, Node.js, TypeScript; lokasi baru `carin-api/` ketika implementasi dimulai |
 | Data | PostgreSQL dan Drizzle; backend adalah source of truth |
 | Auth P0 | Better Auth: email/password, register, verifikasi email, login/logout, persistent session, forgot/reset password |
 | Email | Resend untuk email verifikasi dan reset |
@@ -81,6 +81,11 @@ bebas alergen. Pemeriksaan adalah catatan hasil pengukuran di luar aplikasi.
 ## Default yang ditetapkan dalam spec
 
 Default ini dapat direvisi sebelum implementasi tanpa pertanyaan tambahan:
+
+Penamaan: `carin-app/` untuk aplikasi mobile, `carin-api/` untuk server API dan
+worker aplikasi, serta `ai-service/` untuk REST service AI. Istilah backend dalam
+penjelasan arsitektur menunjuk peran Carin API, bukan nama direktori terpisah.
+Perubahan nama ini tidak mengubah HTTP routes, kontrak payload, atau env keys.
 
 - Admission age memakai tanggal kalender Asia/Jakarta di server. DOB date-only
   bersifat tetap pada P0; koreksi salah DOB ditangani tim saat pengujian.

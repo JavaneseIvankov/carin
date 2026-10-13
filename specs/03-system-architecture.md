@@ -1,6 +1,6 @@
 # Carin — arsitektur sistem
 
-Versi 1.0.0. Struktur target saat implementasi: `carin-app/`, `backend/`,
+Versi 1.0.0. Struktur target saat implementasi: `carin-app/`, `carin-api/`,
 `ai-service/`, `specs/`. Bahasa/framework internal AI tetap keputusan tim AI;
 REST contract tidak bergantung pada pilihan tersebut.
 
@@ -8,18 +8,19 @@ REST contract tidak bergantung pada pilihan tersebut.
 
 ```mermaid
 flowchart LR
-    M[Expo mobile] -->|HTTPS session| B[Hono API]
+    M[Expo mobile] -->|HTTPS session| B[Carin API / Hono]
     B --> D[(PostgreSQL / Drizzle)]
     B --> S[MinIO private]
     B --> E[Resend]
-    W[Backend worker] --> D
+    W[Carin API worker] --> D
     W -->|REST + service credential| A[AI service stateless]
     A -->|short-lived signed read| S
     W --> S
 ```
 
-Backend API dan worker berasal dari image/codebase yang sama dengan entrypoint
-terpisah. PostgreSQL menyimpan job durable dan application/auth data. AI service
+Carin API dan worker berasal dari image/codebase `carin-api/` yang sama dengan
+entrypoint terpisah; Dockerfile berada di `carin-api/Dockerfile`. PostgreSQL
+menyimpan job durable dan application/auth data. AI service
 tidak memperoleh database URL, user session, userId, email, atau akses bucket
 umum. Foto memakai signed read URL untuk satu object dan lifetime terbatas.
 

@@ -36,7 +36,7 @@ dihasilkan library; resource OpenAPI tidak menggantikan kontrak upstream.
 
 ## Traceability AC PRD
 
-U = pure domain unit, I = backend/DB integration, C = API/provider contract,
+U = pure domain unit, I = Carin API/PostgreSQL integration, C = API/provider contract,
 E = end-to-end mobile. Setiap baris membutuhkan hasil uji tercatat.
 
 | AC | Coverage implementasi |
