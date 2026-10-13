@@ -152,6 +152,47 @@ describe('PostgreSQL baseline', () => {
     );
   });
 
+  it('defaults settings revision to one and supports optimistic timezone updates', async () => {
+    expect(
+      (
+        await pool.query('SELECT settings_revision FROM "user" WHERE id=$1', [
+          owner,
+        ])
+      ).rows[0].settings_revision,
+    ).toBe(1);
+    await expect(
+      pool.query('UPDATE "user" SET settings_revision=0 WHERE id=$1', [owner]),
+    ).rejects.toMatchObject({ code: '23514' });
+    const results = await Promise.all(
+      ['UTC', 'Asia/Jakarta'].map((timezone) =>
+        pool.query(
+          'UPDATE "user" SET timezone=$1,settings_revision=settings_revision+1 WHERE id=$2 AND settings_revision=1 RETURNING settings_revision,timezone',
+          [timezone, owner],
+        ),
+      ),
+    );
+    expect(results.map((result) => result.rowCount).sort()).toEqual([0, 1]);
+    expect(
+      (
+        await pool.query(
+          'SELECT settings_revision,timezone FROM "user" WHERE id=$1',
+          [owner],
+        )
+      ).rows[0],
+    ).toMatchObject({
+      settings_revision: 2,
+      timezone: results.find((result) => result.rowCount === 1)!.rows[0]
+        .timezone,
+    });
+    expect(
+      (
+        await pool.query('SELECT settings_revision FROM "user" WHERE id=$1', [
+          other,
+        ])
+      ).rows[0].settings_revision,
+    ).toBe(1);
+  });
+
   it('permits general/manual snapshots with no health profile and version zero', async () => {
     const emptyProfile = randomUUID();
     const manual = randomUUID();

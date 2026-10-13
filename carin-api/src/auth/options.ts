@@ -36,6 +36,12 @@ export const authOptions = {
         input: false,
         defaultValue: 'active',
       },
+      settingsRevision: {
+        type: 'number',
+        required: true,
+        input: false,
+        defaultValue: 1,
+      },
       timezone: {
         type: 'string',
         required: true,

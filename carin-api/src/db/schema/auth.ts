@@ -28,6 +28,7 @@ export const user = pgTable("user", {
   acceptedPrivacyVersion: text("accepted_privacy_version").notNull(),
   acceptedAt: timestamp("accepted_at").notNull(),
   deletionStatus: text("deletion_status").default("active").notNull(),
+  settingsRevision: integer("settings_revision").default(1).notNull(),
   timezone: text("timezone").default("Asia/Jakarta").notNull(),
 });
 

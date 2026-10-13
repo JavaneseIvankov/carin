@@ -7,7 +7,7 @@ integrated C01/C02 at `dev` commit `788699e`; branch `feat/t3-database-schema`.
 Changes and affected files:
 
 - `carin-api/src/auth/{options,generation}.ts`: canonical schema-affecting Better
-  Auth settings and generation-only CLI entrypoint. No product auth endpoints.
+  Auth settings, including server-owned settingsRevision default one, and generation-only CLI entrypoint. No product auth endpoints.
 - `carin-api/src/db/schema/{auth,domain,index}.ts`: CLI-generated UUID auth schema
   and 16 domain tables covering profile/history, consent, catalog/servings, media,
   scans/jobs/results, consumption/history/evaluation, examinations, idempotency,
@@ -20,7 +20,7 @@ Changes and affected files:
   and timestamp expectations for runtime readiness.
 - `carin-api/src/health/postgres-repository{,.unit.test}.ts`: expected-schema probe
   sharing the existing three-second connection/query deadline.
-- `carin-api/tests/integration/database.integration.test.ts`: ten DB tests using
+- `carin-api/tests/integration/database.integration.test.ts`: eleven DB tests using
   an isolated ephemeral Docker PostgreSQL instance, never existing DATABASE_URL.
 - `carin-api/package.json` and lock: parent-coordinated pins/scripts, including
   better-auth/Expo/auth CLI 1.7.7, drizzle-orm 0.45.4, drizzle-kit 0.31.11.
@@ -33,7 +33,7 @@ Verification: performed from `carin-api/` on Linux, Node 24.18.0/pnpm 10.33.0:
 - `pnpm run db:generate`: passed, reports no schema changes after regeneration.
 - `pnpm run typecheck`, `pnpm run lint`, `pnpm run build`: passed.
 - `pnpm run test:unit`: 18 tests in four files passed.
-- `pnpm run test:integration`: 19 tests in two files passed, including ten new
+- `pnpm run test:integration`: 20 tests in two files passed, including eleven new
   PostgreSQL baseline tests.
 - Built CLI smoke: `pnpm run db:migrate` invoked twice against an additional
   fresh scoped container; exactly two migration records; compiled readiness
@@ -43,7 +43,7 @@ Verification: performed from `carin-api/` on Linux, Node 24.18.0/pnpm 10.33.0:
 - `git diff --check`: passed. Disposable test containers removed.
 
 Actual database evidence includes empty HTTP readiness 503/migrated 200,
-concurrent/repeated migrations, cross-owner FKs and idempotency session rejection,
+concurrent/repeated migrations, optimistic account-settings revision storage, cross-owner FKs and idempotency session rejection,
 profile version-zero contexts without a health_profile, duplicate profile/result/
 active default-confirmation rejection, explicit occurrence/reconfirmation support,
 NaN/unit/knowledge-state rejection, immutable historical profile/catalog/result/
@@ -69,3 +69,15 @@ Worktree state: focused changes committed on `feat/t3-database-schema` in
 `.worktrees/t3-database-schema`; no root-dev/task-board/push/deploy changes.
 Dependency manifest changes coordinated with parent; preserve/reconcile T5
 manifest/lock changes during integration. Existing root work is untouched.
+
+Spec-review correction: added canonical Better Auth settingsRevision with
+`type: number`, `input: false`, default 1. The pinned CLI generated the integer
+column, then Drizzle generated `0002_settings_revision.sql`; reviewed
+`0003_settings_revision_invariant.sql` rejects zero/negative revisions. No
+previous migration or auth column was edited manually. A new real PostgreSQL
+test starts with revision one, rejects zero, and races timezone updates carrying
+the same expected revision, proving exactly one update wins and increments to
+two while the other account remains at one. T8 must explicitly block raw vendor
+timezone/settingsRevision updates; a product Me endpoint is outside this task.
+The earlier compiled smoke above recorded the original two migrations; the
+current integration run applies and repeats all four migrations.

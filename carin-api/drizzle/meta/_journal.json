@@ -15,6 +15,20 @@
       "when": 1791912352825,
       "tag": "0001_invariants",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791912918287,
+      "tag": "0002_settings_revision",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791912926932,
+      "tag": "0003_settings_revision_invariant",
+      "breakpoints": true
     }
   ]
 }

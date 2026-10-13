@@ -40,15 +40,20 @@ The generator uses explicit Drizzle/PostgreSQL flags and needs no live database.
 The generated UUID schema, additional account fields, and database rate-limit
 storage are incorporated in `0000_baseline.sql`. `0001_invariants.sql` adds
 application constraints and triggers after generation; these are reviewed SQL
-and must remain in deployment. Custom deferrability and triggers cannot be
+and must remain in deployment. The generated `0002_settings_revision.sql` adds the server-owned integer account
+settings revision with default one, and `0003_settings_revision_invariant.sql`
+requires it to remain positive. Existing SQL files were preserved.
+Custom deferrability and triggers cannot be
 reconstructed by `db:generate` alone.
 
-DOB/legal/deletion fields have `input: false`. The SQL trigger also prevents
+DOB/legal/deletion fields, timezone, and settingsRevision have `input: false`. The SQL trigger also prevents
 changing stored registration metadata. These safeguards do **not** implement
 registration admission, age/legal validation, email delivery, or mobile auth.
 Before mounting auth, T8 must provide validated environment origins/secret,
 admission hooks on the vendor signup route, raw-update bypass protection,
 Resend/outbox callbacks, session resolution/deletion denial, and real auth tests.
+The vendor update-user hook must explicitly protect timezone/settingsRevision,
+so settings changes only occur through the Carin service with expectedRevision.
 The seven-day/sliding-day session, verified-email requirement, disabled automatic
 login, password limits, reset revocation/expiry, disabled vendor delete-user, and
 Expo plugin are configured, but no product auth endpoints are mounted here.
@@ -63,7 +68,10 @@ composite `NO ACTION` ownership check runs after detachment and retains `user_id
 Idempotency's generated session reference is checked by a locking ownership
 trigger without changing the library's generated session schema.
 
-Health-profile versions and resource revisions start at one. An immutable
+Health-profile versions, account settings revisions, and resource revisions start
+at one. Settings writes must atomically compare settingsRevision with the submitted
+expectedRevision and increment it together with the timezone update; the database
+test proves concurrent writes with the same expected revision have one winner. An immutable
 profile context snapshot may use version zero when the optional health profile
 does not exist, matching AI `ProfileContext`; missing health data stays null or
 `not_provided`. No dummy health measurements or fake normal diagnosis are needed.
