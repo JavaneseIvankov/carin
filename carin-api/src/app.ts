@@ -9,6 +9,7 @@ import {
   registerAiConsentRoute,
   registerLegalRegistryRoute,
 } from "./modules/legal/routes.js";
+import { registerCatalogRoutes, type CatalogRouteDependencies } from "./catalog/routes.js";
 
 export type RequestLog = {
   requestId: string;
@@ -22,6 +23,7 @@ export type AppDependencies = {
   log?: (entry: RequestLog) => void;
   registerRoutes?: (app: Hono<AppEnv>) => void;
   legalConsent?: { db: Database; resolveSession: SessionResolver };
+  catalog?: CatalogRouteDependencies;
 };
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -31,6 +33,7 @@ export function createApp({
   log,
   registerRoutes,
   legalConsent,
+  catalog,
 }: AppDependencies): Hono<AppEnv> {
   const app = new Hono<AppEnv>();
   app.use("*", async (c, next) => {
@@ -51,6 +54,7 @@ export function createApp({
   registerHealthRoutes(app, readiness);
   registerLegalRegistryRoute(app);
   if (legalConsent) registerAiConsentRoute(app, legalConsent);
+  if (catalog) registerCatalogRoutes(app, catalog);
 
   registerRoutes?.(app);
 

@@ -121,12 +121,51 @@ export const consentEvent = pgTable(
   ],
 );
 
+export const catalogVersion = pgTable(
+  'catalog_version',
+  {
+    version: text('version').primaryKey(),
+    nutritionDatasetVersion: text('nutrition_dataset_version').notNull(),
+    ruleSetVersion: text('rule_set_version').notNull(),
+    dataMode: text('data_mode').notNull(),
+    publishedAt: timestamp('published_at', { withTimezone: true }).notNull(),
+    digest: text('digest').notNull(),
+    isCurrent: boolean('is_current').default(false).notNull(),
+    importedAt: created(),
+  },
+  (t): PgTableExtraConfigValue[] => [
+    check('catalog_version_data_mode', sql`${t.dataMode} IN ('real','synthetic')`),
+    uniqueIndex('catalog_version_one_current').on(t.isCurrent).where(sql`${t.isCurrent}`),
+  ],
+);
+
+export const catalogSearchCursor = pgTable(
+  'catalog_search_cursor',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: owner(),
+    catalogVersion: text('catalog_version').notNull(),
+    query: text('query').notNull(),
+    limit: integer('limit').notNull(),
+    afterDisplayName: text('after_display_name').notNull(),
+    afterFoodId: text('after_food_id').notNull(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    createdAt: created(),
+  },
+  (t): PgTableExtraConfigValue[] => [
+    foreignKey({ columns: [t.catalogVersion], foreignColumns: [catalogVersion.version] }).onDelete('restrict'),
+    check('catalog_search_cursor_limit', sql`${t.limit} BETWEEN 1 AND 100`),
+    index('catalog_search_cursor_expiry').on(t.expiresAt),
+  ],
+);
+
 export const catalogFood = pgTable(
   'catalog_food',
   {
     id: text('id').notNull(),
     version: text('version').notNull(),
     displayName: text('display_name').notNull(),
+    aliases: jsonb('aliases').$type<string[]>().default([]).notNull(),
     preparation: text('preparation'),
     energyKcal: decimal('energy_kcal'),
     carbohydrateG: decimal('carbohydrate_g'),
@@ -136,15 +175,33 @@ export const catalogFood = pgTable(
     sugarsG: decimal('sugars_g'),
     sodiumMg: decimal('sodium_mg'),
     sourceRefs: jsonb('source_refs').notNull(),
+    nutrientSourceIds: jsonb('nutrient_source_ids')
+      .default(sql`'{"energyKcal":null,"carbohydrateG":null,"proteinG":null,"fatG":null,"fiberG":null,"sugarsG":null,"sodiumMg":null}'::jsonb`)
+      .notNull(),
     createdAt: created(),
   },
   (t): PgTableExtraConfigValue[] => [
     primaryKey({ columns: [t.version, t.id] }),
+    foreignKey({ columns: [t.version], foreignColumns: [catalogVersion.version] }).onDelete('restrict'),
     index('catalog_search').on(t.version, t.displayName, t.id),
     check(
       'catalog_nutrients_nonnegative',
       sql`(${t.energyKcal} IS NULL OR ${t.energyKcal} >= 0 AND ${t.energyKcal} <> 'NaN'::numeric) AND (${t.carbohydrateG} IS NULL OR ${t.carbohydrateG} >= 0 AND ${t.carbohydrateG} <> 'NaN'::numeric) AND (${t.proteinG} IS NULL OR ${t.proteinG} >= 0 AND ${t.proteinG} <> 'NaN'::numeric) AND (${t.fatG} IS NULL OR ${t.fatG} >= 0 AND ${t.fatG} <> 'NaN'::numeric) AND (${t.fiberG} IS NULL OR ${t.fiberG} >= 0 AND ${t.fiberG} <> 'NaN'::numeric) AND (${t.sugarsG} IS NULL OR ${t.sugarsG} >= 0 AND ${t.sugarsG} <> 'NaN'::numeric) AND (${t.sodiumMg} IS NULL OR ${t.sodiumMg} >= 0 AND ${t.sodiumMg} <> 'NaN'::numeric)`,
     ),
+  ],
+);
+export const catalogCondition = pgTable(
+  'catalog_condition',
+  {
+    catalogVersion: text('catalog_version').notNull(),
+    conditionId: text('condition_id').notNull(),
+    displayName: text('display_name').notNull(),
+    condition: jsonb('condition').notNull(),
+  },
+  (t): PgTableExtraConfigValue[] => [
+    primaryKey({ columns: [t.catalogVersion, t.conditionId] }),
+    foreignKey({ columns: [t.catalogVersion], foreignColumns: [catalogVersion.version] }).onDelete('restrict'),
+    index('catalog_condition_search').on(t.catalogVersion, t.displayName, t.conditionId),
   ],
 );
 export const catalogServing = pgTable(
