@@ -3,7 +3,13 @@ import { appOperations } from './generated/operations';
 import { prepareAppRequest, type AppOperation, type AppRequestInput } from './contracts';
 import { requireApiUrl } from '@/lib/config';
 import { OfflineError, requireOnline, type Connectivity } from '@/lib/data/network';
-import { storageKey, type DataScope, type StorageAdapter } from '@/lib/data/scope';
+import {
+  persistScopedData,
+  scopeGeneration,
+  storageKey,
+  type DataScope,
+  type StorageAdapter,
+} from '@/lib/data/scope';
 
 type ResponseFor<O extends AppOperation> = operations[O]['responses'];
 export type AppResponse<O extends AppOperation> = {
@@ -42,6 +48,7 @@ type Dependencies = {
 
 export function createAppRepository(deps: Dependencies) {
   const fetcher = deps.fetcher ?? fetch;
+  const generation = scopeGeneration(deps.storage, deps.scope);
   async function send<O extends AppOperation>(name: O, input: AppRequestInput<O>) {
     const request = prepareAppRequest(name, input);
     if (request.method !== 'GET') requireOnline(deps.connectivity());
@@ -85,7 +92,13 @@ export function createAppRepository(deps: Dependencies) {
         const result = { data, updatedAt: Date.now(), stale: false };
         // /me is never persisted as evidence of a session.
         if (name !== 'getMe' && name !== 'readSignedPhoto' && (deps.isCurrentScope?.() ?? true)) {
-          await deps.storage.setItem(cacheKey, JSON.stringify(result));
+          await persistScopedData(
+            deps.storage,
+            deps.scope,
+            generation,
+            cacheKey,
+            JSON.stringify(result)
+          );
         }
         return result;
       } catch (error) {

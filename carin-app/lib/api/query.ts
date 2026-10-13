@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as React from 'react';
 import { useAppData } from '@/lib/data/provider';
-import { scopeKey } from '@/lib/data/scope';
+import { scopeGeneration, scopeKey } from '@/lib/data/scope';
 import type { AppRequestInput } from './contracts';
 import { createAppRepository, type ReadOperation, type WriteOperation } from './repository';
 
@@ -16,7 +16,11 @@ export function useAppRepository() {
             storage: AsyncStorage,
             connectivity: () => connectivity,
             onUnauthorized: clearSession,
-            isCurrentScope: () => isCurrentScope(scope),
+            isCurrentScope: (() => {
+              const generation = scopeGeneration(AsyncStorage, scope);
+              return () =>
+                isCurrentScope(scope) && scopeGeneration(AsyncStorage, scope) === generation;
+            })(),
           })
         : null,
     [scope, connectivity, clearSession, isCurrentScope]
@@ -39,6 +43,7 @@ export function useAppWrite<O extends WriteOperation>(name: O) {
   const repository = useAppRepository();
   const queryClient = useQueryClient();
   return useMutation({
+    mutationKey: scope ? scopeKey(scope, name) : ['carin', 'no-session', name],
     mutationFn: (input: AppRequestInput<O>) => {
       if (!repository) throw new Error('Sesi diperlukan untuk menyimpan.');
       return repository.write(name, input);

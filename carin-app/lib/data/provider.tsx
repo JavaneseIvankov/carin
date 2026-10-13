@@ -23,6 +23,8 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   const [scope, setScope] = React.useState<DataScope | null>(null);
   const [connectivity, setConnectivity] = React.useState<Connectivity>('unknown');
   const scopeRef = React.useRef(scope);
+  const transitionRef = React.useRef(0);
+  const cleanupRef = React.useRef<Promise<void>>(Promise.resolve());
 
   React.useEffect(
     () =>
@@ -41,8 +43,15 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
 
   const setSessionUser = React.useCallback(async (userId: string | null) => {
     const next = userId ? { environment: apiEnvironment.name, userId } : null;
-    if (!sameScope(scopeRef.current, next)) {
-      await clearScopedData(scopeRef.current, queryClient, AsyncStorage);
+    if (sameScope(scopeRef.current, next)) return cleanupRef.current;
+    const transition = ++transitionRef.current;
+    const departing = scopeRef.current;
+    scopeRef.current = null;
+    setScope(null);
+    const cleanup = clearScopedData(departing, queryClient, AsyncStorage);
+    cleanupRef.current = Promise.all([cleanupRef.current.catch(() => {}), cleanup]).then(() => {});
+    await cleanupRef.current;
+    if (transition === transitionRef.current) {
       scopeRef.current = next;
       setScope(next);
     }

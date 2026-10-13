@@ -91,6 +91,9 @@ describe('mobile shell and data boundary', () => {
     await drafts.save(bob, 'meal', { name: 'soto' });
     await drafts.save({ environment: 'staging', userId: 'alice' }, 'meal', { name: 'staging' });
     queryClient.setQueryData(scopeKey(alice, 'getDashboard'), { sample: true });
+    const mutationCache = queryClient.getMutationCache();
+    mutationCache.build(queryClient, { mutationKey: scopeKey(alice, 'saveProfile') });
+    mutationCache.build(queryClient, { mutationKey: scopeKey(bob, 'saveProfile') });
     expect(scopeKey(alice, 'getDashboard')).not.toEqual(scopeKey(bob, 'getDashboard'));
     await clearScopedData(alice, queryClient, storage);
     expect(await drafts.load(alice, 'meal')).toBeNull();
@@ -99,6 +102,8 @@ describe('mobile shell and data boundary', () => {
       name: 'staging',
     });
     expect(queryClient.getQueryData(scopeKey(alice, 'getDashboard'))).toBeUndefined();
+    expect(mutationCache.findAll({ mutationKey: scopeKey(alice) })).toHaveLength(0);
+    expect(mutationCache.findAll({ mutationKey: scopeKey(bob) })).toHaveLength(1);
   });
 
   it('clears session data on 401 and never serves a cached read as authorized', async () => {
@@ -123,5 +128,76 @@ describe('mobile shell and data boundary', () => {
     } satisfies Partial<ApiError>);
     expect(unauthorized).toHaveBeenCalledOnce();
     expect(await storage.getItem(storageKey(alice, 'read', '/api/v1/dashboard'))).toBeNull();
+  });
+
+  it.each(['logout', 'account switch'])(
+    'does not restore a departing user cache when a read write settles after %s',
+    async (transition) => {
+      const storage = memoryStorage();
+      const bobKey = storageKey(bob, 'read', '/api/v1/dashboard');
+      await storage.setItem(bobKey, JSON.stringify({ data: { sample: 'bob' }, updatedAt: 1 }));
+      const originalSetItem = storage.setItem;
+      let releaseWrite!: () => void;
+      let writeStarted!: () => void;
+      const started = new Promise<void>((resolve) => {
+        writeStarted = resolve;
+      });
+      const blocked = new Promise<void>((resolve) => {
+        releaseWrite = resolve;
+      });
+      storage.setItem = async (key, value) => {
+        writeStarted();
+        await blocked;
+        await originalSetItem(key, value);
+      };
+      let current: DataScope | null = alice;
+      const queryClient = new QueryClient();
+      queryClient.setQueryData(scopeKey(bob, 'getDashboard'), { sample: 'bob' });
+      const repo = createAppRepository({
+        scope: alice,
+        storage,
+        connectivity: () => 'online',
+        onUnauthorized: async () => {},
+        isCurrentScope: () => current === alice,
+        fetcher: vi.fn(async () => Response.json({ sample: 'alice' })) as unknown as typeof fetch,
+        baseUrl: 'https://api.test',
+      });
+      const read = repo.read('getDashboard', {});
+      await started;
+      current = transition === 'logout' ? null : bob;
+      const logout = clearScopedData(alice, queryClient, storage);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      releaseWrite();
+      await Promise.all([logout, read]);
+      expect(await storage.getItem(storageKey(alice, 'read', '/api/v1/dashboard'))).toBeNull();
+      expect(await storage.getItem(bobKey)).not.toBeNull();
+      expect(queryClient.getQueryData(scopeKey(bob, 'getDashboard'))).toEqual({ sample: 'bob' });
+    }
+  );
+
+  it('removes a draft whose storage write is still pending during logout', async () => {
+    const storage = memoryStorage();
+    const originalSetItem = storage.setItem;
+    let releaseWrite!: () => void;
+    let writeStarted!: () => void;
+    const started = new Promise<void>((resolve) => {
+      writeStarted = resolve;
+    });
+    const blocked = new Promise<void>((resolve) => {
+      releaseWrite = resolve;
+    });
+    storage.setItem = async (key, value) => {
+      writeStarted();
+      await blocked;
+      await originalSetItem(key, value);
+    };
+    const drafts = createDraftStore(storage);
+    const save = drafts.save(alice, 'health', { condition: 'private' });
+    await started;
+    const logout = clearScopedData(alice, new QueryClient(), storage);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    releaseWrite();
+    await Promise.all([save, logout]);
+    expect(await drafts.load(alice, 'health')).toBeNull();
   });
 });
