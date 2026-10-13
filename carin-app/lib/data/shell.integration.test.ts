@@ -83,6 +83,101 @@ describe('mobile shell and data boundary', () => {
     expect(fetcher).not.toHaveBeenCalled();
   });
 
+  it('rejects a cached read that resolves after logout', async () => {
+    const storage = memoryStorage();
+    const key = storageKey(alice, 'read', '/api/v1/dashboard');
+    await storage.setItem(key, JSON.stringify({ data: { sample: 'alice' }, updatedAt: 1 }));
+    const originalGetItem = storage.getItem;
+    let releaseRead!: () => void;
+    let readStarted!: () => void;
+    const started = new Promise<void>((resolve) => (readStarted = resolve));
+    const blocked = new Promise<void>((resolve) => (releaseRead = resolve));
+    storage.getItem = async (requestedKey) => {
+      const value = await originalGetItem(requestedKey);
+      readStarted();
+      await blocked;
+      return value;
+    };
+    const repo = createAppRepository({
+      scope: alice,
+      storage,
+      connectivity: () => 'offline',
+      onUnauthorized: async () => {},
+      baseUrl: 'https://api.test',
+    });
+    const read = repo.read('getDashboard', {});
+    const outcome = expect(read).rejects.toThrow('Scope changed');
+    await started;
+    await clearScopedData(alice, new QueryClient(), storage);
+    releaseRead();
+    await outcome;
+  });
+
+  it('rejects a draft loaded before cleanup when its storage read resolves afterward', async () => {
+    const storage = memoryStorage();
+    const drafts = createDraftStore(storage);
+    await drafts.save(alice, 'health', { condition: 'private' });
+    const originalGetItem = storage.getItem;
+    let releaseRead!: () => void;
+    let readStarted!: () => void;
+    const started = new Promise<void>((resolve) => (readStarted = resolve));
+    const blocked = new Promise<void>((resolve) => (releaseRead = resolve));
+    storage.getItem = async (key) => {
+      const value = await originalGetItem(key);
+      readStarted();
+      await blocked;
+      return value;
+    };
+    const load = drafts.load(alice, 'health');
+    const outcome = expect(load).rejects.toThrow('Scope changed');
+    await started;
+    await clearScopedData(alice, new QueryClient(), storage);
+    releaseRead();
+    await outcome;
+  });
+
+  it('rejects a delayed network response after an account switch without repopulating queries', async () => {
+    const storage = memoryStorage();
+    const queryClient = new QueryClient();
+    let releaseResponse!: () => void;
+    let requestStarted!: () => void;
+    const started = new Promise<void>((resolve) => (requestStarted = resolve));
+    const blocked = new Promise<void>((resolve) => (releaseResponse = resolve));
+    let current: DataScope | null = alice;
+    const repo = createAppRepository({
+      scope: alice,
+      storage,
+      connectivity: () => 'online',
+      onUnauthorized: async () => {},
+      isCurrentScope: () => current === alice,
+      fetcher: vi.fn(async () => {
+        requestStarted();
+        await blocked;
+        return Response.json({ sample: 'alice' });
+      }) as unknown as typeof fetch,
+      baseUrl: 'https://api.test',
+    });
+    let repositoryRead!: Promise<unknown>;
+    const queryRead = queryClient.fetchQuery({
+      queryKey: scopeKey(alice, 'getDashboard'),
+      queryFn: () => {
+        repositoryRead = repo.read('getDashboard', {});
+        return repositoryRead;
+      },
+    });
+    const queryOutcome = expect(queryRead).rejects.toThrow();
+    await started;
+    const repositoryOutcome = expect(repositoryRead).rejects.toThrow('Scope changed');
+    current = bob;
+    await clearScopedData(alice, queryClient, storage);
+    queryClient.setQueryData(scopeKey(bob, 'getDashboard'), { sample: 'bob' });
+    releaseResponse();
+    await Promise.all([queryOutcome, repositoryOutcome]);
+    expect(queryClient.getQueryData(scopeKey(alice, 'getDashboard'))).toBeUndefined();
+    expect(queryClient.getQueryData(scopeKey(bob, 'getDashboard'))).toEqual({ sample: 'bob' });
+    expect(await storage.getItem(storageKey(alice, 'read', '/api/v1/dashboard'))).toBeNull();
+  });
+
   it('keeps drafts and queries scoped by user and environment, then clears the departing user', async () => {
     const storage = memoryStorage();
     const drafts = createDraftStore(storage);
@@ -163,12 +258,13 @@ describe('mobile shell and data boundary', () => {
         baseUrl: 'https://api.test',
       });
       const read = repo.read('getDashboard', {});
+      const readOutcome = expect(read).rejects.toThrow('Scope changed');
       await started;
       current = transition === 'logout' ? null : bob;
       const logout = clearScopedData(alice, queryClient, storage);
       await new Promise((resolve) => setTimeout(resolve, 0));
       releaseWrite();
-      await Promise.all([logout, read]);
+      await Promise.all([logout, readOutcome]);
       expect(await storage.getItem(storageKey(alice, 'read', '/api/v1/dashboard'))).toBeNull();
       expect(await storage.getItem(bobKey)).not.toBeNull();
       expect(queryClient.getQueryData(scopeKey(bob, 'getDashboard'))).toEqual({ sample: 'bob' });

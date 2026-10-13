@@ -4,6 +4,7 @@ import { prepareAppRequest, type AppOperation, type AppRequestInput } from './co
 import { requireApiUrl } from '@/lib/config';
 import { OfflineError, requireOnline, type Connectivity } from '@/lib/data/network';
 import {
+  assertCurrentScope,
   persistScopedData,
   scopeGeneration,
   storageKey,
@@ -49,6 +50,8 @@ type Dependencies = {
 export function createAppRepository(deps: Dependencies) {
   const fetcher = deps.fetcher ?? fetch;
   const generation = scopeGeneration(deps.storage, deps.scope);
+  const assertCurrent = () =>
+    assertCurrentScope(deps.storage, deps.scope, generation, deps.isCurrentScope);
   async function send<O extends AppOperation>(name: O, input: AppRequestInput<O>) {
     const request = prepareAppRequest(name, input);
     if (request.method !== 'GET') requireOnline(deps.connectivity());
@@ -77,9 +80,11 @@ export function createAppRepository(deps: Dependencies) {
       name: O,
       input: AppRequestInput<O>
     ): Promise<ReadResult<AppResponse<O>>> {
+      assertCurrent();
       const request = prepareAppRequest(name, input);
       const cacheKey = storageKey(deps.scope, 'read', request.path);
       const cached = await deps.storage.getItem(cacheKey);
+      assertCurrent();
       if (deps.connectivity() === 'offline' && cached) {
         return {
           ...(JSON.parse(cached) as { data: AppResponse<O>; updatedAt: number }),
@@ -89,6 +94,7 @@ export function createAppRepository(deps: Dependencies) {
       if (deps.connectivity() === 'offline') throw new OfflineError();
       try {
         const data = await send(name, input);
+        assertCurrent();
         const result = { data, updatedAt: Date.now(), stale: false };
         // /me is never persisted as evidence of a session.
         if (name !== 'getMe' && name !== 'readSignedPhoto' && (deps.isCurrentScope?.() ?? true)) {
@@ -100,9 +106,11 @@ export function createAppRepository(deps: Dependencies) {
             JSON.stringify(result)
           );
         }
+        assertCurrent();
         return result;
       } catch (error) {
         if (error instanceof ApiError) throw error;
+        assertCurrent();
         if (cached)
           return {
             ...(JSON.parse(cached) as { data: AppResponse<O>; updatedAt: number }),

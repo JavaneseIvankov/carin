@@ -47,6 +47,24 @@ export function scopeGeneration(storage: StorageAdapter, scope: DataScope) {
   return writeState(storage, scope).generation;
 }
 
+export class StaleScopeError extends Error {
+  constructor() {
+    super('Scope changed while reading data.');
+    this.name = 'StaleScopeError';
+  }
+}
+
+export function assertCurrentScope(
+  storage: StorageAdapter,
+  scope: DataScope,
+  generation: number,
+  isCurrentScope?: () => boolean
+) {
+  if (scopeGeneration(storage, scope) !== generation || isCurrentScope?.() === false) {
+    throw new StaleScopeError();
+  }
+}
+
 export async function persistScopedData(
   storage: StorageAdapter,
   scope: DataScope,
