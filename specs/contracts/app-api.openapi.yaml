@@ -1,0 +1,2525 @@
+# Carin contract 1.0.0 — validated with specs/validate-contracts.py
+openapi: "3.1.1"
+info:
+  title: "Carin Application Resource API"
+  version: "1.0.0"
+  description: "Mobile/backend contract for Carin-owned resources. Better Auth raw /api/auth/* endpoints use pinned SDK/generated vendor schema and mandatory registration hooks described in 03-system-architecture.md. All application routes require verified DB session except explicitly public routes. Business invariants in 02-domain-model-and-business-rules.md apply in addition to schema. JSON timestamps include timezone offset; storage normalizes UTC. Resource ownership is server-enforced; no userId supplied by client."
+servers:
+  -
+    url: "https://api.carin.example"
+    description: "Illustrative external API base; replace per environment."
+security:
+  -
+    SessionCookie: []
+paths:
+  "/health/live":
+    get:
+      operationId: "getLiveness"
+      summary: "Process liveness"
+      security: []
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Health"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/health/ready":
+    get:
+      operationId: "getReadiness"
+      summary: "DB/schema readiness; AI degradation does not block core record APIs"
+      security: []
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Health"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/api/v1/legal":
+    get:
+      operationId: "getLegalRegistry"
+      summary: "Get current terms/privacy/AI consent documents"
+      security: []
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/LegalRegistry"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/api/v1/me":
+    get:
+      operationId: "getMe"
+      summary: "Curated verified account and preferences"
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Me"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: "updateMe"
+      summary: "Update account timezone"
+      parameters:
+        -
+          name: "Idempotency-Key"
+          in: "header"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+          description: "Stable for retry of the same action. Same key/different payload is 409; retention 24h."
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/MeUpdate"
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Me"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/api/v1/profile":
+    get:
+      operationId: "getProfile"
+      summary: "Get current health profile; empty profile version zero"
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Profile"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: "updateProfile"
+      summary: "Replace profile fields with version check"
+      parameters:
+        -
+          name: "Idempotency-Key"
+          in: "header"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+          description: "Stable for retry of the same action. Same key/different payload is 409; retention 24h."
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/ProfileUpdate"
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Profile"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/api/v1/consents/ai-processing":
+    put:
+      operationId: "setAiConsent"
+      summary: "Grant/revoke current AI processing consent"
+      parameters:
+        -
+          name: "Idempotency-Key"
+          in: "header"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+          description: "Stable for retry of the same action. Same key/different payload is 409; retention 24h."
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/ConsentUpdate"
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Me"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/api/v1/catalog/conditions":
+    get:
+      operationId: "getConditions"
+      summary: "Search condition labels; actual support is explicit"
+      parameters:
+        -
+          name: "q"
+          in: "query"
+          schema:
+            type: "string"
+            maxLength: 200
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                type: "array"
+                items:
+                  $ref: "./ai-service.openapi.yaml#/components/schemas/Condition"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/api/v1/catalog/foods":
+    get:
+      operationId: "searchFoods"
+      summary: "Search backend-imported catalog and serving/source data"
+      parameters:
+        -
+          name: "cursor"
+          in: "query"
+          schema:
+            type: "string"
+            minLength: 1
+            maxLength: 500
+        -
+          name: "limit"
+          in: "query"
+          schema:
+            type: "integer"
+            minimum: 1
+            maximum: 100
+            default: 30
+        -
+          name: "q"
+          in: "query"
+          schema:
+            type: "string"
+            maxLength: 200
+        -
+          name: "version"
+          in: "query"
+          schema:
+            type: "string"
+            minLength: 1
+            maxLength: 500
+          description: "Omit for current imported version; request a frozen version for an existing draft/correction."
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "./ai-service.openapi.yaml#/components/schemas/CatalogPage"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/api/v1/photos":
+    post:
+      operationId: "uploadPhoto"
+      summary: "Validate/normalize private photo for a new scan"
+      parameters:
+        -
+          name: "Idempotency-Key"
+          in: "header"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+          description: "Stable for retry of the same action. Same key/different payload is 409; retention 24h."
+      requestBody:
+        required: true
+        content:
+          "multipart/form-data":
+            schema:
+              type: "object"
+              additionalProperties: false
+              properties:
+                file:
+                  type: "string"
+                  format: "binary"
+              required: ["file"]
+      responses:
+        "201":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Photo"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/api/v1/photos/{id}/view":
+    get:
+      operationId: "getPhotoView"
+      summary: "Get authorized expiring photo view URL"
+      parameters:
+        -
+          name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/PhotoView"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/api/v1/analysis-jobs":
+    post:
+      operationId: "createPhotoAnalysis"
+      summary: "Create a durable async photo analysis job and scan"
+      parameters:
+        -
+          name: "Idempotency-Key"
+          in: "header"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+          description: "Stable for retry of the same action. Same key/different payload is 409; retention 24h."
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/CreateAnalysisJob"
+      description: "Requires current AI consent and private photo ownership. Creates profile/artifact snapshot. Returns before AI completion."
+      responses:
+        "202":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/AnalysisJob"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/api/v1/analysis-jobs/{id}":
+    get:
+      operationId: "getAnalysisJob"
+      summary: "Poll owned job including validated terminal result"
+      parameters:
+        -
+          name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/AnalysisJob"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/api/v1/analysis-jobs/{id}/retry":
+    post:
+      operationId: "retryAnalysisJob"
+      summary: "New attempt job from a retryable terminal job using same frozen snapshot"
+      parameters:
+        -
+          name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+        -
+          name: "Idempotency-Key"
+          in: "header"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+          description: "Stable for retry of the same action. Same key/different payload is 409; retention 24h."
+      description: "Only failed retryable jobs. New job ID, same target snapshot/generation; invalidation or deletion gives 409/404. No request body."
+      responses:
+        "202":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/AnalysisJob"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/api/v1/analysis-results/{id}":
+    get:
+      operationId: "getAnalysisResult"
+      summary: "Read owned immutable analysis result"
+      parameters:
+        -
+          name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "./ai-service.openapi.yaml#/components/schemas/AnalysisResult"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/api/v1/scans":
+    get:
+      operationId: "listScans"
+      summary: "List retained scan history newest first"
+      parameters:
+        -
+          name: "cursor"
+          in: "query"
+          schema:
+            type: "string"
+            minLength: 1
+            maxLength: 500
+        -
+          name: "limit"
+          in: "query"
+          schema:
+            type: "integer"
+            minimum: 1
+            maximum: 100
+            default: 30
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/ScanPage"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/api/v1/scans/{id}":
+    get:
+      operationId: "getScan"
+      summary: "Read scan references and current revision"
+      parameters:
+        -
+          name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Scan"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: "deleteScan"
+      summary: "Remove scan/photo, cancel jobs, preserve consumption snapshots"
+      parameters:
+        -
+          name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+        -
+          name: "Idempotency-Key"
+          in: "header"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+          description: "Stable for retry of the same action. Same key/different payload is 409; retention 24h."
+      responses:
+        "204":
+          description: "Deleted/removed from current view"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/api/v1/scans/{id}/corrections":
+    post:
+      operationId: "correctScan"
+      summary: "Queue corrected food/portion revision without another photo"
+      parameters:
+        -
+          name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+        -
+          name: "Idempotency-Key"
+          in: "header"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+          description: "Stable for retry of the same action. Same key/different payload is 409; retention 24h."
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/CorrectionInput"
+      responses:
+        "202":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/AnalysisJob"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/api/v1/consumptions":
+    get:
+      operationId: "listConsumptions"
+      summary: "List actual consumption; scan-only never appears"
+      parameters:
+        -
+          name: "cursor"
+          in: "query"
+          schema:
+            type: "string"
+            minLength: 1
+            maxLength: 500
+        -
+          name: "limit"
+          in: "query"
+          schema:
+            type: "integer"
+            minimum: 1
+            maximum: 100
+            default: 30
+        -
+          name: "from"
+          in: "query"
+          schema:
+            type: "string"
+            format: "date-time"
+        -
+          name: "to"
+          in: "query"
+          schema:
+            type: "string"
+            format: "date-time"
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/ConsumptionPage"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: "createConsumption"
+      summary: "Persist actual consumption without depending on AI completion"
+      parameters:
+        -
+          name: "Idempotency-Key"
+          in: "header"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+          description: "Stable for retry of the same action. Same key/different payload is 409; retention 24h."
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/ConsumptionCreate"
+      description: "Manual requires scanId/sourceAnalysisResultId null and occurrence new_occurrence. Photo confirmation requires both IDs owned and current revision. Default repeated confirmation returns existing resource; different input is 409. Optional personal evaluation queued against frozen snapshot. catalogVersion is required; scan confirmation while correction is active returns 409 ANALYSIS_PENDING."
+      responses:
+        "200":
+          description: "Existing default confirmation returned for an identical request with a new idempotency key. Same-key replay returns original status/body."
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Consumption"
+        "201":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Consumption"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/api/v1/consumptions/{id}":
+    get:
+      operationId: "getConsumption"
+      summary: "Read current nutrition snapshot and attention state"
+      parameters:
+        -
+          name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Consumption"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: "updateConsumption"
+      summary: "New current snapshot; stale evaluation cannot overwrite it"
+      parameters:
+        -
+          name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+        -
+          name: "Idempotency-Key"
+          in: "header"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+          description: "Stable for retry of the same action. Same key/different payload is 409; retention 24h."
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/ConsumptionUpdate"
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Consumption"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: "deleteConsumption"
+      summary: "Remove consumption and dashboard contribution; retained scan remains"
+      parameters:
+        -
+          name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+        -
+          name: "Idempotency-Key"
+          in: "header"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+          description: "Stable for retry of the same action. Same key/different payload is 409; retention 24h."
+      responses:
+        "204":
+          description: "Deleted/removed from current view"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/api/v1/examinations":
+    get:
+      operationId: "listExaminations"
+      summary: "List by measurement date/time, keeping comparable series separate"
+      parameters:
+        -
+          name: "cursor"
+          in: "query"
+          schema:
+            type: "string"
+            minLength: 1
+            maxLength: 500
+        -
+          name: "limit"
+          in: "query"
+          schema:
+            type: "integer"
+            minimum: 1
+            maximum: 100
+            default: 30
+        -
+          name: "type"
+          in: "query"
+          schema:
+            type: "string"
+            enum: ["pressure", "glucose", "cholesterol"]
+        -
+          name: "seriesKey"
+          in: "query"
+          schema:
+            type: "string"
+            minLength: 1
+            maxLength: 500
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/ExaminationPage"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: "createExamination"
+      summary: "Save measured result without diagnostic interpretation"
+      parameters:
+        -
+          name: "Idempotency-Key"
+          in: "header"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+          description: "Stable for retry of the same action. Same key/different payload is 409; retention 24h."
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/ExaminationInput"
+      responses:
+        "201":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Examination"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/api/v1/examinations/{id}":
+    get:
+      operationId: "getExamination"
+      summary: "Read owned measured result"
+      parameters:
+        -
+          name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Examination"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: "updateExamination"
+      summary: "Replace measured record with revision check"
+      parameters:
+        -
+          name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+        -
+          name: "Idempotency-Key"
+          in: "header"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+          description: "Stable for retry of the same action. Same key/different payload is 409; retention 24h."
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/ExaminationUpdate"
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Examination"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: "deleteExamination"
+      summary: "Remove exam and recompute latest/series"
+      parameters:
+        -
+          name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+        -
+          name: "Idempotency-Key"
+          in: "header"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+          description: "Stable for retry of the same action. Same key/different payload is 409; retention 24h."
+      responses:
+        "204":
+          description: "Deleted/removed from current view"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/api/v1/dashboard":
+    get:
+      operationId: "getDashboard"
+      summary: "Today nutrition and 7-calendar-day recurring attention in account timezone"
+      parameters:
+        -
+          name: "date"
+          in: "query"
+          schema:
+            type: "string"
+            format: "date"
+          description: "Default today in account timezone"
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Dashboard"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/api/v1/account-deletion":
+    post:
+      operationId: "deleteAccount"
+      summary: "Reauthenticate then revoke access and queue durable purge"
+      parameters:
+        -
+          name: "Idempotency-Key"
+          in: "header"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+          description: "Stable for retry of the same action. Same key/different payload is 409; retention 24h."
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/AccountDeletionInput"
+      description: "This acknowledgement revokes current/all sessions immediately. Actual DB/object purge can still be pending. A repeated call with a now-revoked session is 401; mobile clears credentials/cache and does not treat this as another account."
+      responses:
+        "202":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/AccountDeletionAccepted"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/api/v1/examination-series":
+    get:
+      operationId: "getExaminationSeries"
+      summary: "Comparable chart series with measurement-date ordering"
+      responses:
+        "200":
+          description: "Series separated by type/context/subtype/unit"
+          content:
+            "application/json":
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/ExamSeries"
+        "401":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/media/photos/{photoId}":
+    get:
+      operationId: "readSignedPhoto"
+      summary: "Stream private photo using short-lived backend-issued bearer grant"
+      security: []
+      description: "Public API origin, not a public MinIO endpoint. Token binds photo/user/environment/expiry. Recheck resource/account deletion before streaming. Invalid/expired/deleted grants return the same 404. No token query logging or persistent image caching."
+      parameters:
+        -
+          name: "photoId"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+        -
+          name: "token"
+          in: "query"
+          required: true
+          schema:
+            type: "string"
+            minLength: 1
+            maxLength: 4096
+      responses:
+        "200":
+          description: "Normalized photo bytes"
+          headers:
+            Cache-Control:
+              schema:
+                type: "string"
+                const: "private, no-store"
+          content:
+            "image/jpeg":
+              schema:
+                type: "string"
+                format: "binary"
+            "image/png":
+              schema:
+                type: "string"
+                format: "binary"
+        "404":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+components:
+  securitySchemes:
+    SessionCookie:
+      type: "apiKey"
+      in: "cookie"
+      name: "better-auth.session_token"
+      description: "Conceptual cookie; actual name/prefix follows pinned Better Auth environment config. Expo plugin SecureStore cookie is sent on native requests."
+  schemas:
+    LegalDocument:
+      type: "object"
+      additionalProperties: false
+      properties:
+        version:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        title:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        contentMarkdown:
+          type: "string"
+          minLength: 1
+        effectiveAt:
+          type: "string"
+          format: "date-time"
+      required: ["version", "title", "contentMarkdown", "effectiveAt"]
+    LegalRegistry:
+      type: "object"
+      additionalProperties: false
+      properties:
+        terms:
+          $ref: "#/components/schemas/LegalDocument"
+        privacy:
+          $ref: "#/components/schemas/LegalDocument"
+        aiProcessing:
+          $ref: "#/components/schemas/LegalDocument"
+      required: ["terms", "privacy", "aiProcessing"]
+    Me:
+      type: "object"
+      additionalProperties: false
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        email:
+          type: "string"
+          format: "email"
+        emailVerified:
+          const: true
+        name:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        birthDate:
+          type: "string"
+          format: "date"
+        timezone:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        settingsRevision:
+          type: "integer"
+          minimum: 1
+        acceptedTermsVersion:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        acceptedPrivacyVersion:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        aiConsent:
+          type: "object"
+          additionalProperties: false
+          properties:
+            version:
+              anyOf:
+                -
+                  type: "string"
+                  minLength: 1
+                  maxLength: 500
+                -
+                  type: "null"
+            granted:
+              type: "boolean"
+            updatedAt:
+              anyOf:
+                -
+                  type: "string"
+                  format: "date-time"
+                -
+                  type: "null"
+          required: ["version", "granted", "updatedAt"]
+      required: ["id", "email", "emailVerified", "name", "birthDate", "timezone", "settingsRevision", "acceptedTermsVersion", "acceptedPrivacyVersion", "aiConsent"]
+    MeUpdate:
+      type: "object"
+      additionalProperties: false
+      properties:
+        expectedRevision:
+          type: "integer"
+          minimum: 1
+        timezone:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+      required: ["expectedRevision", "timezone"]
+    Profile:
+      type: "object"
+      additionalProperties: false
+      properties:
+        version:
+          type: "integer"
+          minimum: 0
+        updatedAt:
+          anyOf:
+            -
+              type: "string"
+              format: "date-time"
+            -
+              type: "null"
+        fields:
+          type: "object"
+          additionalProperties: false
+          properties:
+            heightCm:
+              anyOf:
+                -
+                  type: "number"
+                  exclusiveMinimum: 0
+                -
+                  type: "null"
+            weightKg:
+              anyOf:
+                -
+                  type: "number"
+                  exclusiveMinimum: 0
+                -
+                  type: "null"
+            sexForReference:
+              anyOf:
+                -
+                  type: "string"
+                  enum: ["female", "male"]
+                -
+                  type: "null"
+            diagnoses:
+              type: "object"
+              additionalProperties: false
+              properties:
+                state:
+                  type: "string"
+                  enum: ["not_provided", "none_known", "never_examined", "reported"]
+                entries:
+                  type: "array"
+                  items:
+                    type: "object"
+                    additionalProperties: false
+                    properties:
+                      id:
+                        type: "string"
+                        format: "uuid"
+                      conditionId:
+                        anyOf:
+                          -
+                            type: "string"
+                            minLength: 1
+                            maxLength: 500
+                          -
+                            type: "null"
+                      label:
+                        type: "string"
+                        minLength: 1
+                        maxLength: 500
+                    required: ["id", "conditionId", "label"]
+              required: ["state", "entries"]
+            familyHistory:
+              type: "object"
+              additionalProperties: false
+              properties:
+                state:
+                  type: "string"
+                  enum: ["not_provided", "unknown", "none_known", "reported"]
+                entries:
+                  type: "array"
+                  items:
+                    type: "object"
+                    additionalProperties: false
+                    properties:
+                      conditionId:
+                        anyOf:
+                          -
+                            type: "string"
+                            minLength: 1
+                            maxLength: 500
+                          -
+                            type: "null"
+                      label:
+                        type: "string"
+                        minLength: 1
+                        maxLength: 500
+                      relation:
+                        anyOf:
+                          -
+                            type: "string"
+                            minLength: 1
+                            maxLength: 500
+                          -
+                            type: "null"
+                    required: ["conditionId", "label", "relation"]
+              required: ["state", "entries"]
+            allergies:
+              type: "object"
+              additionalProperties: false
+              properties:
+                state:
+                  type: "string"
+                  enum: ["not_provided", "unknown", "none_known", "reported"]
+                entries:
+                  type: "array"
+                  items:
+                    type: "string"
+                    minLength: 1
+                    maxLength: 500
+              required: ["state", "entries"]
+            clinicianNotes:
+              anyOf:
+                -
+                  type: "string"
+                  maxLength: 5000
+                -
+                  type: "null"
+            activity:
+              anyOf:
+                -
+                  type: "string"
+                  enum: ["sedentary", "light", "moderate", "high"]
+                -
+                  type: "null"
+            smoking:
+              anyOf:
+                -
+                  type: "string"
+                  enum: ["never", "former", "current"]
+                -
+                  type: "null"
+          required: ["heightCm", "weightKg", "sexForReference", "diagnoses", "familyHistory", "allergies", "clinicianNotes", "activity", "smoking"]
+        personalization:
+          type: "object"
+          additionalProperties: false
+          properties:
+            missingFields:
+              type: "array"
+              items:
+                type: "string"
+                minLength: 1
+                maxLength: 500
+            unsupportedConditions:
+              type: "array"
+              items:
+                type: "string"
+                minLength: 1
+                maxLength: 500
+          required: ["missingFields", "unsupportedConditions"]
+      required: ["version", "updatedAt", "fields", "personalization"]
+    ProfileUpdate:
+      type: "object"
+      additionalProperties: false
+      properties:
+        expectedVersion:
+          type: "integer"
+          minimum: 0
+        fields:
+          type: "object"
+          additionalProperties: false
+          properties:
+            heightCm:
+              anyOf:
+                -
+                  type: "number"
+                  exclusiveMinimum: 0
+                -
+                  type: "null"
+            weightKg:
+              anyOf:
+                -
+                  type: "number"
+                  exclusiveMinimum: 0
+                -
+                  type: "null"
+            sexForReference:
+              anyOf:
+                -
+                  type: "string"
+                  enum: ["female", "male"]
+                -
+                  type: "null"
+            diagnoses:
+              type: "object"
+              additionalProperties: false
+              properties:
+                state:
+                  type: "string"
+                  enum: ["not_provided", "none_known", "never_examined", "reported"]
+                entries:
+                  type: "array"
+                  items:
+                    type: "object"
+                    additionalProperties: false
+                    properties:
+                      id:
+                        type: "string"
+                        format: "uuid"
+                      conditionId:
+                        anyOf:
+                          -
+                            type: "string"
+                            minLength: 1
+                            maxLength: 500
+                          -
+                            type: "null"
+                      label:
+                        type: "string"
+                        minLength: 1
+                        maxLength: 500
+                    required: ["id", "conditionId", "label"]
+              required: ["state", "entries"]
+            familyHistory:
+              type: "object"
+              additionalProperties: false
+              properties:
+                state:
+                  type: "string"
+                  enum: ["not_provided", "unknown", "none_known", "reported"]
+                entries:
+                  type: "array"
+                  items:
+                    type: "object"
+                    additionalProperties: false
+                    properties:
+                      conditionId:
+                        anyOf:
+                          -
+                            type: "string"
+                            minLength: 1
+                            maxLength: 500
+                          -
+                            type: "null"
+                      label:
+                        type: "string"
+                        minLength: 1
+                        maxLength: 500
+                      relation:
+                        anyOf:
+                          -
+                            type: "string"
+                            minLength: 1
+                            maxLength: 500
+                          -
+                            type: "null"
+                    required: ["conditionId", "label", "relation"]
+              required: ["state", "entries"]
+            allergies:
+              type: "object"
+              additionalProperties: false
+              properties:
+                state:
+                  type: "string"
+                  enum: ["not_provided", "unknown", "none_known", "reported"]
+                entries:
+                  type: "array"
+                  items:
+                    type: "string"
+                    minLength: 1
+                    maxLength: 500
+              required: ["state", "entries"]
+            clinicianNotes:
+              anyOf:
+                -
+                  type: "string"
+                  maxLength: 5000
+                -
+                  type: "null"
+            activity:
+              anyOf:
+                -
+                  type: "string"
+                  enum: ["sedentary", "light", "moderate", "high"]
+                -
+                  type: "null"
+            smoking:
+              anyOf:
+                -
+                  type: "string"
+                  enum: ["never", "former", "current"]
+                -
+                  type: "null"
+          required: ["heightCm", "weightKg", "sexForReference", "diagnoses", "familyHistory", "allergies", "clinicianNotes", "activity", "smoking"]
+      required: ["expectedVersion", "fields"]
+    ConsentUpdate:
+      type: "object"
+      additionalProperties: false
+      properties:
+        version:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        granted:
+          type: "boolean"
+      required: ["version", "granted"]
+    Photo:
+      type: "object"
+      additionalProperties: false
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        mimeType:
+          type: "string"
+          enum: ["image/jpeg", "image/png"]
+        sizeBytes:
+          type: "integer"
+          minimum: 1
+          maximum: 10485760
+        width:
+          type: "integer"
+          minimum: 1
+          maximum: 1600
+        height:
+          type: "integer"
+          minimum: 1
+          maximum: 1600
+        createdAt:
+          type: "string"
+          format: "date-time"
+      required: ["id", "mimeType", "sizeBytes", "width", "height", "createdAt"]
+    PhotoView:
+      type: "object"
+      additionalProperties: false
+      properties:
+        url:
+          type: "string"
+          format: "uri"
+        expiresAt:
+          type: "string"
+          format: "date-time"
+      required: ["url", "expiresAt"]
+    CreateAnalysisJob:
+      type: "object"
+      additionalProperties: false
+      properties:
+        photoId:
+          type: "string"
+          format: "uuid"
+      required: ["photoId"]
+    AnalysisJob:
+      type: "object"
+      additionalProperties: false
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        scanId:
+          anyOf:
+            -
+              type: "string"
+              format: "uuid"
+            -
+              type: "null"
+        targetType:
+          type: "string"
+          enum: ["scan", "consumption"]
+        targetId:
+          type: "string"
+          format: "uuid"
+        targetRevision:
+          type: "integer"
+          minimum: 1
+        inputKind:
+          type: "string"
+          enum: ["photo", "manual", "correction"]
+        status:
+          type: "string"
+          enum: ["queued", "processing", "completed", "failed", "cancelled"]
+        attempts:
+          type: "integer"
+          minimum: 0
+          maximum: 3
+        createdAt:
+          type: "string"
+          format: "date-time"
+        startedAt:
+          anyOf:
+            -
+              type: "string"
+              format: "date-time"
+            -
+              type: "null"
+        finishedAt:
+          anyOf:
+            -
+              type: "string"
+              format: "date-time"
+            -
+              type: "null"
+        resultId:
+          anyOf:
+            -
+              type: "string"
+              format: "uuid"
+            -
+              type: "null"
+        result:
+          anyOf:
+            -
+              $ref: "./ai-service.openapi.yaml#/components/schemas/AnalysisResult"
+            -
+              type: "null"
+        error:
+          anyOf:
+            -
+              type: "object"
+              additionalProperties: false
+              properties:
+                code:
+                  type: "string"
+                  minLength: 1
+                  maxLength: 500
+                message:
+                  type: "string"
+                  minLength: 1
+                  maxLength: 500
+                retryable:
+                  type: "boolean"
+              required: ["code", "message", "retryable"]
+            -
+              type: "null"
+      required: ["id", "scanId", "targetType", "targetId", "targetRevision", "inputKind", "status", "attempts", "createdAt", "startedAt", "finishedAt", "resultId", "result", "error"]
+    Scan:
+      type: "object"
+      additionalProperties: false
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        revision:
+          type: "integer"
+          minimum: 1
+        photoId:
+          anyOf:
+            -
+              type: "string"
+              format: "uuid"
+            -
+              type: "null"
+        createdAt:
+          type: "string"
+          format: "date-time"
+        latestJobId:
+          type: "string"
+          format: "uuid"
+        latestResultId:
+          anyOf:
+            -
+              type: "string"
+              format: "uuid"
+            -
+              type: "null"
+        defaultConsumptionId:
+          anyOf:
+            -
+              type: "string"
+              format: "uuid"
+            -
+              type: "null"
+      required: ["id", "revision", "photoId", "createdAt", "latestJobId", "latestResultId", "defaultConsumptionId"]
+    ScanPage:
+      type: "object"
+      additionalProperties: false
+      properties:
+        items:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Scan"
+        nextCursor:
+          anyOf:
+            -
+              type: "string"
+              minLength: 1
+              maxLength: 500
+            -
+              type: "null"
+      required: ["items", "nextCursor"]
+    CorrectionInput:
+      type: "object"
+      additionalProperties: false
+      properties:
+        expectedRevision:
+          type: "integer"
+          minimum: 1
+        basedOnResultId:
+          type: "string"
+          format: "uuid"
+        components:
+          type: "array"
+          items:
+            $ref: "./ai-service.openapi.yaml#/components/schemas/ComponentInput"
+          minItems: 1
+          maxItems: 30
+        catalogVersion:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+          description: "Immutable catalog version used for food/serving selection. Corrections use the source result version. 'unavailable' allowed only for manual unmatched input with no catalog."
+      required: ["expectedRevision", "basedOnResultId", "components", "catalogVersion"]
+    ConsumptionCreate:
+      type: "object"
+      additionalProperties: false
+      properties:
+        source:
+          type: "string"
+          enum: ["manual", "photo_confirmation"]
+        scanId:
+          anyOf:
+            -
+              type: "string"
+              format: "uuid"
+            -
+              type: "null"
+        sourceAnalysisResultId:
+          anyOf:
+            -
+              type: "string"
+              format: "uuid"
+            -
+              type: "null"
+        occurrence:
+          type: "string"
+          enum: ["default_confirmation", "new_occurrence"]
+        consumedAt:
+          type: "string"
+          format: "date-time"
+        timezone:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        components:
+          type: "array"
+          items:
+            $ref: "./ai-service.openapi.yaml#/components/schemas/ComponentInput"
+          minItems: 1
+          maxItems: 30
+        catalogVersion:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+          description: "Immutable catalog version used for food/serving selection. Corrections use the source result version. 'unavailable' allowed only for manual unmatched input with no catalog."
+      required: ["source", "scanId", "sourceAnalysisResultId", "occurrence", "consumedAt", "timezone", "components", "catalogVersion"]
+    ConsumptionUpdate:
+      type: "object"
+      additionalProperties: false
+      properties:
+        expectedRevision:
+          type: "integer"
+          minimum: 1
+        consumedAt:
+          type: "string"
+          format: "date-time"
+        timezone:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        components:
+          type: "array"
+          items:
+            $ref: "./ai-service.openapi.yaml#/components/schemas/ComponentInput"
+          minItems: 1
+          maxItems: 30
+        catalogVersion:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+          description: "Immutable catalog version used for food/serving selection. Corrections use the source result version. 'unavailable' allowed only for manual unmatched input with no catalog."
+      required: ["expectedRevision", "consumedAt", "timezone", "components", "catalogVersion"]
+    Consumption:
+      type: "object"
+      additionalProperties: false
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        revision:
+          type: "integer"
+          minimum: 1
+        source:
+          type: "string"
+          enum: ["manual", "photo_confirmation"]
+        scanId:
+          anyOf:
+            -
+              type: "string"
+              format: "uuid"
+            -
+              type: "null"
+        sourceAnalysisResultId:
+          anyOf:
+            -
+              type: "string"
+              format: "uuid"
+            -
+              type: "null"
+        photoAvailable:
+          type: "boolean"
+        consumedAt:
+          type: "string"
+          format: "date-time"
+        timezone:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        createdAt:
+          type: "string"
+          format: "date-time"
+        updatedAt:
+          type: "string"
+          format: "date-time"
+        snapshot:
+          $ref: "./ai-service.openapi.yaml#/components/schemas/AnalysisResult"
+        attentionState:
+          type: "string"
+          enum: ["not_requested", "pending", "available", "failed"]
+        attentionJobId:
+          anyOf:
+            -
+              type: "string"
+              format: "uuid"
+            -
+              type: "null"
+      required: ["id", "revision", "source", "scanId", "sourceAnalysisResultId", "photoAvailable", "consumedAt", "timezone", "createdAt", "updatedAt", "snapshot", "attentionState", "attentionJobId"]
+    ConsumptionPage:
+      type: "object"
+      additionalProperties: false
+      properties:
+        items:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Consumption"
+        nextCursor:
+          anyOf:
+            -
+              type: "string"
+              minLength: 1
+              maxLength: 500
+            -
+              type: "null"
+      required: ["items", "nextCursor"]
+    ExaminationInput:
+      oneOf:
+        -
+          type: "object"
+          additionalProperties: false
+          properties:
+            measuredOn:
+              type: "string"
+              format: "date"
+            measuredTime:
+              anyOf:
+                -
+                  type: "string"
+                  pattern: "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                -
+                  type: "null"
+            timezone:
+              type: "string"
+              minLength: 1
+              maxLength: 500
+            note:
+              anyOf:
+                -
+                  type: "string"
+                  maxLength: 2000
+                -
+                  type: "null"
+            type:
+              type: "string"
+              enum: ["pressure"]
+            unit:
+              type: "string"
+              enum: ["mmHg"]
+            systolic:
+              type: "integer"
+              minimum: 1
+            diastolic:
+              type: "integer"
+              minimum: 1
+          required: ["measuredOn", "measuredTime", "timezone", "note", "type", "unit", "systolic", "diastolic"]
+        -
+          type: "object"
+          additionalProperties: false
+          properties:
+            measuredOn:
+              type: "string"
+              format: "date"
+            measuredTime:
+              anyOf:
+                -
+                  type: "string"
+                  pattern: "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                -
+                  type: "null"
+            timezone:
+              type: "string"
+              minLength: 1
+              maxLength: 500
+            note:
+              anyOf:
+                -
+                  type: "string"
+                  maxLength: 2000
+                -
+                  type: "null"
+            type:
+              type: "string"
+              enum: ["glucose"]
+            unit:
+              type: "string"
+              enum: ["mg/dL"]
+            context:
+              type: "string"
+              enum: ["fasting", "random", "post_meal", "unknown"]
+            value:
+              type: "number"
+              exclusiveMinimum: 0
+          required: ["measuredOn", "measuredTime", "timezone", "note", "type", "unit", "context", "value"]
+        -
+          type: "object"
+          additionalProperties: false
+          properties:
+            measuredOn:
+              type: "string"
+              format: "date"
+            measuredTime:
+              anyOf:
+                -
+                  type: "string"
+                  pattern: "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                -
+                  type: "null"
+            timezone:
+              type: "string"
+              minLength: 1
+              maxLength: 500
+            note:
+              anyOf:
+                -
+                  type: "string"
+                  maxLength: 2000
+                -
+                  type: "null"
+            type:
+              type: "string"
+              enum: ["cholesterol"]
+            unit:
+              type: "string"
+              enum: ["mg/dL"]
+            subtype:
+              type: "string"
+              enum: ["total", "ldl", "hdl"]
+            value:
+              type: "number"
+              exclusiveMinimum: 0
+          required: ["measuredOn", "measuredTime", "timezone", "note", "type", "unit", "subtype", "value"]
+    ExaminationUpdate:
+      type: "object"
+      additionalProperties: false
+      properties:
+        expectedRevision:
+          type: "integer"
+          minimum: 1
+        record:
+          $ref: "#/components/schemas/ExaminationInput"
+      required: ["expectedRevision", "record"]
+    Examination:
+      type: "object"
+      additionalProperties: false
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        revision:
+          type: "integer"
+          minimum: 1
+        record:
+          $ref: "#/components/schemas/ExaminationInput"
+        createdAt:
+          type: "string"
+          format: "date-time"
+        updatedAt:
+          type: "string"
+          format: "date-time"
+      required: ["id", "revision", "record", "createdAt", "updatedAt"]
+    ExaminationPage:
+      type: "object"
+      additionalProperties: false
+      properties:
+        items:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Examination"
+        nextCursor:
+          anyOf:
+            -
+              type: "string"
+              minLength: 1
+              maxLength: 500
+            -
+              type: "null"
+      required: ["items", "nextCursor"]
+    RecurringAttention:
+      type: "object"
+      additionalProperties: false
+      properties:
+        ruleId:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        conditionId:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        count:
+          type: "integer"
+          minimum: 2
+        consumptionIds:
+          type: "array"
+          items:
+            type: "string"
+            format: "uuid"
+          minItems: 2
+          uniqueItems: true
+      required: ["ruleId", "conditionId", "count", "consumptionIds"]
+    ExamSeries:
+      type: "object"
+      additionalProperties: false
+      properties:
+        key:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        label:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        unit:
+          type: "string"
+          enum: ["mmHg", "mg/dL"]
+        items:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Examination"
+        latestExaminationId:
+          anyOf:
+            -
+              type: "string"
+              format: "uuid"
+            -
+              type: "null"
+      required: ["key", "label", "unit", "items", "latestExaminationId"]
+    Dashboard:
+      type: "object"
+      additionalProperties: false
+      properties:
+        date:
+          type: "string"
+          format: "date"
+        timezone:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        consumptionWindow:
+          type: "object"
+          additionalProperties: false
+          properties:
+            startAt:
+              type: "string"
+              format: "date-time"
+            endAt:
+              type: "string"
+              format: "date-time"
+          required: ["startAt", "endAt"]
+        attentionWindow:
+          type: "object"
+          additionalProperties: false
+          properties:
+            startDate:
+              type: "string"
+              format: "date"
+            endDate:
+              type: "string"
+              format: "date"
+          required: ["startDate", "endDate"]
+        consumptionCount:
+          type: "integer"
+          minimum: 0
+        componentCount:
+          type: "integer"
+          minimum: 0
+        totals:
+          $ref: "./ai-service.openapi.yaml#/components/schemas/Nutrients"
+        coverage:
+          $ref: "./ai-service.openapi.yaml#/components/schemas/NutrientCoverage"
+        recurringAttentions:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/RecurringAttention"
+        latestExaminations:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Examination"
+        profileMissingFields:
+          type: "array"
+          items:
+            type: "string"
+            minLength: 1
+            maxLength: 500
+        nextActions:
+          type: "array"
+          items:
+            type: "object"
+            additionalProperties: false
+            properties:
+              code:
+                type: "string"
+                minLength: 1
+                maxLength: 500
+              label:
+                type: "string"
+                minLength: 1
+                maxLength: 500
+              target:
+                type: "string"
+                minLength: 1
+                maxLength: 500
+            required: ["code", "label", "target"]
+        computedAt:
+          type: "string"
+          format: "date-time"
+      required: ["date", "timezone", "consumptionWindow", "attentionWindow", "consumptionCount", "componentCount", "totals", "coverage", "recurringAttentions", "latestExaminations", "profileMissingFields", "nextActions", "computedAt"]
+    AccountDeletionInput:
+      type: "object"
+      additionalProperties: false
+      properties:
+        password:
+          type: "string"
+          minLength: 1
+          maxLength: 128
+        confirmation:
+          type: "string"
+          enum: ["DELETE_MY_ACCOUNT"]
+      required: ["password", "confirmation"]
+    AccountDeletionAccepted:
+      type: "object"
+      additionalProperties: false
+      properties:
+        status:
+          type: "string"
+          enum: ["deletion_pending"]
+        acceptedAt:
+          type: "string"
+          format: "date-time"
+        accessRevoked:
+          const: true
+      required: ["status", "acceptedAt", "accessRevoked"]
+    Health:
+      type: "object"
+      additionalProperties: false
+      properties:
+        status:
+          type: "string"
+          enum: ["ok", "degraded"]
+        requestId:
+          type: "string"
+          format: "uuid"
+      required: ["status", "requestId"]
+  responses:
+    Error:
+      description: "Carin error envelope. See domain spec for code-specific semantics."
+      content:
+        "application/json":
+          schema:
+            $ref: "./ai-service.openapi.yaml#/components/schemas/Error"
+    TooManyRequests:
+      description: "Carin error envelope. See domain spec for code-specific semantics."
+      content:
+        "application/json":
+          schema:
+            $ref: "./ai-service.openapi.yaml#/components/schemas/Error"
+      headers:
+        Retry-After:
+          schema:
+            type: "integer"
+            minimum: 1
+          description: "Retry delay seconds"

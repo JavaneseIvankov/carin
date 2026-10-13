@@ -1,0 +1,1027 @@
+# Carin contract 1.0.0 — validated with specs/validate-contracts.py
+openapi: "3.1.1"
+info:
+  title: "Carin Internal AI Service API"
+  version: "1.0.0"
+  description: "Stateless internal API. Backend owns durable async jobs. Internal analysis calls return synchronously. No user DB access. Contract and rule/catalog versions are distinct. All fields are explicit; null never implies zero. Synthetic fixtures only in development/test."
+servers:
+  -
+    url: "http://ai-service:8000"
+    description: "Private deployment network; mobile cannot access this URL."
+security:
+  -
+    ServiceKey: []
+paths:
+  "/internal/v1/capabilities":
+    get:
+      operationId: "getCapabilities"
+      summary: "Get explicit support and artifact versions"
+      responses:
+        "200":
+          description: "Supported scope; synthetic data must be marked"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/CapabilityManifest"
+        "401":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/internal/v1/catalog":
+    get:
+      operationId: "getCatalog"
+      summary: "Export immutable reference catalog for backend import"
+      parameters:
+        -
+          name: "version"
+          in: "query"
+          required: true
+          schema:
+            type: "string"
+            minLength: 1
+            maxLength: 500
+        -
+          name: "cursor"
+          in: "query"
+          schema:
+            type: "string"
+            minLength: 1
+            maxLength: 500
+        -
+          name: "limit"
+          in: "query"
+          schema:
+            type: "integer"
+            minimum: 1
+            maximum: 200
+            default: 100
+      responses:
+        "200":
+          description: "Page; all pages use requested version"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/CatalogPage"
+        "401":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/internal/v1/analyses":
+    post:
+      operationId: "analyzePhoto"
+      summary: "Recognize photo, calculate source-backed nutrition, evaluate supported rules"
+      description: "operationId is backend-owned correlation ID. Signed URL host must be allowlisted MinIO; never arbitrary URLs. Response operationId, profileVersion and artifact versions must match request. Backend timeout is 90s. Result may be complete/partial/unrecognized; runtime failures use non-2xx."
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/PhotoAnalysisRequest"
+      responses:
+        "200":
+          description: "Validated result"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/AnalysisResult"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/internal/v1/recalculations":
+    post:
+      operationId: "recalculateComponents"
+      summary: "Calculate latest structured components and supported attention without a photo"
+      description: "Use requested immutable catalog/rule versions and profile snapshot; no previous nutrient totals from mobile are accepted. Unmatched/unknown portion is a partial result, not INVALID_INPUT. Stateless deterministic calculation plus supported explanation."
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/RecalculationRequest"
+      responses:
+        "200":
+          description: "Latest result"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/AnalysisResult"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+components:
+  securitySchemes:
+    ServiceKey:
+      type: "apiKey"
+      in: "header"
+      name: "X-Carin-Service-Key"
+      description: "Backend/worker only; environment-specific secret."
+  schemas:
+    ContractVersion:
+      type: "string"
+      enum: ["1.0.0"]
+    Error:
+      type: "object"
+      additionalProperties: false
+      properties:
+        error:
+          type: "object"
+          additionalProperties: false
+          properties:
+            code:
+              type: "string"
+              minLength: 1
+              maxLength: 500
+            message:
+              type: "string"
+              minLength: 1
+              maxLength: 500
+            retryable:
+              type: "boolean"
+            requestId:
+              type: "string"
+              format: "uuid"
+            details:
+              type: "object"
+              additionalProperties: true
+              properties: {}
+              required: []
+          required: ["code", "message", "retryable", "requestId", "details"]
+      required: ["error"]
+    Source:
+      type: "object"
+      additionalProperties: false
+      properties:
+        id:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        kind:
+          type: "string"
+          enum: ["nutrition", "portion", "health_rule", "synthetic"]
+        title:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        datasetVersion:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        itemRef:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        url:
+          anyOf:
+            -
+              type: "string"
+              format: "uri"
+            -
+              type: "null"
+      required: ["id", "kind", "title", "datasetVersion", "itemRef", "url"]
+    Nutrients:
+      type: "object"
+      additionalProperties: false
+      properties:
+        energyKcal:
+          anyOf:
+            -
+              type: "number"
+              minimum: 0
+            -
+              type: "null"
+        carbohydrateG:
+          anyOf:
+            -
+              type: "number"
+              minimum: 0
+            -
+              type: "null"
+        proteinG:
+          anyOf:
+            -
+              type: "number"
+              minimum: 0
+            -
+              type: "null"
+        fatG:
+          anyOf:
+            -
+              type: "number"
+              minimum: 0
+            -
+              type: "null"
+        fiberG:
+          anyOf:
+            -
+              type: "number"
+              minimum: 0
+            -
+              type: "null"
+        sugarsG:
+          anyOf:
+            -
+              type: "number"
+              minimum: 0
+            -
+              type: "null"
+        sodiumMg:
+          anyOf:
+            -
+              type: "number"
+              minimum: 0
+            -
+              type: "null"
+      required: ["energyKcal", "carbohydrateG", "proteinG", "fatG", "fiberG", "sugarsG", "sodiumMg"]
+    NutrientCoverage:
+      type: "object"
+      additionalProperties: false
+      properties:
+        energyKcal:
+          type: "object"
+          additionalProperties: false
+          properties:
+            knownComponentCount:
+              type: "integer"
+              minimum: 0
+            totalComponentCount:
+              type: "integer"
+              minimum: 0
+          required: ["knownComponentCount", "totalComponentCount"]
+        carbohydrateG:
+          type: "object"
+          additionalProperties: false
+          properties:
+            knownComponentCount:
+              type: "integer"
+              minimum: 0
+            totalComponentCount:
+              type: "integer"
+              minimum: 0
+          required: ["knownComponentCount", "totalComponentCount"]
+        proteinG:
+          type: "object"
+          additionalProperties: false
+          properties:
+            knownComponentCount:
+              type: "integer"
+              minimum: 0
+            totalComponentCount:
+              type: "integer"
+              minimum: 0
+          required: ["knownComponentCount", "totalComponentCount"]
+        fatG:
+          type: "object"
+          additionalProperties: false
+          properties:
+            knownComponentCount:
+              type: "integer"
+              minimum: 0
+            totalComponentCount:
+              type: "integer"
+              minimum: 0
+          required: ["knownComponentCount", "totalComponentCount"]
+        fiberG:
+          type: "object"
+          additionalProperties: false
+          properties:
+            knownComponentCount:
+              type: "integer"
+              minimum: 0
+            totalComponentCount:
+              type: "integer"
+              minimum: 0
+          required: ["knownComponentCount", "totalComponentCount"]
+        sugarsG:
+          type: "object"
+          additionalProperties: false
+          properties:
+            knownComponentCount:
+              type: "integer"
+              minimum: 0
+            totalComponentCount:
+              type: "integer"
+              minimum: 0
+          required: ["knownComponentCount", "totalComponentCount"]
+        sodiumMg:
+          type: "object"
+          additionalProperties: false
+          properties:
+            knownComponentCount:
+              type: "integer"
+              minimum: 0
+            totalComponentCount:
+              type: "integer"
+              minimum: 0
+          required: ["knownComponentCount", "totalComponentCount"]
+      required: ["energyKcal", "carbohydrateG", "proteinG", "fatG", "fiberG", "sugarsG", "sodiumMg"]
+    PortionInput:
+      oneOf:
+        -
+          type: "object"
+          additionalProperties: false
+          properties:
+            kind:
+              type: "string"
+              enum: ["unknown"]
+          required: ["kind"]
+        -
+          type: "object"
+          additionalProperties: false
+          properties:
+            kind:
+              type: "string"
+              enum: ["known"]
+            quantity:
+              type: "number"
+              exclusiveMinimum: 0
+            unit:
+              type: "string"
+              enum: ["g"]
+          required: ["kind", "quantity", "unit"]
+        -
+          type: "object"
+          additionalProperties: false
+          properties:
+            kind:
+              type: "string"
+              enum: ["known"]
+            quantity:
+              type: "number"
+              exclusiveMinimum: 0
+            unit:
+              type: "string"
+              enum: ["serving"]
+            servingId:
+              type: "string"
+              minLength: 1
+              maxLength: 500
+          required: ["kind", "quantity", "unit", "servingId"]
+    ComponentInput:
+      type: "object"
+      additionalProperties: false
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        displayName:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        catalogFoodId:
+          anyOf:
+            -
+              type: "string"
+              minLength: 1
+              maxLength: 500
+            -
+              type: "null"
+        preparation:
+          anyOf:
+            -
+              type: "string"
+              minLength: 1
+              maxLength: 500
+            -
+              type: "null"
+        portion:
+          $ref: "#/components/schemas/PortionInput"
+      required: ["id", "displayName", "catalogFoodId", "preparation", "portion"]
+    PortionResult:
+      type: "object"
+      additionalProperties: false
+      properties:
+        quantity:
+          anyOf:
+            -
+              type: "number"
+              exclusiveMinimum: 0
+            -
+              type: "null"
+        unit:
+          anyOf:
+            -
+              type: "string"
+              enum: ["g", "serving"]
+            -
+              type: "null"
+        servingId:
+          anyOf:
+            -
+              type: "string"
+              minLength: 1
+              maxLength: 500
+            -
+              type: "null"
+        grams:
+          anyOf:
+            -
+              type: "number"
+              exclusiveMinimum: 0
+            -
+              type: "null"
+        origin:
+          type: "string"
+          enum: ["photo_estimate", "user_reported"]
+        basis:
+          anyOf:
+            -
+              type: "string"
+              minLength: 1
+              maxLength: 500
+            -
+              type: "null"
+        sourceId:
+          anyOf:
+            -
+              type: "string"
+              minLength: 1
+              maxLength: 500
+            -
+              type: "null"
+      required: ["quantity", "unit", "servingId", "grams", "origin", "basis", "sourceId"]
+    ComponentResult:
+      type: "object"
+      additionalProperties: false
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        displayName:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        catalogFoodId:
+          anyOf:
+            -
+              type: "string"
+              minLength: 1
+              maxLength: 500
+            -
+              type: "null"
+        preparation:
+          anyOf:
+            -
+              type: "string"
+              minLength: 1
+              maxLength: 500
+            -
+              type: "null"
+        matchStatus:
+          type: "string"
+          enum: ["matched", "unmatched", "unrecognized"]
+        portion:
+          $ref: "#/components/schemas/PortionResult"
+        nutrients:
+          $ref: "#/components/schemas/Nutrients"
+        sourceIds:
+          type: "array"
+          items:
+            type: "string"
+            minLength: 1
+            maxLength: 500
+          uniqueItems: true
+        nutrientSourceIds:
+          $ref: "#/components/schemas/NutrientSources"
+        per100g:
+          $ref: "#/components/schemas/Nutrients"
+      required: ["id", "displayName", "catalogFoodId", "preparation", "matchStatus", "portion", "nutrients", "sourceIds", "nutrientSourceIds", "per100g"]
+    Limitation:
+      type: "object"
+      additionalProperties: false
+      properties:
+        code:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        message:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        componentIds:
+          type: "array"
+          items:
+            type: "string"
+            format: "uuid"
+          uniqueItems: true
+        critical:
+          type: "boolean"
+      required: ["code", "message", "componentIds", "critical"]
+    Attention:
+      type: "object"
+      additionalProperties: false
+      properties:
+        ruleId:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        conditionId:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        componentIds:
+          type: "array"
+          items:
+            type: "string"
+            format: "uuid"
+          minItems: 1
+          uniqueItems: true
+        reason:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        adjustments:
+          type: "array"
+          items:
+            type: "string"
+            minLength: 1
+            maxLength: 500
+        sourceIds:
+          type: "array"
+          items:
+            type: "string"
+            minLength: 1
+            maxLength: 500
+          minItems: 1
+          uniqueItems: true
+        limitations:
+          type: "array"
+          items:
+            type: "string"
+            minLength: 1
+            maxLength: 500
+      required: ["ruleId", "conditionId", "componentIds", "reason", "adjustments", "sourceIds", "limitations"]
+    ProfileContext:
+      type: "object"
+      additionalProperties: false
+      properties:
+        profileVersion:
+          type: "integer"
+          minimum: 0
+        ageYears:
+          anyOf:
+            -
+              type: "integer"
+              minimum: 0
+              maximum: 150
+            -
+              type: "null"
+        heightCm:
+          anyOf:
+            -
+              type: "number"
+              exclusiveMinimum: 0
+            -
+              type: "null"
+        weightKg:
+          anyOf:
+            -
+              type: "number"
+              exclusiveMinimum: 0
+            -
+              type: "null"
+        sexForReference:
+          anyOf:
+            -
+              type: "string"
+              enum: ["female", "male"]
+            -
+              type: "null"
+        diagnosisState:
+          type: "string"
+          enum: ["not_provided", "none_known", "never_examined", "reported"]
+        conditionIds:
+          type: "array"
+          items:
+            type: "string"
+            minLength: 1
+            maxLength: 500
+          uniqueItems: true
+        unsupportedConditionLabels:
+          type: "array"
+          items:
+            type: "string"
+            minLength: 1
+            maxLength: 500
+        allergyState:
+          type: "string"
+          enum: ["not_provided", "unknown", "none_known", "reported"]
+        allergies:
+          type: "array"
+          items:
+            type: "string"
+            minLength: 1
+            maxLength: 500
+        activity:
+          anyOf:
+            -
+              type: "string"
+              enum: ["sedentary", "light", "moderate", "high"]
+            -
+              type: "null"
+        smoking:
+          anyOf:
+            -
+              type: "string"
+              enum: ["never", "former", "current"]
+            -
+              type: "null"
+      required: ["profileVersion", "ageYears", "heightCm", "weightKg", "sexForReference", "diagnosisState", "conditionIds", "unsupportedConditionLabels", "allergyState", "allergies", "activity", "smoking"]
+    AnalysisResult:
+      type: "object"
+      additionalProperties: false
+      properties:
+        contractVersion:
+          $ref: "#/components/schemas/ContractVersion"
+        operationId:
+          type: "string"
+          format: "uuid"
+        inputKind:
+          type: "string"
+          enum: ["photo", "manual", "correction"]
+        supportStatus:
+          type: "string"
+          enum: ["complete", "partial", "unrecognized"]
+        overallAttention:
+          type: "string"
+          enum: ["considerable", "needs_attention", "insufficient_information"]
+        profileVersion:
+          type: "integer"
+          minimum: 0
+        catalogVersion:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        nutritionDatasetVersion:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        ruleSetVersion:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        computedAt:
+          type: "string"
+          format: "date-time"
+        components:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/ComponentResult"
+          minItems: 1
+          maxItems: 30
+        totals:
+          $ref: "#/components/schemas/Nutrients"
+        coverage:
+          $ref: "#/components/schemas/NutrientCoverage"
+        attentions:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Attention"
+        limitations:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Limitation"
+        sources:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Source"
+        dataMode:
+          type: "string"
+          enum: ["real", "synthetic"]
+      required: ["contractVersion", "operationId", "inputKind", "supportStatus", "overallAttention", "profileVersion", "catalogVersion", "nutritionDatasetVersion", "ruleSetVersion", "computedAt", "components", "totals", "coverage", "attentions", "limitations", "sources", "dataMode"]
+    Serving:
+      type: "object"
+      additionalProperties: false
+      properties:
+        id:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        label:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        grams:
+          type: "number"
+          exclusiveMinimum: 0
+        sourceId:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+      required: ["id", "label", "grams", "sourceId"]
+    CatalogFood:
+      type: "object"
+      additionalProperties: false
+      properties:
+        id:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        catalogVersion:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        displayName:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        aliases:
+          type: "array"
+          items:
+            type: "string"
+            minLength: 1
+            maxLength: 500
+        preparation:
+          anyOf:
+            -
+              type: "string"
+              minLength: 1
+              maxLength: 500
+            -
+              type: "null"
+        per100g:
+          $ref: "#/components/schemas/Nutrients"
+        servings:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Serving"
+        sources:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Source"
+        nutrientSourceIds:
+          $ref: "#/components/schemas/NutrientSources"
+      required: ["id", "catalogVersion", "displayName", "aliases", "preparation", "per100g", "servings", "sources", "nutrientSourceIds"]
+    Condition:
+      type: "object"
+      additionalProperties: false
+      properties:
+        id:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        displayName:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        personalizationSupported:
+          type: "boolean"
+        requiredProfileFields:
+          type: "array"
+          items:
+            type: "string"
+            minLength: 1
+            maxLength: 500
+        requiredNutrients:
+          type: "array"
+          items:
+            type: "string"
+            enum: ["energyKcal", "carbohydrateG", "proteinG", "fatG", "fiberG", "sugarsG", "sodiumMg"]
+        supportedAgeMinimum:
+          anyOf:
+            -
+              type: "integer"
+              minimum: 0
+            -
+              type: "null"
+        supportedAgeMaximum:
+          anyOf:
+            -
+              type: "integer"
+              minimum: 0
+            -
+              type: "null"
+      required: ["id", "displayName", "personalizationSupported", "requiredProfileFields", "requiredNutrients", "supportedAgeMinimum", "supportedAgeMaximum"]
+    CapabilityManifest:
+      type: "object"
+      additionalProperties: false
+      properties:
+        contractVersion:
+          $ref: "#/components/schemas/ContractVersion"
+        catalogVersion:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        nutritionDatasetVersion:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        ruleSetVersion:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        conditions:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Condition"
+        supportedPhotoFoodIds:
+          type: "array"
+          items:
+            type: "string"
+            minLength: 1
+            maxLength: 500
+          uniqueItems: true
+        nutrients:
+          type: "array"
+          items:
+            type: "string"
+            enum: ["energyKcal", "carbohydrateG", "proteinG", "fatG", "fiberG", "sugarsG", "sodiumMg"]
+          uniqueItems: true
+        dataMode:
+          type: "string"
+          enum: ["real", "synthetic"]
+        publishedAt:
+          type: "string"
+          format: "date-time"
+      required: ["contractVersion", "catalogVersion", "nutritionDatasetVersion", "ruleSetVersion", "conditions", "supportedPhotoFoodIds", "nutrients", "dataMode", "publishedAt"]
+    CatalogPage:
+      type: "object"
+      additionalProperties: false
+      properties:
+        catalogVersion:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        items:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/CatalogFood"
+        nextCursor:
+          anyOf:
+            -
+              type: "string"
+              minLength: 1
+              maxLength: 500
+            -
+              type: "null"
+      required: ["catalogVersion", "items", "nextCursor"]
+    PhotoAnalysisRequest:
+      type: "object"
+      additionalProperties: false
+      properties:
+        contractVersion:
+          $ref: "#/components/schemas/ContractVersion"
+        operationId:
+          type: "string"
+          format: "uuid"
+        catalogVersion:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        ruleSetVersion:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        profile:
+          $ref: "#/components/schemas/ProfileContext"
+        image:
+          type: "object"
+          additionalProperties: false
+          properties:
+            downloadUrl:
+              type: "string"
+              format: "uri"
+            mimeType:
+              type: "string"
+              enum: ["image/jpeg", "image/png"]
+            sha256:
+              type: "string"
+              pattern: "^[a-f0-9]{64}$"
+          required: ["downloadUrl", "mimeType", "sha256"]
+      required: ["contractVersion", "operationId", "catalogVersion", "ruleSetVersion", "profile", "image"]
+    RecalculationRequest:
+      type: "object"
+      additionalProperties: false
+      properties:
+        contractVersion:
+          $ref: "#/components/schemas/ContractVersion"
+        operationId:
+          type: "string"
+          format: "uuid"
+        inputKind:
+          type: "string"
+          enum: ["manual", "correction"]
+        catalogVersion:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        ruleSetVersion:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        profile:
+          $ref: "#/components/schemas/ProfileContext"
+        components:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/ComponentInput"
+          minItems: 1
+          maxItems: 30
+      required: ["contractVersion", "operationId", "inputKind", "catalogVersion", "ruleSetVersion", "profile", "components"]
+    NutrientSources:
+      type: "object"
+      additionalProperties: false
+      required: ["energyKcal", "carbohydrateG", "proteinG", "fatG", "fiberG", "sugarsG", "sodiumMg"]
+      properties:
+        energyKcal:
+          anyOf:
+            -
+              type: "string"
+              minLength: 1
+              maxLength: 500
+            -
+              type: "null"
+        carbohydrateG:
+          anyOf:
+            -
+              type: "string"
+              minLength: 1
+              maxLength: 500
+            -
+              type: "null"
+        proteinG:
+          anyOf:
+            -
+              type: "string"
+              minLength: 1
+              maxLength: 500
+            -
+              type: "null"
+        fatG:
+          anyOf:
+            -
+              type: "string"
+              minLength: 1
+              maxLength: 500
+            -
+              type: "null"
+        fiberG:
+          anyOf:
+            -
+              type: "string"
+              minLength: 1
+              maxLength: 500
+            -
+              type: "null"
+        sugarsG:
+          anyOf:
+            -
+              type: "string"
+              minLength: 1
+              maxLength: 500
+            -
+              type: "null"
+        sodiumMg:
+          anyOf:
+            -
+              type: "string"
+              minLength: 1
+              maxLength: 500
+            -
+              type: "null"
+  responses:
+    Error:
+      description: "Structured error; code examples INVALID_INPUT, UNSUPPORTED_VERSION, CATALOG_VERSION_UNAVAILABLE, SERVICE_UNAVAILABLE, MODEL_FAILURE. No successful result body on error."
+      content:
+        "application/json":
+          schema:
+            $ref: "#/components/schemas/Error"
+    TooManyRequests:
+      description: "Structured error; code examples INVALID_INPUT, UNSUPPORTED_VERSION, CATALOG_VERSION_UNAVAILABLE, SERVICE_UNAVAILABLE, MODEL_FAILURE. No successful result body on error."
+      content:
+        "application/json":
+          schema:
+            $ref: "#/components/schemas/Error"
+      headers:
+        Retry-After:
+          schema:
+            type: "integer"
+            minimum: 1
+          description: "Retry delay seconds"
