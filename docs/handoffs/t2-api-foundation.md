@@ -17,6 +17,13 @@ PostgreSQL address, HTTP smoke returned live 200 and ready 503; request ID heade
 matched each JSON body. Integration tests use Hono `app.request` and injected
 probes/fixture handlers.
 
+Review follow-up (2026-10-13): idle PostgreSQL pool errors are handled and logged
+with the fixed code `DATABASE_IDLE_CLIENT_ERROR`; readiness `SELECT 1` uses a
+3-second `query_timeout`. From `carin-api/`, `pnpm run typecheck`, `pnpm run
+lint`, `pnpm run test:unit` (15 passed), `pnpm run test:integration` (9 passed),
+and `pnpm run build` all passed. Unit tests verify error details are not logged
+and the readiness query receives its finite timeout.
+
 Unverified work / blockers: No real PostgreSQL schema or migration exists yet,
 so production readiness intentionally remains 503 even if PostgreSQL accepts
 connections. No PostgreSQL-backed session, ownership repository, real auth, AI,
