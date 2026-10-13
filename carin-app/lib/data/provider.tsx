@@ -56,7 +56,10 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
       setScope(next);
     }
   }, []);
-  const clearSession = React.useCallback(() => setSessionUser(null), [setSessionUser]);
+  const clearSession = React.useCallback(async () => {
+    transitionRef.current += 1;
+    await setSessionUser(null);
+  }, [setSessionUser]);
 
   const value = React.useMemo<DataContextValue>(
     () => ({

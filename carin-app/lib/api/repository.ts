@@ -57,6 +57,7 @@ export function createAppRepository(deps: Dependencies) {
     const request = prepareAppRequest(name, input);
     if (request.method !== 'GET') requireOnline(deps.connectivity());
     const cookie = await deps.getCookie?.();
+    assertCurrent();
     const response = await fetcher(`${deps.baseUrl ?? requireApiUrl()}${request.path}`, {
       method: request.method,
       headers: cookie ? { ...request.headers, Cookie: cookie } : request.headers,
