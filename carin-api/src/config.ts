@@ -5,6 +5,8 @@ export type AppConfig = {
   aiMode: 'real' | 'fixture';
   databaseUrl: string;
   port: number;
+  betterAuthSecret?: string;
+  betterAuthUrl?: string;
   aiServiceUrl?: string;
   aiServiceKey?: string;
   aiServiceAllowedHosts: string[];
@@ -92,6 +94,23 @@ export function loadConfig(env: Record<string, string | undefined>): AppConfig {
     throw new Error('DATABASE_URL must be a PostgreSQL URL with host and database');
   }
 
+  const betterAuthSecret = env.BETTER_AUTH_SECRET?.trim();
+  const betterAuthUrl = env.BETTER_AUTH_URL?.trim();
+  if ((betterAuthSecret && !betterAuthUrl) || (!betterAuthSecret && betterAuthUrl)) {
+    throw new Error('BETTER_AUTH_SECRET and BETTER_AUTH_URL must be configured together');
+  }
+  if (betterAuthUrl) {
+    let parsedAuthUrl: URL;
+    try {
+      parsedAuthUrl = new URL(betterAuthUrl);
+    } catch {
+      throw new Error('BETTER_AUTH_URL must be a valid HTTP(S) URL');
+    }
+    if (!['http:', 'https:'].includes(parsedAuthUrl.protocol) || parsedAuthUrl.username || parsedAuthUrl.password || parsedAuthUrl.search || parsedAuthUrl.hash) {
+      throw new Error('BETTER_AUTH_URL must use HTTP(S) without credentials, query, or fragment');
+    }
+  }
+
   const portString = env.PORT ?? '3000';
   const port = Number(portString);
   if (!/^\d+$/.test(portString) || !Number.isInteger(port) || port < 1 || port > 65535) {
@@ -103,6 +122,7 @@ export function loadConfig(env: Record<string, string | undefined>): AppConfig {
     databaseUrl,
     port,
     aiServiceAllowedHosts,
+    ...(betterAuthSecret && betterAuthUrl ? { betterAuthSecret, betterAuthUrl } : {}),
     ...(aiServiceUrl ? { aiServiceUrl } : {}),
     ...(aiServiceKey ? { aiServiceKey } : {}),
   };
