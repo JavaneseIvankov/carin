@@ -27,7 +27,9 @@ jobs:
         working-directory: ${{ matrix.package }}
       - run: pnpm run lint
         working-directory: ${{ matrix.package }}
-      - run: pnpm run test
+      - run: pnpm run test:unit
+        working-directory: ${{ matrix.package }}
+      - run: pnpm run test:integration
         working-directory: ${{ matrix.package }}
 
   contracts:

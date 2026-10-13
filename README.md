@@ -12,13 +12,15 @@ cd carin-app
 pnpm install --frozen-lockfile
 pnpm run typecheck
 pnpm run lint
-pnpm run test
+pnpm run test:unit
+pnpm run test:integration
 
 cd ../carin-api
 pnpm install --frozen-lockfile
 pnpm run typecheck
 pnpm run lint
-pnpm run test
+pnpm run test:unit
+pnpm run test:integration
 
 cd ..
 python -m venv .venv
@@ -26,8 +28,11 @@ python -m venv .venv
 .venv/bin/python specs/validate-contracts.py
 ```
 
-The two Vitest commands currently report zero tests. Feature work adds tests
-alongside behavior. The contract validator checks specification documents and
-synthetic fixtures; it does not verify a running API or AI service. See the
-module guides and `specs/05-verification-and-deployment.md` for scope and
-platform verification requirements.
+The unit and integration commands currently report zero tests. Name unit test
+files `*.unit.test.ts` or `*.unit.test.tsx`, and integration test files
+`*.integration.test.ts` or `*.integration.test.tsx`, so each CI command selects
+its own category. Feature work adds tests alongside behavior. The contract
+validator checks specification documents and synthetic fixtures; it does not
+verify a running API or AI service. See the module guides and
+`specs/05-verification-and-deployment.md` for scope and platform verification
+requirements.
