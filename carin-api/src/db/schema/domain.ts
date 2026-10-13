@@ -37,8 +37,8 @@ export const healthProfile = pgTable(
   {
     userId: owner().primaryKey(),
     version: integer('version').default(1).notNull(),
-    heightCm: decimal('height_cm'),
-    weightKg: decimal('weight_kg'),
+    heightCm: numeric('height_cm'),
+    weightKg: numeric('weight_kg'),
     sexForReference: text('sex_for_reference'),
     clinicianNotes: text('clinician_notes'),
     activity: text('activity'),

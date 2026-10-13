@@ -29,6 +29,13 @@
       "when": 1791912926932,
       "tag": "0003_settings_revision_invariant",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791927169307,
+      "tag": "0004_profile_unconstrained_measurements",
+      "breakpoints": true
     }
   ]
 }
