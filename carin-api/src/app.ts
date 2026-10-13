@@ -14,6 +14,7 @@ import { registerAccountRoutes } from './modules/account/routes.js';
 import { registerEmailLandingRoutes } from './modules/email/landing.js';
 import { registerProfileRoutes } from './modules/profile/routes.js';
 import { registerAnalysisJobRoutes, type AnalysisJobRouteDependencies } from "./jobs/routes.js";
+import { registerMediaRoutes, type MediaRouteDependencies } from "./modules/media/routes.js";
 
 export type RequestLog = {
   requestId: string;
@@ -32,6 +33,7 @@ export type AppDependencies = {
   auth?: { handler: (request: Request) => Promise<Response> };
   appLinkScheme?: string;
   analysisJobs?: AnalysisJobRouteDependencies;
+  media?: MediaRouteDependencies;
 };
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -46,6 +48,7 @@ export function createApp({
   auth,
   appLinkScheme,
   analysisJobs,
+  media,
 }: AppDependencies): Hono<AppEnv> {
   const app = new Hono<AppEnv>();
   app.use("*", async (c, next) => {
@@ -74,6 +77,7 @@ export function createApp({
   if (appLinkScheme) registerEmailLandingRoutes(app, appLinkScheme);
   if (auth) app.all('/api/auth/*', (c) => auth.handler(c.req.raw));
   if (analysisJobs) registerAnalysisJobRoutes(app, analysisJobs);
+  if (media) registerMediaRoutes(app, media);
 
   registerRoutes?.(app);
 
