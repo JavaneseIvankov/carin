@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import type { components } from '../../contracts/generated/ai-service.js';
+import { isInternalHost, type AppConfig } from '../../config.js';
 import {
   ContractValidationError,
   contractOperations,
@@ -17,7 +18,6 @@ export type AiClient = {
   recalculateComponents(input: Schemas['RecalculationRequest']): Promise<Schemas['AnalysisResult']>;
 };
 export type FixtureScenario = 'complete' | 'partial' | 'unrecognized' | 'correction' | 'service-failure';
-export type AppEnvironment = 'dev' | 'staging' | 'prod' | 'test';
 
 type AdapterErrorCode =
   | 'INVALID_REQUEST'
@@ -105,16 +105,26 @@ function bindRequestedProvenance(
   fixtureResult: Schemas['AnalysisResult'],
   request: Schemas['PhotoAnalysisRequest'] | Schemas['RecalculationRequest']
 ): Schemas['AnalysisResult'] {
+  const canonical = fixture('complete');
+  if (
+    request.catalogVersion !== canonical.catalogVersion || request.ruleSetVersion !== canonical.ruleSetVersion
+  ) {
+    throw new AiAdapterError('INVALID_REQUEST', 'Requested versions are unavailable in the synthetic fixture dataset.', false);
+  }
+  if (
+    fixtureResult.catalogVersion !== canonical.catalogVersion ||
+    fixtureResult.nutritionDatasetVersion !== canonical.nutritionDatasetVersion ||
+    fixtureResult.ruleSetVersion !== canonical.ruleSetVersion ||
+    fixtureResult.sources.some((source) =>
+      (source.id === 'synthetic-nutrition' && source.datasetVersion !== canonical.nutritionDatasetVersion) ||
+      (source.id === 'synthetic-rule' && source.datasetVersion !== canonical.ruleSetVersion)
+    )
+  ) {
+    throw new AiAdapterError('INVALID_RESPONSE', 'Fixture provenance does not match the canonical synthetic dataset.', false);
+  }
   const result = structuredClone(fixtureResult);
   result.operationId = request.operationId;
   result.profileVersion = request.profile.profileVersion;
-  result.catalogVersion = request.catalogVersion;
-  result.ruleSetVersion = request.ruleSetVersion;
-  for (const source of result.sources) {
-    if (source.kind === 'synthetic' && source.id === 'synthetic-rule') {
-      source.datasetVersion = request.ruleSetVersion;
-    }
-  }
   if ('components' in request) {
     if (result.components.length !== request.components.length) {
       throw new AiAdapterError('INVALID_REQUEST', 'Fixture scenario does not match component count.', false);
@@ -132,6 +142,12 @@ function bindRequestedProvenance(
         throw new AiAdapterError('INVALID_REQUEST', 'Fixture scenario does not match selected food and portion.', false);
       }
       component.id = input.id;
+      component.displayName = input.displayName;
+      component.catalogFoodId = input.catalogFoodId;
+      component.preparation = input.preparation;
+      component.portion.quantity = input.portion.quantity;
+      component.portion.unit = input.portion.unit;
+      component.portion.servingId = input.portion.unit === 'serving' ? input.portion.servingId : null;
       return component;
     });
     for (const attention of result.attentions) {
@@ -183,11 +199,14 @@ function validateResponseBody<T>(operation: string, body: unknown): T {
   return body as T;
 }
 
-export function createFixtureAiClient(options: {
-  environment: AppEnvironment;
+function createFixtureAiClient(options: {
+  config: Pick<AppConfig, 'appEnv' | 'aiMode'>;
   scenario: FixtureScenario;
 }): AiClient {
-  if (options.environment !== 'dev' && options.environment !== 'test') {
+  if (
+    options.config.aiMode !== 'fixture' ||
+    options.config.appEnv !== 'dev'
+  ) {
     throw new AiAdapterError('INVALID_REQUEST', 'Synthetic AI fixtures are disabled in this environment.', false);
   }
   return {
@@ -247,11 +266,23 @@ type Fetch = typeof fetch;
 export function createHttpAiClient(options: {
   baseUrl: string;
   serviceKey: string;
+  allowedHosts: readonly string[];
   timeoutMs?: number;
   fetch?: Fetch;
 }): AiClient {
-  const endpoint = new URL(options.baseUrl);
-  if (!['http:', 'https:'].includes(endpoint.protocol) || !options.serviceKey.trim()) {
+  let endpoint: URL;
+  try {
+    endpoint = new URL(options.baseUrl);
+  } catch {
+    throw new AiAdapterError('INVALID_REQUEST', 'Internal AI service configuration is invalid.', false);
+  }
+  const allowedHosts = new Set(options.allowedHosts.map((host) => host.trim().toLowerCase()).filter(Boolean));
+  if (
+    !['http:', 'https:'].includes(endpoint.protocol) || !options.serviceKey.trim() || allowedHosts.size === 0 ||
+    [...allowedHosts].some((host) => !isInternalHost(host)) || !isInternalHost(endpoint.hostname) ||
+    !allowedHosts.has(endpoint.hostname.toLowerCase()) || endpoint.username || endpoint.password ||
+    endpoint.search || endpoint.hash || /[?#]/.test(options.baseUrl)
+  ) {
     throw new AiAdapterError('INVALID_REQUEST', 'Internal AI service configuration is invalid.', false);
   }
   const timeoutMs = options.timeoutMs ?? 90_000;
@@ -287,6 +318,7 @@ export function createHttpAiClient(options: {
         },
         ...(body === undefined ? {} : { body: JSON.stringify(body) }),
         signal: controller.signal,
+        redirect: 'error',
       });
       responseText = await response.text();
     } catch (error) {
@@ -334,6 +366,32 @@ export function createHttpAiClient(options: {
         result as Schemas['AnalysisResult'],
         body as Schemas['PhotoAnalysisRequest'] | Schemas['RecalculationRequest']
       );
+      if (operationId === 'ai.recalculateComponents') {
+        const recalculation = body as Schemas['RecalculationRequest'];
+        const components = (result as Schemas['AnalysisResult']).components;
+        const selectedFieldsMatch = components.length === recalculation.components.length &&
+          components.every((component, index) => {
+            const selected = recalculation.components[index];
+            if (!selected) return false;
+            const selectedComponentMatches = component.id === selected.id &&
+              component.displayName === selected.displayName &&
+              component.catalogFoodId === selected.catalogFoodId &&
+              component.preparation === selected.preparation;
+            if (!selectedComponentMatches) return false;
+            if (selected.portion.kind === 'unknown') {
+              return component.portion.quantity === null &&
+                component.portion.unit === null &&
+                component.portion.servingId === null &&
+                component.portion.grams === null;
+            }
+            return component.portion.quantity === selected.portion.quantity &&
+              component.portion.unit === selected.portion.unit &&
+              component.portion.servingId === (selected.portion.unit === 'serving' ? selected.portion.servingId : null);
+          });
+        if (!selectedFieldsMatch) {
+          throw new AiAdapterError('INVALID_RESPONSE', 'AI recalculation changed the selected component or portion.', false);
+        }
+      }
     }
     if (operationId === 'ai.getCatalog' && (result as Schemas['CatalogPage']).catalogVersion !== query?.version) {
       throw new AiAdapterError('INVALID_RESPONSE', 'AI catalog version did not match the requested version.', false);
@@ -346,4 +404,18 @@ export function createHttpAiClient(options: {
     analyzePhoto: (input) => send('ai.analyzePhoto', input),
     recalculateComponents: (input) => send('ai.recalculateComponents', input),
   };
+}
+
+export function createAiClient(config: AppConfig, scenario: FixtureScenario = 'complete'): AiClient {
+  if (config.aiMode === 'fixture') {
+    return createFixtureAiClient({ config, scenario });
+  }
+  if (!config.aiServiceUrl || !config.aiServiceKey || config.aiServiceAllowedHosts.length === 0) {
+    throw new AiAdapterError('INVALID_REQUEST', 'Real AI service configuration is incomplete.', false);
+  }
+  return createHttpAiClient({
+    baseUrl: config.aiServiceUrl,
+    serviceKey: config.aiServiceKey,
+    allowedHosts: config.aiServiceAllowedHosts,
+  });
 }

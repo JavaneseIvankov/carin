@@ -1,8 +1,15 @@
 import assert from 'node:assert/strict';
-import { stdout } from 'node:process';
-import { createFixtureAiClient } from '../dist/integrations/ai/index.js';
+import { env, stdout } from 'node:process';
+import { loadConfig } from '../dist/config.js';
+import { createAiClient } from '../dist/integrations/ai/index.js';
 
-const client = createFixtureAiClient({ environment: 'test', scenario: 'complete' });
+const config = loadConfig({
+  ...env,
+  APP_ENV: env.APP_ENV ?? 'dev',
+  AI_MODE: env.AI_MODE ?? 'fixture',
+  DATABASE_URL: env.DATABASE_URL ?? 'postgresql://smoke:smoke@127.0.0.1:5432/carin',
+});
+const client = createAiClient(config);
 const profile = {
   profileVersion: 7,
   ageYears: null,

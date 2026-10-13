@@ -1,9 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { components } from '../../contracts/generated/ai-service.js';
+import { loadConfig } from '../../config.js';
 import {
   AiAdapterError,
-  createFixtureAiClient,
+  createAiClient,
   createHttpAiClient,
   type AiClient,
   type FixtureScenario,
@@ -54,15 +55,31 @@ const recalculationRequest: components['schemas']['RecalculationRequest'] = {
   components: [
     {
       id: '123e4567-e89b-42d3-a456-426614174001',
-      displayName: 'Makanan uji',
+      displayName: 'Makanan contoh sintetis 100 g',
       catalogFoodId: 'fixture-food-001',
       preparation: 'Contoh uji',
       portion: { kind: 'known', quantity: 0.5, unit: 'serving', servingId: 'fixture-serving-100g' },
     },
   ],
 };
+const recalculationResponse = (): Record<string, unknown> => {
+  const value = JSON.parse(
+    readFileSync(new URL('../../../../specs/fixtures/ai/correction-complete.json', import.meta.url), 'utf8')
+  ) as Record<string, unknown>;
+  value.operationId = operationId;
+  value.profileVersion = 7;
+  const components = value.components as Array<Record<string, unknown>>;
+  components[0]!.id = recalculationRequest.components[0]!.id;
+  return value;
+};
 
 afterEach(() => vi.unstubAllGlobals());
+
+const fixtureClient = (scenario: FixtureScenario) => createAiClient(loadConfig({
+  APP_ENV: 'dev',
+  AI_MODE: 'fixture',
+  DATABASE_URL: 'postgresql://user:pass@localhost:5432/carin',
+}), scenario);
 
 describe('packaged fixture data', () => {
   it('keeps package-local copies identical to the canonical five fixtures', () => {
@@ -85,7 +102,7 @@ describe('fixture AI adapter', () => {
   it.each<FixtureScenario>(['complete', 'partial', 'unrecognized'])(
     'returns the explicitly selected %s photo scenario with request provenance',
     async (scenario) => {
-      const client = createFixtureAiClient({ environment: 'dev', scenario });
+      const client = fixtureClient(scenario);
       const result = await client.analyzePhoto(photoRequest);
       expect(result.supportStatus).toBe(scenario);
       expect(result.dataMode).toBe('synthetic');
@@ -93,12 +110,14 @@ describe('fixture AI adapter', () => {
       expect(result.profileVersion).toBe(profile.profileVersion);
       expect(result.catalogVersion).toBe(photoRequest.catalogVersion);
       expect(result.ruleSetVersion).toBe(photoRequest.ruleSetVersion);
+      expect(result.nutritionDatasetVersion).toBe('synthetic-nutrition-1');
+      expect(result.sources.filter((source) => source.id === 'synthetic-rule').every((source) => source.datasetVersion === 'synthetic-rules-1')).toBe(true);
       expect(result.sources.every((source) => source.kind === 'synthetic')).toBe(true);
     }
   );
 
   it('serves only explicit synthetic capability and catalog data', async () => {
-    const client = createFixtureAiClient({ environment: 'test', scenario: 'complete' });
+    const client = fixtureClient('complete');
     const capabilities = await client.getCapabilities();
     expect(capabilities.dataMode).toBe('synthetic');
     expect(capabilities.supportedPhotoFoodIds).toEqual([]);
@@ -112,7 +131,7 @@ describe('fixture AI adapter', () => {
   });
 
   it('uses the correction fixture for recalculation and request component identity', async () => {
-    const client = createFixtureAiClient({ environment: 'test', scenario: 'correction' });
+    const client = fixtureClient('correction');
     const result = await client.recalculateComponents(recalculationRequest);
     expect(result.inputKind).toBe('correction');
     expect(result.components[0]?.id).toBe(recalculationRequest.components[0]?.id);
@@ -120,17 +139,54 @@ describe('fixture AI adapter', () => {
     expect(result.dataMode).toBe('synthetic');
   });
 
-  it('rejects fixture mode outside development and test', () => {
-    expect(() => createFixtureAiClient({ environment: 'staging', scenario: 'complete' })).toThrow(
-      AiAdapterError
-    );
-    expect(() => createFixtureAiClient({ environment: 'prod', scenario: 'complete' })).toThrow(
-      AiAdapterError
+  it('preserves every selected fixture component field during recalculation', async () => {
+    const client = fixtureClient('correction');
+    const request = {
+      ...recalculationRequest,
+      components: [{
+        ...recalculationRequest.components[0]!,
+        displayName: 'User-entered meal name',
+        preparation: 'Steamed and chopped',
+      }],
+    } satisfies components['schemas']['RecalculationRequest'];
+
+    const result = await client.recalculateComponents(request);
+    const selected = request.components[0]!;
+    if (selected.portion.kind !== 'known') throw new Error('test request must use a known portion');
+    const component = result.components[0]!;
+    expect(component.id).toBe(selected.id);
+    expect(component.displayName).toBe(selected.displayName);
+    expect(component.catalogFoodId).toBe(selected.catalogFoodId);
+    expect(component.preparation).toBe(selected.preparation);
+    expect(component.portion.quantity).toBe(selected.portion.quantity);
+    expect(component.portion.unit).toBe(selected.portion.unit);
+    expect(component.portion.servingId).toBe(
+      selected.portion.unit === 'serving' ? selected.portion.servingId : null
     );
   });
 
+  it.each([
+    ['catalog', { catalogVersion: 'catalog-not-in-fixtures' }],
+    ['rule set', { ruleSetVersion: 'rules-not-in-fixtures' }],
+  ])('rejects an unknown %s version for photo analysis', async (_label, patch) => {
+    const client = fixtureClient('complete');
+    await expect(client.analyzePhoto({ ...photoRequest, ...patch })).rejects.toMatchObject({ code: 'INVALID_REQUEST' });
+  });
+
+  it.each([
+    ['catalog', { catalogVersion: 'catalog-not-in-fixtures' }],
+    ['rule set', { ruleSetVersion: 'rules-not-in-fixtures' }],
+  ])('rejects an unknown %s version for correction', async (_label, patch) => {
+    const client = fixtureClient('correction');
+    await expect(client.recalculateComponents({ ...recalculationRequest, ...patch })).rejects.toMatchObject({ code: 'INVALID_REQUEST' });
+  });
+
+  it('selects fixtures only through validated development runtime configuration', () => {
+    expect(() => fixtureClient('complete')).not.toThrow();
+  });
+
   it('returns service failure only when that scenario is explicitly selected', async () => {
-    const client = createFixtureAiClient({ environment: 'test', scenario: 'service-failure' });
+    const client = fixtureClient('service-failure');
     await expect(client.analyzePhoto(photoRequest)).rejects.toMatchObject({
       code: 'SERVICE_UNAVAILABLE',
       retryable: true,
@@ -143,6 +199,7 @@ describe('internal HTTP AI adapter', () => {
     createHttpAiClient({
       baseUrl: 'http://ai-service.internal:8000',
       serviceKey: 'test-only-service-key',
+      allowedHosts: ['ai-service.internal'],
       timeoutMs,
       fetch: fetcher,
     });
@@ -186,6 +243,144 @@ describe('internal HTTP AI adapter', () => {
     const body = { ...fixtureResponse(), operationId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' };
     const client = makeClient(async () => Response.json(body));
     await expect(client.analyzePhoto(photoRequest)).rejects.toMatchObject({ code: 'INVALID_RESPONSE' });
+  });
+
+  it.each([
+    ['component id', (body: Record<string, unknown>) => {
+      ((body.components as Array<Record<string, unknown>>)[0]!).id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+    }],
+    ['selected food', (body: Record<string, unknown>) => {
+      ((body.components as Array<Record<string, unknown>>)[0]!).catalogFoodId = 'another-food';
+    }],
+    ['selected portion', (body: Record<string, unknown>) => {
+      (((body.components as Array<Record<string, unknown>>)[0]!.portion) as Record<string, unknown>).quantity = 0.25;
+    }],
+  ])('rejects a valid-schema recalculation response with mismatched %s', async (_label, alter) => {
+    const body = recalculationResponse();
+    alter(body);
+    const client = makeClient(async () => Response.json(body));
+    await expect(client.recalculateComponents(recalculationRequest)).rejects.toMatchObject({ code: 'INVALID_RESPONSE' });
+  });
+
+  it('accepts a valid recalculation response that preserves selected component identity', async () => {
+    const client = makeClient(async () => Response.json(recalculationResponse()));
+    const result = await client.recalculateComponents(recalculationRequest);
+    expect(result.components[0]?.id).toBe(recalculationRequest.components[0]?.id);
+    expect(result.components[0]?.portion.quantity).toBe(0.5);
+  });
+
+  it('accepts an unknown selected portion with a valid partial response', async () => {
+    const request: components['schemas']['RecalculationRequest'] = {
+      ...recalculationRequest,
+      components: [{
+        id: recalculationRequest.components[0]!.id,
+        displayName: 'Makanan contoh sintetis 100 g',
+        catalogFoodId: 'fixture-food-001',
+        preparation: 'Contoh uji',
+        portion: { kind: 'unknown' },
+      }],
+    };
+    const body = JSON.parse(
+      readFileSync(new URL('../../../../specs/fixtures/ai/analysis-partial.json', import.meta.url), 'utf8')
+    ) as Record<string, unknown>;
+    body.operationId = operationId;
+    body.profileVersion = 7;
+    body.inputKind = 'correction';
+    const component = (body.components as Array<Record<string, unknown>>)[0]!;
+    component.id = request.components[0]!.id;
+    component.portion = {
+      quantity: null,
+      unit: null,
+      servingId: null,
+      grams: null,
+      origin: 'user_reported',
+      basis: null,
+      sourceId: null,
+    };
+    body.components = [component];
+
+    const result = await makeClient(async () => Response.json(body)).recalculateComponents(request);
+    expect(result.components[0]).toMatchObject({
+      id: request.components[0]!.id,
+      displayName: request.components[0]!.displayName,
+      catalogFoodId: request.components[0]!.catalogFoodId,
+      preparation: request.components[0]!.preparation,
+      portion: { quantity: null, unit: null, servingId: null, grams: null },
+    });
+  });
+
+  it('rejects an unknown selected portion response with an estimated gram value', async () => {
+    const request: components['schemas']['RecalculationRequest'] = {
+      ...recalculationRequest,
+      components: [{
+        id: recalculationRequest.components[0]!.id,
+        displayName: 'Makanan contoh sintetis 100 g',
+        catalogFoodId: 'fixture-food-001',
+        preparation: 'Contoh uji',
+        portion: { kind: 'unknown' },
+      }],
+    };
+    const body = JSON.parse(
+      readFileSync(new URL('../../../../specs/fixtures/ai/analysis-partial.json', import.meta.url), 'utf8')
+    ) as Record<string, unknown>;
+    body.operationId = operationId;
+    body.profileVersion = 7;
+    body.inputKind = 'correction';
+    const component = (body.components as Array<Record<string, unknown>>)[0]!;
+    component.id = request.components[0]!.id;
+    component.portion = {
+      quantity: null,
+      unit: null,
+      servingId: null,
+      grams: 25,
+      origin: 'user_reported',
+      basis: null,
+      sourceId: null,
+    };
+    body.components = [component];
+
+    const client = makeClient(async () => Response.json(body));
+    await expect(client.recalculateComponents(request)).rejects.toMatchObject({ code: 'INVALID_RESPONSE' });
+  });
+
+  it('rejects unapproved hosts and URL credentials, query, or fragment before network access', () => {
+    const fetcher = vi.fn<typeof fetch>();
+    for (const baseUrl of [
+      'https://example.com',
+      'http://169.254.169.254:8000',
+      'http://[fe80::1]:8000',
+      'not a valid URL',
+      'http://user:pass@ai-service.internal:8000',
+      'http://ai-service.internal:8000?token=secret',
+      'http://ai-service.internal:8000#fragment',
+    ]) {
+      expect(() => createHttpAiClient({
+        baseUrl,
+        serviceKey: 'test-only-service-key',
+        allowedHosts: baseUrl === 'https://example.com'
+          ? ['example.com']
+          : baseUrl.includes('169.254.169.254')
+            ? ['169.254.169.254']
+            : baseUrl.includes('fe80::1')
+              ? ['[fe80::1]']
+              : ['ai-service.internal'],
+        fetch: fetcher,
+      })).toThrow(AiAdapterError);
+    }
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it('fails closed on redirects so a second host cannot receive the service key', async () => {
+    const fetcher = vi.fn<typeof fetch>(async (_input, init) => {
+      void init;
+      return new Response(null, { status: 302, headers: { location: 'https://public.example/collect' } });
+    });
+    const client = makeClient(fetcher);
+    await expect(client.analyzePhoto(photoRequest)).rejects.toMatchObject({ code: 'INVALID_RESPONSE' });
+    expect(fetcher).toHaveBeenCalledOnce();
+    expect(fetcher.mock.calls[0]?.[1]?.redirect).toBe('error');
+    expect(fetcher.mock.calls[0]?.[0]).toBeInstanceOf(URL);
+    expect(new URL(String(fetcher.mock.calls[0]?.[0])).hostname).toBe('ai-service.internal');
   });
 
   it('maps timeout and network errors to retryable service errors', async () => {
