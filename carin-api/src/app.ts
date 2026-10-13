@@ -12,6 +12,7 @@ import {
 import { registerAccountRoutes } from './modules/account/routes.js';
 import { registerProfileRoutes } from './modules/profile/routes.js';
 import { registerExaminationRoutes } from './modules/examinations/routes.js';
+import { registerEmailLandingRoutes } from './modules/email/landing.js';
 
 export type RequestLog = {
   requestId: string;
@@ -28,6 +29,7 @@ export type AppDependencies = {
   account?: { db: Database; resolveSession: SessionResolver };
   examinations?: { db: Database; resolveSession: SessionResolver; cursorSecret: string };
   auth?: { handler: (request: Request) => Promise<Response> };
+  appLinkScheme?: string;
 };
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -40,6 +42,7 @@ export function createApp({
   account,
   examinations,
   auth,
+  appLinkScheme,
 }: AppDependencies): Hono<AppEnv> {
   const app = new Hono<AppEnv>();
   app.use("*", async (c, next) => {
@@ -65,6 +68,7 @@ export function createApp({
     registerProfileRoutes(app, account);
   }
   if (examinations) registerExaminationRoutes(app, examinations);
+  if (appLinkScheme) registerEmailLandingRoutes(app, appLinkScheme);
   if (auth) app.all('/api/auth/*', (c) => auth.handler(c.req.raw));
 
   registerRoutes?.(app);

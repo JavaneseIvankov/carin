@@ -26,6 +26,10 @@ export function getAuthTransactionDatabase(): AuthTransactionDatabase {
   return transaction;
 }
 
+export function getOptionalAuthTransactionDatabase(): AuthTransactionDatabase | undefined {
+  return transactionStore.getStore();
+}
+
 export function createAuthDatabaseAdapter(
   db: Database,
 ): (options: BetterAuthOptions) => DBAdapter<BetterAuthOptions> {

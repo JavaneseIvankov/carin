@@ -1,18 +1,21 @@
 import { execFileSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { Pool } from 'pg';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../src/app.js';
 import { createAuthRuntime, type AuthMail } from '../../src/auth/runtime.js';
 import { createDatabase } from '../../src/db/client.js';
 import { applyMigrations } from '../../src/db/migrations.js';
 import { getLegalRegistry } from '../../src/modules/legal/registry.js';
+import { enqueueAuthMail } from '../../src/modules/email/outbox.js';
 
 const name = `carin-t8-auth-${randomUUID()}`;
 let pool: Pool;
 let app: ReturnType<typeof createApp>;
 let containerStarted = false;
 const mail: AuthMail[] = [];
+const authSecret = 'test-secret-that-is-long-enough-for-auth';
+let queueFailures = 0;
 
 beforeAll(async () => {
   execFileSync('docker', [
@@ -33,21 +36,31 @@ beforeAll(async () => {
   const runtime = createAuthRuntime({
     db,
     baseURL: 'http://test.local',
-    secret: 'test-secret-that-is-long-enough-for-auth',
-    trustedOrigins: ['carin://'],
-    sendEmail: async (message) => { mail.push(message); },
+    secret: authSecret,
+    trustedOrigins: ['carin-dev://', 'http://test.local'],
+    appEnv: 'dev',
+    sendEmail: async (message) => {
+      mail.push(message);
+      await enqueueAuthMail(db, authSecret, message);
+    },
+    onEmailQueueFailure: () => { queueFailures += 1; },
   });
   app = createApp({
     readiness: async () => true,
     auth: runtime.auth,
     account: { db, resolveSession: runtime.resolveSession },
     legalConsent: { db, resolveSession: runtime.resolveSession },
+    appLinkScheme: 'carin-dev',
   });
 }, 120_000);
 
 afterAll(async () => {
   await pool?.end();
   if (containerStarted) execFileSync('docker', ['rm', '-f', name], { stdio: 'pipe' });
+});
+
+beforeEach(async () => {
+  await pool.query('DELETE FROM rate_limit');
 });
 
 describe('Better Auth registration boundary', () => {
@@ -67,7 +80,7 @@ describe('Better Auth registration boundary', () => {
     const message = mail.filter((item) => item.to === email).at(-1);
     expect(message?.kind).toBe('verification');
     const verification = new URL(message!.url);
-    const verified = await app.request(`/api/auth/verify-email?token=${encodeURIComponent(verification.searchParams.get('token')!)}`);
+    const verified = await app.request(`${verification.pathname}${verification.search}`);
     expect(verified.status).toBeLessThan(400);
     const signedIn = await app.request('/api/auth/sign-in/email', {
       method: 'POST',
@@ -105,6 +118,33 @@ describe('Better Auth registration boundary', () => {
       { kind: 'terms', version: current.terms.version, granted: true },
     ]);
     expect(mail.at(-1)).toMatchObject({ kind: 'verification', to: email });
+    const verification = new URL(mail.at(-1)!.url);
+    expect(verification.searchParams.get('callbackURL')).toBe('http://test.local/auth/verified');
+    const queued = await pool.query('SELECT payload FROM email_task WHERE user_id=$1', [user.rows[0].id]);
+    expect(queued.rows[0].payload).toEqual({ to: email, url: mail.at(-1)!.url });
+    expect(queued.rows[0].payload).not.toHaveProperty('token');
+  });
+
+  it('does not persist a signup when its verification task cannot be queued', async () => {
+    const email = `${randomUUID()}@example.invalid`;
+    const beforeFailures = queueFailures;
+    await pool.query(`CREATE FUNCTION carin_test_reject_email_task() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'email task write blocked'; END; $$`);
+    await pool.query('CREATE TRIGGER carin_test_reject_email_task_trigger BEFORE INSERT ON email_task FOR EACH ROW EXECUTE FUNCTION carin_test_reject_email_task()');
+    try {
+      const current = getLegalRegistry();
+      const response = await app.request('/api/auth/sign-up/email', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ name: 'Queue Failure', email, password: 'password123', birthDate: '1976-10-14', acceptedTermsVersion: current.terms.version, acceptedPrivacyVersion: current.privacy.version }),
+      });
+      expect(response.status).toBe(503);
+      expect(queueFailures).toBe(beforeFailures + 1);
+      expect((await pool.query('SELECT id FROM "user" WHERE email=$1', [email])).rowCount).toBe(0);
+      expect((await pool.query('SELECT id FROM email_task WHERE payload->>\'to\'=$1', [email])).rowCount).toBe(0);
+    } finally {
+      await pool.query('DROP TRIGGER carin_test_reject_email_task_trigger ON email_task');
+      await pool.query('DROP FUNCTION carin_test_reject_email_task()');
+    }
   });
 
   it('rejects raw signup admission bypasses without creating an account', async () => {
@@ -129,6 +169,117 @@ describe('Better Auth registration boundary', () => {
     });
     expect(response.status).toBe(403);
     expect((await pool.query('SELECT id FROM "user" WHERE email=$1', [email])).rowCount).toBe(0);
+  });
+
+  it('rejects arbitrary callback origins for verification and password reset', async () => {
+    const email = `${randomUUID()}@example.invalid`;
+    await register(email, '1976-10-14');
+    const before = mail.length;
+    const verification = await app.request('/api/auth/send-verification-email', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: 'http://test.local' },
+      body: JSON.stringify({ email, callbackURL: 'https://attacker.example/verified' }),
+    });
+    const reset = await app.request('/api/auth/request-password-reset', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: 'http://test.local' },
+      body: JSON.stringify({ email, redirectTo: 'https://attacker.example/reset' }),
+    });
+    expect(verification.status).toBe(403);
+    expect(reset.status).toBe(403);
+    expect(mail).toHaveLength(before);
+  });
+
+  it('keeps reset responses generic on queue failure and allows a later retry', async () => {
+    const email = `${randomUUID()}@example.invalid`;
+    await register(email, '1976-10-14');
+    const beforeFailures = queueFailures;
+    await pool.query(`CREATE FUNCTION carin_test_reject_email_task() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'email task write blocked'; END; $$`);
+    await pool.query('CREATE TRIGGER carin_test_reject_email_task_trigger BEFORE INSERT ON email_task FOR EACH ROW EXECUTE FUNCTION carin_test_reject_email_task()');
+    let known: Response;
+    try {
+      known = await app.request('/api/auth/request-password-reset', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', origin: 'http://test.local' },
+        body: JSON.stringify({ email, redirectTo: 'http://test.local/auth/reset' }),
+      });
+    } finally {
+      await pool.query('DROP TRIGGER carin_test_reject_email_task_trigger ON email_task');
+      await pool.query('DROP FUNCTION carin_test_reject_email_task()');
+    }
+    const unknown = await app.request('/api/auth/request-password-reset', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: 'http://test.local' },
+      body: JSON.stringify({ email: `${randomUUID()}@example.invalid`, redirectTo: 'http://test.local/auth/reset' }),
+    });
+    expect(known!.status).toBe(unknown.status);
+    expect(await known!.json()).toEqual(await unknown.json());
+    expect(queueFailures).toBe(beforeFailures + 1);
+
+    const retry = await app.request('/api/auth/request-password-reset', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: 'http://test.local' },
+      body: JSON.stringify({ email, redirectTo: 'http://test.local/auth/reset' }),
+    });
+    expect(retry.status).toBe(200);
+    expect((await pool.query("SELECT id FROM email_task WHERE kind='password_reset' AND user_id=(SELECT id FROM \"user\" WHERE email=$1)", [email])).rowCount).toBe(1);
+  });
+
+  it('returns a generic reset response and revokes sessions after a valid reset token', async () => {
+    const email = `${randomUUID()}@example.invalid`;
+    await register(email, '1976-10-14');
+    const cookie = await verifyAndSignIn(email);
+    const resetRequest = (target: string) => app.request('/api/auth/request-password-reset', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: 'http://test.local' },
+      body: JSON.stringify({ email: target, redirectTo: 'http://test.local/auth/reset' }),
+    });
+    const known = await resetRequest(email);
+    const unknown = await resetRequest(`${randomUUID()}@example.invalid`);
+    expect(known.status).toBe(200);
+    expect(await known.json()).toEqual(await unknown.json());
+    const resetMail = mail.filter((item) => item.to === email && item.kind === 'password-reset').at(-1);
+    expect(resetMail).toBeDefined();
+    const resetUrl = new URL(resetMail!.url);
+    expect(resetUrl.origin).toBe('http://test.local');
+    expect(resetUrl.pathname).toBe('/auth/reset');
+    expect(resetUrl.searchParams.has('callbackURL')).toBe(false);
+    const landing = await app.request(`${resetUrl.pathname}${resetUrl.search}`);
+    expect(landing.headers.get('referrer-policy')).toBe('no-referrer');
+    expect(await landing.text()).toContain('carin-dev://auth/reset?token=');
+
+    const token = resetUrl.searchParams.get('token')!;
+    const reset = (newPassword: string) => app.request('/api/auth/reset-password', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: 'http://test.local' },
+      body: JSON.stringify({ token, newPassword }),
+    });
+    expect((await reset('new-password-123')).status).toBe(200);
+    expect((await app.request('/api/v1/me', { headers: { cookie } })).status).toBe(401);
+    expect((await reset('new-password-456')).status).toBeGreaterThanOrEqual(400);
+  });
+
+  it('rejects an expired reset token', async () => {
+    const email = `${randomUUID()}@example.invalid`;
+    await register(email, '1976-10-14');
+    const resetRequest = await app.request('/api/auth/request-password-reset', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: 'http://test.local' },
+      body: JSON.stringify({ email, redirectTo: 'http://test.local/auth/reset' }),
+    });
+    expect(resetRequest.status).toBe(200);
+    const resetMail = mail.filter((item) => item.to === email && item.kind === 'password-reset').at(-1);
+    expect(resetMail).toBeDefined();
+    await pool.query(
+      'UPDATE verification SET expires_at=now()-interval \'1 second\' WHERE identifier=$1',
+      [`reset-password:${resetMail!.token}`],
+    );
+    const response = await app.request('/api/auth/reset-password', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: 'http://test.local' },
+      body: JSON.stringify({ token: resetMail!.token, newPassword: 'new-password-123' }),
+    });
+    expect(response.status).toBeGreaterThanOrEqual(400);
   });
 
   it('rolls back the account when mandatory legal versions are stale', async () => {
@@ -185,12 +336,12 @@ describe('Better Auth registration boundary', () => {
     expect(await me.json()).toEqual(expect.objectContaining({ email, emailVerified: true, birthDate: '1976-10-14', aiConsent: { version: null, granted: false, updatedAt: null } }));
     const bypass = await app.request('/api/auth/update-user', {
       method: 'POST',
-      headers: { cookie, origin: 'carin://', 'content-type': 'application/json' },
+      headers: { cookie, origin: 'carin-dev://', 'content-type': 'application/json' },
       body: JSON.stringify({ birthDate: '2000-01-01', acceptedTermsVersion: 'forged' }),
     });
     expect(bypass.status).toBeGreaterThanOrEqual(400);
     expect((await pool.query('SELECT birth_date,accepted_terms_version FROM "user" WHERE email=$1', [email])).rows[0]).toEqual({ birth_date: '1976-10-14', accepted_terms_version: getLegalRegistry().terms.version });
-    const signedOut = await app.request('/api/auth/sign-out', { method: 'POST', headers: { cookie, origin: 'carin://' } });
+    const signedOut = await app.request('/api/auth/sign-out', { method: 'POST', headers: { cookie, origin: 'carin-dev://' } });
     expect(signedOut.status).toBe(200);
     expect((await app.request('/api/v1/me', { headers: { cookie } })).status).toBe(401);
   });

@@ -76,6 +76,28 @@ services:
       - private
     restart: unless-stopped
 
+  email-worker:
+    build:
+      context: ../carin-api
+      dockerfile: Dockerfile
+    profiles: ["email"]
+    environment:
+      APP_ENV: dev
+      DATABASE_URL: postgresql://${POSTGRES_USER:-carin_dev}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in infra/.env}@postgres:5432/${POSTGRES_DB:-carin_dev}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Set BETTER_AUTH_SECRET in infra/.env}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:?Set BETTER_AUTH_URL in infra/.env}
+      AUTH_TRUSTED_ORIGINS: ${AUTH_TRUSTED_ORIGINS:?Set AUTH_TRUSTED_ORIGINS in infra/.env}
+      APP_LINK_SCHEME: ${APP_LINK_SCHEME:?Set APP_LINK_SCHEME in infra/.env}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      EMAIL_FROM: ${EMAIL_FROM:-}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    command: ["node", "dist/email-worker.js"]
+    networks:
+      - private
+    restart: unless-stopped
+
   # Prepared for C16. Do not start this profile before its worker entrypoint exists.
   worker:
     build:
