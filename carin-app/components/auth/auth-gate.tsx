@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
-import { Redirect, useSegments } from 'expo-router';
+import { Redirect, useGlobalSearchParams, usePathname, useSegments, type Href } from 'expo-router';
 import { Text } from '@/components/ui/text';
 import { useAuth } from '@/lib/auth/provider';
 import { decideAuthRoute } from '@/lib/auth/routes';
@@ -36,7 +36,9 @@ export function AuthRestorationState({
 export function AuthGate() {
   const { status, error, retryRestoration } = useAuth();
   const segments = useSegments();
-  const decision = decideAuthRoute(status, segments.map(String));
+  const pathname = usePathname();
+  const params = useGlobalSearchParams<{ next?: string | string[] }>();
+  const decision = decideAuthRoute(status, segments.map(String), pathname, params.next);
 
   if (decision.type === 'render') return null;
   const isLoading = decision.type === 'loading';
@@ -47,7 +49,7 @@ export function AuthGate() {
         error={isLoading ? error : undefined}
         onRetry={isLoading ? () => void retryRestoration() : undefined}
       />
-      {decision.type === 'redirect' ? <Redirect href={decision.href} /> : null}
+      {decision.type === 'redirect' ? <Redirect href={decision.href as Href} /> : null}
     </>
   );
 }
