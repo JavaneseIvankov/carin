@@ -13,13 +13,24 @@ sama pada backend, generated mobile types, real AI, dan fixture adapter.
 Jalankan validator paket dari root repo (dependencies dapat dipasang di venv):
 
 ```sh
-python -m pip install PyYAML jsonschema openapi-spec-validator
-python specs/validate-contracts.py
+python -m venv .venv
+.venv/bin/python -m pip install -r specs/requirements-contracts.txt
+.venv/bin/python specs/validate-contracts.py
 ```
 
 Validator mengecek dokumen OpenAPI, resolve semua local refs tanpa network,
 JSON Schema formats, fixture output, coverage/count, source refs, serta scaling
 koreksi. Fixture mapping:
+
+`requirements-contracts.in` mencatat dependency langsung, sedangkan
+`requirements-contracts.txt` mengunci seluruh dependency transitif. Regenerasi
+lock dengan:
+
+```sh
+uv pip compile specs/requirements-contracts.in --python-version 3.14 -o specs/requirements-contracts.txt
+```
+
+CI menjalankan validator pada Python 3.14.
 
 | Fixture | Schema/arti |
 | --- | --- |
