@@ -32,6 +32,8 @@ Tanggal audit: 13 Oktober 2026. Baseline spec/kontrak: 1.0.0.
 
 Ketiganya tidak menulis kode atau mengubah board. Temuan dirangkum di dokumen ini; klaim diverifikasi terhadap file repo. Rekomendasi model berikut adalah kebijakan penugasan berdasarkan kompleksitas, bukan perbandingan harga terukur.
 
+**Perubahan kebijakan pengguna, 14 Oktober 2026:** delegasi konteks `backend_context` berikutnya memakai `gpt-6-luna / xhigh`. Baris tabel di atas adalah catatan historis model yang benar-benar dipakai pada audit awal; jangan ubah catatan historis itu.
+
 ## Kebijakan worker dan integrasi
 
 - [ ] Baca detail task terbaru melalui `tsk list Txx --json` dan periksa `git status --short` sebelum dispatch.
