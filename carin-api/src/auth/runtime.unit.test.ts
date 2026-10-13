@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Database } from '../db/client.js';
+import { loadConfig } from '../config.js';
 import {
   createAuthRuntime,
   createResetLandingUrl,
@@ -13,7 +14,7 @@ describe('Better Auth runtime', () => {
       baseURL: 'http://test.local',
       secret: 'test-secret-that-is-long-enough-for-auth',
       trustedOrigins: ['carin-dev://'],
-      cookiePrefix: 'carin-dev',
+      appEnv: 'dev',
       sendEmail: async () => undefined,
     });
 
@@ -25,14 +26,22 @@ describe('Better Auth runtime', () => {
     { appEnv: 'dev', cookiePrefix: 'carin-dev', appLinkScheme: 'carin-dev' },
     { appEnv: 'staging', cookiePrefix: 'carin-staging', appLinkScheme: 'carin-staging' },
     { appEnv: 'prod', cookiePrefix: 'carin-prod', appLinkScheme: 'carin' },
-  ])('uses the $appEnv cookie prefix while preserving auth options', ({ cookiePrefix, appLinkScheme }) => {
+  ])('uses the $appEnv cookie prefix while preserving auth options', ({ appEnv, cookiePrefix, appLinkScheme }) => {
+    const config = loadConfig({
+      APP_ENV: appEnv,
+      DATABASE_URL: 'postgresql://user:pass@localhost:5432/carin',
+      BETTER_AUTH_SECRET: 'test-secret-that-is-long-enough-for-auth',
+      BETTER_AUTH_URL: appEnv === 'dev' ? 'http://localhost:3000' : 'https://api.example.test',
+      AUTH_TRUSTED_ORIGINS: `${appLinkScheme}://`,
+      APP_LINK_SCHEME: appLinkScheme,
+    });
     const trustedOrigin = `${appLinkScheme}://`;
     const runtime = createAuthRuntime({
       db: undefined as unknown as Database,
       baseURL: 'http://test.local',
       secret: 'test-secret-that-is-long-enough-for-auth',
-      trustedOrigins: [trustedOrigin],
-      cookiePrefix,
+      trustedOrigins: config.authTrustedOrigins ?? [],
+      appEnv: config.appEnv,
       sendEmail: async () => undefined,
     });
 

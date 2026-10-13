@@ -38,7 +38,7 @@ beforeAll(async () => {
     baseURL: 'http://test.local',
     secret: authSecret,
     trustedOrigins: ['carin-dev://', 'http://test.local'],
-    cookiePrefix: 'carin-dev',
+    appEnv: 'dev',
     sendEmail: async (message) => {
       mail.push(message);
       await enqueueAuthMail(db, authSecret, message);
