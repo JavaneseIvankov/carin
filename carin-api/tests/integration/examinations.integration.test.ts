@@ -96,11 +96,14 @@ describe('examination API', () => {
     expect(series).toHaveLength(1);
     expect(series[0].items).toHaveLength(2);
     expect(series[0].latestExaminationId).toBe(latestBody.id);
-    const list = await request('/api/v1/examinations?limit=1');
+    const list = await request('/api/v1/examinations?limit=1&type=glucose');
     expect(list.status).toBe(200);
     const page = await list.json();
     expect(page.items[0].record.measuredOn).toBe('2025-03-01');
     expect(page.nextCursor).toEqual(expect.any(String));
+    const nextPage = await (await request(`/api/v1/examinations?limit=1&type=glucose&cursor=${encodeURIComponent(page.nextCursor)}`)).json();
+    expect(nextPage.items).toHaveLength(1);
+    expect(nextPage.items[0].record.measuredOn).toBe('2024-11-01');
   });
 
   it('keeps date-only rows deterministic by createdAt/id without assigning a measured time', async () => {
@@ -139,32 +142,48 @@ describe('examination API', () => {
   });
 
   it('replaces records with revision checks and removes only the deleted row from latest/series', async () => {
-    const older = await create(glucose({ measuredOn: '2020-01-01' }));
-    const newer = await create(glucose({ measuredOn: '2021-01-01', value: 95 }));
+    const hdl = (overrides: Record<string, unknown> = {}) => ({
+      ...glucose(), type: 'cholesterol', context: undefined, subtype: 'hdl', value: 55, ...overrides,
+    });
+    const older = await create(hdl({ measuredOn: '2020-01-01' }));
+    const newer = await create(hdl({ measuredOn: '2021-01-01', value: 60 }));
     const oldRecord = await older.json();
     const newRecord = await newer.json();
-    const update = await request(`/api/v1/examinations/${oldRecord.id}`, {
+    const updateKey = randomUUID();
+    const updateInit = {
       method: 'PATCH',
-      headers: { 'content-type': 'application/json', 'idempotency-key': randomUUID() },
-      body: JSON.stringify({ expectedRevision: 1, record: glucose({ measuredOn: '2022-01-01', value: 97 }) }),
-    });
+      headers: { 'content-type': 'application/json', 'idempotency-key': updateKey },
+      body: JSON.stringify({ expectedRevision: 1, record: hdl({ measuredOn: '2022-01-01', value: 65 }) }),
+    };
+    const update = await request(`/api/v1/examinations/${oldRecord.id}`, updateInit);
     expect(update.status).toBe(200);
-    expect((await update.json()).revision).toBe(2);
+    const updatedBody = await update.json();
+    expect(updatedBody.revision).toBe(2);
+    const updateReplay = await request(`/api/v1/examinations/${oldRecord.id}`, updateInit);
+    expect(updateReplay.status).toBe(200);
+    expect(await updateReplay.json()).toEqual(updatedBody);
+    const updateConflict = await request(`/api/v1/examinations/${oldRecord.id}`, {
+      ...updateInit,
+      body: JSON.stringify({ expectedRevision: 1, record: hdl({ measuredOn: '2022-01-01', value: 64 }) }),
+    });
+    expect(updateConflict.status).toBe(409);
+    expect((await updateConflict.json()).error.code).toBe('IDEMPOTENCY_CONFLICT');
     const stale = await request(`/api/v1/examinations/${oldRecord.id}`, {
       method: 'PATCH',
       headers: { 'content-type': 'application/json', 'idempotency-key': randomUUID() },
-      body: JSON.stringify({ expectedRevision: 1, record: glucose({ value: 98 }) }),
+      body: JSON.stringify({ expectedRevision: 1, record: hdl({ value: 66 }) }),
     });
     expect(stale.status).toBe(409);
     expect((await stale.json()).error.code).toBe('REVISION_CONFLICT');
-    const deletion = await request(`/api/v1/examinations/${oldRecord.id}`, {
-      method: 'DELETE', headers: { 'idempotency-key': randomUUID() },
-    });
+    const deleteInit = { method: 'DELETE', headers: { 'idempotency-key': randomUUID() } };
+    const deletion = await request(`/api/v1/examinations/${oldRecord.id}`, deleteInit);
     expect(deletion.status).toBe(204);
+    expect((await request(`/api/v1/examinations/${oldRecord.id}`, deleteInit)).status).toBe(204);
     expect((await request(`/api/v1/examinations/${oldRecord.id}`)).status).toBe(404);
     const series = await (await request('/api/v1/examination-series')).json();
-    expect(series[0].items.map((item: { id: string }) => item.id)).toEqual([newRecord.id]);
-    expect(series[0].latestExaminationId).toBe(newRecord.id);
+    const hdlSeries = series.find((entry: { latestExaminationId: string }) => entry.latestExaminationId === newRecord.id);
+    expect(hdlSeries.items.map((item: { id: string }) => item.id)).toEqual([newRecord.id]);
+    expect(hdlSeries.latestExaminationId).toBe(newRecord.id);
   });
 
   it('hides foreign-owned IDs and requires authentication', async () => {
@@ -192,6 +211,11 @@ describe('examination API', () => {
     const broad = await create(glucose({ measuredOn: '2018-01-01', value: 0.000000000123456789 }));
     expect(broad.status).toBe(201);
     expect((await broad.json()).record.value).toBe(0.000000000123456789);
+    await expect(pool.query(
+      `INSERT INTO examination (user_id,type,series_key,measured_on,timezone,systolic,diastolic,unit)
+       VALUES ($1,'pressure','["pressure",null,"mmHg"]','2018-01-01','UTC',120.5,80,'mmHg')`,
+      [ownerId],
+    )).rejects.toThrow();
   });
 
   it('binds opaque cursors to the authenticated owner and filters', async () => {

@@ -43,6 +43,13 @@
       "when": 1791927773662,
       "tag": "0005_examination_unconstrained_measurements",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791928093696,
+      "tag": "0006_examination_integer_pressure",
+      "breakpoints": true
     }
   ]
 }

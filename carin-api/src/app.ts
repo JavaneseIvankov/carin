@@ -11,6 +11,7 @@ import {
 } from "./modules/legal/routes.js";
 import { registerAccountRoutes } from './modules/account/routes.js';
 import { registerProfileRoutes } from './modules/profile/routes.js';
+import { registerExaminationRoutes } from './modules/examinations/routes.js';
 
 export type RequestLog = {
   requestId: string;
@@ -25,6 +26,7 @@ export type AppDependencies = {
   registerRoutes?: (app: Hono<AppEnv>) => void;
   legalConsent?: { db: Database; resolveSession: SessionResolver };
   account?: { db: Database; resolveSession: SessionResolver };
+  examinations?: { db: Database; resolveSession: SessionResolver; cursorSecret: string };
   auth?: { handler: (request: Request) => Promise<Response> };
 };
 
@@ -36,6 +38,7 @@ export function createApp({
   registerRoutes,
   legalConsent,
   account,
+  examinations,
   auth,
 }: AppDependencies): Hono<AppEnv> {
   const app = new Hono<AppEnv>();
@@ -61,6 +64,7 @@ export function createApp({
     registerAccountRoutes(app, account);
     registerProfileRoutes(app, account);
   }
+  if (examinations) registerExaminationRoutes(app, examinations);
   if (auth) app.all('/api/auth/*', (c) => auth.handler(c.req.raw));
 
   registerRoutes?.(app);

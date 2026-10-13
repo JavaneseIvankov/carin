@@ -31,6 +31,7 @@ const app = createApp({
   log: (entry) => { process.stdout.write(`${JSON.stringify(entry)}\n`); },
   auth: authRuntime.auth,
   account: { db, resolveSession: authRuntime.resolveSession },
+  examinations: { db, resolveSession: authRuntime.resolveSession, cursorSecret: authSecret },
   legalConsent: { db, resolveSession: authRuntime.resolveSession },
 });
 
