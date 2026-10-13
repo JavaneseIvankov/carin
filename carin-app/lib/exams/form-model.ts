@@ -19,6 +19,44 @@ export type ExaminationFormBuildResult = {
   errors: Partial<Record<ExaminationFormField, string>>;
 };
 
+function calendarParts(date: Date, timezone: string) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: timezone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(date);
+  return Object.fromEntries(parts.map(({ type, value }) => [type, value]));
+}
+
+export function formatCalendarDateInTimezone(date: Date, timezone: string) {
+  const parts = calendarParts(date, timezone);
+  return `${parts.year}-${parts.month}-${parts.day}`;
+}
+
+export function dateAtTimezoneCalendarNoon(value: string, timezone: string) {
+  const [year, month, day] = value.split('-').map(Number);
+  const wantedLocalNoon = Date.UTC(year, month - 1, day, 12);
+  let instant = wantedLocalNoon;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const parts = calendarParts(new Date(instant), timezone);
+    const representedAsUtc = Date.UTC(
+      Number(parts.year),
+      Number(parts.month) - 1,
+      Number(parts.day),
+      Number(parts.hour),
+      Number(parts.minute),
+      Number(parts.second)
+    );
+    instant = wantedLocalNoon - (representedAsUtc - instant);
+  }
+  return new Date(instant);
+}
+
 function isCalendarDate(value: string) {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
   if (!match) return false;
@@ -57,7 +95,11 @@ export function buildExaminationInput(
   const errors: ExaminationFormBuildResult['errors'] = {};
   if (!isCalendarDate(values.measuredOn))
     errors.measuredOn = 'Pilih tanggal pengukuran yang valid.';
-  if (values.measuredTime !== null && !/^([01]\d|2[0-3]):[0-5]\d$/.test(values.measuredTime)) {
+  if (
+    values.measuredTime !== null &&
+    values.measuredTime !== '' &&
+    !/^([01]\d|2[0-3]):[0-5]\d$/.test(values.measuredTime)
+  ) {
     errors.measuredTime = 'Pilih waktu yang valid.';
   }
   if (!timezone.trim()) errors.timezone = 'Zona waktu akun belum tersedia. Coba lagi.';
@@ -73,7 +115,7 @@ export function buildExaminationInput(
         systolic,
         diastolic,
         measuredOn: values.measuredOn,
-        measuredTime: values.measuredTime,
+        measuredTime: values.measuredTime || null,
         timezone,
         note: values.note.trim() || null,
       };
@@ -88,7 +130,7 @@ export function buildExaminationInput(
           value,
           context: values.context,
           measuredOn: values.measuredOn,
-          measuredTime: values.measuredTime,
+          measuredTime: values.measuredTime || null,
           timezone,
           note: values.note.trim() || null,
         };
@@ -99,7 +141,7 @@ export function buildExaminationInput(
           value,
           subtype: values.subtype,
           measuredOn: values.measuredOn,
-          measuredTime: values.measuredTime,
+          measuredTime: values.measuredTime || null,
           timezone,
           note: values.note.trim() || null,
         };

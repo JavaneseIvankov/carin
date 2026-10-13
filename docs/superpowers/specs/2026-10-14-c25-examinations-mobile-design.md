@@ -26,13 +26,18 @@ didukung jumlah titik.
 - Grafik SVG ringan menghubungkan paling banyak data dalam satu seri API. Label
   teks dan ringkasan daftar dapat dibaca screen reader. Satu titik hanya
   ditampilkan sebagai satu hasil, bukan tren. Tekanan sistolik/diastolik
-  divisualkan pada seri terpisah dengan tanggal historis yang sama.
+  divisualkan pada seri terpisah dengan tanggal historis yang sama. Semua titik
+  pada tanggal kalender yang sama memakai koordinat x yang sama. Jika waktu
+  pengukuran tidak dicatat, jangan hubungkan titik tersebut dengan titik lain
+  pada tanggal yang sama; baris dan ringkasan aksesibel tetap menyebut waktu
+  tidak dicatat.
 - Gunakan `@react-native-community/datetimepicker` via `expo install` untuk
-  pemilih tanggal/waktu native; web memakai input date/time yang dapat diakses.
-  Format tanggal dari komponen kalender lokal, bukan `toISOString`, supaya tidak
-  bergeser timezone. Waktu kosong sampai pengguna menambahkannya.
-- Gunakan timezone profil akun dari `getProfile`, bukan timezone perangkat. Jika
-  profil gagal dimuat, tampilkan pesan dan opsi coba lagi sebelum save.
+  pemilih tanggal native, dikunci ke timezone akun. Web memakai input date.
+  Format tanggal pada timezone akun, bukan `toISOString`, supaya tidak bergeser.
+  Waktu memakai field teks HH:mm yang kosong sampai pengguna memasukkan nilai;
+  jangan menginisialisasi dengan jam saat ini atau tengah malam.
+- Gunakan timezone akun dari `getMe`, bukan timezone perangkat. Jika data akun
+  gagal dimuat, tampilkan pesan dan opsi coba lagi sebelum save.
 - Daftar melakukan pagination cursor sampai habis, bukan mengasumsikan maksimal
   100 hasil.
 

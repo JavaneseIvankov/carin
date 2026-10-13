@@ -3,6 +3,8 @@ import type { components } from '../api/generated/app-api';
 import {
   formatMeasuredAt,
   formatMeasurement,
+  formatProjectedMeasurements,
+  localizedSeriesLabel,
   seriesAccessibleSummary,
   parseMeasurement,
   projectSeries,
@@ -70,6 +72,12 @@ describe('measurement formatting', () => {
     expect(formatMeasuredAt(dateOnly, 'en-GB')).toBe('14 Oct 2026');
     expect(formatMeasuredAt(withTime, 'en-GB')).toBe('14 Oct 2026 · 09:35');
   });
+
+  it('formats chart row values with the Indonesian decimal separator', () => {
+    expect(
+      formatProjectedMeasurements([{ key: 'value', label: 'Gula darah', value: 104.25 }], 'mg/dL')
+    ).toBe('Gula darah 104,25 mg/dL');
+  });
 });
 
 describe('recordTitle', () => {
@@ -113,6 +121,37 @@ describe('recordTitle', () => {
 });
 
 describe('projectSeries', () => {
+  it('localizes known API series labels from their typed series keys', () => {
+    const examples: [string, string, string][] = [
+      ['["pressure",null,"mmHg"]', 'Blood pressure', 'Tekanan darah'],
+      ['["glucose","fasting","mg/dL"]', 'Glucose · fasting', 'Gula darah · Puasa'],
+      ['["glucose","random","mg/dL"]', 'Glucose · random', 'Gula darah · Sewaktu'],
+      ['["glucose","post_meal","mg/dL"]', 'Glucose · post meal', 'Gula darah · Setelah makan'],
+      [
+        '["glucose","unknown","mg/dL"]',
+        'Glucose · unknown',
+        'Gula darah · Konteks tidak diketahui',
+      ],
+      ['["cholesterol","total","mg/dL"]', 'Cholesterol · TOTAL', 'Kolesterol · Total'],
+      ['["cholesterol","ldl","mg/dL"]', 'Cholesterol · LDL', 'Kolesterol · LDL'],
+      ['["cholesterol","hdl","mg/dL"]', 'Cholesterol · HDL', 'Kolesterol · HDL'],
+    ];
+
+    for (const [key, label, expected] of examples) {
+      const item: ExamSeries = {
+        key,
+        label,
+        unit: key.includes('pressure') ? 'mmHg' : 'mg/dL',
+        latestExaminationId: null,
+        items: [],
+      };
+      expect(localizedSeriesLabel(item)).toBe(expected);
+      const projected = projectSeries([item])[0]!;
+      expect(projected.label).toBe(expected);
+      expect(seriesAccessibleSummary(projected)).toContain(`${expected}.`);
+    }
+  });
+
   it('orders chart points by measured date and time, never by creation time', () => {
     const series: ExamSeries = {
       key: 'glucose:fasting:mg/dL',
@@ -131,6 +170,52 @@ describe('projectSeries', () => {
       'early-time',
       'late',
     ]);
+  });
+
+  it('keeps date-only and timed points at the same date coordinate without connecting them', () => {
+    const series: ExamSeries = {
+      key: 'glucose:fasting:mg/dL',
+      label: 'Gula darah · Puasa',
+      unit: 'mg/dL',
+      latestExaminationId: 'next-day',
+      items: [
+        examination(
+          'date-only',
+          glucoseRecord('2026-10-14', null, 'fasting', 101),
+          '2026-10-14T13:00:00Z'
+        ),
+        examination(
+          'next-day',
+          glucoseRecord('2026-10-15', '08:00', 'fasting', 102),
+          '2026-10-15T01:00:00Z'
+        ),
+        examination(
+          'timed',
+          glucoseRecord('2026-10-14', '09:30', 'fasting', 100),
+          '2026-10-14T02:30:00Z'
+        ),
+        examination(
+          'previous-day',
+          glucoseRecord('2026-10-13', null, 'fasting', 99),
+          '2026-10-13T08:00:00Z'
+        ),
+      ],
+    };
+    const projected = projectSeries([series])[0]!;
+
+    expect(projected.points.map(({ id, dateIndex }) => [id, dateIndex])).toEqual([
+      ['previous-day', 0],
+      ['timed', 1],
+      ['date-only', 1],
+      ['next-day', 2],
+    ]);
+    expect(projected.dateCount).toBe(3);
+    expect(projected.lineSegments.map((segment) => segment.map(({ id }) => id))).toEqual([
+      ['previous-day', 'timed'],
+      ['date-only', 'next-day'],
+    ]);
+    expect(projected.points[2]?.measuredAt).toBe('14 Okt 2026 · waktu tidak dicatat');
+    expect(seriesAccessibleSummary(projected)).toContain('14 Okt 2026 · waktu tidak dicatat:');
   });
 
   it('summarizes one point as a record count without implying a trend', () => {
@@ -198,7 +283,7 @@ describe('seriesAccessibleSummary', () => {
     };
 
     expect(seriesAccessibleSummary(projectSeries([series])[0]!)).toBe(
-      'Gula darah · Konteks tidak diketahui. 1 pengukuran. 14 Okt 2026: Gula darah · Konteks tidak diketahui 104 mg/dL.'
+      'Gula darah · Konteks tidak diketahui. 1 pengukuran. 14 Okt 2026 · waktu tidak dicatat: Gula darah · Konteks tidak diketahui 104 mg/dL.'
     );
   });
 });

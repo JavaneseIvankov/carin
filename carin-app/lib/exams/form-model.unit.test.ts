@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { buildExaminationInput } from './form-model';
+import {
+  buildExaminationInput,
+  dateAtTimezoneCalendarNoon,
+  formatCalendarDateInTimezone,
+} from './form-model';
 
 const validBase = {
   type: 'glucose' as const,
@@ -37,6 +41,12 @@ describe('buildExaminationInput', () => {
     expect(
       buildExaminationInput({ ...validBase, measuredTime: '9:05' }, 'Asia/Jakarta').errors
     ).toHaveProperty('measuredTime');
+  });
+
+  it('keeps a blank optional time absent instead of substituting a time', () => {
+    const result = buildExaminationInput({ ...validBase, measuredTime: '' }, 'Asia/Jakarta');
+    expect(result.record).toMatchObject({ measuredTime: null });
+    expect(result.errors).not.toHaveProperty('measuredTime');
   });
 
   it('requires positive integer pressure values and uses the pressure unit', () => {
@@ -82,4 +92,14 @@ describe('buildExaminationInput', () => {
     expect(result.record).toBeUndefined();
     expect(result.errors).toHaveProperty('timezone');
   });
+});
+
+describe('account timezone calendar helpers', () => {
+  it.each(['Pacific/Kiritimati', 'America/Los_Angeles', 'Asia/Jakarta'])(
+    'round-trips a calendar date in %s independent of the device timezone',
+    (timezone) => {
+      const date = dateAtTimezoneCalendarNoon('2026-10-14', timezone);
+      expect(formatCalendarDateInTimezone(date, timezone)).toBe('2026-10-14');
+    }
+  );
 });

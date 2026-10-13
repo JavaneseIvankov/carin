@@ -1,6 +1,10 @@
 import { Text } from '@/components/ui/text';
 import type { components } from '@/lib/api/generated/app-api';
-import { projectSeries, seriesAccessibleSummary } from '@/lib/exams/model';
+import {
+  formatProjectedMeasurements,
+  projectSeries,
+  seriesAccessibleSummary,
+} from '@/lib/exams/model';
 import Svg, { Circle, Line, Polyline } from 'react-native-svg';
 import { View } from 'react-native';
 
@@ -36,54 +40,58 @@ export function ExaminationSeriesChart({ series }: { series: ExamSeries }) {
   return (
     <View className="gap-3 rounded-xl border border-border bg-card p-4">
       <View className="gap-1">
-        <Text variant="large">{series.label}</Text>
+        <Text variant="large">{projected.label}</Text>
         <Text variant="muted">
           {projected.summary} · {series.unit}
         </Text>
       </View>
       {projected.points.length > 0 ? (
         <View accessibilityRole="summary" accessibilityLabel={accessibilitySummary}>
-          {projected.points.length > 1 ? (
-            <Svg
-              width="100%"
-              height={HEIGHT}
-              viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-              accessible={false}
-              accessibilityElementsHidden
-              importantForAccessibility="no-hide-descendants">
-              <Line x1={LEFT} y1={BOTTOM} x2={RIGHT} y2={BOTTOM} stroke="#9ca3af" strokeWidth="1" />
-              {metricKeys.map((metricKey) => {
-                const line = projected.points.flatMap((point, index) => {
-                  const measurement = point.measurements.find(({ key }) => key === metricKey);
-                  return measurement
-                    ? [`${xPosition(index, projected.points.length)},${getY(measurement.value)}`]
-                    : [];
+          <Svg
+            width="100%"
+            height={HEIGHT}
+            viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+            accessible={false}
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants">
+            <Line x1={LEFT} y1={BOTTOM} x2={RIGHT} y2={BOTTOM} stroke="#9ca3af" strokeWidth="1" />
+            {projected.points.length > 1 &&
+              metricKeys.map((metricKey) => {
+                return projected.lineSegments.map((segment, segmentIndex) => {
+                  const line = segment.flatMap((point) => {
+                    const measurement = point.measurements.find(({ key }) => key === metricKey);
+                    return measurement
+                      ? [
+                          `${xPosition(point.dateIndex, projected.dateCount)},${getY(measurement.value)}`,
+                        ]
+                      : [];
+                  });
+                  return line.length > 1 ? (
+                    <Polyline
+                      key={`${metricKey}-${segmentIndex}`}
+                      points={line.join(' ')}
+                      fill="none"
+                      stroke={metricColors[metricKey]}
+                      strokeWidth="3"
+                      strokeLinejoin="round"
+                      strokeLinecap="round"
+                    />
+                  ) : null;
                 });
-                return line.length > 1 ? (
-                  <Polyline
-                    key={metricKey}
-                    points={line.join(' ')}
-                    fill="none"
-                    stroke={metricColors[metricKey]}
-                    strokeWidth="3"
-                    strokeLinejoin="round"
-                    strokeLinecap="round"
-                  />
-                ) : null;
               })}
-              {projected.points.flatMap((point, index) =>
-                point.measurements.map((measurement) => (
-                  <Circle
-                    key={`${point.id}-${measurement.key}`}
-                    cx={xPosition(index, projected.points.length)}
-                    cy={getY(measurement.value)}
-                    r="4"
-                    fill={metricColors[measurement.key]}
-                  />
-                ))
-              )}
-            </Svg>
-          ) : (
+            {projected.points.flatMap((point) =>
+              point.measurements.map((measurement) => (
+                <Circle
+                  key={`${point.id}-${measurement.key}`}
+                  cx={xPosition(point.dateIndex, projected.dateCount)}
+                  cy={getY(measurement.value)}
+                  r="4"
+                  fill={metricColors[measurement.key]}
+                />
+              ))
+            )}
+          </Svg>
+          {projected.points.length === 1 && (
             <View className="min-h-24 items-center justify-center rounded-lg bg-muted px-4">
               <Text className="font-medium">Satu pengukuran tercatat</Text>
               <Text variant="muted">Belum ada cukup data untuk membandingkan waktu.</Text>
@@ -109,10 +117,7 @@ export function ExaminationSeriesChart({ series }: { series: ExamSeries }) {
                 key={point.id}
                 className="flex-row flex-wrap items-center justify-between gap-1 border-t border-border pt-2">
                 <Text variant="muted">{point.measuredAt}</Text>
-                <Text>
-                  {point.measurements.map(({ label, value }) => `${label} ${value}`).join(' · ')}{' '}
-                  {series.unit}
-                </Text>
+                <Text>{formatProjectedMeasurements(point.measurements, series.unit)}</Text>
               </View>
             ))}
           </View>

@@ -5,7 +5,12 @@ import { Text } from '@/components/ui/text';
 import { ExaminationSeriesChart } from '@/components/exams/ExaminationSeriesChart';
 import { useAppRead, useAppRepository } from '@/lib/api/query';
 import type { components } from '@/lib/api/generated/app-api';
-import { formatMeasuredAt, formatMeasurement, recordTitle } from '@/lib/exams/model';
+import {
+  formatMeasuredAt,
+  formatMeasurement,
+  localizedSeriesLabel,
+  recordTitle,
+} from '@/lib/exams/model';
 import { Link, useRouter } from 'expo-router';
 import * as React from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
@@ -133,7 +138,7 @@ export default function Exams() {
                 accessibilityState={{ selected: seriesKey === item.key }}
                 onPress={() => changeSeries(seriesKey === item.key ? null : item.key)}
                 className={`min-h-11 justify-center rounded-full border px-4 ${seriesKey === item.key ? 'border-primary bg-accent' : 'border-border bg-card'}`}>
-                <Text>{item.label}</Text>
+                <Text>{localizedSeriesLabel(item)}</Text>
               </Pressable>
             ))}
           </ScrollView>

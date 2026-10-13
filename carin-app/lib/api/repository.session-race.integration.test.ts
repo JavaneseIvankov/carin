@@ -1,6 +1,6 @@
 import { QueryClient } from '@tanstack/react-query';
 import { describe, expect, it, vi } from 'vitest';
-import { createAppRepository } from './repository';
+import { ApiError, createAppRepository } from './repository';
 import {
   clearScopedData,
   StaleScopeError,
@@ -72,5 +72,49 @@ describe('repository auth scope races', () => {
 
     expect(error).toBeInstanceOf(StaleScopeError);
     expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it('preserves the structured reason for an examination revision conflict', async () => {
+    const repository = createAppRepository({
+      scope: alice,
+      storage: memoryStorage(),
+      connectivity: () => 'online',
+      onUnauthorized: async () => {},
+      fetcher: (async () =>
+        new Response(
+          JSON.stringify({
+            error: {
+              code: 'REVISION_CONFLICT',
+              message: 'Examination has changed',
+              retryable: false,
+              requestId: 'request-1',
+              details: {},
+            },
+          }),
+          { status: 409, headers: { 'content-type': 'application/json' } }
+        )) as typeof fetch,
+      baseUrl: 'https://api.test',
+    });
+
+    const outcome = repository.write('updateExamination', {
+      path: { id: 'examination-1' },
+      headers: { 'Idempotency-Key': 'update-1' },
+      body: {
+        expectedRevision: 1,
+        record: {
+          type: 'glucose',
+          value: 100,
+          unit: 'mg/dL',
+          context: 'fasting',
+          measuredOn: '2026-10-14',
+          measuredTime: null,
+          timezone: 'Asia/Jakarta',
+          note: null,
+        },
+      },
+    });
+
+    await expect(outcome).rejects.toBeInstanceOf(ApiError);
+    await expect(outcome).rejects.toMatchObject({ status: 409, code: 'REVISION_CONFLICT' });
   });
 });

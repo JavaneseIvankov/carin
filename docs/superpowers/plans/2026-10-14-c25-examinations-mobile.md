@@ -35,7 +35,7 @@
 
 - [ ] Add tests for required measurement date, optional time staying null, decimal comma normalization, glucose unknown context, subtype selection, and preview showing exact unit/date/context before write.
 - [ ] Run the focused test to verify it fails for the absent form.
-- [ ] Install the Expo-compatible date/time picker, then implement accessible controls using it natively and date/time inputs on web; format selected calendar values locally, never through UTC conversion.
+- [ ] Install the Expo-compatible date picker, configure it with the account timezone, and implement a blank HH:mm field that remains null until entered; web uses a date input. Format selected calendar values in account timezone, never through UTC conversion.
 - [ ] Load the account timezone with `useAppRead('getMe', {})`; keep create/update disabled while timezone is unavailable. Do not invent a time default or abnormal-value thresholds.
 - [ ] Verify create/edit values serialize to the generated discriminated union, preview requires explicit confirmation, and one idempotency key is retained across retries of the same action.
 - [ ] Run form tests, typecheck, and lint for changed files; commit `feat(mobile): add examination entry form`.

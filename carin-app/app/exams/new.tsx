@@ -8,13 +8,19 @@ import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { useAppRead, useAppWrite } from '@/lib/api/query';
 import { serviceErrorMessage } from '@/components/app/presentation';
+import { resolveExaminationTimezoneRead } from '@/lib/exams/timezone-state';
 
 export default function NewExamination() {
   const router = useRouter();
   const me = useAppRead('getMe', {});
   const create = useAppWrite('createExamination');
   const idempotencyKey = React.useRef<string | null>(null);
-  const timezone = me.data?.data.timezone;
+  const timezoneRead = resolveExaminationTimezoneRead({
+    timezone: me.data?.data.timezone,
+    isPending: me.isPending,
+    error: me.error,
+  });
+  const timezone = timezoneRead.timezone;
 
   const resetDraft = () => {
     idempotencyKey.current = null;
@@ -46,19 +52,24 @@ export default function NewExamination() {
         <Text variant="h3">Catat pemeriksaan</Text>
         <Text variant="muted">Masukkan nilai persis seperti hasil pengukuran.</Text>
       </View>
-      {me.isPending ? (
-        <Text variant="muted">Memuat pengaturan akun…</Text>
-      ) : me.error && !timezone ? (
-        <ServiceError error={me.error} onRetry={() => void me.refetch()} />
-      ) : timezone ? (
-        <ExaminationForm
-          timezone={timezone}
-          pending={create.isPending}
-          submitError={create.error ? serviceErrorMessage(create.error) : undefined}
-          onDraftChange={resetDraft}
-          onSubmit={save}
-        />
-      ) : null}
+      {me.isPending && !timezone ? <Text variant="muted">Memuat pengaturan akun…</Text> : null}
+      <View className="flex-1 gap-4">
+        <View>
+          {timezoneRead.status === 'error' && (
+            <ServiceError error={me.error} onRetry={() => void me.refetch()} />
+          )}
+        </View>
+        {timezone && (
+          <ExaminationForm
+            timezone={timezone}
+            pending={create.isPending}
+            submissionDisabled={timezoneRead.submissionDisabled}
+            submitError={create.error ? serviceErrorMessage(create.error) : undefined}
+            onDraftChange={resetDraft}
+            onSubmit={save}
+          />
+        )}
+      </View>
     </View>
   );
 }
