@@ -89,7 +89,12 @@ export function isSuccessfulQueryRefresh(result: {
   isError: boolean;
   error?: unknown;
 }): boolean {
-  return result.data !== undefined && !result.isError && result.error == null;
+  const stale =
+    typeof result.data === 'object' &&
+    result.data !== null &&
+    'stale' in result.data &&
+    result.data.stale === true;
+  return result.data !== undefined && !stale && !result.isError && result.error == null;
 }
 
 export function getAiConsentStatus(

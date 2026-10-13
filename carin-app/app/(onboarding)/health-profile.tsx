@@ -310,7 +310,7 @@ export default function HealthProfileScreen() {
 
   const reloadConflict = async () => {
     const result = await profileQuery.refetch();
-    if (isSuccessfulQueryRefresh(result)) {
+    if (isSuccessfulQueryRefresh(result) && result.data && !result.data.stale) {
       setConflict(false);
       setConflictMessage(
         'Versi terbaru sudah dimuat. Draft tetap ada; tinjau lalu simpan kembali.'

@@ -213,6 +213,20 @@ describe('query refresh handling', () => {
     expect(isSuccessfulQueryRefresh({ data: { version: 4 }, isError: false, error: null })).toBe(
       true
     );
+    expect(
+      isSuccessfulQueryRefresh({
+        data: { data: { version: 4 }, updatedAt: 1, stale: true },
+        isError: false,
+        error: null,
+      })
+    ).toBe(false);
+    expect(
+      isSuccessfulQueryRefresh({
+        data: { data: { version: 4 }, updatedAt: 1, stale: false },
+        isError: false,
+        error: null,
+      })
+    ).toBe(true);
     expect(isSuccessfulQueryRefresh({ data: undefined, isError: false })).toBe(false);
   });
 });
