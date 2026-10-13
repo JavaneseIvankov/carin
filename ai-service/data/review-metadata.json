@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1.0.0",
+  "artifacts": {
+    "catalog": {"status": "draft", "reviewer": null, "approvedAt": null, "approvalId": null, "boundVersion": null, "contentSha256": null},
+    "nutrition-dataset": {"status": "draft", "reviewer": null, "approvedAt": null, "approvalId": null, "boundVersion": null, "contentSha256": null},
+    "rules": {"status": "draft", "reviewer": null, "approvedAt": null, "approvalId": null, "boundVersion": null, "contentSha256": null},
+    "capability-manifest": {"status": "draft", "reviewer": null, "approvedAt": null, "approvalId": null, "boundVersion": null, "contentSha256": null},
+    "sources": {},
+    "rulesById": {}
+  }
+}

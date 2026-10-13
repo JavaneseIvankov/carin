@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://carin.invalid/ai-data/nutrition-dataset.schema.json",
+  "title": "Versioned nutrition source registry",
+  "type": "object", "additionalProperties": false,
+  "required": ["artifactVersion", "datasetVersion", "sources"],
+  "properties": {
+    "artifactVersion": {"type": "string", "minLength": 1},
+    "datasetVersion": {"type": "string", "minLength": 1},
+    "sources": {"type": "array", "items": {"$ref": "source.schema.json"}}
+  }
+}

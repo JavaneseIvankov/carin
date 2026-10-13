@@ -1,0 +1,8 @@
+{
+  "artifactVersion": "1.0.0-draft",
+  "ruleSetVersion": "rules-unpublished-0.1.0",
+  "catalogVersion": "catalog-unpublished-0.1.0",
+  "nutritionDatasetVersion": "nutrition-unpublished-0.1.0",
+  "conditions": [],
+  "rules": []
+}
