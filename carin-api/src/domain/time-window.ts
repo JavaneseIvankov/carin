@@ -25,32 +25,26 @@ function addDays(date: string, count: number): string {
     .toString().padStart(2, '0')}-${result.getUTCDate().toString().padStart(2, '0')}`;
 }
 
-function localMidnightAsUtc(date: string, timeZone: string): Date {
+function firstInstantOnOrAfterLocalDate(date: string, timeZone: string): Date {
   const [year, month, day] = date.split('-').map(Number);
   const target = Date.UTC(year!, month! - 1, day!);
-  let candidate = target;
+  const dayMs = 24 * 60 * 60 * 1000;
+  let before = target - dayMs;
+  let after = target + dayMs;
 
-  // Iterate because the UTC offset can differ on either side of a DST change.
-  for (let attempt = 0; attempt < 4; attempt += 1) {
-    const parts = new Intl.DateTimeFormat('en-US', {
-      timeZone,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hourCycle: 'h23',
-    }).formatToParts(new Date(candidate));
-    const part = (type: Intl.DateTimeFormatPartTypes) => Number(parts.find((item) => item.type === type)!.value);
-    const localAsUtc = Date.UTC(
-      part('year'), part('month') - 1, part('day'), part('hour'), part('minute'), part('second'),
-    );
-    const adjustment = target - localAsUtc;
-    candidate += adjustment;
-    if (adjustment === 0) break;
+  // Bracket the local-date boundary. Expanding the bracket avoids assumptions
+  // about offset size or a fixed number of DST corrections.
+  while (localDateAt(new Date(before), timeZone) >= date) before -= dayMs;
+  while (localDateAt(new Date(after), timeZone) < date) after += dayMs;
+
+  // Find the first millisecond whose local date is the requested date or later.
+  // If a civil date was skipped entirely, this resolves to the next valid date.
+  while (after - before > 1) {
+    const middle = before + Math.floor((after - before) / 2);
+    if (localDateAt(new Date(middle), timeZone) < date) before = middle;
+    else after = middle;
   }
-  return new Date(candidate);
+  return new Date(after);
 }
 
 export function getDashboardWindow(now: Date, timeZone: string): DashboardWindow {
@@ -65,8 +59,8 @@ export function getDashboardWindow(now: Date, timeZone: string): DashboardWindow
     timezone: timeZone,
     startDate,
     endDate,
-    startInclusiveUtc: localMidnightAsUtc(startDate, timeZone).toISOString(),
-    endExclusiveUtc: localMidnightAsUtc(endExclusiveDate, timeZone).toISOString(),
+    startInclusiveUtc: firstInstantOnOrAfterLocalDate(startDate, timeZone).toISOString(),
+    endExclusiveUtc: firstInstantOnOrAfterLocalDate(endExclusiveDate, timeZone).toISOString(),
     dates: Array.from({ length: 7 }, (_, index) => addDays(startDate, index)),
   };
 }

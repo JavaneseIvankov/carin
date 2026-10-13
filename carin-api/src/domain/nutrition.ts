@@ -28,18 +28,27 @@ function requirePositiveFinite(value: number, label: string): void {
   if (!Number.isFinite(value) || value <= 0) throw new RangeError(`${label} must be finite and positive`);
 }
 
+function roundPositiveGrams(value: number): number {
+  const grams = roundToSixDecimals(value);
+  if (!Number.isFinite(grams) || grams <= 0) {
+    throw new RangeError('Portion grams must be representable as a positive six-decimal value');
+  }
+  return grams;
+}
+
 export function calculatePortionGrams(portion: PortionInput): number | null {
   const { quantity, unit, servingGrams } = portion;
   if (quantity === null || unit === null) return null;
   requirePositiveFinite(quantity, 'Quantity');
 
-  if (unit === 'g') return roundToSixDecimals(quantity);
+  if (unit === 'g') return roundPositiveGrams(quantity);
   if (servingGrams === null) return null;
   requirePositiveFinite(servingGrams, 'Serving grams');
-  return roundToSixDecimals(quantity * servingGrams);
+  return roundPositiveGrams(quantity * servingGrams);
 }
 
 export function scaleNutrients(per100g: Nutrients, edibleGrams: number | null): Nutrients {
+  if (edibleGrams !== null) requirePositiveFinite(edibleGrams, 'Edible grams');
   const result = {} as Nutrients;
   for (const key of NUTRIENT_KEYS) {
     const source = per100g[key];

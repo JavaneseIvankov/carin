@@ -89,6 +89,11 @@ describe('portion and nutrient math', () => {
     expect(() => calculatePortionGrams({ quantity: 0, unit: 'g', servingGrams: null })).toThrow();
   });
 
+  it('rejects portions smaller than the supported six-decimal gram precision', () => {
+    expect(() => calculatePortionGrams({ quantity: 1e-7, unit: 'g', servingGrams: null })).toThrow();
+    expect(() => calculatePortionGrams({ quantity: 1e-7, unit: 'serving', servingGrams: 1 })).toThrow();
+  });
+
   it('matches complete fixture nutrient values and does not mutate source data', () => {
     const source = structuredClone(complete.components[0]!.per100g);
     const before = structuredClone(source);
@@ -106,6 +111,15 @@ describe('portion and nutrient math', () => {
     expect(result.totals.carbohydrateG).toBe(30);
     expect(result.coverage.energyKcal).toEqual({ knownComponentCount: 2, totalComponentCount: 2 });
     expect(result.coverage.carbohydrateG).toEqual({ knownComponentCount: 1, totalComponentCount: 2 });
+  });
+
+  it('requires positive finite edible grams while preserving unknown and known-zero nutrients', () => {
+    const source = nutrients({ energyKcal: 0, carbohydrateG: null });
+    expect(scaleNutrients(source, 10)).toEqual(nutrients({ energyKcal: 0, carbohydrateG: null }));
+    for (const grams of [-1, 0, Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]) {
+      expect(() => scaleNutrients(source, grams)).toThrow();
+    }
+    expect(scaleNutrients(source, null)).toEqual(nutrients({}));
   });
 
   it('matches partial and unrecognized fixture totals and coverage', () => {
@@ -155,6 +169,18 @@ describe('timezone dashboard window', () => {
     expect(window.endDate).toBe('2026-03-09');
     expect(window.startInclusiveUtc).toBe('2026-03-03T05:00:00.000Z');
     expect(window.endExclusiveUtc).toBe('2026-03-10T04:00:00.000Z');
+  });
+
+  it('uses the first valid instant after a midnight DST gap', () => {
+    const window = getDashboardWindow(new Date('2026-09-05T12:00:00.000Z'), 'America/Santiago');
+    expect(window.endDate).toBe('2026-09-05');
+    expect(window.endExclusiveUtc).toBe('2026-09-06T04:00:00.000Z');
+  });
+
+  it('uses the next valid local date boundary when an entire date is skipped', () => {
+    const window = getDashboardWindow(new Date('2011-12-29T12:00:00.000Z'), 'Pacific/Apia');
+    expect(window.endDate).toBe('2011-12-29');
+    expect(window.endExclusiveUtc).toBe('2011-12-30T10:00:00.000Z');
   });
 
   it('rejects invalid instants and timezones', () => {
