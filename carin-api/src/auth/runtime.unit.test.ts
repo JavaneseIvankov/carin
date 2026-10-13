@@ -8,6 +8,7 @@ describe('Better Auth runtime', () => {
       db: undefined as unknown as Database,
       baseURL: 'http://test.local',
       secret: 'test-secret-that-is-long-enough-for-auth',
+      trustedOrigins: ['carin://'],
       sendEmail: async () => undefined,
     });
 

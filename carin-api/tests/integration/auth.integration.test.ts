@@ -34,6 +34,7 @@ beforeAll(async () => {
     db,
     baseURL: 'http://test.local',
     secret: 'test-secret-that-is-long-enough-for-auth',
+    trustedOrigins: ['carin://'],
     sendEmail: async (message) => { mail.push(message); },
   });
   app = createApp({
@@ -118,6 +119,18 @@ describe('Better Auth registration boundary', () => {
     expect((await pool.query('SELECT id FROM "user" WHERE email=$1', [email])).rowCount).toBe(0);
   });
 
+  it('rejects authentication requests from an untrusted origin', async () => {
+    const current = getLegalRegistry();
+    const email = `${randomUUID()}@example.invalid`;
+    const response = await app.request('/api/auth/sign-up/email', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: 'https://attacker.example' },
+      body: JSON.stringify({ name: 'Origin Check', email, password: 'password123', birthDate: '1976-10-14', acceptedTermsVersion: current.terms.version, acceptedPrivacyVersion: current.privacy.version }),
+    });
+    expect(response.status).toBe(403);
+    expect((await pool.query('SELECT id FROM "user" WHERE email=$1', [email])).rowCount).toBe(0);
+  });
+
   it('rolls back the account when mandatory legal versions are stale', async () => {
     const email = `${randomUUID()}@example.invalid`;
     const response = await app.request('/api/auth/sign-up/email', {
@@ -172,12 +185,12 @@ describe('Better Auth registration boundary', () => {
     expect(await me.json()).toEqual(expect.objectContaining({ email, emailVerified: true, birthDate: '1976-10-14', aiConsent: { version: null, granted: false, updatedAt: null } }));
     const bypass = await app.request('/api/auth/update-user', {
       method: 'POST',
-      headers: { cookie, 'content-type': 'application/json' },
+      headers: { cookie, origin: 'carin://', 'content-type': 'application/json' },
       body: JSON.stringify({ birthDate: '2000-01-01', acceptedTermsVersion: 'forged' }),
     });
     expect(bypass.status).toBeGreaterThanOrEqual(400);
     expect((await pool.query('SELECT birth_date,accepted_terms_version FROM "user" WHERE email=$1', [email])).rows[0]).toEqual({ birth_date: '1976-10-14', accepted_terms_version: getLegalRegistry().terms.version });
-    const signedOut = await app.request('/api/auth/sign-out', { method: 'POST', headers: { cookie } });
+    const signedOut = await app.request('/api/auth/sign-out', { method: 'POST', headers: { cookie, origin: 'carin://' } });
     expect(signedOut.status).toBe(200);
     expect((await app.request('/api/v1/me', { headers: { cookie } })).status).toBe(401);
   });

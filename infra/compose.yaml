@@ -57,6 +57,10 @@ services:
     environment:
       APP_ENV: dev
       DATABASE_URL: postgresql://${POSTGRES_USER:-carin_dev}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in infra/.env}@postgres:5432/${POSTGRES_DB:-carin_dev}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Set BETTER_AUTH_SECRET in infra/.env}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:?Set BETTER_AUTH_URL in infra/.env}
+      AUTH_TRUSTED_ORIGINS: ${AUTH_TRUSTED_ORIGINS:?Set AUTH_TRUSTED_ORIGINS in infra/.env}
+      APP_LINK_SCHEME: ${APP_LINK_SCHEME:?Set APP_LINK_SCHEME in infra/.env}
       PORT: "3000"
     ports:
       - "${API_BIND_ADDRESS:-0.0.0.0}:${API_PORT:-3000}:3000"

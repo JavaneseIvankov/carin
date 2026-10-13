@@ -20,6 +20,7 @@ const authRuntime = createAuthRuntime({
   db,
   baseURL: authURL,
   secret: authSecret,
+  trustedOrigins: config.authTrustedOrigins ?? [],
   // C09 supplies the durable Resend/outbox implementation through this seam.
   sendEmail: async () => {
     throw new Error('AUTH_EMAIL_DELIVERY_UNCONFIGURED');

@@ -18,7 +18,10 @@ phone on the same trusted LAN can call it.
 ## Start and persist data
 
 Copy `infra/.env.example` to `infra/.env`, replace the local-only passwords,
-then run these commands from the repository root. If a password contains URL
+set a unique `BETTER_AUTH_SECRET`, and use the same reachable API base in
+`BETTER_AUTH_URL` and `EXPO_PUBLIC_API_URL`. Keep `APP_LINK_SCHEME` aligned with
+`carin-app/app.json`; list only approved exact origins in `AUTH_TRUSTED_ORIGINS`.
+Then run these commands from the repository root. If a password contains URL
 reserved characters, percent-encode it because Compose places it in
 `DATABASE_URL`:
 

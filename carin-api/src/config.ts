@@ -7,6 +7,8 @@ export type AppConfig = {
   port: number;
   betterAuthSecret?: string;
   betterAuthUrl?: string;
+  authTrustedOrigins?: string[];
+  appLinkScheme?: string;
   aiServiceUrl?: string;
   aiServiceKey?: string;
   aiServiceAllowedHosts: string[];
@@ -96,8 +98,20 @@ export function loadConfig(env: Record<string, string | undefined>): AppConfig {
 
   const betterAuthSecret = env.BETTER_AUTH_SECRET?.trim();
   const betterAuthUrl = env.BETTER_AUTH_URL?.trim();
-  if ((betterAuthSecret && !betterAuthUrl) || (!betterAuthSecret && betterAuthUrl)) {
-    throw new Error('BETTER_AUTH_SECRET and BETTER_AUTH_URL must be configured together');
+  if (env.BETTER_AUTH_TRUSTED_ORIGINS?.trim()) {
+    throw new Error('BETTER_AUTH_TRUSTED_ORIGINS is not supported; configure AUTH_TRUSTED_ORIGINS instead');
+  }
+  const authTrustedOrigins = (env.AUTH_TRUSTED_ORIGINS ?? '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+  const appLinkScheme = env.APP_LINK_SCHEME?.trim().toLowerCase();
+  const authSettingsPresent = Boolean(betterAuthSecret || betterAuthUrl || authTrustedOrigins.length || appLinkScheme);
+  if (authSettingsPresent && (!betterAuthSecret || !betterAuthUrl || !authTrustedOrigins.length || !appLinkScheme)) {
+    throw new Error('BETTER_AUTH_SECRET, BETTER_AUTH_URL, AUTH_TRUSTED_ORIGINS, and APP_LINK_SCHEME must be configured together');
+  }
+  if (betterAuthSecret && betterAuthSecret.length < 32) {
+    throw new Error('BETTER_AUTH_SECRET must be at least 32 characters');
   }
   if (betterAuthUrl) {
     let parsedAuthUrl: URL;
@@ -109,6 +123,38 @@ export function loadConfig(env: Record<string, string | undefined>): AppConfig {
     if (!['http:', 'https:'].includes(parsedAuthUrl.protocol) || parsedAuthUrl.username || parsedAuthUrl.password || parsedAuthUrl.search || parsedAuthUrl.hash) {
       throw new Error('BETTER_AUTH_URL must use HTTP(S) without credentials, query, or fragment');
     }
+    if (appEnv !== 'dev' && parsedAuthUrl.protocol !== 'https:') {
+      throw new Error('BETTER_AUTH_URL must use HTTPS outside dev');
+    }
+  }
+  if (appLinkScheme && (!/^[a-z][a-z0-9+.-]*$/.test(appLinkScheme) || ['http', 'https'].includes(appLinkScheme))) {
+    throw new Error('APP_LINK_SCHEME must be a valid URI scheme');
+  }
+  const normalizedTrustedOrigins = authTrustedOrigins.map((origin) => {
+    if (origin.includes('*')) {
+      throw new Error('AUTH_TRUSTED_ORIGINS entries must be exact HTTP(S) origins or app schemes');
+    }
+    if (/^[a-z][a-z0-9+.-]*:\/\/$/i.test(origin)) return origin.toLowerCase();
+    let parsedOrigin: URL;
+    try {
+      parsedOrigin = new URL(origin);
+    } catch {
+      throw new Error('AUTH_TRUSTED_ORIGINS entries must be exact HTTP(S) origins or app schemes');
+    }
+    if (
+      !['http:', 'https:'].includes(parsedOrigin.protocol) || !parsedOrigin.hostname ||
+      parsedOrigin.username || parsedOrigin.password || parsedOrigin.pathname !== '/' ||
+      parsedOrigin.search || parsedOrigin.hash
+    ) {
+      throw new Error('AUTH_TRUSTED_ORIGINS entries must be exact HTTP(S) origins or app schemes');
+    }
+    if (appEnv !== 'dev' && parsedOrigin.protocol !== 'https:') {
+      throw new Error('AUTH_TRUSTED_ORIGINS web origins must use HTTPS outside dev');
+    }
+    return parsedOrigin.origin;
+  });
+  if (appLinkScheme && !normalizedTrustedOrigins.includes(`${appLinkScheme}://`)) {
+    throw new Error('AUTH_TRUSTED_ORIGINS must include APP_LINK_SCHEME');
   }
 
   const portString = env.PORT ?? '3000';
@@ -122,7 +168,12 @@ export function loadConfig(env: Record<string, string | undefined>): AppConfig {
     databaseUrl,
     port,
     aiServiceAllowedHosts,
-    ...(betterAuthSecret && betterAuthUrl ? { betterAuthSecret, betterAuthUrl } : {}),
+    ...(betterAuthSecret && betterAuthUrl ? {
+      betterAuthSecret,
+      betterAuthUrl,
+      authTrustedOrigins: normalizedTrustedOrigins,
+      appLinkScheme: appLinkScheme!,
+    } : {}),
     ...(aiServiceUrl ? { aiServiceUrl } : {}),
     ...(aiServiceKey ? { aiServiceKey } : {}),
   };

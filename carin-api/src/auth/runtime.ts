@@ -21,6 +21,7 @@ export type AuthRuntimeOptions = {
   db: Database;
   baseURL: string;
   secret: string;
+  trustedOrigins: string[];
   sendEmail: (mail: AuthMail) => Promise<void>;
 };
 
@@ -28,12 +29,15 @@ export function createAuthRuntime({
   db,
   baseURL,
   secret,
+  trustedOrigins,
   sendEmail,
 }: AuthRuntimeOptions): AuthRuntime {
   const auth = betterAuth({
     ...authOptions,
     baseURL,
     secret,
+    trustedOrigins,
+    advanced: { ...authOptions.advanced, disableOriginCheck: false },
     database: createAuthDatabaseAdapter(db),
     emailVerification: {
       ...authOptions.emailVerification,
