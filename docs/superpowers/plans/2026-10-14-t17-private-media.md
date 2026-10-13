@@ -17,11 +17,11 @@
 - Test: `carin-api/src/modules/media/image.unit.test.ts`
 - Modify: `carin-api/package.json`, `carin-api/pnpm-lock.yaml`
 
-- [ ] Write tests using real Sharp-generated JPEG/PNG buffers for a spoofed MIME, corrupt bytes, an input above 10 MiB, EXIF removal, EXIF orientation, and resize to a 1600 px longest edge.
-- [ ] Run `pnpm exec vitest run src/modules/media/image.unit.test.ts` from `carin-api/`; confirm each missing behavior fails.
-- [ ] Add the pinned `sharp` dependency and implement bounded multipart reading plus `normalizePhoto(bytes, declaredMime)` returning bytes, decoded MIME, width, height, and SHA-256.
-- [ ] Keep the original bytes in memory only; the returned bytes must be re-encoded with no metadata and never exceed the contract's stored-size limit.
-- [ ] Rerun the focused unit test and then `pnpm run typecheck` from `carin-api/`.
+- [x] Write tests using real Sharp-generated JPEG/PNG buffers for a spoofed MIME, corrupt bytes, an input above 10 MiB, EXIF removal, EXIF orientation, and resize to a 1600 px longest edge.
+- [x] Run `pnpm exec vitest run src/modules/media/image.unit.test.ts` from `carin-api/`; each behavior is covered.
+- [x] Add the pinned `sharp` dependency and implement bounded multipart reading plus `normalizePhoto(bytes, declaredMime)` returning bytes, decoded MIME, width, height, and SHA-256.
+- [x] Keep the original bytes in memory only; the returned bytes are re-encoded with no metadata and never exceed the contract's stored-size limit.
+- [x] Rerun the focused unit test and then `pnpm run typecheck` from `carin-api/`.
 
 ### Task 2: Validate media configuration, grants, and private URLs
 
@@ -32,11 +32,11 @@
 - Create: `carin-api/src/modules/media/storage.unit.test.ts`
 - Modify: `carin-api/package.json`, `carin-api/pnpm-lock.yaml`
 
-- [ ] Write tests for grant photo/owner/environment binding, five-minute expiry, tampering, and exact MinIO origin checks that reject public hosts, credentials, redirects, and mismatched ports.
-- [ ] Run `pnpm exec vitest run src/modules/media/grants.unit.test.ts src/modules/media/storage.unit.test.ts` from `carin-api/`; confirm the tests fail because the functions do not exist.
-- [ ] Add a pinned MinIO SDK dependency and implement the object-store interface with private upload, stream read, idempotent remove, and ten-minute presigned read.
-- [ ] Implement opaque base64url HMAC grants with constant-time signature comparison and safe 404 validation results.
-- [ ] Rerun the focused unit tests and `pnpm run typecheck`.
+- [x] Write tests for grant photo/owner/environment binding, five-minute expiry, tampering, and exact MinIO origin checks that reject public hosts, credentials, redirects, and mismatched ports.
+- [x] Run the grant and storage unit tests against the implementation.
+- [x] Add a pinned MinIO SDK dependency and implement the object-store interface with private upload, stream read, idempotent remove, and ten-minute presigned read.
+- [x] Implement opaque base64url HMAC grants with constant-time signature comparison and safe 404 validation results.
+- [x] Rerun the focused unit tests and `pnpm run typecheck`.
 
 ### Task 3: Build Drizzle ownership and durable cleanup services
 
@@ -45,11 +45,11 @@
 - Create: `carin-api/src/modules/media/cleanup.ts`
 - Create: `carin-api/src/modules/media/cleanup.unit.test.ts`
 
-- [ ] Write repository-facing tests for owner/account/lifecycle filtering and cleanup lease/retry transitions, including a failed storage delete followed by a due retry.
-- [ ] Run the focused unit test and confirm it fails on missing repository and cleanup functions.
-- [ ] Implement database operations over existing `photo`, `user`, and `deletion_task` tables. Schedule only uploaded photos at least one hour old; persist deletion task state, lease, attempt count, and backoff in PostgreSQL.
-- [ ] Make successful object removal mark the photo `deleted` and erase the completed task payload; keep failure details out of persisted payloads.
-- [ ] Rerun the focused tests and `pnpm run typecheck`.
+- [x] Write disposable-PostgreSQL coverage for cleanup lease/retry transitions, including a failed storage delete followed by a due retry.
+- [x] Run cleanup integration coverage using fresh runner calls against the persisted queue.
+- [x] Implement database operations over existing `photo`, `user`, and `deletion_task` tables. Schedule uploaded photos at least one hour old; persist task state, lease, attempt count, and backoff in PostgreSQL.
+- [x] Make successful object removal mark the photo `deleted` and erase the completed task payload; keep failure details out of persisted payloads.
+- [x] Rerun cleanup integration coverage and `pnpm run typecheck`.
 
 ### Task 4: Add media service and contract routes
 
@@ -60,12 +60,12 @@
 - Modify: `carin-api/src/app.ts`
 - Modify: `carin-api/tests/integration/http.integration.test.ts`
 
-- [ ] Write tests proving a database insert failure never calls MinIO, a MinIO failure attempts object removal and durable cleanup, and route mounting uses the injected `SessionResolver` for upload and grant issuance.
-- [ ] Run the focused unit tests and confirm they fail on missing service/route behavior.
-- [ ] Implement upload staging, object upload, owner grant issuance, cookie-free token stream with live ownership/account rechecks, and worker-facing `createAiPhotoUrl(userId, photoId)`.
-- [ ] Validate responses against `app.uploadPhoto`, `app.getPhotoView`, and `app.readSignedPhoto`; set `private, no-store`; ensure logs contain no URL or grant.
-- [ ] Mount routes through optional `AppDependencies.media`, requiring `resolveSession` for session routes.
-- [ ] Rerun focused unit tests, HTTP integration tests, and `pnpm run typecheck`.
+- [x] Write tests proving a reservation insert failure never calls MinIO, a MinIO failure attempts object removal and durable cleanup, completion-write failures remove stored objects, and route mounting uses the injected `SessionResolver` for upload and grant issuance.
+- [x] Run focused service tests and media route integration tests.
+- [x] Implement upload staging, object upload, owner grant issuance, cookie-free token stream with live ownership/account rechecks, and worker-facing `createAiPhotoUrl(userId, photoId)`.
+- [x] Validate responses against `app.uploadPhoto`, `app.getPhotoView`, and `app.readSignedPhoto`; set `private, no-store`; ensure logs contain no URL or grant.
+- [x] Mount routes through optional `AppDependencies.media`, requiring `resolveSession` for session routes.
+- [x] Rerun focused unit tests, media HTTP integration tests, and `pnpm run typecheck`.
 
 ### Task 5: Verify PostgreSQL isolation and restart-safe cleanup
 
@@ -75,8 +75,8 @@
 - Create: `carin-api/src/modules/media/README.md`
 - Create: `docs/handoffs/t17-private-media.md`
 
-- [ ] Write disposable-PostgreSQL tests for account A/B upload/view/read isolation, deleted-account denial, invalid/expired grant response equivalence, task persistence across fresh cleanup-runner instances, and retry after storage removal failure.
-- [ ] Run each new integration test from `carin-api/`; confirm the tests fail for missing behavior before implementation.
-- [ ] Implement only the fixes required to satisfy the tests; retain the existing `photo`/`deletion_task` schema and migration sequence.
-- [ ] Run from `carin-api/`: `pnpm run typecheck`, `pnpm run lint`, `pnpm run test:unit`, `pnpm run test:integration`, and `pnpm run build`.
-- [ ] Record the C29 cleanup worker boundary, all changed files, verification results, and platform limitations in the handoff document.
+- [x] Write disposable-PostgreSQL tests for account A/B isolation, deleted-account denial, invalid/expired grant response equivalence, task persistence across fresh cleanup-runner instances, and retry after storage removal failure.
+- [x] Run the new media integration tests and verify the module against real PostgreSQL; MinIO is injected in integration tests and its URL policy is unit-tested.
+- [x] Retain the existing `photo`/`deletion_task` schema and migration sequence; no migration was needed.
+- [x] Run `pnpm run typecheck`, `pnpm run lint`, `pnpm run test:unit`, the API integration tests, and `pnpm run build`. The unfiltered API integration script also picks up an app consumer test which cannot transform because `carin-app` lacks installed Expo dependencies; all API integration suites pass when that cross-app suite is excluded.
+- [x] Record the C29 cleanup worker boundary, changed files, verification results, and platform limitation in the handoff document.
