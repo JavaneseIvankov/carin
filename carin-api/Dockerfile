@@ -22,6 +22,7 @@ WORKDIR /app
 COPY --from=production-dependencies /app/node_modules ./node_modules
 COPY --from=build /app/package.json ./package.json
 COPY --from=build /app/dist ./dist
+COPY --from=build /app/fixtures ./fixtures
 # Runtime readiness and the one-shot migrator both load these reviewed SQL files.
 COPY --from=build /app/drizzle ./drizzle
 USER node

@@ -1,0 +1,20 @@
+{
+  "id": "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+  "scanId": "ffffffff-ffff-4fff-8fff-ffffffffffff",
+  "targetType": "scan",
+  "targetId": "ffffffff-ffff-4fff-8fff-ffffffffffff",
+  "targetRevision": 1,
+  "inputKind": "photo",
+  "status": "failed",
+  "attempts": 3,
+  "createdAt": "2026-10-13T05:00:00Z",
+  "startedAt": "2026-10-13T05:00:01Z",
+  "finishedAt": "2026-10-13T05:04:50Z",
+  "resultId": null,
+  "result": null,
+  "error": {
+    "code": "AI_SERVICE_UNAVAILABLE",
+    "message": "Analisis belum berhasil. Coba lagi; catatan lain tetap tersimpan.",
+    "retryable": true
+  }
+}

@@ -1,0 +1,145 @@
+{
+  "contractVersion": "1.0.0",
+  "dataMode": "synthetic",
+  "operationId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+  "inputKind": "photo",
+  "supportStatus": "complete",
+  "overallAttention": "needs_attention",
+  "profileVersion": 1,
+  "catalogVersion": "synthetic-catalog-1",
+  "nutritionDatasetVersion": "synthetic-nutrition-1",
+  "ruleSetVersion": "synthetic-rules-1",
+  "computedAt": "2026-10-13T05:00:00Z",
+  "components": [
+    {
+      "id": "11111111-1111-4111-8111-111111111111",
+      "displayName": "Makanan contoh sintetis 100 g",
+      "catalogFoodId": "fixture-food-001",
+      "preparation": "Contoh uji",
+      "matchStatus": "matched",
+      "portion": {
+        "quantity": 1,
+        "unit": "serving",
+        "servingId": "fixture-serving-100g",
+        "grams": 100,
+        "origin": "photo_estimate",
+        "basis": "Takaran sintetis 100 gram untuk pengujian",
+        "sourceId": "synthetic-nutrition"
+      },
+      "nutrients": {
+        "energyKcal": 200,
+        "carbohydrateG": 30,
+        "proteinG": 10,
+        "fatG": 5,
+        "fiberG": 3,
+        "sugarsG": 2,
+        "sodiumMg": 100
+      },
+      "per100g": {
+        "energyKcal": 200,
+        "carbohydrateG": 30,
+        "proteinG": 10,
+        "fatG": 5,
+        "fiberG": 3,
+        "sugarsG": 2,
+        "sodiumMg": 100
+      },
+      "nutrientSourceIds": {
+        "energyKcal": "synthetic-nutrition",
+        "carbohydrateG": "synthetic-nutrition",
+        "proteinG": "synthetic-nutrition",
+        "fatG": "synthetic-nutrition",
+        "fiberG": "synthetic-nutrition",
+        "sugarsG": "synthetic-nutrition",
+        "sodiumMg": "synthetic-nutrition"
+      },
+      "sourceIds": [
+        "synthetic-nutrition"
+      ]
+    }
+  ],
+  "totals": {
+    "energyKcal": 200,
+    "carbohydrateG": 30,
+    "proteinG": 10,
+    "fatG": 5,
+    "fiberG": 3,
+    "sugarsG": 2,
+    "sodiumMg": 100
+  },
+  "coverage": {
+    "energyKcal": {
+      "knownComponentCount": 1,
+      "totalComponentCount": 1
+    },
+    "carbohydrateG": {
+      "knownComponentCount": 1,
+      "totalComponentCount": 1
+    },
+    "proteinG": {
+      "knownComponentCount": 1,
+      "totalComponentCount": 1
+    },
+    "fatG": {
+      "knownComponentCount": 1,
+      "totalComponentCount": 1
+    },
+    "fiberG": {
+      "knownComponentCount": 1,
+      "totalComponentCount": 1
+    },
+    "sugarsG": {
+      "knownComponentCount": 1,
+      "totalComponentCount": 1
+    },
+    "sodiumMg": {
+      "knownComponentCount": 1,
+      "totalComponentCount": 1
+    }
+  },
+  "attentions": [
+    {
+      "ruleId": "fixture-rule-001",
+      "conditionId": "fixture-condition",
+      "componentIds": [
+        "11111111-1111-4111-8111-111111111111"
+      ],
+      "reason": "Pesan sintetis untuk menguji tampilan alasan perhatian; tidak mempunyai arti klinis.",
+      "adjustments": [
+        "Penyesuaian contoh untuk pengujian UI; jangan digunakan sebagai saran kesehatan."
+      ],
+      "sourceIds": [
+        "synthetic-rule"
+      ],
+      "limitations": [
+        "Hanya fixture development/test."
+      ]
+    }
+  ],
+  "limitations": [
+    {
+      "code": "SYNTHETIC_DATA",
+      "message": "Data contoh sintetis; bukan hasil AI nyata atau informasi kesehatan.",
+      "componentIds": [],
+      "critical": false
+    }
+  ],
+  "sources": [
+    {
+      "id": "synthetic-nutrition",
+      "kind": "synthetic",
+      "title": "Data angka sintetis untuk pengujian kontrak, bukan data gizi nyata",
+      "datasetVersion": "synthetic-nutrition-1",
+      "itemRef": "fixture-food-001 per 100 g",
+      "url": "https://fixtures.carin.invalid/nutrition/fixture-food-001"
+    },
+    {
+      "id": "synthetic-rule",
+      "kind": "synthetic",
+      "title": "Aturan contoh untuk pengujian UI, bukan acuan kesehatan",
+      "datasetVersion": "synthetic-rules-1",
+      "itemRef": "fixture-rule-001",
+      "url": "https://fixtures.carin.invalid/rules/fixture-rule-001"
+    }
+  ]
+}

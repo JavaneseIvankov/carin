@@ -1,0 +1,116 @@
+{
+  "contractVersion": "1.0.0",
+  "dataMode": "synthetic",
+  "operationId": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+  "inputKind": "photo",
+  "supportStatus": "unrecognized",
+  "overallAttention": "insufficient_information",
+  "profileVersion": 1,
+  "catalogVersion": "synthetic-catalog-1",
+  "nutritionDatasetVersion": "synthetic-nutrition-1",
+  "ruleSetVersion": "synthetic-rules-1",
+  "computedAt": "2026-10-13T05:00:00Z",
+  "components": [
+    {
+      "id": "22222222-2222-4222-8222-222222222222",
+      "displayName": "Komponen yang belum dikenali",
+      "catalogFoodId": null,
+      "preparation": null,
+      "matchStatus": "unrecognized",
+      "portion": {
+        "quantity": null,
+        "unit": null,
+        "servingId": null,
+        "grams": null,
+        "origin": "photo_estimate",
+        "basis": null,
+        "sourceId": null
+      },
+      "nutrients": {
+        "energyKcal": null,
+        "carbohydrateG": null,
+        "proteinG": null,
+        "fatG": null,
+        "fiberG": null,
+        "sugarsG": null,
+        "sodiumMg": null
+      },
+      "per100g": {
+        "energyKcal": null,
+        "carbohydrateG": null,
+        "proteinG": null,
+        "fatG": null,
+        "fiberG": null,
+        "sugarsG": null,
+        "sodiumMg": null
+      },
+      "nutrientSourceIds": {
+        "energyKcal": null,
+        "carbohydrateG": null,
+        "proteinG": null,
+        "fatG": null,
+        "fiberG": null,
+        "sugarsG": null,
+        "sodiumMg": null
+      },
+      "sourceIds": []
+    }
+  ],
+  "totals": {
+    "energyKcal": null,
+    "carbohydrateG": null,
+    "proteinG": null,
+    "fatG": null,
+    "fiberG": null,
+    "sugarsG": null,
+    "sodiumMg": null
+  },
+  "coverage": {
+    "energyKcal": {
+      "knownComponentCount": 0,
+      "totalComponentCount": 1
+    },
+    "carbohydrateG": {
+      "knownComponentCount": 0,
+      "totalComponentCount": 1
+    },
+    "proteinG": {
+      "knownComponentCount": 0,
+      "totalComponentCount": 1
+    },
+    "fatG": {
+      "knownComponentCount": 0,
+      "totalComponentCount": 1
+    },
+    "fiberG": {
+      "knownComponentCount": 0,
+      "totalComponentCount": 1
+    },
+    "sugarsG": {
+      "knownComponentCount": 0,
+      "totalComponentCount": 1
+    },
+    "sodiumMg": {
+      "knownComponentCount": 0,
+      "totalComponentCount": 1
+    }
+  },
+  "attentions": [],
+  "limitations": [
+    {
+      "code": "SYNTHETIC_DATA",
+      "message": "Data contoh sintetis; bukan hasil AI nyata atau informasi kesehatan.",
+      "componentIds": [],
+      "critical": false
+    },
+    {
+      "code": "UNRECOGNIZED_COMPONENT",
+      "message": "Sebagian makanan belum dikenali. Total gizi hanya mencakup komponen yang diketahui.",
+      "componentIds": [
+        "22222222-2222-4222-8222-222222222222"
+      ],
+      "critical": true
+    }
+  ],
+  "sources": []
+}
