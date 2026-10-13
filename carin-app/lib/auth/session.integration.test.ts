@@ -113,6 +113,62 @@ describe('auth session lifecycle', () => {
     expect(states.at(-1)).toBe('unauthenticated');
   });
 
+  it('defers 401 invalidation until pending sign-out cookie cleanup finishes', async () => {
+    const states: string[] = [];
+    let releaseServerSignOut!: () => void;
+    let serverSignOutStarted!: () => void;
+    const serverSignOut = new Promise<void>((resolve) => {
+      releaseServerSignOut = resolve;
+    });
+    const started = new Promise<void>((resolve) => {
+      serverSignOutStarted = resolve;
+    });
+    let serverSignOutSettled = false;
+    let releaseLocalCleanup!: () => void;
+    let localCleanupStarted!: () => void;
+    const localCleanup = new Promise<void>((resolve) => {
+      releaseLocalCleanup = resolve;
+    });
+    const cleanupStarted = new Promise<void>((resolve) => {
+      localCleanupStarted = resolve;
+    });
+    const clearSession = vi.fn(async () => {
+      if (serverSignOutSettled) {
+        localCleanupStarted();
+        await localCleanup;
+      }
+    });
+    const lifecycle = createAuthSessionLifecycle({
+      getSession: async () => sessionFor('alice'),
+      setSessionUser: async () => {},
+      clearSession,
+      onState: (state) => states.push(state.status),
+    });
+    await lifecycle.restore();
+
+    const signOut = lifecycle.signOut(async () => {
+      serverSignOutStarted();
+      await serverSignOut;
+      serverSignOutSettled = true;
+    });
+    await started;
+    const invalidation = lifecycle.invalidateSession();
+
+    await Promise.resolve();
+    expect(lifecycle.getState().status).toBe('loading');
+    expect(states).not.toContain('unauthenticated');
+
+    releaseServerSignOut();
+    await cleanupStarted;
+    expect(lifecycle.getState().status).toBe('loading');
+    releaseLocalCleanup();
+    await Promise.all([signOut, invalidation]);
+
+    expect(clearSession).toHaveBeenCalledOnce();
+    expect(lifecycle.getState()).toMatchObject({ status: 'unauthenticated', user: null });
+    expect(states.at(-1)).toBe('unauthenticated');
+  });
+
   it('invalidates the auth state when a protected request returns 401', async () => {
     const storage = memoryStorage();
     const queryClient = new QueryClient();

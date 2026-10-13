@@ -28,6 +28,7 @@ type Dependencies = {
 export function createAuthSessionLifecycle(deps: Dependencies) {
   let state: AuthLifecycleState = { status: 'loading', user: null };
   let requestGeneration = 0;
+  let signOutInFlight: Promise<void> | null = null;
 
   const publish = (next: AuthLifecycleState) => {
     state = next;
@@ -60,6 +61,11 @@ export function createAuthSessionLifecycle(deps: Dependencies) {
 
   async function invalidateSession() {
     const generation = ++requestGeneration;
+    if (signOutInFlight) {
+      await signOutInFlight;
+      if (generation === requestGeneration) publish({ status: 'unauthenticated', user: null });
+      return;
+    }
     try {
       await deps.clearSession();
     } catch {
@@ -71,6 +77,11 @@ export function createAuthSessionLifecycle(deps: Dependencies) {
   async function signOut(serverSignOut: () => Promise<unknown>) {
     const generation = ++requestGeneration;
     publish({ status: 'loading', user: state.user });
+    let finishSignOut!: () => void;
+    const signOutOperation = new Promise<void>((resolve) => {
+      finishSignOut = resolve;
+    });
+    signOutInFlight = signOutOperation;
     try {
       await serverSignOut();
     } catch {
@@ -81,7 +92,12 @@ export function createAuthSessionLifecycle(deps: Dependencies) {
     } catch {
       // A cleanup error must not leave authenticated UI visible.
     }
-    if (generation === requestGeneration) publish({ status: 'unauthenticated', user: null });
+    try {
+      if (generation === requestGeneration) publish({ status: 'unauthenticated', user: null });
+    } finally {
+      finishSignOut();
+      if (signOutInFlight === signOutOperation) signOutInFlight = null;
+    }
   }
 
   return {
