@@ -24,7 +24,10 @@ owner row before job rows, enforces the per-user active limit, and claims a due
 queued row or an expired processing lease using `FOR UPDATE SKIP LOCKED`. Claim
 increments the attempt, issues a fresh UUID fencing token, and sets the lease to
 the earlier of 120 seconds or the immutable deadline. Heartbeats require the
-same still-live token and never move the job deadline.
+same still-live token and never move the job deadline. Heartbeat, publication, and
+failure sample PostgreSQL `clock_timestamp()` only after obtaining the owner/job
+locks; publication rechecks it after target locks too, so lock waits cannot let an
+expired lease pass the fence.
 
 Worker provider calls happen outside transactions. The worker loads the frozen
 job snapshot, invokes the existing schema-validated `AiClient` with its 90-second
@@ -104,7 +107,7 @@ combined; integration tests here apply this branch's migration sequence alone.
 
 Verification from `carin-api/` in the T16 worktree:
 
-- `pnpm run test` — passed: 82 unit tests and 116 integration tests across 8 and 7 files.
+- `pnpm run test` — passed: 82 unit tests and 117 integration tests across 8 and 7 files.
 - `pnpm run typecheck` — passed.
 - `pnpm run lint` — passed with zero warnings.
 - `pnpm run build` — passed.
@@ -116,6 +119,8 @@ backoff/attempt/deadline limits, target edit and photo detachment, consent withd
 and re-grant, an explicitly ordered withdrawal/publication race, atomic rollback
 before commit and duplicate publication after commit, idempotent retry, owner-only
 reads, active-job throttling, and a worker call through the shared fixture AI client.
+The lock-wait regression holds the account row until a short lease expires and proves
+heartbeat, publication, and failure reject the now-stale attempt.
 
 Limits for integration review: this base has no authenticated server session
 resolver or job-producing media/domain route, so app registration remains dependency

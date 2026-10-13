@@ -132,6 +132,26 @@ async function waitForLockWaiters(minimum: number): Promise<void> {
   throw new Error(`Expected ${minimum} database lock waiters`);
 }
 
+async function holdOwnerLockPastLease<T>(jobId: string, operation: () => Promise<T>): Promise<T> {
+  const blocker = await pool.connect();
+  try {
+    await blocker.query('BEGIN');
+    await blocker.query('SELECT id FROM "user" WHERE id=$1 FOR UPDATE', [userId]);
+    await pool.query(
+      `UPDATE analysis_job SET lease_expires_at=clock_timestamp()+interval '350 milliseconds' WHERE id=$1`,
+      [jobId],
+    );
+    const pending = operation();
+    await waitForLockWaiters(1);
+    await new Promise((resolve) => setTimeout(resolve, 450));
+    await blocker.query('COMMIT');
+    return await pending;
+  } finally {
+    await blocker.query('ROLLBACK').catch(() => undefined);
+    blocker.release();
+  }
+}
+
 describe('durable analysis job leases and publication', () => {
   it('reclaims a crashed lease with a new fence and publishes at most once', async () => {
     const job = await createPhotoJob();
@@ -649,5 +669,51 @@ describe('durable analysis job leases and publication', () => {
     );
     expect(scheduled.rows[0]).toMatchObject({ status: 'queued', attempts: 1, error: null });
     expect(scheduled.rows[0].next_attempt_at).toBeInstanceOf(Date);
+    await pool.query(
+      `UPDATE analysis_job SET status='cancelled',finished_at=clock_timestamp(),updated_at=clock_timestamp()
+       WHERE id=$1 AND status='queued'`,
+      [retryJob.id],
+    );
+  });
+
+  it('rejects heartbeat, publication, and failure after waiting for the owner lock past lease expiry', async () => {
+    const renewJob = await createPhotoJob();
+    const renewClaim = await claimNextJob(database);
+    expect(renewClaim?.id).toBe(renewJob.id);
+    expect(await holdOwnerLockPastLease(renewJob.id, () => renewJobLease(database, {
+      jobId: renewJob.id,
+      userId,
+      leaseToken: renewClaim!.leaseToken,
+    }))).toBeNull();
+    await pool.query(
+      `UPDATE analysis_job SET status='cancelled',lease_token=NULL,lease_expires_at=NULL,finished_at=now()
+       WHERE id=$1 AND status='processing'`,
+      [renewJob.id],
+    );
+
+    const publishJob = await createPhotoJob();
+    const publishClaim = await claimNextJob(database);
+    expect(publishClaim?.id).toBe(publishJob.id);
+    expect(await holdOwnerLockPastLease(publishJob.id, () => publishJobResult(database, {
+      jobId: publishJob.id,
+      userId,
+      leaseToken: publishClaim!.leaseToken,
+      result: completePhotoResult(publishJob.operationId),
+    }))).toBe(false);
+    await pool.query(
+      `UPDATE analysis_job SET status='cancelled',lease_token=NULL,lease_expires_at=NULL,finished_at=now()
+       WHERE id=$1 AND status='processing'`,
+      [publishJob.id],
+    );
+
+    const failureJob = await createPhotoJob();
+    const failureClaim = await claimNextJob(database);
+    expect(failureClaim?.id).toBe(failureJob.id);
+    expect(await holdOwnerLockPastLease(failureJob.id, () => recordJobFailure(database, {
+      jobId: failureJob.id,
+      userId,
+      leaseToken: failureClaim!.leaseToken,
+      error: { code: 'SERVICE_UNAVAILABLE', message: 'AI service unavailable.', retryable: true },
+    }))).toBe('stale');
   });
 });

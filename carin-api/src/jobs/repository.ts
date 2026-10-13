@@ -322,9 +322,9 @@ export async function renewJobLease(
   input: { jobId: string; userId: string; leaseToken: string; now?: Date },
 ): Promise<Date | null> {
   return db.transaction(async (tx) => {
-    const now = input.now ?? await databaseNow(tx);
     const { account, job } = await lockOwnedJob(tx, input.jobId, input.userId);
     if (!account || !job) return null;
+    const now = input.now ?? await databaseNow(tx);
     if (
       account.deletionStatus !== 'active' ||
       job.status !== 'processing' ||
@@ -383,9 +383,10 @@ export async function publishJobResult(
 ): Promise<boolean> {
   validateSchema('ai.AnalysisResult', input.result);
   return db.transaction(async (tx) => {
-    const now = input.now ?? await databaseNow(tx);
     const { account, job } = await lockOwnedJob(tx, input.jobId, input.userId);
-    if (!account || !job || !isCurrentAttempt(job, input.leaseToken, now)) return false;
+    if (!account || !job) return false;
+    let now = input.now ?? await databaseNow(tx);
+    if (!isCurrentAttempt(job, input.leaseToken, now)) return false;
     if (account.deletionStatus !== 'active' || !await lockAndCheckCurrentAiConsent(tx, input.userId)) {
       await cancelStaleAttempt(tx, job.id, now);
       return false;
@@ -402,6 +403,8 @@ export async function publishJobResult(
       [scanRow] = await tx.select().from(scan)
         .where(and(eq(scan.id, job.scanId), eq(scan.userId, input.userId)))
         .for('update');
+      now = input.now ?? await databaseNow(tx);
+      if (!isCurrentAttempt(job, input.leaseToken, now)) return false;
       const targetIsCurrent = Boolean(scanRow) && scanRow!.lifecycle === 'active' &&
         scanRow!.photoId !== null && scanRow!.deletedAt === null && scanRow!.generation === job.targetGeneration &&
         scanRow!.latestJobId === job.id && (
@@ -418,12 +421,6 @@ export async function publishJobResult(
       [consumptionRow] = await tx.select().from(consumption)
         .where(and(eq(consumption.id, job.consumptionId), eq(consumption.userId, input.userId)))
         .for('update');
-      if (!consumptionRow || consumptionRow.deletedAt !== null ||
-          consumptionRow.revision !== job.targetRevision ||
-          consumptionRow.generation !== job.targetGeneration || !consumptionRow.currentSnapshotId) {
-        await cancelStaleAttempt(tx, job.id, now);
-        return false;
-      }
       [evaluationRow] = await tx.select().from(consumptionEvaluation)
         .where(and(
           eq(consumptionEvaluation.userId, input.userId),
@@ -432,6 +429,14 @@ export async function publishJobResult(
           eq(consumptionEvaluation.jobId, job.id),
         ))
         .for('update');
+      now = input.now ?? await databaseNow(tx);
+      if (!isCurrentAttempt(job, input.leaseToken, now)) return false;
+      if (!consumptionRow || consumptionRow.deletedAt !== null ||
+          consumptionRow.revision !== job.targetRevision ||
+          consumptionRow.generation !== job.targetGeneration || !consumptionRow.currentSnapshotId) {
+        await cancelStaleAttempt(tx, job.id, now);
+        return false;
+      }
       if (!evaluationRow || evaluationRow.state !== 'pending' ||
           evaluationRow.snapshotId !== consumptionRow.currentSnapshotId) {
         await cancelStaleAttempt(tx, job.id, now);
@@ -497,9 +502,10 @@ export async function recordJobFailure(
   },
 ): Promise<'retrying' | 'failed' | 'stale'> {
   return db.transaction(async (tx) => {
-    const now = input.now ?? await databaseNow(tx);
     const { account, job } = await lockOwnedJob(tx, input.jobId, input.userId);
-    if (!account || !job || !isCurrentAttempt(job, input.leaseToken, now)) return 'stale';
+    if (!account || !job) return 'stale';
+    const now = input.now ?? await databaseNow(tx);
+    if (!isCurrentAttempt(job, input.leaseToken, now)) return 'stale';
     if (account.deletionStatus !== 'active' || !await lockAndCheckCurrentAiConsent(tx, input.userId)) {
       await cancelStaleAttempt(tx, job.id, now);
       return 'stale';
