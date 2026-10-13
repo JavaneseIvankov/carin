@@ -13,6 +13,7 @@ import { registerCatalogRoutes, type CatalogRouteDependencies } from "./catalog/
 import { registerAccountRoutes } from './modules/account/routes.js';
 import { registerEmailLandingRoutes } from './modules/email/landing.js';
 import { registerProfileRoutes } from './modules/profile/routes.js';
+import { registerAnalysisJobRoutes, type AnalysisJobRouteDependencies } from "./jobs/routes.js";
 
 export type RequestLog = {
   requestId: string;
@@ -30,6 +31,7 @@ export type AppDependencies = {
   account?: { db: Database; resolveSession: SessionResolver };
   auth?: { handler: (request: Request) => Promise<Response> };
   appLinkScheme?: string;
+  analysisJobs?: AnalysisJobRouteDependencies;
 };
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -43,6 +45,7 @@ export function createApp({
   account,
   auth,
   appLinkScheme,
+  analysisJobs,
 }: AppDependencies): Hono<AppEnv> {
   const app = new Hono<AppEnv>();
   app.use("*", async (c, next) => {
@@ -70,6 +73,7 @@ export function createApp({
   }
   if (appLinkScheme) registerEmailLandingRoutes(app, appLinkScheme);
   if (auth) app.all('/api/auth/*', (c) => auth.handler(c.req.raw));
+  if (analysisJobs) registerAnalysisJobRoutes(app, analysisJobs);
 
   registerRoutes?.(app);
 

@@ -43,6 +43,13 @@
       "when": 1791931398454,
       "tag": "0005_aberrant_dark_beast",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791935388155,
+      "tag": "0006_analysis_job_lifecycle_timestamps",
+      "breakpoints": true
     }
   ]
 }

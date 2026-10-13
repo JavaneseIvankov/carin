@@ -334,12 +334,14 @@ export const analysisJob = pgTable(
       .notNull(),
     leaseToken: uuid('lease_token'),
     leaseExpiresAt: timestamp('lease_expires_at', { withTimezone: true }),
+    startedAt: timestamp('started_at', { withTimezone: true }),
     deadlineAt: timestamp('deadline_at', { withTimezone: true })
       .default(sql`now() + interval '5 minutes'`)
       .notNull(),
     error: jsonb('error'),
     createdAt: created(),
     updatedAt: updated(),
+    finishedAt: timestamp('finished_at', { withTimezone: true }),
   },
   (t): PgTableExtraConfigValue[] => [
     unique('job_owner').on(t.userId, t.id),

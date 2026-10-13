@@ -36,7 +36,7 @@ export function isValidAnalysisJobState(value: unknown): value is AnalysisJobSta
         typeof job.resultId === 'string' && job.resultId.length > 0 &&
         typeof job.result === 'object' && job.result !== null && job.error === null;
     case 'failed':
-      return hasTimestamp(job.startedAt) && hasTimestamp(job.finishedAt) &&
+      return (job.startedAt === null || hasTimestamp(job.startedAt)) && hasTimestamp(job.finishedAt) &&
         job.resultId === null && job.result === null && hasError(job.error);
     case 'cancelled':
       return (job.startedAt === null || hasTimestamp(job.startedAt)) &&
