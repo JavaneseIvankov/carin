@@ -1,4 +1,4 @@
-import type { Pool, PoolClient, QueryConfig } from 'pg';
+import type { Pool, PoolClient } from 'pg';
 import type { ReadinessRepository } from './readiness.js';
 
 const DATABASE_PROBE_TIMEOUT_MS = 3000;
@@ -36,12 +36,7 @@ export function postgresReadinessRepository(pool: Pool): ReadinessRepository {
           throw timeoutError;
         }
 
-        const queryTimeout = deadlineAt - Date.now();
-        const probe = {
-          text: 'SELECT 1',
-          query_timeout: queryTimeout,
-        } as QueryConfig & { query_timeout: number };
-        await Promise.race([client.query(probe), deadline]);
+        await Promise.race([client.query({ text: 'SELECT 1' }), deadline]);
         return true;
       } finally {
         clearTimeout(timer);
