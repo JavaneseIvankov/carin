@@ -30,7 +30,7 @@ function repository(overrides: Partial<MediaRepository> = {}): MediaRepository {
     reserveUpload: vi.fn().mockResolvedValue({
       state: 'upload', photoId, objectKey, createdAt: now,
     }),
-    completeUpload: vi.fn().mockResolvedValue(undefined),
+    completeUpload: vi.fn().mockResolvedValue(true),
     recordUploadFailure: vi.fn().mockResolvedValue(undefined),
     findActiveOwnedPhoto: vi.fn().mockResolvedValue(null),
     ...overrides,

@@ -4,7 +4,7 @@ import { requireSession } from '../../http/access.js';
 import { ContractValidationError, validateRequest, validateResponse } from '../../contracts/validation.js';
 import type { AppEnv } from '../../http/types.js';
 import { ApiError } from '../../http/errors.js';
-import { MediaIdempotencyConflict } from './repository.js';
+import { MediaIdempotencyConflict, MediaUploadInProgress } from './repository.js';
 import {
   MediaPhotoNotFound,
   MediaServiceUnavailable,
@@ -25,6 +25,8 @@ function routeError(error: unknown): never {
   ) throw new ApiError(422, 'INVALID_REQUEST', 'Request does not match the API contract');
   if (error instanceof MediaPhotoNotFound)
     throw new ApiError(404, 'RESOURCE_NOT_FOUND', 'Resource not found');
+  if (error instanceof MediaUploadInProgress)
+    throw new ApiError(409, 'IDEMPOTENCY_IN_PROGRESS', 'An upload with this key is still in progress', true);
   if (error instanceof MediaIdempotencyConflict)
     throw new ApiError(409, 'IDEMPOTENCY_CONFLICT', 'Idempotency key was already used for another upload');
   if (error instanceof MediaServiceUnavailable)

@@ -38,4 +38,15 @@ describe('media read grants', () => {
   it('requires a high-entropy server secret when issuing a grant', () => {
     expect(() => createMediaGrant(claims, 'short', 1_800_000_000_000)).toThrow();
   });
+
+  it('keeps owner, photo, and environment claims opaque in the bearer token', () => {
+    const token = createMediaGrant(claims, secret, 1_800_000_000_000);
+    const decodedParts = token.split('.').map((part) => Buffer.from(part, 'base64url').toString('utf8'));
+
+    expect(token).not.toContain(claims.photoId);
+    expect(token).not.toContain(claims.userId);
+    expect(decodedParts.join(' ')).not.toContain(claims.photoId);
+    expect(decodedParts.join(' ')).not.toContain(claims.userId);
+    expect(decodedParts.join(' ')).not.toContain('"environment":"dev"');
+  });
 });

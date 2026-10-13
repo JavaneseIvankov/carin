@@ -6,6 +6,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../../src/app.js';
 import { createDatabase } from '../../src/db/client.js';
 import { applyMigrations } from '../../src/db/migrations.js';
+import { runPhotoCleanupBatch } from '../../src/modules/media/cleanup.js';
 import { createMediaGrant } from '../../src/modules/media/grants.js';
 import { createMediaRepository } from '../../src/modules/media/repository.js';
 import { createMediaService } from '../../src/modules/media/service.js';
@@ -130,6 +131,116 @@ describe('private photo media routes', () => {
     expect(changed.status).toBe(409);
   });
 
+  it('keeps duplicate in-flight requests from sharing or deleting the winning object', async () => {
+    const { app, store, objects } = makeMediaContext();
+    const bytes = await jpeg();
+    const form = () => {
+      const body = new FormData();
+      body.append('file', new Blob([new Uint8Array(bytes)], { type: 'image/jpeg' }), 'meal.jpg');
+      return body;
+    };
+    const idempotencyKey = randomUUID();
+    let announcePut!: () => void;
+    let releasePut!: () => void;
+    const putStarted = new Promise<void>((resolve) => { announcePut = resolve; });
+    const putBarrier = new Promise<void>((resolve) => { releasePut = resolve; });
+    let putCalls = 0;
+    store.putObject = vi.fn(async ({ key, bytes: objectBytes }) => {
+      putCalls++;
+      if (putCalls === 1) {
+        announcePut();
+        await putBarrier;
+        objects.set(key, Buffer.from(objectBytes));
+        return;
+      }
+      throw new Error('a second writer reached MinIO');
+    });
+    const upload = () => app.request('/api/v1/photos', {
+      method: 'POST',
+      headers: { 'x-test-session': sessionA, 'Idempotency-Key': idempotencyKey },
+      body: form(),
+    });
+
+    const firstPromise = upload();
+    await putStarted;
+    const duplicate = await upload();
+    releasePut();
+    const first = await firstPromise;
+
+    expect(duplicate.status).toBe(409);
+    expect(first.status).toBe(201);
+    expect(putCalls).toBe(1);
+    expect(store.removeObject).not.toHaveBeenCalled();
+    expect(objects.size).toBe(1);
+  });
+
+  it('fences an expired reservation from completing after a retry takes over', async () => {
+    const repository = createMediaRepository(createDatabase(pool));
+    const idempotencyKey = randomUUID();
+    const requestHash = 'e'.repeat(64);
+    const createdAt = new Date();
+    const reserve = (at: Date) => repository.reserveUpload({
+      userId: ownerA,
+      sessionId: sessionA,
+      idempotencyKey,
+      requestHash,
+      photoId: randomUUID(),
+      objectKey: `photos/${randomUUID()}`,
+      reservationToken: randomUUID(),
+      checksum: 'a'.repeat(64),
+      mimeType: 'image/jpeg',
+      sizeBytes: 128,
+      createdAt: at,
+    });
+    const first = await reserve(createdAt);
+    expect(first.state).toBe('upload');
+    if (first.state !== 'upload') throw new Error('Expected an upload reservation');
+
+    const retryAt = new Date(createdAt.getTime() + 6 * 60 * 1000);
+    const second = await reserve(retryAt);
+    expect(second.state).toBe('upload');
+    if (second.state !== 'upload') throw new Error('Expired reservation was not acquired');
+    expect(second.photoId).not.toBe(first.photoId);
+    expect(second.objectKey).not.toBe(first.objectKey);
+
+    const response = (id: string, time: Date) => ({
+      id,
+      mimeType: 'image/jpeg' as const,
+      sizeBytes: 128,
+      width: 8,
+      height: 6,
+      createdAt: time.toISOString(),
+    });
+    await expect(repository.completeUpload({
+      userId: ownerA,
+      sessionId: sessionA,
+      idempotencyKey,
+      requestHash,
+      reservationToken: first.reservationToken,
+      objectKey: first.objectKey,
+      photo: response(first.photoId, first.createdAt),
+      now: retryAt,
+    })).resolves.toBe(false);
+    await expect(repository.completeUpload({
+      userId: ownerA,
+      sessionId: sessionA,
+      idempotencyKey,
+      requestHash,
+      reservationToken: second.reservationToken,
+      objectKey: second.objectKey,
+      photo: response(second.photoId, second.createdAt),
+      now: retryAt,
+    })).resolves.toBe(true);
+
+    expect((await pool.query('SELECT lifecycle FROM photo WHERE id=$1', [first.photoId])).rows[0].lifecycle)
+      .toBe('deleting');
+    const cleanup = await pool.query(
+      "SELECT object_keys FROM deletion_task WHERE user_id=$1 AND kind='photo'",
+      [ownerA],
+    );
+    expect(cleanup.rows.some((row) => (row.object_keys as string[]).includes(first.objectKey))).toBe(true);
+  });
+
   it('requires an injected verified session for uploads and owner grant issuance', async () => {
     const { app } = makeMediaContext();
     const form = new FormData();
@@ -204,5 +315,101 @@ describe('private photo media routes', () => {
     expect(expiredBody.error).toMatchObject({ code: 'RESOURCE_NOT_FOUND', message: 'Resource not found' });
     expect(JSON.stringify(log)).not.toContain(invalidToken);
     expect(JSON.stringify(log)).not.toContain(expiredToken);
+  });
+
+  it('queues a delayed object write when account deletion and cleanup win first', async () => {
+    const { app, store, objects } = makeMediaContext();
+    const bytes = await jpeg();
+    const idempotencyKey = randomUUID();
+    const form = new FormData();
+    form.append('file', new Blob([new Uint8Array(bytes)], { type: 'image/jpeg' }), 'meal.jpg');
+    let announcePut!: () => void;
+    let releasePut!: () => void;
+    const putStarted = new Promise<void>((resolve) => { announcePut = resolve; });
+    const putBarrier = new Promise<void>((resolve) => { releasePut = resolve; });
+    store.putObject = vi.fn(async ({ key, bytes: objectBytes }) => {
+      announcePut();
+      await putBarrier;
+      objects.set(key, Buffer.from(objectBytes));
+    });
+    const uploadPromise = app.request('/api/v1/photos', {
+      method: 'POST',
+      headers: { 'x-test-session': sessionB, 'Idempotency-Key': idempotencyKey },
+      body: form,
+    });
+    await putStarted;
+
+    const reservation = await pool.query(
+      `SELECT p.id,p.object_key FROM photo p
+       INNER JOIN idempotency_record i ON i.resource_id=p.id
+       WHERE i.user_id=$1 AND i.session_id=$2 AND i.key=$3`,
+      [ownerB, sessionB, idempotencyKey],
+    );
+    expect(reservation.rows).toHaveLength(1);
+    const photoRow = reservation.rows[0] as { id: string; object_key: string };
+    const cleanupAt = new Date();
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      await client.query('UPDATE "user" SET deletion_status=$1 WHERE id=$2', ['deleting', ownerB]);
+      await client.query(
+        'UPDATE photo SET lifecycle=$1,deleted_at=$2 WHERE id=$3',
+        ['deleting', cleanupAt, photoRow.id],
+      );
+      await client.query(
+        'INSERT INTO deletion_task (user_id,kind,object_keys,status,attempts,next_attempt_at,created_at) VALUES ($1,$2,$3::jsonb,$4,0,$5,$5)',
+        [ownerB, 'photo', JSON.stringify([photoRow.object_key]), 'queued', cleanupAt],
+      );
+      await client.query('COMMIT');
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+    const beforeLatePut = await runPhotoCleanupBatch(createDatabase(pool), store, { now: cleanupAt });
+    expect(beforeLatePut).toMatchObject({ removed: 1, failed: 0 });
+    expect((await pool.query('SELECT lifecycle FROM photo WHERE id=$1', [photoRow.id])).rows[0].lifecycle)
+      .toBe('deleted');
+
+    store.removeObject = vi.fn(async () => { throw new Error('MinIO unavailable after late PUT'); });
+    const accountGuard = await pool.connect();
+    await accountGuard.query('BEGIN');
+    await accountGuard.query('SELECT id FROM "user" WHERE id=$1 FOR UPDATE', [ownerB]);
+    releasePut();
+    let completionWaitingOnAccount = false;
+    try {
+      for (let attempt = 0; attempt < 100; attempt++) {
+        const waiting = await pool.query(
+          `SELECT 1 FROM pg_stat_activity
+           WHERE wait_event_type='Lock' AND query ILIKE '%deletion_status%' AND query ILIKE '%for update%' LIMIT 1`,
+        );
+        if (waiting.rowCount) {
+          completionWaitingOnAccount = true;
+          break;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      }
+      expect(completionWaitingOnAccount).toBe(true);
+    } finally {
+      await accountGuard.query('COMMIT');
+      accountGuard.release();
+    }
+    const lateUpload = await uploadPromise;
+    expect(lateUpload.status).toBe(503);
+    expect(objects.has(photoRow.object_key)).toBe(true);
+    const queued = await pool.query(
+      "SELECT object_keys FROM deletion_task WHERE user_id=$1 AND kind='photo'",
+      [ownerB],
+    );
+    expect(queued.rows.some((row) => (row.object_keys as string[]).includes(photoRow.object_key))).toBe(true);
+
+    store.removeObject = vi.fn(async (key) => { objects.delete(key); });
+    const retryAt = new Date(Date.now() + 60_000);
+    const cleanup = await runPhotoCleanupBatch(createDatabase(pool), store, { now: retryAt });
+    expect(cleanup).toMatchObject({ scheduled: 0, removed: 1, failed: 0 });
+    expect(objects.has(photoRow.object_key)).toBe(false);
+    expect((await pool.query('SELECT lifecycle FROM photo WHERE id=$1', [photoRow.id])).rows[0].lifecycle)
+      .toBe('deleted');
   });
 });

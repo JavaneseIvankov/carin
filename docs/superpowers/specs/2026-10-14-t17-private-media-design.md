@@ -18,9 +18,9 @@ MinIO.
   stores cleanup retries. No migration is needed for this scope.
 - Image validation and normalization are isolated from Hono, PostgreSQL, and
   MinIO. Object storage is an injected interface with a MinIO adapter.
-- Opaque media grants are HMAC-signed and bind photo ID, owner ID, environment,
-  and a five-minute expiry. The stream handler returns the same 404 for invalid,
-  expired, deleted, or cross-account grants.
+- Opaque media grants use AES-256-GCM authenticated encryption and bind photo
+  ID, owner ID, environment, and a five-minute expiry. The stream handler returns
+  the same 404 for invalid, expired, deleted, or cross-account grants.
 - Internal AI URLs are generated only from an owner-checked photo row and a
   configured private MinIO endpoint. The generated URL is checked against the
   exact configured origin before it leaves the API and lasts ten minutes.
@@ -39,10 +39,20 @@ match the decoded image format. Sharp decodes with pixel limits, applies EXIF
 orientation, resizes without enlargement, and encodes a fresh JPEG or PNG so
 metadata is not carried forward. The normalized bytes are hashed.
 
-The service first inserts the private photo metadata row, then uploads the
-normalized bytes to MinIO using a random key. If the database insert fails, no
-object was written. If MinIO fails, the service attempts immediate deletion and
-records a durable photo cleanup task if needed. If the cleanup database write
+The service reserves each idempotency key under a five-minute database lease
+stored in the existing idempotency response JSON. An overlapping request with
+the same key and body receives a retryable conflict; it cannot share the first
+request's photo row, object key, or failure compensation. Once a lease expires,
+a retry receives a new photo row, random object key, and fencing token, so a
+late request from the old lease cannot complete or delete the new attempt.
+
+After reservation, the service inserts private photo metadata and uploads the
+normalized bytes to MinIO. Completion locks rows in user, photo, then
+idempotency order, and rechecks that the account is active, the photo is still
+uploaded, and the reservation token still owns the lease. A deletion or cleanup
+that wins this ordering prevents a late upload from becoming visible; the late
+object key is persisted in the durable deletion queue. MinIO failures attempt
+immediate deletion and persist a cleanup task if needed. If cleanup scheduling
 also fails, the staged `uploaded` row remains discoverable by the one-hour
 orphan sweep. Storage errors return a safe retryable 503.
 
@@ -66,15 +76,19 @@ No service logs grants, MinIO signatures, or request query strings.
 ## Verification
 
 Unit tests cover MIME spoofing, corrupt decode, raw-size limits, EXIF removal,
-orientation/resize, grant tampering and expiry, internal URL host/redirect
+orientation/resize, grant opacity, tampering and expiry, internal URL host/redirect
 rejection, database-write failure before storage, and MinIO failure cleanup.
 Disposable-PostgreSQL integration tests cover two-account isolation, active
 account rechecks, owner-issued grants, download behavior, and durable orphan
-cleanup scheduling/retry after a fresh runner instance. Object storage is
-injected in database integration tests; the adapter separately exercises the
-MinIO SDK boundary and presigned URL validation.
+cleanup scheduling/retry after a fresh runner instance, concurrent same-key
+reservation fencing, expired-lease takeover, and delayed MinIO completion racing
+account deletion and cleanup. Object storage is injected in database integration
+tests; the adapter separately exercises the MinIO SDK boundary and presigned URL
+validation.
 
 The cleanup contract handed to C29 is `runPhotoCleanupBatch(db, store, now)`.
 The caller must invoke it at worker startup and on a recurring schedule; its
 queue, lease, attempt count, and retry time live in PostgreSQL, never process
-memory.
+memory. Account deletion must acquire the user row lock before changing photo or
+idempotency state, retain the account in `deleting` until in-flight uploads are
+fenced and their cleanup drains, and only then hard-delete/cascade its rows.

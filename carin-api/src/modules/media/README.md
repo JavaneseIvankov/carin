@@ -13,11 +13,19 @@ origin, MinIO endpoint, and bucket. Upload and owner-view routes use the shared
 implementation. The executable server should supply these dependencies when
 the session resolver is available.
 
-The owner-view route returns a five-minute API URL grant. Each stream validates
-the grant and then re-reads the photo and active account owner from PostgreSQL
-before fetching the object. The worker helper `createAiPhotoUrl` performs the
-same live owner check and validates that the ten-minute MinIO URL remains on
-the configured internal endpoint and expected bucket/key.
+The owner-view route returns a five-minute opaque AES-256-GCM API URL grant.
+Each stream decrypts and validates the grant, then re-reads the photo and active
+account owner from PostgreSQL before fetching the object. The worker helper
+`createAiPhotoUrl` performs the same live owner check and validates that the
+ten-minute MinIO URL remains on the configured internal endpoint and expected
+bucket/key.
+
+Upload idempotency reservations have a five-minute lease stored in the existing
+`idempotency_record.response_body` JSONB field. A live lease serializes duplicate
+requests. Expired leases rotate to a distinct photo row and random object key;
+the reservation token fences late completion and compensation from an earlier
+attempt. Upload completion locks user, photo, and idempotency rows in that order,
+and rechecks active-account and uploaded-photo state after MinIO returns.
 
 ## Cleanup worker boundary
 
@@ -34,3 +42,10 @@ The default batch size is 100; callers may provide `{ now, batchSize }` for
 deterministic tests and bounded batches. The result reports `scheduled`,
 `removed`, and `failed` counts. Do not replace this with an in-memory timer or
 delete uploaded object keys directly in C29.
+
+Coordinate account deletion with this lock contract: first lock the user row,
+mark the account `deleting`, then transition its photos and cleanup tasks. Keep
+the user row until in-flight uploads have observed the deletion state and their
+late object keys have been drained. Hard deletion/cascading the user before
+that point can remove the foreign-key parent needed to enqueue cleanup for a
+PUT that returns late.

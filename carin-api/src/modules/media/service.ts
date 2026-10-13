@@ -7,6 +7,7 @@ import {
 import { normalizePhoto, type NormalizedPhoto } from './image.js';
 import {
   MediaIdempotencyConflict,
+  MediaUploadInProgress,
   type MediaPhotoRecord,
   type MediaRepository,
   type PhotoResponse,
@@ -86,6 +87,7 @@ export function createMediaService(options: MediaServiceOptions) {
     sessionId: string;
     idempotencyKey: string;
     requestHash: string;
+    reservationToken: string;
     photoId: string;
     objectKey: string;
     objectMayExist: boolean;
@@ -131,16 +133,18 @@ export function createMediaService(options: MediaServiceOptions) {
         requestHash: hash,
         photoId: newPhotoId,
         objectKey: proposedObjectKey,
+        reservationToken: randomUUID(),
         checksum: normalized.checksum,
         mimeType: normalized.mimeType,
         sizeBytes: normalized.bytes.length,
         createdAt,
       });
     } catch (error) {
-      if (error instanceof MediaIdempotencyConflict) throw error;
+      if (error instanceof MediaIdempotencyConflict || error instanceof MediaUploadInProgress) throw error;
       throw new MediaServiceUnavailable();
     }
     if (reservation.state === 'replay') return reservation.photo;
+    if (reservation.state === 'in-progress') throw new MediaUploadInProgress();
 
     const response: PhotoResponse = {
       id: reservation.photoId,
@@ -157,6 +161,7 @@ export function createMediaService(options: MediaServiceOptions) {
       requestHash: hash,
       photoId: reservation.photoId,
       objectKey: reservation.objectKey,
+      reservationToken: reservation.reservationToken,
       objectMayExist: true,
     };
 
@@ -167,13 +172,17 @@ export function createMediaService(options: MediaServiceOptions) {
         mimeType: normalized.mimeType,
         checksum: normalized.checksum,
       });
-      await options.repository.completeUpload({
+      const completed = await options.repository.completeUpload({
         userId: input.userId,
         sessionId: input.sessionId,
         idempotencyKey: input.idempotencyKey,
         requestHash: hash,
+        reservationToken: reservation.reservationToken,
+        objectKey: reservation.objectKey,
         photo: response,
+        now: now(),
       });
+      if (!completed) throw new MediaServiceUnavailable();
     } catch {
       await discardFailedUpload(cleanupInput);
       throw new MediaServiceUnavailable();
