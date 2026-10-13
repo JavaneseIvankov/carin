@@ -148,6 +148,25 @@ class ValidateDataArtifactsTests(unittest.TestCase):
 
         self.assertTrue(any("per100g" in error or "finite" in error for error in errors))
 
+    def test_approved_catalog_with_nonfinite_values_returns_errors(self):
+        for invalid_value in (math.inf, math.nan):
+            with self.subTest(value=invalid_value):
+                bad = copy.deepcopy(self.bundle)
+                food = synthetic_food()
+                food["per100g"]["energyKcal"] = 42.0
+                bad["catalog"]["foods"] = [food]
+                catalog = bad["catalog"]
+                bad["review-metadata"]["artifacts"]["catalog"] = approval_for(
+                    catalog, catalog["catalogVersion"]
+                )
+                bad["catalog"]["foods"][0]["per100g"]["energyKcal"] = invalid_value
+
+                errors = validator.validate_bundle(bad, ROOT.parent)
+
+                self.assertTrue(any("finite" in error.lower() for error in errors))
+                self.assertTrue(any("approval content" in error.lower() and "hash" in error.lower()
+                                    for error in errors))
+
     def test_rejects_publication_without_complete_approval_metadata(self):
         bad = copy.deepcopy(self.bundle)
         bad["capability-manifest"]["publicationStatus"] = "published"

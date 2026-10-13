@@ -61,7 +61,12 @@ def _check_approval(errors, label, approval, version, record):
         return
     if approval.get("boundVersion") != version:
         errors.append(f"{label} approval version binding is stale")
-    if approval.get("contentSha256") != _canonical_sha256(record):
+    try:
+        content_hash = _canonical_sha256(record)
+    except ValueError as exc:
+        errors.append(f"{label} content hash cannot be computed for non-canonical data: {exc}")
+        return
+    if approval.get("contentSha256") != content_hash:
         errors.append(f"{label} approval content binding is stale")
 
 
@@ -324,13 +329,18 @@ def validate_bundle(bundle, repo_root):
 def main():
     repo_root = Path(__file__).resolve().parents[1]
     data_dir = Path(__file__).resolve().parent / "data"
-    errors = validate_bundle(load_bundle(data_dir), repo_root)
+    bundle = load_bundle(data_dir)
+    errors = validate_bundle(bundle, repo_root)
     if errors:
         print("AI data artifact validation failed:")
         for error in errors:
             print(f"- {error}")
         return 1
-    print("PASS: AI data templates match the shared wire schema; publication remains gated and unsupported scope is empty.")
+    manifest = bundle["capability-manifest"]
+    if manifest["publicationStatus"] == "published":
+        print("PASS: published AI capability manifest validates against internal and shared wire schemas.")
+    else:
+        print("PASS: unpublished AI data templates validate; publication is gated and capability claims are empty.")
     return 0
 
 
