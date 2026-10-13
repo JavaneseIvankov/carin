@@ -56,6 +56,14 @@ immediate deletion and persist a cleanup task if needed. If cleanup scheduling
 also fails, the staged `uploaded` row remains discoverable by the one-hour
 orphan sweep. Storage errors return a safe retryable 503.
 
+If the completion call throws, the service reconciles its outcome under the
+same user → photo → idempotency lock order before compensating. A committed 201
+response is returned from the persisted idempotency result. A still-pending
+matching lease is fenced and queued for durable cleanup before best-effort
+object removal. If the database cannot establish either outcome, the service
+preserves the object and returns 503 rather than risk deleting a committed
+photo.
+
 ## HTTP and worker behavior
 
 - `POST /api/v1/photos`: authenticated multipart upload; returns the contract

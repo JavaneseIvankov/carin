@@ -92,6 +92,8 @@
 - [x] Encrypt grant claims with AES-256-GCM and test that base64url token contents do not expose photo, user, or environment claims.
 - [x] Store a five-minute reservation lease and fencing token in the existing idempotency JSONB; return a retryable conflict to concurrent same-key uploads and give expired retries distinct photo/object identities.
 - [x] Serialize completion under user → photo → idempotency locks, recheck active account and uploaded lifecycle after MinIO returns, and durably queue late object cleanup when deletion wins.
+- [x] Reconcile completion exceptions under the same locks; return persisted success, fence and queue a confirmed pending upload, and preserve the object when database state remains ambiguous.
 - [x] Add barrier-based duplicate upload and delayed-PUT versus deletion/cleanup/retry integration tests.
+- [x] Add fault injection where completion commits then throws; verify the photo stays uploaded and its signed read remains usable.
 - [x] Document the C29 account deletion lock order and require the user row to remain until in-flight PUTs and their durable object cleanup have settled.
 - [x] Run lint, typecheck, unit tests, API integration tests (excluding the Expo-dependent app consumer suite), and build.

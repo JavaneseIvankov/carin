@@ -91,7 +91,7 @@ function makeMediaContext() {
   };
   const app = createApp({ readiness: async () => true, media, log: (entry) => log.push(entry) });
   const service = createMediaService({ ...media });
-  return { app, service, store, objects, log };
+  return { app, service, store, objects, log, media };
 }
 
 async function jpeg(background: { r: number; g: number; b: number } = { r: 120, g: 70, b: 30 }) {
@@ -101,6 +101,39 @@ async function jpeg(background: { r: number; g: number; b: number } = { r: 120, 
 }
 
 describe('private photo media routes', () => {
+  it('keeps a usable object when completion committed but its acknowledgement was lost', async () => {
+    const { app, store, objects, media } = makeMediaContext();
+    const completeUpload = media.repository.completeUpload.bind(media.repository);
+    media.repository.completeUpload = vi.fn(async (input) => {
+      await completeUpload(input);
+      throw new Error('database commit acknowledgement lost');
+    });
+    const idempotencyKey = randomUUID();
+    const form = new FormData();
+    form.append('file', new Blob([new Uint8Array(await jpeg())], { type: 'image/jpeg' }), 'meal.jpg');
+
+    const upload = await app.request('/api/v1/photos', {
+      method: 'POST',
+      headers: { 'x-test-session': sessionA, 'Idempotency-Key': idempotencyKey },
+      body: form,
+    });
+    expect(upload.status).toBe(201);
+    const response = await upload.json();
+    const stored = await pool.query('SELECT object_key,lifecycle FROM photo WHERE id=$1', [response.id]);
+    expect(stored.rows[0].lifecycle).toBe('uploaded');
+    expect(objects.has(stored.rows[0].object_key)).toBe(true);
+    expect(store.removeObject).not.toHaveBeenCalled();
+
+    const view = await app.request(`/api/v1/photos/${response.id}/view`, {
+      headers: { 'x-test-session': sessionA },
+    });
+    expect(view.status).toBe(200);
+    const viewBody = await view.json();
+    const read = await app.request(viewBody.url);
+    expect(read.status).toBe(200);
+    expect((await sharp(Buffer.from(await read.arrayBuffer())).metadata()).width).toBe(32);
+  });
+
   it('uploads a normalized object, replays an idempotency key, and rejects changed payloads', async () => {
     const { app, store } = makeMediaContext();
     const bytes = await jpeg();

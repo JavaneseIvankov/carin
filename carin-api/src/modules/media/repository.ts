@@ -48,6 +48,22 @@ export type UploadReservation =
   | { state: 'in-progress' }
   | { state: 'replay'; photo: PhotoResponse };
 
+export type CompletePhotoUpload = {
+  userId: string;
+  sessionId: string;
+  idempotencyKey: string;
+  requestHash: string;
+  reservationToken: string;
+  objectKey: string;
+  photo: PhotoResponse;
+  now: Date;
+};
+
+export type UploadCompletionResolution =
+  | { state: 'committed'; photo: PhotoResponse }
+  | { state: 'fenced' }
+  | { state: 'unknown' };
+
 export class MediaIdempotencyConflict extends Error {}
 export class MediaUploadInProgress extends Error {}
 
@@ -77,16 +93,8 @@ function parseReservationLease(value: unknown): ReservationLease | null {
 
 export type MediaRepository = {
   reserveUpload(input: ReservePhotoUpload): Promise<UploadReservation>;
-  completeUpload(input: {
-    userId: string;
-    sessionId: string;
-    idempotencyKey: string;
-    requestHash: string;
-    reservationToken: string;
-    objectKey: string;
-    photo: PhotoResponse;
-    now: Date;
-  }): Promise<boolean>;
+  completeUpload(input: CompletePhotoUpload): Promise<boolean>;
+  resolveUploadCompletion(input: CompletePhotoUpload): Promise<UploadCompletionResolution>;
   recordUploadFailure(input: {
     userId: string;
     sessionId: string;
@@ -100,6 +108,17 @@ export type MediaRepository = {
   }): Promise<void>;
   findActiveOwnedPhoto(photoId: string, userId: string): Promise<MediaPhotoRecord | null>;
 };
+
+function isPhotoResponse(value: unknown, expectedId: string): value is PhotoResponse {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const response = value as Record<string, unknown>;
+  return response.id === expectedId &&
+    (response.mimeType === 'image/jpeg' || response.mimeType === 'image/png') &&
+    Number.isSafeInteger(response.sizeBytes) && (response.sizeBytes as number) > 0 &&
+    Number.isSafeInteger(response.width) && (response.width as number) > 0 &&
+    Number.isSafeInteger(response.height) && (response.height as number) > 0 &&
+    typeof response.createdAt === 'string' && Number.isFinite(Date.parse(response.createdAt));
+}
 
 export function createMediaRepository(db: Database): MediaRepository {
   return {
@@ -303,6 +322,83 @@ export function createMediaRepository(db: Database): MediaRepository {
           }
         }
         return false;
+      });
+    },
+
+    async resolveUploadCompletion(input) {
+      return db.transaction(async (tx) => {
+        const [account] = await tx
+          .select({ id: user.id })
+          .from(user)
+          .where(eq(user.id, input.userId))
+          .for('update');
+        const [photoRow] = await tx
+          .select({ id: photo.id, lifecycle: photo.lifecycle })
+          .from(photo)
+          .where(and(
+            eq(photo.id, input.photo.id),
+            eq(photo.userId, input.userId),
+            eq(photo.objectKey, input.objectKey),
+          ))
+          .for('update');
+        const [reservation] = await tx
+          .select()
+          .from(idempotencyRecord)
+          .where(and(
+            eq(idempotencyRecord.userId, input.userId),
+            eq(idempotencyRecord.sessionId, input.sessionId),
+            eq(idempotencyRecord.actionScope, 'photo:upload'),
+            eq(idempotencyRecord.key, input.idempotencyKey),
+          ))
+          .for('update');
+        const responseBody = reservation?.responseBody;
+        if (
+          reservation?.responseStatus === 201 &&
+          reservation.requestHash === input.requestHash &&
+          reservation.resourceId === input.photo.id &&
+          isPhotoResponse(responseBody, input.photo.id)
+        ) return { state: 'committed', photo: responseBody } as const;
+
+        const lease = parseReservationLease(responseBody);
+        const ownsPendingReservation = Boolean(
+          account && reservation && reservation.responseStatus === null &&
+          reservation.requestHash === input.requestHash &&
+          reservation.resourceId === input.photo.id &&
+          lease?.token === input.reservationToken
+        );
+        if (!ownsPendingReservation) return { state: 'unknown' } as const;
+
+        if (photoRow?.lifecycle === 'uploaded') {
+          await tx.update(photo)
+            .set({ lifecycle: 'deleting', deletedAt: input.now })
+            .where(eq(photo.id, photoRow.id));
+        }
+        const [pendingCleanup] = await tx
+          .select({ id: deletionTask.id })
+          .from(deletionTask)
+          .where(and(
+            eq(deletionTask.userId, input.userId),
+            eq(deletionTask.kind, 'photo'),
+            inArray(deletionTask.status, ['queued', 'failed']),
+            sql`${deletionTask.objectKeys} @> ${JSON.stringify([input.objectKey])}::jsonb`,
+          ))
+          .for('update');
+        if (pendingCleanup) {
+          await tx.update(deletionTask)
+            .set({ status: 'queued', attempts: 0, nextAttemptAt: input.now, leaseToken: null, leaseExpiresAt: null })
+            .where(eq(deletionTask.id, pendingCleanup.id));
+        } else {
+          await tx.insert(deletionTask).values({
+            userId: input.userId,
+            kind: 'photo',
+            objectKeys: [input.objectKey],
+            status: 'queued',
+            attempts: 0,
+            nextAttemptAt: input.now,
+            createdAt: input.now,
+          });
+        }
+        return { state: 'fenced' } as const;
       });
     },
 

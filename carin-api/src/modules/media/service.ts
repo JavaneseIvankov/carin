@@ -172,18 +172,41 @@ export function createMediaService(options: MediaServiceOptions) {
         mimeType: normalized.mimeType,
         checksum: normalized.checksum,
       });
-      const completed = await options.repository.completeUpload({
-        userId: input.userId,
-        sessionId: input.sessionId,
-        idempotencyKey: input.idempotencyKey,
-        requestHash: hash,
-        reservationToken: reservation.reservationToken,
-        objectKey: reservation.objectKey,
-        photo: response,
-        now: now(),
-      });
-      if (!completed) throw new MediaServiceUnavailable();
     } catch {
+      await discardFailedUpload(cleanupInput);
+      throw new MediaServiceUnavailable();
+    }
+
+    const completionInput = {
+      userId: input.userId,
+      sessionId: input.sessionId,
+      idempotencyKey: input.idempotencyKey,
+      requestHash: hash,
+      reservationToken: reservation.reservationToken,
+      objectKey: reservation.objectKey,
+      photo: response,
+      now: now(),
+    };
+    let completed: boolean;
+    try {
+      completed = await options.repository.completeUpload(completionInput);
+    } catch {
+      let resolution;
+      try {
+        resolution = await options.repository.resolveUploadCompletion({
+          ...completionInput,
+          now: now(),
+        });
+      } catch {
+        // Keep the staged object if database state is still ambiguous. The durable
+        // reservation/orphan cleanup path can resolve it after the database recovers.
+        throw new MediaServiceUnavailable();
+      }
+      if (resolution.state === 'committed') return resolution.photo;
+      if (resolution.state === 'fenced') await discardFailedUpload(cleanupInput);
+      throw new MediaServiceUnavailable();
+    }
+    if (!completed) {
       await discardFailedUpload(cleanupInput);
       throw new MediaServiceUnavailable();
     }

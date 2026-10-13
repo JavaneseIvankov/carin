@@ -28,9 +28,10 @@ function serviceWith(repository: MediaRepository, store: MediaObjectStore) {
 function repository(overrides: Partial<MediaRepository> = {}): MediaRepository {
   return {
     reserveUpload: vi.fn().mockResolvedValue({
-      state: 'upload', photoId, objectKey, createdAt: now,
+      state: 'upload', photoId, objectKey, createdAt: now, reservationToken: 'reservation-token',
     }),
     completeUpload: vi.fn().mockResolvedValue(true),
+    resolveUploadCompletion: vi.fn().mockResolvedValue({ state: 'fenced' }),
     recordUploadFailure: vi.fn().mockResolvedValue(undefined),
     findActiveOwnedPhoto: vi.fn().mockResolvedValue(null),
     ...overrides,
@@ -88,6 +89,7 @@ describe('media upload service', () => {
   it('removes the stored object and records cleanup when the completion write fails', async () => {
     const repo = repository({
       completeUpload: vi.fn().mockRejectedValue(new Error('database unavailable')),
+      resolveUploadCompletion: vi.fn().mockResolvedValue({ state: 'fenced' }),
     });
     const store = objectStore();
     const bytes = await sharp({
@@ -104,6 +106,49 @@ describe('media upload service', () => {
       objectKey,
       objectMayExist: false,
     }));
+  });
+
+  it('preserves a committed object when completion acknowledgement is ambiguous', async () => {
+    const photo = {
+      id: photoId,
+      mimeType: 'image/jpeg' as const,
+      sizeBytes: 200,
+      width: 8,
+      height: 6,
+      createdAt: now.toISOString(),
+    };
+    const repo = repository({
+      completeUpload: vi.fn().mockRejectedValue(new Error('commit acknowledgement lost')),
+      resolveUploadCompletion: vi.fn().mockResolvedValue({ state: 'committed', photo }),
+    });
+    const store = objectStore();
+    const bytes = await sharp({
+      create: { width: 8, height: 6, channels: 3, background: 'purple' },
+    }).jpeg().toBuffer();
+
+    await expect(serviceWith(repo, store).upload({
+      userId, sessionId, idempotencyKey: photoId, bytes, declaredMime: 'image/jpeg',
+    })).resolves.toEqual(photo);
+    expect(store.removeObject).not.toHaveBeenCalled();
+    expect(repo.recordUploadFailure).not.toHaveBeenCalled();
+  });
+
+  it('preserves the object when completion state cannot be resolved', async () => {
+    const repo = repository({
+      completeUpload: vi.fn().mockRejectedValue(new Error('commit acknowledgement lost')),
+      resolveUploadCompletion: vi.fn().mockRejectedValue(new Error('database unavailable')),
+    });
+    const store = objectStore();
+    const bytes = await sharp({
+      create: { width: 8, height: 6, channels: 3, background: 'orange' },
+    }).jpeg().toBuffer();
+
+    await expect(serviceWith(repo, store).upload({
+      userId, sessionId, idempotencyKey: photoId, bytes, declaredMime: 'image/jpeg',
+    })).rejects.toBeInstanceOf(MediaServiceUnavailable);
+    expect(store.putObject).toHaveBeenCalledWith(expect.objectContaining({ key: objectKey }));
+    expect(store.removeObject).not.toHaveBeenCalled();
+    expect(repo.recordUploadFailure).not.toHaveBeenCalled();
   });
 
   it('replays a completed idempotent upload without storing a second object', async () => {

@@ -22,13 +22,18 @@ Changes and affected files:
   distinct photo row and random object key. Completion locks user → photo →
   idempotency, rechecks active/uploaded state, and queues late objects if
   account deletion or cleanup wins the race.
+- If completion acknowledgement is ambiguous, the service reconciles under the
+  same lock order. It returns a persisted committed response, atomically fences
+  a confirmed pending attempt before cleanup, or preserves the object and
+  returns 503 if database state cannot be resolved. A commit-then-throw test
+  verifies the photo remains uploaded and can still be read with an owner grant.
 
 Verification from `carin-api/`:
 
 - `pnpm run typecheck` — passed.
 - `pnpm run lint` — passed.
-- `pnpm run test:unit` — 11 files, 94 tests passed.
-- `pnpm exec vitest run tests/integration --exclude tests/integration/app-consumer.integration.test.ts` — 7 files, 77 tests passed, including the barrier race, expired lease takeover, and delayed PUT/deletion/cleanup retry tests.
+- `pnpm run test:unit` — 11 files, 96 tests passed.
+- `pnpm exec vitest run tests/integration --exclude tests/integration/app-consumer.integration.test.ts` — 7 files, 78 tests passed, including the barrier race, expired lease takeover, delayed PUT/deletion/cleanup retry, and commit-then-throw tests.
 - `pnpm run build` — passed.
 - `pnpm run test:integration` — the API integration suites pass, but the
   unfiltered command fails while transforming

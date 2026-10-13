@@ -25,7 +25,12 @@ Upload idempotency reservations have a five-minute lease stored in the existing
 requests. Expired leases rotate to a distinct photo row and random object key;
 the reservation token fences late completion and compensation from an earlier
 attempt. Upload completion locks user, photo, and idempotency rows in that order,
-and rechecks active-account and uploaded-photo state after MinIO returns.
+and rechecks active-account and uploaded-photo state after MinIO returns. If
+completion throws, the repository rereads the persisted result with the same
+lock order: it returns a committed 201 response, atomically fences and queues a
+confirmed pending attempt, or reports an unknown state. Unknown state preserves
+the object and returns 503; the service never compensates by deleting a possibly
+committed object.
 
 ## Cleanup worker boundary
 
