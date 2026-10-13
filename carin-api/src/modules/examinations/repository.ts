@@ -1,4 +1,4 @@
-import { and, desc, eq, gt, isNull, lt, or, sql } from 'drizzle-orm';
+import { and, desc, eq, getTableColumns, gt, isNull, lt, or, sql } from 'drizzle-orm';
 import type { Database } from '../../db/client.js';
 import { examination, idempotencyRecord, session, user } from '../../db/schema/index.js';
 import type { ExaminationRecord } from './types.js';
@@ -119,10 +119,12 @@ export type ExaminationCursorSort = {
   id: string;
 };
 
+export type ListedExaminationRow = ExaminationRow & { cursorCreatedAt: string };
+
 export async function listExaminations(
   db: Database | ExaminationTransaction,
   input: { userId: string; limit: number; type?: string; seriesKey?: string; after?: ExaminationCursorSort },
-): Promise<ExaminationRow[]> {
+): Promise<ListedExaminationRow[]> {
   const filters = [eq(examination.userId, input.userId), isNull(examination.deletedAt)];
   if (input.type) filters.push(eq(examination.type, input.type));
   if (input.seriesKey) filters.push(eq(examination.seriesKey, input.seriesKey));
@@ -130,13 +132,14 @@ export async function listExaminations(
     const cursor = input.after;
     const cursorDate = cursor.measuredOn;
     const cursorTime = cursor.measuredTime;
-    const cursorCreated = new Date(cursor.createdAt);
+    const createdBeforeCursor = sql`${examination.createdAt} < ${cursor.createdAt}::timestamptz`;
+    const createdAtEqualsCursor = sql`${examination.createdAt} = ${cursor.createdAt}::timestamptz`;
     const sameDayAfter = cursorTime === null
-      ? and(isNull(examination.measuredTime), lt(examination.createdAt, cursorCreated))
+      ? and(isNull(examination.measuredTime), createdBeforeCursor)
       : or(
         lt(examination.measuredTime, cursorTime),
         isNull(examination.measuredTime),
-        and(eq(examination.measuredTime, cursorTime), lt(examination.createdAt, cursorCreated)),
+        and(eq(examination.measuredTime, cursorTime), createdBeforeCursor),
       );
     filters.push(or(
       lt(examination.measuredOn, cursorDate),
@@ -144,12 +147,15 @@ export async function listExaminations(
       and(
         eq(examination.measuredOn, cursorDate),
         cursorTime === null ? isNull(examination.measuredTime) : eq(examination.measuredTime, cursorTime),
-        eq(examination.createdAt, cursorCreated),
+        createdAtEqualsCursor,
         lt(examination.id, cursor.id),
       ),
     )!);
   }
-  return db.select().from(examination).where(and(...filters)).orderBy(
+  return db.select({
+    ...getTableColumns(examination),
+    cursorCreatedAt: sql<string>`to_char(${examination.createdAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
+  }).from(examination).where(and(...filters)).orderBy(
     desc(examination.measuredOn),
     sql`${examination.measuredTime} DESC NULLS LAST`,
     desc(examination.createdAt),

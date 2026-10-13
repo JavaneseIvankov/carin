@@ -211,6 +211,12 @@ describe('signed examination cursors', () => {
     expect(decodeExaminationCursor(longFilterToken, secret, longBinding)).toEqual(position);
   });
 
+  it('preserves PostgreSQL microseconds in the keyset position', () => {
+    const exactPosition = { ...position, createdAt: '2026-10-14T02:05:00.123456Z' };
+    const token = encodeExaminationCursor(exactPosition, secret, binding);
+    expect(decodeExaminationCursor(token, secret, binding)).toEqual(exactPosition);
+  });
+
   it('rejects tampered, malformed, expired-shape, and wrong-secret cursors', () => {
     const token = encodeExaminationCursor(position, secret, binding);
     const [payload, signature] = token.split('.');

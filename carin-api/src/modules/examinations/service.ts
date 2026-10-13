@@ -205,7 +205,7 @@ export async function listExaminations(
   const nextCursor = hasMore && last ? encodeExaminationCursor({
       measuredOn: last.measuredOn,
       measuredTime: last.measuredTime,
-      createdAt: last.createdAt.toISOString(),
+      createdAt: last.cursorCreatedAt,
       id: last.id,
     }, input.cursorSecret, {
       userId: input.userId,

@@ -228,4 +228,32 @@ describe('examination API', () => {
     const wrongOwner = await request(`/api/v1/examinations?limit=1&type=glucose&cursor=${encodeURIComponent(first.nextCursor)}`, {}, otherId);
     expect(wrongOwner.status).toBe(400);
   });
+
+  it('paginates existing rows with PostgreSQL sub-millisecond createdAt precision', async () => {
+    const seriesKey = '["pressure",null,"mmHg"]';
+    const olderId = randomUUID();
+    const newerId = randomUUID();
+    await pool.query(
+      `INSERT INTO examination (id,user_id,revision,type,series_key,measured_on,timezone,systolic,diastolic,unit,created_at,updated_at)
+       VALUES
+         ($1,$3,1,'pressure',$4,'2010-01-01','UTC',120,80,'mmHg','2020-01-01T00:00:00.123400Z','2020-01-01T00:00:00.123400Z'),
+         ($2,$3,1,'pressure',$4,'2010-01-01','UTC',121,81,'mmHg','2020-01-01T00:00:00.123456Z','2020-01-01T00:00:00.123456Z')`,
+      [olderId, newerId, ownerId, seriesKey],
+    );
+    const query = `limit=1&type=pressure&seriesKey=${encodeURIComponent(seriesKey)}`;
+    const first = await (await request(`/api/v1/examinations?${query}`)).json();
+    expect(first.items[0].id).toBe(newerId);
+    const secondResponse = await request(`/api/v1/examinations?${query}&cursor=${encodeURIComponent(first.nextCursor)}`);
+    expect(secondResponse.status).toBe(200);
+    const second = await secondResponse.json();
+    expect(second.items.map((item: { id: string }) => item.id)).toEqual([olderId]);
+  });
+
+  it('rejects PostgreSQL numeric infinity at the persistence boundary', async () => {
+    await expect(pool.query(
+      `INSERT INTO examination (user_id,type,context,series_key,measured_on,timezone,value,unit)
+       VALUES ($1,'glucose','fasting','["glucose","fasting","mg/dL"]','2018-01-01','UTC','Infinity'::numeric,'mg/dL')`,
+      [ownerId],
+    )).rejects.toThrow();
+  });
 });

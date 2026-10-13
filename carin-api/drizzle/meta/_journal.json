@@ -50,6 +50,13 @@
       "when": 1791928093696,
       "tag": "0006_examination_integer_pressure",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791928366662,
+      "tag": "0007_examination_finite_measurements",
+      "breakpoints": true
     }
   ]
 }

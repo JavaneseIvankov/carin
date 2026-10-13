@@ -4,6 +4,7 @@ import type { ExaminationInput } from './types.js';
 
 const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 const TIME_PATTERN = /^([01]\d|2[0-3]):([0-5]\d)$/;
+const CREATED_AT_PATTERN = /^(\d{4}-\d{2}-\d{2})T([01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d{1,6})?Z$/;
 const CURSOR_DOMAIN = 'carin-api:examination-cursor:v1';
 const CURSOR_MAX_LENGTH = 500;
 
@@ -280,9 +281,10 @@ function normalizedBinding(binding: ExaminationCursorBinding): ExaminationCursor
 }
 
 function normalizedPosition(position: ExaminationCursorPosition): ExaminationCursorPosition {
+  const createdAt = typeof position?.createdAt === 'string' ? CREATED_AT_PATTERN.exec(position.createdAt) : null;
   if (
     !position || typeof position.measuredOn !== 'string' || !isCalendarDate(position.measuredOn) ||
-    !isMeasurementTime(position.measuredTime) || typeof position.createdAt !== 'string' ||
+    !isMeasurementTime(position.measuredTime) || !createdAt || !isCalendarDate(createdAt[1]!) ||
     !Number.isFinite(Date.parse(position.createdAt)) || typeof position.id !== 'string' ||
     !position.id || position.id.length > 200
   ) {
@@ -291,7 +293,8 @@ function normalizedPosition(position: ExaminationCursorPosition): ExaminationCur
   return {
     measuredOn: position.measuredOn,
     measuredTime: position.measuredTime,
-    createdAt: new Date(position.createdAt).toISOString(),
+    // Preserve PostgreSQL's full microsecond sort key; Date.toISOString() would truncate it.
+    createdAt: position.createdAt,
     id: position.id,
   };
 }
