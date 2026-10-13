@@ -21,6 +21,8 @@ Copy `infra/.env.example` to `infra/.env`, replace the local-only passwords,
 set a unique `BETTER_AUTH_SECRET`, and use the same reachable API base in
 `BETTER_AUTH_URL` and `EXPO_PUBLIC_API_URL`. Keep `APP_LINK_SCHEME` aligned with
 `carin-app/app.json`; list only approved exact origins in `AUTH_TRUSTED_ORIGINS`.
+To deliver auth email locally, set `RESEND_API_KEY` and `EMAIL_FROM` to a sender
+on a domain verified for this Resend environment.
 Then run these commands from the repository root. If a password contains URL
 reserved characters, percent-encode it because Compose places it in
 `DATABASE_URL`:
@@ -28,6 +30,18 @@ reserved characters, percent-encode it because Compose places it in
 ```sh
 docker compose --env-file infra/.env -f infra/compose.yaml up --build
 ```
+
+Start the dedicated email delivery worker when Resend is configured:
+
+```sh
+docker compose --profile email --env-file infra/.env -f infra/compose.yaml up --build
+```
+
+The email worker shares PostgreSQL and the API image but receives the Resend
+credential only in its own container. Its profile is separate from the general
+`worker` profile reserved for C16. The example sender is a placeholder; a real
+inbox check requires a verified sender domain, active API key, recipient mailbox,
+and a reachable `BETTER_AUTH_URL`.
 
 Compose waits for PostgreSQL health, runs `node dist/db/migrate.js` once, and
 starts the API only after that migration service exits successfully. PostgreSQL
@@ -51,7 +65,7 @@ exec postgres psql -U carin_dev -d carin_dev`. An S3 client pointed at
 MinIO is only reachable by services on the private network. No database,
 MinIO, AI, or worker port is published.
 
-The `worker` service is a disabled Compose profile prepared for C16 and points
+The general `worker` service is a disabled Compose profile prepared for C16 and points
 at the planned `dist/worker.js` entrypoint. Do not enable `--profile worker`
 before C16 implements and verifies that entrypoint. Before enabling it, create
 a least-privilege Silo account for the bucket and replace `MINIO_ACCESS_KEY` and

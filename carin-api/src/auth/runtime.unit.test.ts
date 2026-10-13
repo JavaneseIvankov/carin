@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import type { Database } from '../db/client.js';
-import { createAuthRuntime } from './runtime.js';
+import {
+  createAuthRuntime,
+  createResetLandingUrl,
+  createVerificationLandingUrl,
+} from './runtime.js';
 
 describe('Better Auth runtime', () => {
   it('exposes a handler, verified-session resolver, and injectable mail sender', () => {
@@ -14,5 +18,19 @@ describe('Better Auth runtime', () => {
 
     expect(runtime.auth.handler).toBeTypeOf('function');
     expect(runtime.resolveSession).toBeTypeOf('function');
+  });
+
+  it('pins verification and reset links to the fixed HTTPS landing routes', () => {
+    const base = 'https://api.example.test';
+    const verification = createVerificationLandingUrl(
+      'https://api.example.test/api/auth/verify-email?token=opaque&callbackURL=https%3A%2F%2Fevil.example',
+      base,
+    );
+    expect(new URL(verification).searchParams.get('callbackURL')).toBe('https://api.example.test/auth/verified');
+    expect(() => createVerificationLandingUrl(
+      'https://api.example.test/api/auth/verify-email?token=opaque',
+      'https://attacker.example',
+    )).toThrow(/AUTH_VERIFICATION_LINK_INVALID/);
+    expect(createResetLandingUrl('token+/=', base)).toBe('https://api.example.test/auth/reset?token=token%2B%2F%3D');
   });
 });

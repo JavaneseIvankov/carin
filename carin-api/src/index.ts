@@ -6,6 +6,7 @@ import { postgresReadinessRepository } from './health/postgres-repository.js';
 import { createReadinessService } from './health/readiness.js';
 import { createDatabase } from './db/client.js';
 import { createAuthRuntime } from './auth/runtime.js';
+import { enqueueAuthMail } from './modules/email/outbox.js';
 
 const config = loadConfig(process.env);
 const authSecret = config.betterAuthSecret;
@@ -21,10 +22,11 @@ const authRuntime = createAuthRuntime({
   baseURL: authURL,
   secret: authSecret,
   trustedOrigins: config.authTrustedOrigins ?? [],
-  // C09 supplies the durable Resend/outbox implementation through this seam.
-  sendEmail: async () => {
-    throw new Error('AUTH_EMAIL_DELIVERY_UNCONFIGURED');
+  sendEmail: async (mail) => {
+    const result = await enqueueAuthMail(db, authSecret, mail);
+    if (result === 'expired') process.stdout.write(`${JSON.stringify({ event: 'AUTH_EMAIL_TOKEN_EXPIRED' })}\n`);
   },
+  onEmailQueueFailure: () => process.stdout.write(`${JSON.stringify({ event: 'AUTH_EMAIL_QUEUE_FAILED' })}\n`),
 });
 const app = createApp({
   readiness: createReadinessService(postgresReadinessRepository(pool)),
@@ -32,6 +34,7 @@ const app = createApp({
   auth: authRuntime.auth,
   account: { db, resolveSession: authRuntime.resolveSession },
   legalConsent: { db, resolveSession: authRuntime.resolveSession },
+  appLinkScheme: config.appLinkScheme,
 });
 
 serve({ fetch: app.fetch, port: config.port });

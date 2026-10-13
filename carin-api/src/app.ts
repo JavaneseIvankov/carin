@@ -10,6 +10,7 @@ import {
   registerLegalRegistryRoute,
 } from "./modules/legal/routes.js";
 import { registerAccountRoutes } from './modules/account/routes.js';
+import { registerEmailLandingRoutes } from './modules/email/landing.js';
 
 export type RequestLog = {
   requestId: string;
@@ -25,6 +26,7 @@ export type AppDependencies = {
   legalConsent?: { db: Database; resolveSession: SessionResolver };
   account?: { db: Database; resolveSession: SessionResolver };
   auth?: { handler: (request: Request) => Promise<Response> };
+  appLinkScheme?: string;
 };
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -36,6 +38,7 @@ export function createApp({
   legalConsent,
   account,
   auth,
+  appLinkScheme,
 }: AppDependencies): Hono<AppEnv> {
   const app = new Hono<AppEnv>();
   app.use("*", async (c, next) => {
@@ -57,6 +60,7 @@ export function createApp({
   registerLegalRegistryRoute(app);
   if (legalConsent) registerAiConsentRoute(app, legalConsent);
   if (account) registerAccountRoutes(app, account);
+  if (appLinkScheme) registerEmailLandingRoutes(app, appLinkScheme);
   if (auth) app.all('/api/auth/*', (c) => auth.handler(c.req.raw));
 
   registerRoutes?.(app);
