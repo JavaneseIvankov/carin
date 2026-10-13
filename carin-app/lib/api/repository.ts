@@ -44,6 +44,7 @@ type Dependencies = {
   onUnauthorized: () => Promise<void>;
   isCurrentScope?: () => boolean;
   fetcher?: typeof fetch;
+  getCookie?: () => Promise<string>;
   baseUrl?: string;
 };
 
@@ -55,11 +56,12 @@ export function createAppRepository(deps: Dependencies) {
   async function send<O extends AppOperation>(name: O, input: AppRequestInput<O>) {
     const request = prepareAppRequest(name, input);
     if (request.method !== 'GET') requireOnline(deps.connectivity());
+    const cookie = await deps.getCookie?.();
     const response = await fetcher(`${deps.baseUrl ?? requireApiUrl()}${request.path}`, {
       method: request.method,
-      headers: request.headers,
+      headers: cookie ? { ...request.headers, Cookie: cookie } : request.headers,
       body: request.body,
-      credentials: 'include',
+      credentials: 'omit',
     });
     if (response.status === 401) {
       if (deps.isCurrentScope?.() ?? true) await deps.onUnauthorized();
