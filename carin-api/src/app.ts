@@ -89,3 +89,21 @@ export function createApp({
   );
   return app;
 }
+
+export type VerifiedAppDependencies = Omit<
+  AppDependencies,
+  'account' | 'catalog' | 'legalConsent'
+> & {
+  db: Database;
+  resolveSession: SessionResolver;
+};
+
+export function createVerifiedApp({ db, resolveSession, ...dependencies }: VerifiedAppDependencies) {
+  const resources = { db, resolveSession };
+  return createApp({
+    ...dependencies,
+    account: resources,
+    legalConsent: resources,
+    catalog: resources,
+  });
+}

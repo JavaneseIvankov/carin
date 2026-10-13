@@ -1,5 +1,5 @@
 import { serve } from '@hono/node-server';
-import { createApp } from './app.js';
+import { createVerifiedApp } from './app.js';
 import { loadConfig } from './config.js';
 import { createPostgresPool } from './health/postgres-pool.js';
 import { postgresReadinessRepository } from './health/postgres-repository.js';
@@ -29,12 +29,12 @@ const authRuntime = createAuthRuntime({
   },
   onEmailQueueFailure: () => process.stdout.write(`${JSON.stringify({ event: 'AUTH_EMAIL_QUEUE_FAILED' })}\n`),
 });
-const app = createApp({
+const app = createVerifiedApp({
   readiness: createReadinessService(postgresReadinessRepository(pool)),
   log: (entry) => { process.stdout.write(`${JSON.stringify(entry)}\n`); },
   auth: authRuntime.auth,
-  account: { db, resolveSession: authRuntime.resolveSession },
-  legalConsent: { db, resolveSession: authRuntime.resolveSession },
+  db,
+  resolveSession: authRuntime.resolveSession,
   appLinkScheme: config.appLinkScheme,
 });
 

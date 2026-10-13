@@ -31,13 +31,17 @@ export function useAppRepository() {
   );
 }
 
-export function useAppRead<O extends ReadOperation>(name: O, input: AppRequestInput<O>) {
+export function useAppRead<O extends ReadOperation>(
+  name: O,
+  input: AppRequestInput<O>,
+  options: { enabled?: boolean } = {}
+) {
   const { scope } = useAppData();
   const repository = useAppRepository();
   return useQuery({
     queryKey: scope ? scopeKey(scope, name, input) : ['carin', 'no-session', name],
     queryFn: () => repository!.read(name, input),
-    enabled: !!repository,
+    enabled: !!repository && (options.enabled ?? true),
     networkMode: 'always',
   });
 }
