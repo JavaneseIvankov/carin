@@ -131,6 +131,7 @@ export const catalogVersion = pgTable(
     publishedAt: timestamp('published_at', { withTimezone: true }).notNull(),
     digest: text('digest').notNull(),
     isCurrent: boolean('is_current').default(false).notNull(),
+    activationGeneration: integer('activation_generation').default(0).notNull(),
     importedAt: created(),
   },
   (t): PgTableExtraConfigValue[] => [

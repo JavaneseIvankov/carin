@@ -1,6 +1,7 @@
 export type CatalogImportFailure =
   | 'INVALID_CATALOG'
   | 'CATALOG_VERSION_CONFLICT'
+  | 'CATALOG_ACTIVATION_CONFLICT'
   | 'CATALOG_VERSION_UNAVAILABLE';
 
 export class CatalogImportError extends Error {

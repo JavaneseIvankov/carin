@@ -1,9 +1,9 @@
 import { createHash } from 'node:crypto';
 import type { components } from '../contracts/generated/ai-service.js';
-import { validateSchema } from '../contracts/validation.js';
+import { ContractValidationError, validateSchema } from '../contracts/validation.js';
 import type { AiClient } from '../integrations/ai/index.js';
 import { CatalogImportError } from './errors.js';
-import { persistCatalogSnapshot } from './repository.js';
+import { persistCatalogSnapshot, readCatalogActivationBaseline } from './repository.js';
 
 export { CatalogImportError } from './errors.js';
 
@@ -26,6 +26,15 @@ const maximumCatalogPages = 10_000;
 
 function invalidCatalog(): never {
   throw new CatalogImportError('INVALID_CATALOG', 'AI catalog snapshot failed validation.');
+}
+
+function validateCatalogSchema(name: string, value: unknown): void {
+  try {
+    validateSchema(name, value);
+  } catch (error) {
+    if (error instanceof ContractValidationError) invalidCatalog();
+    throw error;
+  }
 }
 
 function validateFood(food: Schemas['CatalogFood'], version: string, dataMode: Schemas['CapabilityManifest']['dataMode']): void {
@@ -77,13 +86,8 @@ function canonicalJson(value: unknown): string {
 export async function loadCatalogSnapshot(
   ai: Pick<AiClient, 'getCapabilities' | 'getCatalog'>,
 ): Promise<CatalogSnapshot> {
-  let manifest: Schemas['CapabilityManifest'];
-  try {
-    manifest = await ai.getCapabilities();
-    validateSchema('ai.CapabilityManifest', manifest);
-  } catch {
-    invalidCatalog();
-  }
+  const manifest = await ai.getCapabilities();
+  validateCatalogSchema('ai.CapabilityManifest', manifest);
   const conditionIds = new Set<string>();
   for (const condition of manifest.conditions) {
     if (conditionIds.has(condition.id)) invalidCatalog();
@@ -99,20 +103,11 @@ export async function loadCatalogSnapshot(
       if (cursors.has(cursor)) invalidCatalog();
       cursors.add(cursor);
     }
-    let page: Schemas['CatalogPage'];
-    try {
-      page = await ai.getCatalog({ version: manifest.catalogVersion, ...(cursor === undefined ? {} : { cursor }), limit: 200 });
-      validateSchema('ai.CatalogPage', page);
-    } catch {
-      invalidCatalog();
-    }
+    const page = await ai.getCatalog({ version: manifest.catalogVersion, ...(cursor === undefined ? {} : { cursor }), limit: 200 });
+    validateCatalogSchema('ai.CatalogPage', page);
     if (page.catalogVersion !== manifest.catalogVersion) invalidCatalog();
     for (const item of page.items) {
-      try {
-        validateSchema('ai.CatalogFood', item);
-      } catch {
-        invalidCatalog();
-      }
+      validateCatalogSchema('ai.CatalogFood', item);
       validateFood(item, manifest.catalogVersion, manifest.dataMode);
       if (foodIds.has(item.id)) invalidCatalog();
       foodIds.add(item.id);
@@ -136,8 +131,9 @@ export async function importCatalog(
   db: import('../db/client.js').Database,
   ai: Pick<AiClient, 'getCapabilities' | 'getCatalog'>,
 ): Promise<{ version: string; foodCount: number; digest: string }> {
+  const activationBaseline = await readCatalogActivationBaseline(db);
   const snapshot = await loadCatalogSnapshot(ai);
-  await persistCatalogSnapshot(db, snapshot);
+  await persistCatalogSnapshot(db, snapshot, activationBaseline);
   return {
     version: snapshot.manifest.catalogVersion,
     foodCount: snapshot.foods.length,

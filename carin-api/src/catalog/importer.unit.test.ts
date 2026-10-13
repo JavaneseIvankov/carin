@@ -1,4 +1,5 @@
 import type { components } from '../contracts/generated/ai-service.js';
+import { AiAdapterError } from '../integrations/ai/index.js';
 import { describe, expect, it } from 'vitest';
 import { CatalogImportError, loadCatalogSnapshot } from './importer.js';
 
@@ -65,6 +66,35 @@ function client(pages: Schemas['CatalogPage'][]) {
 }
 
 describe('catalog snapshot import input', () => {
+  it('preserves typed AI timeout failures while fetching the capability manifest', async () => {
+    const failure = new AiAdapterError('TIMEOUT', 'AI request timed out.', true);
+    const api = {
+      getCapabilities: async () => { throw failure; },
+      getCatalog: async () => ({ catalogVersion: manifest.catalogVersion, items: [], nextCursor: null }),
+    };
+
+    await expect(loadCatalogSnapshot(api)).rejects.toBe(failure);
+  });
+
+  it('preserves typed AI service failures while fetching catalog pages', async () => {
+    const failure = new AiAdapterError('SERVICE_UNAVAILABLE', 'AI service unavailable.', true);
+    const api = {
+      getCapabilities: async () => manifest,
+      getCatalog: async () => { throw failure; },
+    };
+
+    await expect(loadCatalogSnapshot(api)).rejects.toBe(failure);
+  });
+
+  it('maps response schema validation failures to INVALID_CATALOG', async () => {
+    const api = {
+      getCapabilities: async () => ({ ...manifest, catalogVersion: 42 }) as unknown as Schemas['CapabilityManifest'],
+      getCatalog: async () => ({ catalogVersion: manifest.catalogVersion, items: [], nextCursor: null }),
+    };
+
+    await expect(loadCatalogSnapshot(api)).rejects.toMatchObject({ code: 'INVALID_CATALOG' });
+  });
+
   it('fetches every page for the manifest version in order', async () => {
     const source = client([
       { catalogVersion: manifest.catalogVersion, items: [food('food-a', 'A')], nextCursor: 'page-2' },
