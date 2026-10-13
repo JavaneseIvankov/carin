@@ -10,6 +10,7 @@ import {
   registerLegalRegistryRoute,
 } from "./modules/legal/routes.js";
 import { registerAccountRoutes } from './modules/account/routes.js';
+import { registerProfileRoutes } from './modules/profile/routes.js';
 
 export type RequestLog = {
   requestId: string;
@@ -56,7 +57,10 @@ export function createApp({
   registerHealthRoutes(app, readiness);
   registerLegalRegistryRoute(app);
   if (legalConsent) registerAiConsentRoute(app, legalConsent);
-  if (account) registerAccountRoutes(app, account);
+  if (account) {
+    registerAccountRoutes(app, account);
+    registerProfileRoutes(app, account);
+  }
   if (auth) app.all('/api/auth/*', (c) => auth.handler(c.req.raw));
 
   registerRoutes?.(app);
