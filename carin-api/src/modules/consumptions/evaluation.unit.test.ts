@@ -45,7 +45,11 @@ const profile: ProfileContext = {
   smoking: null,
 };
 
-function manifest(requiredProfileFields: string[] = [], requiredNutrients: string[] = []): Ai['CapabilityManifest'] {
+function manifest(
+  requiredProfileFields: string[] = [],
+  requiredNutrients: string[] = [],
+  withRule = true,
+): Ai['CapabilityManifest'] {
   return {
     contractVersion: '1.0.0',
     catalogVersion: photoResult.catalogVersion,
@@ -61,7 +65,11 @@ function manifest(requiredProfileFields: string[] = [], requiredNutrients: strin
       supportedAgeMaximum: null,
     }],
     supportedPhotoFoodIds: ['fixture-food-001'],
-    supportedRules: [],
+    supportedRules: withRule ? [{
+      ruleId: 'fixture-rule',
+      conditionId: 'fixture-condition',
+      sources: [],
+    }] : [],
     nutrients: ['energyKcal', 'carbohydrateG', 'proteinG', 'fatG', 'fiberG', 'sugarsG', 'sodiumMg'],
     dataMode: photoResult.dataMode,
     publishedAt: photoResult.computedAt,
@@ -102,6 +110,27 @@ describe('consumption personal evaluation eligibility', () => {
     });
     expect(missingData.eligible).toBe(false);
     expect(missingData.limitations.map(({ code }) => code)).toContain('missing_evaluation_data');
+  });
+
+  it('resolves nested profile requirements and requires a published condition rule', () => {
+    const nestedProfileField = evaluatePersonalizationEligibility({
+      profile: { ...profile, diagnosisState: 'reported' },
+      snapshot: photoResult,
+      manifest: manifest(['diagnoses.state']),
+      consentGranted: true,
+      catalogReady: true,
+    });
+    expect(nestedProfileField.eligible).toBe(true);
+
+    const noRule = evaluatePersonalizationEligibility({
+      profile,
+      snapshot: photoResult,
+      manifest: manifest([], [], false),
+      consentGranted: true,
+      catalogReady: true,
+    });
+    expect(noRule.eligible).toBe(false);
+    expect(noRule.limitations.map(({ code }) => code)).toContain('unsupported_condition');
   });
 
   it('allows reuse only when source result, actual portion, catalog, and frozen profile agree', () => {

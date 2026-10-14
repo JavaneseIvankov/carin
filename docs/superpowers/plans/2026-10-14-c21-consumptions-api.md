@@ -43,6 +43,6 @@
 ## Task 4: Wire, verify, and hand off
 
 - [x] Register `/api/v1/consumptions` routes in the verified app composition and validate requests/responses through generated OpenAPI types.
-- [ ] Run API typecheck, lint, unit/integration tests, build, `db:generate` drift check, app contract check, root contract validator, and `git diff --check` from documented working directories.
-- [ ] Do not modify C18 migration `0007` or migration manifest; add an append-only migration only if inspection proves the existing schema cannot meet an invariant.
-- [ ] Update this plan and `docs/handoffs/t21-consumptions-api.md`; commit locally with a conventional message. Leave TSK 21 started and do not push.
+- [x] Run API typecheck, lint, unit/integration tests, build, `db:generate` drift check, app contract check, root contract validator, and `git diff --check` from documented working directories.
+- [x] Preserve C18 migration `0007` and the migration manifest; existing C18 schema meets the consumption invariants, so no new migration is needed.
+- [x] Update this plan and `docs/handoffs/t21-consumptions-api.md`; commit locally with a conventional message. Leave TSK 21 started and do not push.

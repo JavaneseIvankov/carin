@@ -1,5 +1,6 @@
 import type { components } from '../../contracts/generated/ai-service.js';
 import type { components as AppComponents } from '../../contracts/generated/app-api.js';
+import { hasRequiredProfileFields } from '../analyses/result-validation.js';
 
 type Ai = components['schemas'];
 type AnalysisResult = Ai['AnalysisResult'];
@@ -19,12 +20,6 @@ function canonical(value: unknown): string {
 
 function limitation(code: string, message: string, componentIds: string[] = []): Ai['Limitation'] {
   return { code, message, componentIds: [...new Set(componentIds)], critical: false };
-}
-
-function hasProfileValue(profile: ProfileContext, field: string): boolean {
-  const value = (profile as unknown as Record<string, unknown>)[field];
-  if (value === null || value === undefined || value === '' || value === 'not_provided' || value === 'unknown') return false;
-  return !Array.isArray(value) || value.length > 0;
 }
 
 export type PersonalizationEligibilityInput = {
@@ -80,6 +75,13 @@ export function evaluatePersonalizationEligibility(
       ));
       continue;
     }
+    if (!(input.manifest.supportedRules ?? []).some((rule) => rule.conditionId === conditionId)) {
+      limitations.push(limitation(
+        'unsupported_condition',
+        `No published personal evaluation rule supports condition ${conditionId}.`,
+      ));
+      continue;
+    }
     if ((condition.supportedAgeMinimum !== null &&
           (input.profile.ageYears === null || input.profile.ageYears < condition.supportedAgeMinimum)) ||
         (condition.supportedAgeMaximum !== null &&
@@ -91,12 +93,12 @@ export function evaluatePersonalizationEligibility(
       continue;
     }
 
-    const missingFields = condition.requiredProfileFields.filter((field) => !hasProfileValue(input.profile, field));
+    const hasRequiredFields = hasRequiredProfileFields(input.profile, condition.requiredProfileFields);
     const missingNutrients = condition.requiredNutrients.filter((nutrient) => {
       const coverage = input.snapshot.coverage[nutrient];
       return coverage.totalComponentCount === 0 || coverage.knownComponentCount !== coverage.totalComponentCount;
     });
-    if (missingFields.length || missingNutrients.length) {
+    if (!hasRequiredFields || missingNutrients.length) {
       const missingComponents = missingNutrients.length
         ? input.snapshot.components.filter((component) =>
             missingNutrients.some((nutrient) => component.nutrients[nutrient] === null),
@@ -105,7 +107,7 @@ export function evaluatePersonalizationEligibility(
       limitations.push(limitation(
         'missing_evaluation_data',
         `Condition ${conditionId} needs ${[
-          ...missingFields,
+          ...(!hasRequiredFields ? ['required profile fields'] : []),
           ...missingNutrients,
         ].join(', ')} before personal evaluation is supported.`,
         missingComponents,

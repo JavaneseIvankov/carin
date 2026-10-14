@@ -79,7 +79,7 @@ function equalNutrients(left: Nutrients, right: Nutrients): boolean {
   return nutrientKeys.every((key) => sameNumber(left[key], right[key]));
 }
 
-function hasRequiredProfileFields(profile: ProfileContext, requiredFields: string[]): boolean {
+export function hasRequiredProfileFields(profile: ProfileContext, requiredFields: string[]): boolean {
   const values: Record<string, unknown> = {
     heightCm: profile.heightCm,
     weightKg: profile.weightKg,
