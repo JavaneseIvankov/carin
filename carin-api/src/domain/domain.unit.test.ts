@@ -177,6 +177,17 @@ describe('timezone dashboard window', () => {
     );
   });
 
+  it.each([
+    ['0001-01-01', '0001-01-02'],
+    ['0099-01-01', '0099-01-02'],
+    ['0100-01-01', '0100-01-02'],
+  ])('supports early calendar year date %s', (date, nextDate) => {
+    expect(getCalendarDayWindow(date, 'UTC')).toEqual({
+      startAt: `${date}T00:00:00.000Z`,
+      endAt: `${nextDate}T00:00:00.000Z`,
+    });
+  });
+
   it('builds the selected date and preceding six-day window across DST', () => {
     expect(getDashboardWindowForDate('2026-03-09', 'America/New_York')).toEqual({
       timezone: 'America/New_York',

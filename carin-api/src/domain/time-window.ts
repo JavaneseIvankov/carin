@@ -20,12 +20,19 @@ function localDateAt(instant: Date, timeZone: string): string {
   }
   const parts = formatter.formatToParts(instant);
   const value = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)!.value;
-  return `${value('year')}-${value('month')}-${value('day')}`;
+  return `${value('year').padStart(4, '0')}-${value('month')}-${value('day')}`;
 }
 
 const localDateFormatters = new Map<string, Intl.DateTimeFormat>();
 const localDateTimeFormatters = new Map<string, Intl.DateTimeFormat>();
 const localDayBoundaryCache = new Map<string, string>();
+
+function utcTimestamp(year: number, monthIndex: number, day: number, hour = 0, minute = 0, second = 0): number {
+  const result = new Date(0);
+  result.setUTCFullYear(year, monthIndex, day);
+  result.setUTCHours(hour, minute, second, 0);
+  return result.getTime();
+}
 
 function localWallTimeAsUtc(instant: Date, timeZone: string): number {
   let formatter = localDateTimeFormatters.get(timeZone);
@@ -44,7 +51,7 @@ function localWallTimeAsUtc(instant: Date, timeZone: string): number {
   }
   const parts = formatter.formatToParts(instant);
   const value = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)!.value;
-  return Date.UTC(
+  return utcTimestamp(
     Number(value('year')),
     Number(value('month')) - 1,
     Number(value('day')),
@@ -56,14 +63,14 @@ function localWallTimeAsUtc(instant: Date, timeZone: string): number {
 
 function addDays(date: string, count: number): string {
   const [year, month, day] = date.split('-').map(Number);
-  const result = new Date(Date.UTC(year!, month! - 1, day! + count));
+  const result = new Date(utcTimestamp(year!, month! - 1, day! + count));
   return `${result.getUTCFullYear().toString().padStart(4, '0')}-${(result.getUTCMonth() + 1)
     .toString().padStart(2, '0')}-${result.getUTCDate().toString().padStart(2, '0')}`;
 }
 
 function firstInstantOnLocalDate(date: string, timeZone: string): Date | null {
   const [year, month, day] = date.split('-').map(Number);
-  const target = Date.UTC(year!, month! - 1, day!);
+  const target = utcTimestamp(year!, month! - 1, day!);
   const hourMs = 60 * 60 * 1000;
   const offsets = new Set<number>();
 
