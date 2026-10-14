@@ -41,10 +41,11 @@ Verification (API commands run from `carin-api/`):
 - `pnpm run lint` passed with no warnings.
 - `pnpm run test:unit` passed: 24 files, 193 tests. Final focused eligibility
   regressions passed: 1 file, 4 tests.
-- `pnpm run test:integration` passed: 15 files, 189 tests, with Docker PostgreSQL.
-  The focused consumption suite passed: 10 tests covering committed replay,
+- `pnpm run test:integration` passed: 15 files, 190 tests, with Docker PostgreSQL.
+  The focused consumption suite passed: 11 tests covering committed replay,
   concurrent/default confirmation, source ownership/currentness, pending scans,
-  invalid selections without side effects, nutrition snapshots, source-result purge,
+  invalid selections without side effects, nutrition snapshots, source-result purge
+  after create and metadata-only edit, revoked-consent suppression of reuse,
   edits/deletes, and stale worker publication.
 - `pnpm run build` passed.
 - `pnpm run db:generate` reported no schema changes.

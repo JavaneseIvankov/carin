@@ -438,10 +438,23 @@ describe('C21 consumption API and evaluation lifecycle', () => {
     expect(original.snapshot.attentions).toEqual(source.result.attentions);
     expect(original.snapshot.overallAttention).toBe(source.result.overallAttention);
 
-    await pool.query('UPDATE consumption SET photo_available=false WHERE id=$1', [original.id]);
+    const editedResponse = await updateBody(owner, original.id, {
+      expectedRevision: 1,
+      consumedAt: new Date(Date.parse(original.consumedAt) + 1_000).toISOString(),
+      timezone: original.timezone,
+      components: photoBody(source, source.result).components,
+      catalogVersion,
+    });
+    expect(editedResponse.status).toBe(200);
+    const edited = await editedResponse.json() as AppComponents['schemas']['Consumption'];
+    expect(edited.revision).toBe(2);
+    expect(edited.attentionState).toBe('available');
+    expect(edited.snapshot.attentions).toEqual(source.result.attentions);
+
+    await pool.query('UPDATE consumption SET photo_available=false WHERE id=$1', [edited.id]);
     await pool.query('DELETE FROM scan WHERE id=$1 AND user_id=$2', [source.scanId, owner.userId]);
 
-    const afterPurge = await app.request(`/api/v1/consumptions/${original.id}`, { headers: headers(owner) });
+    const afterPurge = await app.request(`/api/v1/consumptions/${edited.id}`, { headers: headers(owner) });
     expect(afterPurge.status).toBe(200);
     const preserved = await afterPurge.json() as AppComponents['schemas']['Consumption'];
     expect(preserved.sourceAnalysisResultId).toBeNull();
@@ -453,6 +466,25 @@ describe('C21 consumption API and evaluation lifecycle', () => {
     expect(preserved.snapshot.sources.map(({ id }) => id)).toEqual(expect.arrayContaining(
       source.result.sources.map(({ id }) => id),
     ));
+  });
+
+  it('does not reuse photo attention after current AI consent is revoked', async () => {
+    const owner = await createOwner();
+    const app = appFor(owner);
+    const source = await createScanWithResult(owner, app);
+    await pool.query(
+      `INSERT INTO consent_event (user_id,kind,version,granted,created_at)
+       VALUES ($1,'ai_processing',$2,false,clock_timestamp()+interval '1 second')`,
+      [owner.userId, getLegalRegistry().aiProcessing.version],
+    );
+
+    const response = await postConsumption(owner, photoBody(source, source.result), randomUUID(), app);
+    expect(response.status).toBe(201);
+    const created = await response.json() as AppComponents['schemas']['Consumption'];
+    expect(created.attentionState).toBe('not_requested');
+    expect(created.snapshot.attentions).toEqual([]);
+    expect(created.snapshot.overallAttention).toBe('insufficient_information');
+    expect(created.snapshot.limitations.map(({ code }) => code)).toContain('ai_consent_required');
   });
 
   it('checks scan ownership, current source revision and pending analysis before saving a photo confirmation', async () => {
