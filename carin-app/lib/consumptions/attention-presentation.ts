@@ -53,6 +53,10 @@ function attentionPresentation(consumption: ManualConsumption) {
 
 export function getConsumptionDetailPresentation(consumption: ManualConsumption) {
   return {
+    source: {
+      label: consumption.source === 'manual' ? 'Catatan manual' : 'Konfirmasi dari foto',
+      photoDeleted: consumption.source === 'photo_confirmation' && !consumption.photoAvailable,
+    },
     attention: attentionPresentation(consumption),
     nutrients: nutrientDefinitions.map(([key, label, unit]) => {
       const coverage = consumption.snapshot.coverage[key];

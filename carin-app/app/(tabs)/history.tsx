@@ -2,18 +2,39 @@ import { OnlineIndicator } from '@/components/app/online-indicator';
 import { ServiceError } from '@/components/app/service-error';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
-import { useAppRead } from '@/lib/api/query';
+import { useAppRepository } from '@/lib/api/query';
 import { formatLocalDateTime } from '@/lib/consumptions/consumption';
 import { getConsumptionDetailPresentation } from '@/lib/consumptions/attention-presentation';
+import {
+  CONSUMPTION_HISTORY_PAGE_LIMIT,
+  createConsumptionHistoryPageInput,
+  getConsumptionHistoryItems,
+  getNextConsumptionCursor,
+} from '@/lib/consumptions/history';
 import { useAppData } from '@/lib/data/provider';
+import { scopeKey } from '@/lib/data/scope';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { useRouter, type Href } from 'expo-router';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 
 export default function History() {
   const router = useRouter();
-  const { connectivity } = useAppData();
-  const consumptionQuery = useAppRead('listConsumptions', { query: { limit: 20 } });
-  const page = consumptionQuery.data?.data;
+  const { connectivity, scope } = useAppData();
+  const repository = useAppRepository();
+  const consumptionQuery = useInfiniteQuery({
+    queryKey: scope
+      ? scopeKey(scope, 'listConsumptions', { query: { limit: CONSUMPTION_HISTORY_PAGE_LIMIT } })
+      : ['carin', 'no-session', 'listConsumptions'],
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }) =>
+      repository!.read('listConsumptions', createConsumptionHistoryPageInput(pageParam)),
+    getNextPageParam: (lastPage) => getNextConsumptionCursor(lastPage.data),
+    enabled: !!repository,
+    networkMode: 'always',
+  });
+  const pages = consumptionQuery.data?.pages;
+  const items = getConsumptionHistoryItems(pages);
+  const isStale = pages?.some((page) => page.stale) ?? false;
 
   return (
     <View className="flex-1 bg-background">
@@ -29,8 +50,8 @@ export default function History() {
 
         <View className="gap-3">
           <Text variant="h3">Konsumsi</Text>
-          {page?.items.length ? (
-            page.items.map((item) => {
+          {items.length ? (
+            items.map((item) => {
               const local = formatLocalDateTime(new Date(item.consumedAt), item.timezone);
               const attention = getConsumptionDetailPresentation(item).attention.title;
               const foods = item.snapshot.components
@@ -52,6 +73,9 @@ export default function History() {
                   <Text variant="muted">
                     {item.source === 'manual' ? 'Catatan manual' : 'Konfirmasi dari foto'} ·{' '}
                     {attention}
+                    {item.source === 'photo_confirmation' && !item.photoAvailable
+                      ? ' · Foto sumber telah dihapus'
+                      : ''}
                   </Text>
                 </Pressable>
               );
@@ -72,7 +96,27 @@ export default function History() {
               <Text variant="muted">Catatan manual tidak memerlukan foto atau hasil analisis.</Text>
             </View>
           )}
-          {consumptionQuery.data?.stale || consumptionQuery.error ? (
+          {items.length && consumptionQuery.error ? (
+            <ServiceError
+              error={consumptionQuery.error}
+              onRetry={() => void consumptionQuery.refetch()}
+            />
+          ) : null}
+          {consumptionQuery.hasNextPage ? (
+            <Button
+              variant="outline"
+              className="min-h-12"
+              disabled={consumptionQuery.isFetchingNextPage}
+              onPress={() => void consumptionQuery.fetchNextPage()}
+              accessibilityLabel="Muat catatan konsumsi yang lebih lama">
+              {consumptionQuery.isFetchingNextPage ? (
+                <ActivityIndicator accessibilityLabel="Memuat catatan lama" />
+              ) : (
+                <Text>Muat catatan lebih lama</Text>
+              )}
+            </Button>
+          ) : null}
+          {isStale || consumptionQuery.error ? (
             <Text variant="muted">
               Data terakhir tersimpan ditampilkan. Muat ulang saat online.
             </Text>

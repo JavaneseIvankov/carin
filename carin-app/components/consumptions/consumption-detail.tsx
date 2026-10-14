@@ -37,7 +37,6 @@ export function ConsumptionDetail({
 }: Props) {
   const presentation = getConsumptionDetailPresentation(consumption);
   const localTime = formatLocalDateTime(new Date(consumption.consumedAt), consumption.timezone);
-  const sourceLabel = consumption.source === 'manual' ? 'Catatan manual' : 'Konfirmasi dari foto';
 
   return (
     <ScrollView contentContainerClassName="gap-5 px-5 pb-10 pt-7">
@@ -47,8 +46,11 @@ export function ConsumptionDetail({
         </Button>
         <Text variant="h2">Detail konsumsi</Text>
         <Text variant="muted">
-          {sourceLabel} · Revisi {consumption.revision}
+          {presentation.source.label} · Revisi {consumption.revision}
         </Text>
+        {presentation.source.photoDeleted ? (
+          <Text variant="muted">Foto sumber telah dihapus.</Text>
+        ) : null}
         {isStale ? (
           <Text variant="muted">Data terakhir tersimpan ditampilkan. Muat ulang saat online.</Text>
         ) : null}

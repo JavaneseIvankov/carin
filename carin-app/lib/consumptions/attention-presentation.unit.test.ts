@@ -2,14 +2,17 @@ import { describe, expect, it } from 'vitest';
 import type { ManualConsumption } from './consumption';
 import { getConsumptionDetailPresentation } from './attention-presentation';
 
-function record(attentionState: ManualConsumption['attentionState']): ManualConsumption {
+function record(
+  attentionState: ManualConsumption['attentionState'],
+  overrides: Partial<Pick<ManualConsumption, 'source' | 'photoAvailable'>> = {}
+): ManualConsumption {
   return {
     id: 'consumption-1',
     revision: 1,
-    source: 'manual',
+    source: overrides.source ?? 'manual',
     scanId: null,
     sourceAnalysisResultId: null,
-    photoAvailable: false,
+    photoAvailable: overrides.photoAvailable ?? false,
     consumedAt: '2026-10-14T05:30:00.000Z',
     timezone: 'Asia/Jakarta',
     createdAt: '2026-10-14T05:30:00.000Z',
@@ -77,5 +80,16 @@ describe('consumption detail presentation', () => {
       message: 'Pertimbangan ini memakai snapshot catatan saat disimpan.',
       available: true,
     });
+  });
+
+  it('labels a photo-backed consumption whose source photo has been removed', () => {
+    expect(
+      getConsumptionDetailPresentation(
+        record('not_requested', {
+          source: 'photo_confirmation',
+          photoAvailable: false,
+        })
+      ).source
+    ).toEqual({ label: 'Konfirmasi dari foto', photoDeleted: true });
   });
 });
