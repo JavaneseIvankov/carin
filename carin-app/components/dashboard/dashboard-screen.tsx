@@ -3,6 +3,7 @@ import { ReadState } from '@/components/app/read-state';
 import { ServiceError } from '@/components/app/service-error';
 import { MissingFieldActions } from '@/components/profile/missing-field-actions';
 import { Button } from '@/components/ui/button';
+import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import { useAppRead } from '@/lib/api/query';
 import { useAppData } from '@/lib/data/provider';
@@ -17,16 +18,50 @@ import {
 import { useDashboard } from '@/lib/dashboard/use-dashboard';
 import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
-import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
+import {
+  CalendarDays,
+  Camera,
+  ChevronRight,
+  ClipboardPlus,
+  FlaskConical,
+  Sprout,
+  Utensils,
+} from 'lucide-react-native';
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  ScrollView,
+  View,
+  useWindowDimensions,
+} from 'react-native';
+import { shouldShowDashboardNextAction, shouldStackDashboardActions } from '@/lib/dashboard/layout';
 
-function RecurringAttentionCard({
+const MASCOT = require('../../assets/images/carin-mascot.png');
+
+function SectionTitle({ title, detail }: { title: string; detail?: string }) {
+  return (
+    <View className="gap-1">
+      <Text variant="h2">{title}</Text>
+      {detail ? (
+        <Text variant="caption" className="text-muted-foreground">
+          {detail}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
+function RecurringAttentionItem({
   attention,
   onOpenLink,
+  isLast,
 }: {
   attention: ReturnType<typeof getRecurringAttentionCards>[number];
   onOpenLink: (
     href: ReturnType<typeof getRecurringAttentionCards>[number]['links'][number]['href']
   ) => void;
+  isLast: boolean;
 }) {
   const firstConsumptionId = attention.links[0]?.id;
   const detailQuery = useAppRead(
@@ -39,18 +74,21 @@ function RecurringAttentionCard({
     : null;
 
   return (
-    <View className="gap-2 rounded-lg border border-border p-3">
-      <Text variant="large">{attention.label}</Text>
-      {reason ? <Text variant="muted">{reason}</Text> : null}
-      <Text>Tercatat pada {attention.count} catatan konsumsi</Text>
+    <View className={isLast ? 'gap-2' : 'gap-2 border-b border-foreground/15 pb-3'}>
+      <Text variant="h3">{attention.label}</Text>
+      {reason ? <Text>{reason}</Text> : null}
+      <Text variant="caption" className="text-muted-foreground">
+        Muncul di {attention.count} catatan konsumsi
+      </Text>
       {attention.links.map((link) => (
         <Pressable
           key={link.id}
-          className="min-h-12 justify-center"
+          className="min-h-11 flex-row items-center gap-1 self-start"
           accessibilityRole="link"
           accessibilityLabel={`${link.label} dari ${attention.label}`}
           onPress={() => onOpenLink(link.href)}>
-          <Text className="font-medium text-primary">{link.label} →</Text>
+          <Text className="font-semibold text-primary">{link.label}</Text>
+          <Icon as={ChevronRight} className="text-primary" size={18} />
         </Pressable>
       ))}
     </View>
@@ -65,6 +103,9 @@ export function DashboardScreen() {
   const intake = dashboard ? getDailyIntakeSummary(dashboard) : null;
   const recurringAttentions = dashboard ? getRecurringAttentionCards(dashboard) : [];
   const examinations = dashboard ? getLatestExaminationCards(dashboard) : [];
+  const { width, fontScale } = useWindowDimensions();
+  const pageGutter = width < 360 ? 16 : 20;
+  const stackFoodActions = shouldStackDashboardActions(width, fontScale);
 
   const openTarget = (
     target: string | { pathname: string; params?: Record<string, string> } | null
@@ -72,48 +113,105 @@ export function DashboardScreen() {
     if (target) router.push(target as Href);
   };
 
+  const nutrient = (key: string) => intake?.nutrients.find((item) => item.key === key);
+  const energy = nutrient('energyKcal');
+
   return (
     <View className="flex-1 bg-background">
       <OnlineIndicator connectivity={connectivity} />
-      <ScrollView contentContainerClassName="gap-5 px-5 pb-10 pt-7">
-        <View className="gap-1">
-          <Text variant="h2">Beranda</Text>
-          {dashboard ? (
-            <Text variant="muted">
-              {formatDashboardDate(dashboard.date)} · {dashboard.timezone}
+      <ScrollView
+        className="flex-1 bg-background"
+        contentContainerClassName="gap-5 pb-8 pt-4"
+        contentContainerStyle={{ paddingHorizontal: pageGutter }}
+        showsVerticalScrollIndicator={false}>
+        <View className="gap-3">
+          <View className="flex-row items-center gap-1.5">
+            <Icon as={Sprout} className="text-primary" size={20} />
+            <Text variant="emphasis" className="text-primary">
+              carin
             </Text>
-          ) : (
-            <Text variant="muted">Ringkasan catatan kesehatan Anda.</Text>
-          )}
-          {dashboardQuery.data ? (
-            <ReadState
-              updatedAt={dashboardQuery.data.updatedAt}
-              stale={dashboardQuery.data.stale}
-              connectivity={connectivity}
-            />
-          ) : null}
+          </View>
+          <Text variant="label" className="text-muted-foreground">
+            {dashboard ? formatDashboardDate(dashboard.date) : 'Hari ini'}
+          </Text>
+          <View className="min-h-[88px] flex-row items-center gap-2">
+            <View className="flex-1 gap-1.5 py-1">
+              <Text variant="h1">
+                {dashboard?.consumptionCount
+                  ? 'Halo! Lihat catatanmu, yuk.'
+                  : 'Hai! Kita mulai dari yang sederhana.'}
+              </Text>
+              <Text className="text-muted-foreground">
+                {dashboard?.consumptionCount
+                  ? 'Catatanmu tersimpan di sini.'
+                  : 'Satu makanan dulu juga boleh.'}
+              </Text>
+            </View>
+            <View className="h-[88px] w-[88px] items-center justify-center rounded-full bg-carin-butter">
+              <Image
+                source={MASCOT}
+                resizeMode="contain"
+                accessibilityLabel="Maskot Carin menyapa dan mengajak mulai mencatat"
+                style={{ width: 80, height: 80 }}
+              />
+            </View>
+          </View>
         </View>
 
-        <View className="flex-row gap-3">
+        {dashboardQuery.data ? (
+          <ReadState
+            updatedAt={dashboardQuery.data.updatedAt}
+            stale={dashboardQuery.data.stale}
+            connectivity={connectivity}
+            variant="caption"
+          />
+        ) : null}
+
+        <View className={stackFoodActions ? 'gap-3' : 'flex-row gap-3'}>
           <Button
-            className="min-h-12 flex-1"
-            onPress={() => router.push('/food/capture' as Href)}
-            accessibilityLabel="Analisis foto makanan">
-            <Text>Analisis foto</Text>
+            className={
+              stackFoodActions
+                ? 'h-auto min-h-16 w-full justify-start rounded-control px-4 py-3'
+                : 'h-auto min-h-28 flex-1 flex-col items-start justify-center rounded-control px-4 py-3'
+            }
+            accessibilityLabel="Catat makanan yang sudah dikonsumsi"
+            onPress={() => router.push('/consumptions/new' as Href)}>
+            <Icon as={ClipboardPlus} size={20} />
+            <View className={stackFoodActions ? 'flex-1 gap-0.5' : 'w-full gap-2'}>
+              <Text className="text-sm font-medium">Catat makanan</Text>
+              <Text variant="caption" className="text-xs font-normal text-primary-foreground">
+                Sudah dikonsumsi
+              </Text>
+            </View>
+            {stackFoodActions ? <Icon as={ChevronRight} size={20} /> : null}
           </Button>
+
           <Button
-            variant="outline"
-            className="min-h-12 flex-1"
-            onPress={() => router.push('/consumptions/new' as Href)}
-            accessibilityLabel="Catat makanan yang sudah dikonsumsi">
-            <Text>Catat manual</Text>
+            variant="secondary"
+            className={
+              stackFoodActions
+                ? 'h-auto min-h-16 w-full justify-start rounded-control px-4 py-3'
+                : 'h-auto min-h-28 flex-1 flex-col items-start justify-center rounded-control px-4 py-3'
+            }
+            accessibilityLabel="Analisis foto makanan sebelum makan"
+            onPress={() => router.push('/food/capture' as Href)}>
+            <Icon as={Camera} className="text-secondary-foreground" size={20} />
+            <View className={stackFoodActions ? 'flex-1 gap-0.5' : 'w-full gap-2'}>
+              <Text className="text-sm font-medium">Analisis foto</Text>
+              <Text variant="caption" className="text-xs font-normal text-secondary-foreground">
+                Sebelum makan
+              </Text>
+            </View>
+            {stackFoodActions ? (
+              <Icon as={ChevronRight} className="text-secondary-foreground" size={20} />
+            ) : null}
           </Button>
         </View>
 
         {dashboardQuery.isPending && !dashboard ? (
-          <View className="flex-row items-center gap-3 rounded-xl border border-border p-4">
+          <View className="flex-row items-center gap-3 rounded-summary bg-card p-4">
             <ActivityIndicator accessibilityLabel="Memuat ringkasan hari ini" />
-            <Text variant="muted">Memuat ringkasan hari ini…</Text>
+            <Text variant="muted">Memuat catatanmu…</Text>
           </View>
         ) : null}
         {dashboardQuery.error && !dashboard ? (
@@ -124,99 +222,144 @@ export function DashboardScreen() {
         ) : null}
 
         {dashboard && intake ? (
-          <View className="gap-3 rounded-xl border border-border bg-card p-4">
-            <View className="gap-1">
-              <Text variant="h3">Asupan hari ini</Text>
-              <Text variant="muted">Dihitung dari catatan konsumsi, bukan hasil scan.</Text>
-            </View>
+          <View className="gap-4 rounded-summary bg-card p-4">
+            <SectionTitle
+              title="Asupan hari ini"
+              detail={`${intake.consumptionCount} catatan · ${intake.componentCount} komponen`}
+            />
             {intake.kind === 'empty' ? (
-              <View className="gap-2 rounded-lg border border-dashed border-border p-4">
-                <Text variant="large">Belum ada konsumsi tercatat hari ini</Text>
-                <Text variant="muted">
-                  Hasil analisis foto baru masuk ke asupan setelah Anda mengonfirmasi konsumsi.
+              <View className="items-center gap-3 py-2">
+                <View className="h-16 w-16 items-center justify-center rounded-full bg-carin-butter">
+                  <Icon as={Utensils} className="text-primary" size={24} />
+                </View>
+                <Text variant="h3" className="text-center">
+                  Catatan pertamamu dimulai di sini.
+                </Text>
+                <Text className="text-center text-muted-foreground">
+                  Catat yang sudah dimakan. Hasil foto masuk ke asupan setelah kamu mengonfirmasi
+                  konsumsi.
                 </Text>
               </View>
             ) : (
-              <>
-                <View className="flex-row justify-between gap-3">
-                  <Text variant="muted">Catatan makan</Text>
-                  <Text>{intake.consumptionCount}</Text>
-                </View>
-                <View className="flex-row justify-between gap-3">
-                  <Text variant="muted">Komponen makanan</Text>
-                  <Text>{intake.componentCount}</Text>
-                </View>
-                <View className="gap-2 border-t border-border pt-3">
-                  {intake.nutrients.map((nutrient) => (
-                    <View key={nutrient.key} className="flex-row items-start justify-between gap-3">
+              <View>
+                {energy ? (
+                  <View className="gap-1 pb-3">
+                    <Text variant="label" className="text-muted-foreground">
+                      Energi tercatat
+                    </Text>
+                    <Text variant="metric">{energy.value}</Text>
+                    <Text variant="caption" className="text-muted-foreground">
+                      Cakupan {energy.coverage}
+                    </Text>
+                  </View>
+                ) : null}
+
+                {intake.nutrients
+                  .filter(({ key }) => key !== 'energyKcal')
+                  .map((item) => (
+                    <View
+                      key={item.key}
+                      className="min-h-12 flex-row items-center justify-between gap-3 border-t border-border py-2">
                       <View className="flex-1 gap-0.5">
-                        <Text>{nutrient.label}</Text>
-                        <Text variant="muted">Cakupan: {nutrient.coverage}</Text>
+                        <Text variant="label">{item.label}</Text>
+                        <Text variant="caption" className="text-muted-foreground">
+                          Cakupan {item.coverage}
+                        </Text>
                       </View>
-                      <Text className="text-right">{nutrient.value}</Text>
+                      <Text className="shrink text-right font-semibold">{item.value}</Text>
                     </View>
                   ))}
-                </View>
-              </>
+                <Text variant="caption" className="mt-3 text-muted-foreground">
+                  Ringkasan ini berasal dari makanan yang sudah dicatat, tanpa target harian.
+                </Text>
+              </View>
             )}
           </View>
         ) : null}
 
         {dashboard ? (
-          <View className="gap-3 rounded-xl border border-border bg-card p-4">
-            <View className="gap-1">
-              <Text variant="h3">Perhatian berulang</Text>
-              <Text variant="muted">
-                Periode {formatDashboardDate(dashboard.attentionWindow.startDate)} –{' '}
-                {formatDashboardDate(dashboard.attentionWindow.endDate)}
-              </Text>
-            </View>
+          <View className="gap-4 rounded-summary bg-card p-4">
+            <SectionTitle
+              title="Perhatian 7 hari"
+              detail={`${formatDashboardDate(dashboard.attentionWindow.startDate)} – ${formatDashboardDate(dashboard.attentionWindow.endDate)}`}
+            />
             {recurringAttentions.length ? (
-              recurringAttentions.map((attention) => (
-                <RecurringAttentionCard
-                  key={attention.id}
-                  attention={attention}
-                  onOpenLink={(href) => router.push(href as Href)}
-                />
-              ))
+              <View className="gap-3">
+                {recurringAttentions.map((attention, index) => (
+                  <RecurringAttentionItem
+                    key={attention.id}
+                    attention={attention}
+                    isLast={index === recurringAttentions.length - 1}
+                    onOpenLink={(href) => router.push(href as Href)}
+                  />
+                ))}
+              </View>
             ) : (
-              <Text variant="muted">
-                Belum ada catatan perhatian berulang yang tersedia untuk periode ini.
-              </Text>
+              <View className="items-center gap-3 py-2">
+                <View className="h-16 w-16 items-center justify-center rounded-full bg-carin-butter">
+                  <Icon as={CalendarDays} className="text-primary" size={24} />
+                </View>
+                <Text variant="h3" className="text-center text-sm font-semibold leading-5">
+                  Belum ada pola yang tercatat
+                </Text>
+                <Text className="text-center text-muted-foreground">
+                  Catatan berulang dalam periode ini akan muncul di sini.
+                </Text>
+              </View>
             )}
           </View>
         ) : null}
 
         {dashboard ? (
-          <View className="gap-3 rounded-xl border border-border bg-card p-4">
-            <Text variant="h3">Pemeriksaan terakhir</Text>
+          <View className="gap-4 rounded-summary bg-card p-4">
+            <SectionTitle title="Pemeriksaan terakhir" />
             {examinations.length ? (
-              examinations.map((examination) => (
-                <Pressable
-                  key={examination.id}
-                  className="min-h-16 gap-1 rounded-lg border border-border p-3"
-                  accessibilityRole="link"
-                  accessibilityLabel={`${examination.title}, ${examination.value}, diukur ${examination.measuredAt}`}
-                  onPress={() => router.push(examination.href as Href)}>
-                  <View className="flex-row items-start justify-between gap-3">
-                    <Text className="flex-1 font-medium">{examination.title}</Text>
-                    <Text>{examination.value}</Text>
-                  </View>
-                  <Text variant="muted">Diukur {examination.measuredAt}</Text>
-                </Pressable>
-              ))
+              <View>
+                {examinations.map((examination, index) => (
+                  <Pressable
+                    key={examination.id}
+                    className={`min-h-14 flex-row items-center gap-3 py-2 ${index === examinations.length - 1 ? '' : 'border-b border-border'}`}
+                    accessibilityRole="link"
+                    accessibilityLabel={`${examination.title}, ${examination.value}, diukur ${examination.measuredAt}`}
+                    onPress={() => router.push(examination.href as Href)}>
+                    <Icon as={FlaskConical} className="text-primary" size={20} />
+                    <View className="flex-1 gap-0.5">
+                      <Text variant="h3">{examination.title}</Text>
+                      <Text variant="caption" className="text-muted-foreground">
+                        Diukur {examination.measuredAt}
+                      </Text>
+                    </View>
+                    <Text variant="label" className="shrink text-right">
+                      {examination.value}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
             ) : (
-              <Text variant="muted">Belum ada pemeriksaan tersimpan.</Text>
+              <View className="items-center gap-3 py-2">
+                <View className="h-16 w-16 items-center justify-center rounded-full bg-carin-butter">
+                  <Icon as={FlaskConical} className="text-primary" size={24} />
+                </View>
+                <Text variant="h3" className="text-center text-sm font-semibold leading-5">
+                  Belum ada pemeriksaan tersimpan
+                </Text>
+                <Text className="text-center text-muted-foreground">
+                  Hasil yang kamu catat akan tampil di bagian ini.
+                </Text>
+              </View>
             )}
           </View>
         ) : null}
 
         {dashboard ? (
-          <View className="gap-3 rounded-xl border border-border bg-card p-4">
-            <Text variant="h3">Langkah berikutnya</Text>
+          <View className="gap-3">
+            <SectionTitle title="Langkah berikutnya" />
             {dashboard.profileMissingFields.length ? (
               <MissingFieldActions
                 fields={dashboard.profileMissingFields}
+                tone="tonal"
+                heading="Profil kesehatan bersifat opsional"
+                description="Tambahkan informasi jika ingin melihat pertimbangan yang lebih sesuai dengan profilmu."
                 onOpen={(focus) =>
                   router.push({
                     pathname: '/(onboarding)/health-profile',
@@ -226,22 +369,25 @@ export function DashboardScreen() {
               />
             ) : null}
             {dashboard.nextActions
-              .filter((action) => action.code !== 'complete_profile')
+              .filter((action) => shouldShowDashboardNextAction(action.code))
               .map((action) => {
                 const target = getNextActionTarget(action, dashboard.profileMissingFields);
                 if (!target) return null;
                 return (
-                  <Button
+                  <Pressable
                     key={action.code}
-                    variant="outline"
-                    className="min-h-12"
+                    className="min-h-12 flex-row items-center justify-between border-b border-border"
+                    accessibilityRole="button"
                     onPress={() => openTarget(target)}>
-                    <Text>{action.label}</Text>
-                  </Button>
+                    <Text className="font-semibold">{action.label}</Text>
+                    <Icon as={ChevronRight} className="text-primary" size={18} />
+                  </Pressable>
                 );
               })}
             {!dashboard.profileMissingFields.length && !dashboard.nextActions.length ? (
-              <Text variant="muted">Belum ada langkah tambahan yang disarankan.</Text>
+              <Text className="text-muted-foreground">
+                Belum ada langkah tambahan yang disarankan.
+              </Text>
             ) : null}
           </View>
         ) : null}
