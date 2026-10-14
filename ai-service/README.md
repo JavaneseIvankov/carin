@@ -17,7 +17,7 @@ Set `AI_SERVICE_KEY`, `DASHSCOPE_API_KEY`, `VLM_BASE_URL`, and an exact MinIO ho
 uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --no-access-log
 ```
 
-The shared contract and Swagger UI are available at `/openapi.json` and `/docs`. They are the repository OpenAPI contract rather than a separately maintained API shape. All four internal routes require `X-Carin-Service-Key`. Do not expose the AI service directly to the public internet or mobile app.
+The shared contract and Swagger UI are available at `/openapi.json` and `/docs`. The served document uses the same-origin base URL so Swagger “Try it out” works from localhost or a teammate's LAN address; paths and payload schemas come from the repository OpenAPI contract, not a second copy. All four internal routes require `X-Carin-Service-Key`. Do not expose the AI service directly to the public internet or mobile app.
 
 ## Routes
 

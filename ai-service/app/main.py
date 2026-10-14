@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import hmac
 import logging
 import uuid
@@ -117,8 +118,10 @@ async def _json_body(request: Request, schema_name: str) -> dict[str, Any]:
 
 
 @app.get("/openapi.json", include_in_schema=False)
-async def shared_openapi_contract() -> dict[str, Any]:
-    return OPENAPI_DOCUMENT
+async def shared_openapi_contract(request: Request) -> dict[str, Any]:
+    document = copy.deepcopy(OPENAPI_DOCUMENT)
+    document["servers"] = [{"url": "/", "description": "Origin yang sedang membuka dokumentasi"}]
+    return document
 
 
 @app.get("/docs", include_in_schema=False)

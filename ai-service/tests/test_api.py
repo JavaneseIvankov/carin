@@ -298,3 +298,4 @@ async def test_shared_contract_is_exposed_without_a_second_contract_copy(client)
     spec = response.json()
     assert "/internal/v1/analyses" in spec["paths"]
     assert spec["components"]["securitySchemes"]["ServiceKey"]["name"] == "X-Carin-Service-Key"
+    assert spec["servers"][0]["url"] == "/"
