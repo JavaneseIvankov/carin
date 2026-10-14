@@ -3,17 +3,42 @@ import { getPhotoConfirmationAvailability } from '@/lib/consumptions/photo-confi
 
 type Action = {
   label: string;
-  pathname: '/consumptions/from-scan/[scanId]' | '/consumptions/[id]';
+  pathname: '/consumptions/from-scan/[scanId]' | '/consumptions/[id]' | '/food/analysis/[id]';
   params: Record<string, string>;
 };
 
+export async function refreshAnalysisReads(input: {
+  refetchJob: () => Promise<unknown>;
+  refreshActionSnapshot: () => Promise<unknown>;
+  refetchLatestResult?: () => Promise<unknown>;
+}) {
+  await Promise.allSettled([
+    input.refetchJob(),
+    input.refreshActionSnapshot(),
+    ...(input.refetchLatestResult ? [input.refetchLatestResult()] : []),
+  ]);
+}
+
 export function getPhotoConfirmationActions(input: {
   scan: components['schemas']['Scan'];
+  selectedJobId: string;
   latestJob: components['schemas']['AnalysisJob'];
   resultId: string | undefined;
   result: components['schemas']['ai__AnalysisResult'] | undefined;
+  latestResultLoadError?: boolean;
 }): { primary: Action | null; secondary: Action | null; message: string | null } {
-  const { scan, latestJob, resultId, result } = input;
+  const { scan, selectedJobId, latestJob, resultId, result, latestResultLoadError } = input;
+  if (selectedJobId !== latestJob.id) {
+    return {
+      primary: {
+        label: 'Buka hasil terbaru',
+        pathname: '/food/analysis/[id]',
+        params: { id: latestJob.id },
+      },
+      secondary: null,
+      message: 'Hasil scan yang lebih baru tersedia.',
+    };
+  }
   const availability = getPhotoConfirmationAvailability({
     scan,
     latestJob,
@@ -106,8 +131,9 @@ export function getPhotoConfirmationActions(input: {
   return {
     primary: null,
     secondary: null,
-    message:
-      availability === 'loading'
+    message: latestResultLoadError
+      ? 'Hasil terbaru belum dapat dimuat. Pilih Muat status terbaru untuk mencoba lagi.'
+      : availability === 'loading'
         ? 'Memuat hasil terbaru…'
         : 'Konfirmasi tersedia hanya untuk hasil terbaru yang berhasil.',
   };

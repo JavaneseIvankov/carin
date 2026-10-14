@@ -5,7 +5,10 @@ import type { components } from '@/lib/api/generated/app-api';
 import { useAppData } from '@/lib/data/provider';
 import { canConfirmSelectedScanResult, isCurrentScanResult } from '@/lib/food/correction';
 import { getResultScreenActions } from '@/lib/food/correction-screen';
-import { getPhotoConfirmationActions } from '@/lib/food/photo-confirmation-actions';
+import {
+  getPhotoConfirmationActions,
+  refreshAnalysisReads,
+} from '@/lib/food/photo-confirmation-actions';
 import {
   createLatestAnalysisSnapshotRefreshCoordinator,
   getActiveCorrectionStatus,
@@ -112,12 +115,16 @@ export default function AnalysisResultScreen() {
   );
   const latestResult = latestResultQuery.data?.data;
   const consumptionActions =
-    actionScan && actionLatestJob
+    actionScan && actionLatestJob && id
       ? getPhotoConfirmationActions({
           scan: actionScan,
+          selectedJobId: id,
           latestJob: actionLatestJob,
           resultId: latestResult ? (actionScan.latestResultId ?? undefined) : undefined,
           result: latestResultQuery.data?.stale ? undefined : latestResult,
+          latestResultLoadError:
+            latestResultQuery.isError ||
+            (latestResultQuery.data?.stale === true && !latestResultQuery.isFetching),
         })
       : null;
   const activeCorrectionStatus = getCorrectionPollingStatus(
@@ -487,8 +494,13 @@ export default function AnalysisResultScreen() {
           variant="outline"
           className="min-h-12"
           onPress={() => {
-            void jobQuery.refetch();
-            void refreshActionSnapshot();
+            void refreshAnalysisReads({
+              refetchJob: jobQuery.refetch,
+              refreshActionSnapshot,
+              refetchLatestResult: actionScan?.latestResultId
+                ? latestResultQuery.refetch
+                : undefined,
+            });
           }}
           disabled={jobQuery.isFetching}>
           <Text>{jobQuery.isFetching ? 'Memuat…' : 'Muat status terbaru'}</Text>
