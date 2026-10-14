@@ -24,6 +24,21 @@ describe('Better Auth registration admission', () => {
     else expect(run).toThrow(RegistrationAdmissionError);
   });
 
+  it('counts a February 29 birthday on March 1 in a non-leap year', () => {
+    const birthDate = '2008-02-29';
+    const beforeBirthday = () => validateRegistrationAdmission(
+      { ...base, birthDate },
+      new Date('2026-02-28T16:59:59.999Z'),
+    );
+    const onBirthday = () => validateRegistrationAdmission(
+      { ...base, birthDate },
+      new Date('2026-02-28T17:00:00.000Z'),
+    );
+
+    expect(beforeBirthday).toThrow(RegistrationAdmissionError);
+    expect(onBirthday()).toEqual(expect.objectContaining({ birthDate }));
+  });
+
   it('rejects a future or malformed date', () => {
     expect(() => validateRegistrationAdmission({ ...base, birthDate: 'nope' }, new Date())).toThrow(RegistrationAdmissionError);
   });

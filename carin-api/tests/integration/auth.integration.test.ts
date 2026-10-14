@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { Pool } from 'pg';
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../../src/app.js';
 import { createAuthRuntime, type AuthMail } from '../../src/auth/runtime.js';
 import { createDatabase } from '../../src/db/client.js';
@@ -189,6 +189,58 @@ describe('Better Auth registration boundary', () => {
     expect(mail).toHaveLength(before);
   });
 
+  it('keeps verification resend generic and rate limited, then queues after the 60-second cooldown', async () => {
+    const email = `${randomUUID()}@example.invalid`;
+    const unknownEmail = `${randomUUID()}@example.invalid`;
+    await register(email, '1976-10-14');
+    const user = await pool.query('SELECT id FROM "user" WHERE email=$1', [email]);
+    const sendVerification = (target: string) => app.request('/api/auth/send-verification-email', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        origin: 'http://test.local',
+        'x-forwarded-for': '198.51.100.24',
+      },
+      body: JSON.stringify({ email: target, callbackURL: 'http://test.local/auth/verified' }),
+    });
+    const taskCount = async () => Number((await pool.query(
+      "SELECT count(*)::int AS count FROM email_task WHERE user_id=$1 AND kind='verification'",
+      [user.rows[0].id],
+    )).rows[0].count);
+
+    expect(await taskCount()).toBe(1);
+    const known = await sendVerification(email);
+    const knownBody = await known.json();
+    const unknown = await sendVerification(unknownEmail);
+    expect(known.status).toBe(200);
+    expect(unknown.status).toBe(200);
+    expect(await unknown.json()).toEqual(knownBody);
+    expect(knownBody).toEqual({ status: true });
+    expect(await taskCount()).toBe(1);
+
+    expect((await sendVerification(email)).status).toBe(200);
+    const rateLimited = await sendVerification(email);
+    expect(rateLimited.status).toBe(429);
+
+    await pool.query("DELETE FROM rate_limit WHERE key NOT LIKE 'carin-email-%'");
+    const cooldown = await pool.query(
+      "UPDATE rate_limit SET last_request=last_request-60001 WHERE key LIKE 'carin-email-verification-%'",
+    );
+    expect(cooldown.rowCount).toBe(1);
+    const resent = await sendVerification(email);
+    expect(resent.status).toBe(200);
+    expect(await resent.json()).toEqual(knownBody);
+    expect(await taskCount()).toBe(2);
+    const resentMail = mail.filter((item) => item.to === email && item.kind === 'verification').at(-1);
+    expect(resentMail).toBeDefined();
+    const resentUrl = new URL(resentMail!.url);
+    expect(resentUrl.searchParams.get('callbackURL')).toBe('http://test.local/auth/verified');
+    const verification = await app.request(`${resentUrl.pathname}${resentUrl.search}`);
+    expect(verification.status).toBe(302);
+    expect(verification.headers.get('location')).toContain('/auth/verified');
+    expect((await pool.query('SELECT email_verified FROM "user" WHERE id=$1', [user.rows[0].id])).rows[0].email_verified).toBe(true);
+  });
+
   it('keeps reset responses generic on queue failure and allows a later retry', async () => {
     const email = `${randomUUID()}@example.invalid`;
     await register(email, '1976-10-14');
@@ -279,6 +331,33 @@ describe('Better Auth registration boundary', () => {
       body: JSON.stringify({ token: resetMail!.token, newPassword: 'new-password-123' }),
     });
     expect(response.status).toBeGreaterThanOrEqual(400);
+  });
+
+  it('rejects an expired verification link without granting verified access', async () => {
+    const email = `${randomUUID()}@example.invalid`;
+    await register(email, '1976-10-14');
+    const verificationMail = mail.filter((item) => item.to === email && item.kind === 'verification').at(-1);
+    expect(verificationMail).toBeDefined();
+    const tokenPayload = JSON.parse(Buffer.from(verificationMail!.token.split('.')[1]!, 'base64url').toString('utf8')) as { exp: number };
+    const verification = new URL(verificationMail!.url);
+
+    vi.setSystemTime(new Date(tokenPayload.exp * 1000 + 1));
+    try {
+      const rejected = await app.request(`${verification.pathname}${verification.search}`);
+      expect(rejected.status).toBe(302);
+      expect(rejected.headers.get('location')).toContain('/auth/verified?error=TOKEN_EXPIRED');
+      expect((await pool.query('SELECT email_verified FROM "user" WHERE email=$1', [email])).rows[0].email_verified).toBe(false);
+
+      const signIn = await app.request('/api/auth/sign-in/email', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email, password: 'password123' }),
+      });
+      expect(signIn.status).toBeGreaterThanOrEqual(400);
+      expect(signIn.headers.has('set-cookie')).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('rolls back the account when mandatory legal versions are stale', async () => {
