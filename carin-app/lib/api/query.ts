@@ -2,12 +2,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as React from 'react';
 import { useAppData } from '@/lib/data/provider';
+import { authClient } from '@/lib/auth/client';
+import { useAuth } from '@/lib/auth/provider';
 import { scopeGeneration, scopeKey } from '@/lib/data/scope';
 import type { AppRequestInput } from './contracts';
 import { createAppRepository, type ReadOperation, type WriteOperation } from './repository';
 
 export function useAppRepository() {
-  const { scope, connectivity, clearSession, isCurrentScope } = useAppData();
+  const { scope, connectivity, isCurrentScope } = useAppData();
+  const { invalidateSession } = useAuth();
   return React.useMemo(
     () =>
       scope
@@ -15,7 +18,8 @@ export function useAppRepository() {
             scope,
             storage: AsyncStorage,
             connectivity: () => connectivity,
-            onUnauthorized: clearSession,
+            onUnauthorized: invalidateSession,
+            getCookie: () => authClient.getCookie(),
             isCurrentScope: (() => {
               const generation = scopeGeneration(AsyncStorage, scope);
               return () =>
@@ -23,7 +27,7 @@ export function useAppRepository() {
             })(),
           })
         : null,
-    [scope, connectivity, clearSession, isCurrentScope]
+    [scope, connectivity, invalidateSession, isCurrentScope]
   );
 }
 

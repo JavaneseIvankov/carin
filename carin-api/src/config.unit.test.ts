@@ -10,6 +10,32 @@ describe('environment configuration', () => {
     expect(loadConfig({ ...valid, APP_ENV: 'prod' }).appEnv).toBe('prod');
   });
 
+  it('validates auth secrets, app link scheme, and exact trusted origins together', () => {
+    const auth = {
+      ...valid,
+      BETTER_AUTH_SECRET: 'local-development-secret-with-at-least-32-chars',
+      BETTER_AUTH_URL: 'http://localhost:3000',
+      AUTH_TRUSTED_ORIGINS: 'carin://,https://app.example.test',
+      APP_LINK_SCHEME: 'carin',
+    };
+    expect(loadConfig(auth)).toMatchObject({
+      betterAuthUrl: 'http://localhost:3000',
+      authTrustedOrigins: ['carin://', 'https://app.example.test'],
+      appLinkScheme: 'carin',
+    });
+    expect(() => loadConfig({ ...auth, BETTER_AUTH_SECRET: 'short' })).toThrow(/32 characters/);
+    expect(() => loadConfig({ ...auth, AUTH_TRUSTED_ORIGINS: 'https://app.example.test' })).toThrow(/APP_LINK_SCHEME/);
+    expect(() => loadConfig({ ...auth, AUTH_TRUSTED_ORIGINS: 'https://*.example.test,carin://' })).toThrow(/exact HTTP/);
+    expect(() => loadConfig({ ...auth, AUTH_TRUSTED_ORIGINS: 'carin://,https://app.example.test/path' })).toThrow(/exact HTTP/);
+    expect(() => loadConfig({ ...auth, BETTER_AUTH_URL: undefined })).toThrow(/configured together/);
+    expect(() => loadConfig({ ...auth, APP_ENV: 'staging' })).toThrow(/HTTPS/);
+    expect(loadConfig({ ...auth, APP_ENV: 'prod', BETTER_AUTH_URL: 'https://api.example.test' }).betterAuthUrl).toBe('https://api.example.test');
+    expect(() => loadConfig({ ...auth, APP_ENV: 'staging', BETTER_AUTH_URL: 'https://api.example.test', AUTH_TRUSTED_ORIGINS: 'carin://,http://app.example.test' })).toThrow(/HTTPS/);
+    expect(() => loadConfig({ ...auth, APP_ENV: 'prod', BETTER_AUTH_URL: 'https://api.example.test', AUTH_TRUSTED_ORIGINS: 'carin://,http://app.example.test' })).toThrow(/HTTPS/);
+    expect(() => loadConfig({ ...auth, BETTER_AUTH_TRUSTED_ORIGINS: '*' })).toThrow(/BETTER_AUTH_TRUSTED_ORIGINS/);
+    expect(() => loadConfig({ ...auth, APP_LINK_SCHEME: 'https', AUTH_TRUSTED_ORIGINS: 'https://,https://app.example.test' })).toThrow(/valid URI scheme/);
+  });
+
   it('allows fixture mode only in dev and fails closed in staging and prod', () => {
     expect(loadConfig({ ...valid, AI_MODE: 'fixture' }).aiMode).toBe('fixture');
     expect(() => loadConfig({ ...valid, APP_ENV: 'staging', AI_MODE: 'fixture' })).toThrow(/AI_MODE/);
