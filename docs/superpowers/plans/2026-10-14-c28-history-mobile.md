@@ -38,10 +38,10 @@
 **Files:**
 - Modify: `docs/superpowers/plans/2026-10-14-c28-history-mobile.md` to mark completed steps.
 
-- [ ] **Step 1: Run** `pnpm run test:unit`, `pnpm run test:integration`, `pnpm run typecheck`, `pnpm run lint`, and `pnpm run contracts:check` from `carin-app/`.
-- [ ] **Step 2: Run** `pnpm exec prettier --check` for touched TS/TSX files, format then rerun checks if needed.
-- [ ] **Step 3: Review** `git diff --check`, `git status`, and diff against the acceptance criteria; record platform/device limitations.
-- [ ] **Step 4: Commit** the plan and feature with a focused conventional message and leave the worktree clean.
+- [x] **Step 1: Run** `pnpm run test:unit`, `pnpm run test:integration`, `pnpm run typecheck`, `pnpm run lint`, and `pnpm run contracts:check` from `carin-app/`.
+- [x] **Step 2: Run** `pnpm exec prettier --check` for touched TS/TSX files, format then rerun checks if needed.
+- [x] **Step 3: Review** `git diff --check`, `git status`, and diff against the acceptance criteria; record platform/device limitations.
+- [x] **Step 4: Commit** the plan and feature with a focused conventional message and leave the worktree clean.
 
 **UI verification note:** The Vitest setup has no React Native renderer or Expo Router harness; automated coverage is in pure history helpers. Route interactions remain device unverified.
 
