@@ -21,6 +21,9 @@ export type ValidationCatalog = {
   nutritionDatasetVersion: string;
   ruleSetVersion: string;
   dataMode: 'real' | 'synthetic';
+  supportedPhotoFoodIds: string[];
+  conditions: Array<Pick<Ai['Condition'], 'id' | 'personalizationSupported'>>;
+  supportedRules: Array<Pick<Ai['SupportedRule'], 'ruleId' | 'conditionId' | 'sources'>>;
   foods: Array<{
     id: string;
     displayName: string;
@@ -78,6 +81,16 @@ function equalNutrients(left: Nutrients, right: Nutrients): boolean {
 
 function validateSources(result: AnalysisResult, catalog: ValidationCatalog): Map<string, Source> {
   const sources = new Map<string, Source>();
+  const ruleSources = new Map<string, Source>();
+  for (const rule of catalog.supportedRules) {
+    for (const source of rule.sources) {
+      if (source.datasetVersion !== catalog.ruleSetVersion ||
+          (catalog.dataMode === 'real' ? source.kind !== 'health_rule' : source.kind !== 'synthetic')) invalid();
+      const prior = ruleSources.get(source.id);
+      if (prior && canonical(prior) !== canonical(source)) invalid();
+      ruleSources.set(source.id, source);
+    }
+  }
   for (const source of result.sources) {
     if (sources.has(source.id)) invalid();
     if (source.kind === 'synthetic') {
@@ -92,6 +105,9 @@ function validateSources(result: AnalysisResult, catalog: ValidationCatalog): Ma
     } else if (source.datasetVersion !== catalog.nutritionDatasetVersion) {
       invalid();
     }
+    if ((source.kind === 'health_rule' ||
+        (source.kind === 'synthetic' && source.datasetVersion === catalog.ruleSetVersion)) &&
+        canonical(ruleSources.get(source.id)) !== canonical(source)) invalid();
     sources.set(source.id, source);
   }
 
@@ -177,6 +193,7 @@ function validateComponent(
         !equalNutrients(component.per100g, food.per100g) || nutrientKeys.some((key) =>
           component.nutrientSourceIds[key] !== food!.nutrientSourceIds[key],
         )) invalid();
+    if (result.inputKind === 'photo' && !catalog.supportedPhotoFoodIds.includes(food.id)) invalid();
   }
 
   const grams = expectedGrams(component.portion, food);
@@ -230,6 +247,37 @@ function validateTotalsAndStatus(result: AnalysisResult): void {
   }
 }
 
+function validateRuleClaims(
+  result: AnalysisResult,
+  profile: ProfileContext,
+  catalog: ValidationCatalog,
+  sources: Map<string, Source>,
+): void {
+  const citedRuleSourceIds = new Set<string>();
+  if (result.attentions.length > 0 && profile.profileVersion === 0) invalid();
+  for (const attention of result.attentions) {
+    if (!profile.conditionIds.includes(attention.conditionId)) invalid();
+    const conditions = catalog.conditions.filter(({ id }) => id === attention.conditionId);
+    const rules = catalog.supportedRules.filter(({ ruleId, conditionId }) =>
+      ruleId === attention.ruleId && conditionId === attention.conditionId,
+    );
+    if (conditions.length !== 1 || !conditions[0]!.personalizationSupported || rules.length !== 1) invalid();
+    const supportedSources = rules[0]!.sources;
+    if (attention.sourceIds.length === 0 || attention.sourceIds.some((sourceId) => {
+      const returned = sources.get(sourceId);
+      const authority = supportedSources.find((source) => source.id === sourceId);
+      if (!returned || !authority || canonical(returned) !== canonical(authority)) return true;
+      citedRuleSourceIds.add(sourceId);
+      return false;
+    })) invalid();
+  }
+  for (const source of result.sources) {
+    if ((source.kind === 'health_rule' ||
+        (source.kind === 'synthetic' && source.datasetVersion === catalog.ruleSetVersion)) &&
+        !citedRuleSourceIds.has(source.id)) invalid();
+  }
+}
+
 export function validateAnalysisResult(
   result: AnalysisResult,
   expectation: AnalysisExpectation,
@@ -254,6 +302,7 @@ export function validateAnalysisResult(
     if (attention.componentIds.some((id) => !componentIds.has(id)) ||
         attention.sourceIds.some((id) => !sources.has(id))) invalid();
   }
+  validateRuleClaims(result, expectation.profile, catalog, sources);
   for (const limitation of result.limitations) {
     if (limitation.componentIds.some((id) => !componentIds.has(id))) invalid();
   }

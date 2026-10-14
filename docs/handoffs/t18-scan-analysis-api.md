@@ -1,50 +1,52 @@
 # T18 Scan and analysis API handoff
 
 Task / scope: C18 automatic photo scans, durable initial and correction jobs,
-owner-scoped scan/result reads, and validation before result publication.
+owner-scoped scan/result reads, and safe result publication, including the
+review follow-up for imported capability authority and frozen-profile eligibility.
 
-Changes and affected files: Added `carin-api/src/modules/analyses/` and
-`carin-api/src/modules/scans/` for immutable request/profile snapshots,
-catalog-backed result validation, owner reads, corrections, and transactional
-job creation. Mounted authenticated routes in `carin-api/src/app.ts`; wired C17
-private media runtime into `carin-api/src/index.ts` and the analysis worker;
-added validated media runtime settings in `carin-api/src/config.ts`. The worker
-now resolves the owned photo URL per claim and rejects invalid AI outputs before
-C16 fenced publication. Added unit, verified-app, and PostgreSQL integration
-coverage under `carin-api/src/modules/analyses/`,
-`carin-api/src/app.verified.unit.test.ts`, and
-`carin-api/tests/integration/analysis-scan.integration.test.ts`; adjusted the
-existing C16 worker fixture in `carin-api/tests/integration/jobs.integration.test.ts`
-to seed a valid frozen catalog/profile. Updated `infra/compose.yaml`,
-`infra/.env.example`, `infra/README.md`, and the implementation plan at
+Changes and affected files: C18 is implemented in `carin-api/src/modules/analyses/`
+and `carin-api/src/modules/scans/`, with authenticated routes registered in
+`carin-api/src/app.ts` and private photo/job runtime wired in `carin-api/src/index.ts`
+and the worker. The worker validates provider output against the immutable scan
+profile, catalog, operation, generation and job fence before publication. This
+follow-up adds the optional `supportedRules` AI capability contract and generated
+consumers, persists the exact imported capability manifest in append-only migration
+`carin-api/drizzle/0007_rare_ben_parker.sql`, and rejects photo-food matches outside
+the imported allowlist. Rule claims require an exact imported rule/condition/source,
+the condition must be present in the frozen profile, and profile-version-zero or
+empty-condition snapshots cannot publish attention claims. Missing or version-
+mismatched capability authority fails closed. Synthetic fixtures declare explicit
+supported food IDs, rules, conditions, and sources; no real source/rule data was
+invented. Tests cover missing authority, unsupported photo foods, unbacked or
+mismatched citations, absent profile conditions, and existing correction/fencing
+paths. The updated implementation plan is
 `docs/superpowers/plans/2026-10-14-c18-scan-analysis-api.md`.
 
-Verification (all commands completed successfully):
+Verification (run from `carin-api/` unless stated otherwise):
 
-- From `carin-api/`: `pnpm run typecheck`, `pnpm run lint`, `pnpm run test`
-  (22 unit-test files / 164 tests and 14 integration-test files / 173 tests,
-  including disposable PostgreSQL via Docker), `pnpm run build`, and
-  `pnpm run db:generate` (reported no schema changes; existing migrations
-  0004–0006 are sufficient).
-- From `carin-app/`: `pnpm install --frozen-lockfile` enabled the shared mobile
-  contract consumer test; `pnpm run contracts:check` passed.
-- From the repository root: after creating the ignored `.venv` from
-  `specs/requirements-contracts.txt`, `.venv/bin/python
-  specs/validate-contracts.py` passed (2 OpenAPI documents, 38 operations,
-  408 local refs, 5 fixtures).
-- From the repository root: `git diff --check` passed.
+- `pnpm run typecheck` passed.
+- `pnpm run lint` passed.
+- `pnpm run test:unit` passed: 22 files, 171 tests.
+- `pnpm run test:integration` passed: 14 files, 178 tests, using disposable
+  PostgreSQL containers through Docker.
+- `pnpm run build` passed.
+- `pnpm run db:generate` reported no schema changes after migration `0007`.
+- From `carin-app/`, `pnpm run contracts:check` passed.
+- From the worktree root, `/home/arundaya/Documents/Workspace/Code_Stuff/igs-joints-hackathon/carin/.venv/bin/python
+  specs/validate-contracts.py` passed: 2 OpenAPI documents, 38 operations,
+  410 local refs, and 5 fixtures.
+- `git diff --check` passed.
 
-Unverified work / blockers: The disposable PostgreSQL integration tests passed,
-but this run did not connect to a live Silo bucket or internal AI deployment.
-Compose uses placeholder credentials and fixture mode remains synthetic local
-behavior. The confirmation lock helper is implemented and tested as the
-transaction boundary for the existing future consumption flow; this branch has
-no consumption route to wire yet, so that consumer must call
-`lockScanForConfirmation` before persisting confirmation.
+Unverified work / blockers: Live AI validation and real citation authority remain
+externally gated by C31; only synthetic fixtures were exercised. No live Silo bucket
+or internal AI deployment was used. `lockScanForConfirmation` remains an explicit
+transaction seam with a pending-analysis guard and integration coverage. C21 must
+call it in the same transaction that persists consumption confirmation; C18 has no
+consumption route caller.
 
-Next step: Parent review. Keep TSK 18 `started` until review; do not push this
-branch.
+Next step: Parent review. Keep TSK 18 `started` until review; do not push this branch.
 
-Worktree state: Branch `feat/c18-analysis-api`, based on integration commit
-`b9c0a58`. Local commit `4cbac74` contains the implementation; the branch is
-left unpushed for parent review.
+Worktree state: Branch `feat/c18-analysis-api` in the isolated C18 integration
+worktree. Follow-up is committed locally with conventional message
+`fix: validate imported analysis capability authority`; preserve the earlier C18
+implementation commit already on this branch.

@@ -120,8 +120,12 @@ describe('fixture AI adapter', () => {
     const client = fixtureClient('complete');
     const capabilities = await client.getCapabilities();
     expect(capabilities.dataMode).toBe('synthetic');
-    expect(capabilities.supportedPhotoFoodIds).toEqual([]);
-    expect(capabilities.conditions).toEqual([]);
+    expect(capabilities.supportedPhotoFoodIds).toEqual(['fixture-food-001']);
+    expect(capabilities.conditions.map(({ id }) => id)).toEqual(['fixture-condition']);
+    expect(capabilities.supportedRules).toEqual([expect.objectContaining({
+      ruleId: 'fixture-rule-001', conditionId: 'fixture-condition',
+      sources: [expect.objectContaining({ id: 'synthetic-rule', datasetVersion: 'synthetic-rules-1' })],
+    })]);
     const catalog = await client.getCatalog({ version: 'synthetic-catalog-1' });
     expect(catalog.items[0]?.id).toBe('fixture-food-001');
     expect(catalog.items[0]?.sources.every((source) => source.kind === 'synthetic')).toBe(true);

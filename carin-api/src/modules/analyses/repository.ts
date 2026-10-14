@@ -6,6 +6,7 @@ import type { Database } from '../../db/client.js';
 import {
   analysisJob,
   analysisResult,
+  catalogCapabilityManifest,
   catalogFood,
   catalogServing,
   catalogVersion,
@@ -284,6 +285,21 @@ export async function loadAnalysisValidationContext(
   }
   const [version] = await db.select().from(catalogVersion).where(eq(catalogVersion.version, expectedCatalogVersion)).limit(1);
   if (!version) throw new AnalysisCatalogUnavailableError();
+  const [capabilityRow] = await db.select({ manifest: catalogCapabilityManifest.manifest })
+    .from(catalogCapabilityManifest)
+    .where(eq(catalogCapabilityManifest.catalogVersion, expectedCatalogVersion)).limit(1);
+  if (!capabilityRow) throw new AnalysisCatalogUnavailableError();
+  const manifest = capabilityRow.manifest as components['schemas']['CapabilityManifest'];
+  try {
+    validateSchema('ai.CapabilityManifest', capabilityRow.manifest);
+  } catch {
+    throw new ContractValidationError('ai.CapabilityManifest');
+  }
+  if (manifest.catalogVersion !== version.version ||
+      manifest.nutritionDatasetVersion !== version.nutritionDatasetVersion ||
+      manifest.ruleSetVersion !== version.ruleSetVersion || manifest.dataMode !== version.dataMode) {
+    throw new ContractValidationError('analysis.catalogAuthority');
+  }
   const outputFoodIds = [...new Set(result.components.flatMap((component) => component.catalogFoodId ? [component.catalogFoodId] : []))];
   const foods = outputFoodIds.length
     ? await db.select().from(catalogFood).where(and(
@@ -307,6 +323,9 @@ export async function loadAnalysisValidationContext(
     nutritionDatasetVersion: version.nutritionDatasetVersion,
     ruleSetVersion: version.ruleSetVersion,
     dataMode: version.dataMode as ValidationCatalog['dataMode'],
+    supportedPhotoFoodIds: manifest.supportedPhotoFoodIds,
+    conditions: manifest.conditions.map(({ id, personalizationSupported }) => ({ id, personalizationSupported })),
+    supportedRules: manifest.supportedRules ?? [],
     foods: foods.map((food) => ({
       id: food.id,
       displayName: food.displayName,

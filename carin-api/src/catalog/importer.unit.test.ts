@@ -35,8 +35,8 @@ function food(id: string, displayName = id): CatalogFood {
     },
     servings: [{ id: `${id}-serving`, label: 'synthetic test serving', grams: 25, sourceId: 'portion-source' }],
     sources: [
-      { id: 'nutrition-source', kind: 'synthetic', title: 'Synthetic test nutrient', datasetVersion: manifest.nutritionDatasetVersion, itemRef: `${id} per 100 g`, url: null },
-      { id: 'portion-source', kind: 'synthetic', title: 'Synthetic test serving', datasetVersion: manifest.nutritionDatasetVersion, itemRef: `${id} serving`, url: null },
+      { id: 'nutrition-source', kind: 'synthetic', title: 'Synthetic test nutrient', datasetVersion: manifest.nutritionDatasetVersion, itemRef: 'synthetic test nutrient dataset', url: null },
+      { id: 'portion-source', kind: 'synthetic', title: 'Synthetic test serving', datasetVersion: manifest.nutritionDatasetVersion, itemRef: 'synthetic test serving dataset', url: null },
     ],
     nutrientSourceIds: {
       energyKcal: 'nutrition-source',
@@ -50,12 +50,12 @@ function food(id: string, displayName = id): CatalogFood {
   };
 }
 
-function client(pages: Schemas['CatalogPage'][]) {
+function client(pages: Schemas['CatalogPage'][], capabilities: Schemas['CapabilityManifest'] = manifest) {
   const calls: Array<{ version: string; cursor?: string; limit?: number }> = [];
   return {
     calls,
     api: {
-      getCapabilities: async () => manifest,
+      getCapabilities: async () => capabilities,
       getCatalog: async (input: { version: string; cursor?: string; limit?: number }) => {
         calls.push(input);
         return pages[calls.length - 1] ?? { catalogVersion: input.version, items: [], nextCursor: null };
@@ -136,6 +136,35 @@ describe('catalog snapshot import input', () => {
       { catalogVersion: manifest.catalogVersion, items: [food('food-a')], nextCursor: 'page-2' },
       { catalogVersion: manifest.catalogVersion, items: [food('food-a')], nextCursor: null },
     ]);
+
+    await expect(loadCatalogSnapshot(source.api)).rejects.toMatchObject({ code: 'INVALID_CATALOG' });
+  });
+
+  it('rejects photo-support IDs that are absent from the imported food catalog', async () => {
+    const capabilities = { ...manifest, supportedPhotoFoodIds: ['missing-photo-food'] };
+    const source = client([
+      { catalogVersion: manifest.catalogVersion, items: [food('food-a')], nextCursor: null },
+    ], capabilities);
+
+    await expect(loadCatalogSnapshot(source.api)).rejects.toMatchObject({ code: 'INVALID_CATALOG' });
+  });
+
+  it('rejects rule authority unless its source and personalization condition are imported and versioned', async () => {
+    const capabilities: Schemas['CapabilityManifest'] = {
+      ...manifest,
+      conditions: [{
+        id: 'condition-a', displayName: 'Condition A', personalizationSupported: true,
+        requiredProfileFields: [], requiredNutrients: [], supportedAgeMinimum: null, supportedAgeMaximum: null,
+      }],
+      supportedRules: [{
+        ruleId: 'rule-a', conditionId: 'condition-missing',
+        sources: [{ id: 'rule-source', kind: 'synthetic', title: 'Synthetic rule source',
+          datasetVersion: manifest.ruleSetVersion, itemRef: 'rule-a', url: null }],
+      }],
+    };
+    const source = client([
+      { catalogVersion: manifest.catalogVersion, items: [food('food-a')], nextCursor: null },
+    ], capabilities);
 
     await expect(loadCatalogSnapshot(source.api)).rejects.toMatchObject({ code: 'INVALID_CATALOG' });
   });

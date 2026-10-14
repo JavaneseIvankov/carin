@@ -65,6 +65,37 @@ function validateFood(food: Schemas['CatalogFood'], version: string, dataMode: S
   }
 }
 
+function validateRuleAuthority(manifest: Schemas['CapabilityManifest']): void {
+  const conditions = new Map(manifest.conditions.map((condition) => [condition.id, condition]));
+  const ruleKeys = new Set<string>();
+  for (const rule of manifest.supportedRules ?? []) {
+    const key = `${rule.ruleId}\u0000${rule.conditionId}`;
+    const condition = conditions.get(rule.conditionId);
+    if (ruleKeys.has(key) || !condition?.personalizationSupported) invalidCatalog();
+    ruleKeys.add(key);
+    const sourceIds = new Set<string>();
+    for (const source of rule.sources) {
+      const expectedKind = manifest.dataMode === 'synthetic' ? 'synthetic' : 'health_rule';
+      if (sourceIds.has(source.id) || source.kind !== expectedKind || source.datasetVersion !== manifest.ruleSetVersion) {
+        invalidCatalog();
+      }
+      sourceIds.add(source.id);
+    }
+  }
+}
+
+function validateSnapshotSources(manifest: Schemas['CapabilityManifest'], foods: Schemas['CatalogFood'][]): void {
+  const sources = new Map<string, string>();
+  const remember = (source: Schemas['Source']) => {
+    const prior = sources.get(source.id);
+    const value = canonicalJson(source);
+    if (prior !== undefined && prior !== value) invalidCatalog();
+    sources.set(source.id, value);
+  };
+  for (const food of foods) for (const source of food.sources) remember(source);
+  for (const rule of manifest.supportedRules ?? []) for (const source of rule.sources) remember(source);
+}
+
 function canonicalJson(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonicalJson).join(',')}]`;
   if (value !== null && typeof value === 'object') {
@@ -89,6 +120,7 @@ export async function loadCatalogSnapshot(
     if (conditionIds.has(condition.id)) invalidCatalog();
     conditionIds.add(condition.id);
   }
+  validateRuleAuthority(manifest);
 
   const foods: Schemas['CatalogFood'][] = [];
   const foodIds = new Set<string>();
@@ -119,6 +151,8 @@ export async function loadCatalogSnapshot(
       foods.push(item);
     }
     if (page.nextCursor === null) {
+      if (manifest.supportedPhotoFoodIds.some((id) => !foodIds.has(id))) invalidCatalog();
+      validateSnapshotSources(manifest, foods);
       const canonical = canonicalJson({
         manifest,
         foods: [...foods].sort((a, b) => a.id.localeCompare(b.id)),

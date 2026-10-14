@@ -88,6 +88,7 @@ beforeAll(async () => {
     'utf8',
   )) as {
     catalogVersion: string; nutritionDatasetVersion: string; ruleSetVersion: string;
+    computedAt: string;
     components: Array<{ catalogFoodId: string | null; displayName: string; preparation: string | null; per100g: object; nutrientSourceIds: object; sourceIds: string[] }>;
     sources: Array<{ id: string; kind: string; title: string; datasetVersion: string; itemRef: string; url: string | null }>;
   };
@@ -96,6 +97,27 @@ beforeAll(async () => {
     `INSERT INTO catalog_version (version,nutrition_dataset_version,rule_set_version,data_mode,published_at,digest,is_current)
      VALUES ($1,$2,$3,'synthetic',now(),'c16-worker-test',true)`,
     [catalogSample.catalogVersion, catalogSample.nutritionDatasetVersion, catalogSample.ruleSetVersion],
+  );
+  await pool.query(
+    `INSERT INTO catalog_capability_manifest (catalog_version,manifest) VALUES ($1,$2)`,
+    [catalogSample.catalogVersion, JSON.stringify({
+      contractVersion: '1.0.0',
+      catalogVersion: catalogSample.catalogVersion,
+      nutritionDatasetVersion: catalogSample.nutritionDatasetVersion,
+      ruleSetVersion: catalogSample.ruleSetVersion,
+      conditions: [{
+        id: 'fixture-condition', displayName: 'Synthetic fixture condition', personalizationSupported: true,
+        requiredProfileFields: [], requiredNutrients: [], supportedAgeMinimum: null, supportedAgeMaximum: null,
+      }],
+      supportedPhotoFoodIds: ['fixture-food-001'],
+      supportedRules: [{
+        ruleId: 'fixture-rule-001', conditionId: 'fixture-condition',
+        sources: [catalogSample.sources.find(({ id }) => id === 'synthetic-rule')],
+      }],
+      nutrients: ['energyKcal', 'carbohydrateG', 'proteinG', 'fatG', 'fiberG', 'sugarsG', 'sodiumMg'],
+      dataMode: 'synthetic',
+      publishedAt: catalogSample.computedAt,
+    })],
   );
   await pool.query(
     `INSERT INTO catalog_food

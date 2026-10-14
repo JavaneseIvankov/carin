@@ -125,6 +125,13 @@ function bindRequestedProvenance(
   const result = structuredClone(fixtureResult);
   result.operationId = request.operationId;
   result.profileVersion = request.profile.profileVersion;
+  result.attentions = result.attentions.filter((attention) =>
+    request.profile.profileVersion > 0 && request.profile.conditionIds.includes(attention.conditionId),
+  );
+  const citedRuleSources = new Set(result.attentions.flatMap(({ sourceIds }) => sourceIds));
+  result.sources = result.sources.filter((source) =>
+    !(source.kind === 'synthetic' && source.datasetVersion === result.ruleSetVersion && !citedRuleSources.has(source.id)),
+  );
   if ('components' in request) {
     if (result.components.length !== request.components.length) {
       throw new AiAdapterError('INVALID_REQUEST', 'Fixture scenario does not match component count.', false);
@@ -217,8 +224,21 @@ function createFixtureAiClient(options: {
         catalogVersion: sample.catalogVersion,
         nutritionDatasetVersion: sample.nutritionDatasetVersion,
         ruleSetVersion: sample.ruleSetVersion,
-        conditions: [],
-        supportedPhotoFoodIds: [],
+        conditions: [{
+          id: 'fixture-condition',
+          displayName: 'Synthetic fixture condition',
+          personalizationSupported: true,
+          requiredProfileFields: [],
+          requiredNutrients: [],
+          supportedAgeMinimum: null,
+          supportedAgeMaximum: null,
+        }],
+        supportedPhotoFoodIds: ['fixture-food-001'],
+        supportedRules: [{
+          ruleId: 'fixture-rule-001',
+          conditionId: 'fixture-condition',
+          sources: [sample.sources.find((source) => source.id === 'synthetic-rule')!],
+        }],
         nutrients: [],
         dataMode: 'synthetic',
         publishedAt: sample.computedAt,

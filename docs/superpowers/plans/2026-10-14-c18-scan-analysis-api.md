@@ -54,3 +54,13 @@
 - [x] Run `pnpm run typecheck`, `pnpm run lint`, `pnpm run test:unit`, API integration tests, `pnpm run build`, `pnpm run db:generate`/drift check, and the root contract validator from their documented directories.
 - [x] If Docker/PostgreSQL or required cross-package dependencies are unavailable, record the exact failed/unavailable commands and run all independent available checks.
 - [x] Review `git diff --check`, update the implementation plan checkboxes and `docs/handoffs/t18-scan-analysis-api.md`, then commit locally with a conventional message; do not push or mark TSK 18 done.
+
+## Review follow-up: imported capability authority and profile eligibility
+
+- [x] Extend the additive AI capability contract with `supportedRules`, binding an exact rule ID and condition ID to exact citation-source objects. An omitted/empty list declares no publishable health-rule claims.
+- [x] Persist the exact imported capability manifest in append-only migration `0007`, with update/delete protection; verify photo-food IDs and rule/condition/source consistency while importing.
+- [x] Load the stored manifest for worker validation and fail closed if it is missing or disagrees with immutable catalog version metadata.
+- [x] Reject photo matches outside `supportedPhotoFoodIds`; reject attention claims unless the condition is in the frozen profile, is marked supported in the manifest, and the exact rule/condition/source authority matches. A profile-version-zero snapshot cannot publish an attention.
+- [x] Add unit and PostgreSQL integration coverage for unsupported photo matches, unbacked/mismatched rule citations, unsupported profile conditions, empty profiles, and missing manifests. Synthetic provider fixtures explicitly declare their supported food/rule/source authority.
+- [x] Preserve `lockScanForConfirmation` as the transaction seam. C21 must call it in the transaction that persists consumption confirmation; no C18 confirmation route exists to call it here.
+- [x] Re-run API typecheck, lint, unit and integration suites, build, Drizzle no-drift, app contract generation check, root OpenAPI validation, and diff check. Live AI/source validation remains gated by C31 and is unverified.

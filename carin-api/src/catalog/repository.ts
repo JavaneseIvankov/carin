@@ -1,11 +1,20 @@
 import { eq, sql } from 'drizzle-orm';
 import type { components } from '../contracts/generated/ai-service.js';
 import type { Database } from '../db/client.js';
-import { catalogCondition, catalogFood, catalogServing, catalogVersion } from '../db/schema/index.js';
+import { catalogCapabilityManifest, catalogCondition, catalogFood, catalogServing, catalogVersion } from '../db/schema/index.js';
 import { CatalogImportError } from './errors.js';
 import type { CatalogSnapshot } from './importer.js';
 
 type CatalogFoodArtifact = components['schemas']['CatalogFood'];
+
+function canonicalJson(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(',')}]`;
+  if (value !== null && typeof value === 'object') {
+    const record = value as Record<string, unknown>;
+    return `{${Object.keys(record).sort().map((key) => `${JSON.stringify(key)}:${canonicalJson(record[key])}`).join(',')}}`;
+  }
+  return JSON.stringify(value) ?? 'null';
+}
 
 export async function persistCatalogSnapshot(db: Database, snapshot: CatalogSnapshot): Promise<void> {
   await db.transaction(async (tx) => {
@@ -15,6 +24,14 @@ export async function persistCatalogSnapshot(db: Database, snapshot: CatalogSnap
     if (existing[0]) {
       if (existing[0].digest !== snapshot.digest) {
         throw new CatalogImportError('CATALOG_VERSION_CONFLICT', 'Catalog version already exists with different contents.');
+      }
+      const [persistedAuthority] = await tx.select({ manifest: catalogCapabilityManifest.manifest })
+        .from(catalogCapabilityManifest).where(eq(catalogCapabilityManifest.catalogVersion, version)).limit(1);
+      if (persistedAuthority && canonicalJson(persistedAuthority.manifest) !== canonicalJson(snapshot.manifest)) {
+        throw new CatalogImportError('CATALOG_VERSION_CONFLICT', 'Catalog capability authority differs from its immutable version.');
+      }
+      if (!persistedAuthority) {
+        await tx.insert(catalogCapabilityManifest).values({ catalogVersion: version, manifest: snapshot.manifest });
       }
       await tx.update(catalogVersion).set({ isCurrent: false });
       await tx.update(catalogVersion).set({ isCurrent: true }).where(eq(catalogVersion.version, version));
@@ -30,6 +47,7 @@ export async function persistCatalogSnapshot(db: Database, snapshot: CatalogSnap
       digest: snapshot.digest,
       isCurrent: false,
     });
+    await tx.insert(catalogCapabilityManifest).values({ catalogVersion: version, manifest: snapshot.manifest });
 
     const foods: CatalogFoodArtifact[] = snapshot.foods;
     for (let start = 0; start < foods.length; start += 200) {

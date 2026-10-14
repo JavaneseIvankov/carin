@@ -16,7 +16,7 @@ const profile = {
   weightKg: null,
   sexForReference: null,
   diagnosisState: 'not_provided' as const,
-  conditionIds: [],
+  conditionIds: ['fixture-condition'],
   unsupportedConditionLabels: [],
   allergyState: 'not_provided' as const,
   allergies: [],
@@ -25,12 +25,28 @@ const profile = {
 };
 
 function catalogFor(result: AnalysisResult): ValidationCatalog {
+  const conditions = [...new Set(result.attentions.map(({ conditionId }) => conditionId))]
+    .map((id) => ({ id, personalizationSupported: true }));
+  const supportedRules = result.attentions.map((attention) => ({
+    ruleId: attention.ruleId,
+    conditionId: attention.conditionId,
+    sources: attention.sourceIds.flatMap((id) => {
+      const source = result.sources.find((item) => item.id === id);
+      return source ? [source] : [];
+    }),
+  }));
+  const supportedPhotoFoodIds = result.inputKind === 'photo'
+    ? [...new Set(result.components.flatMap(({ catalogFoodId }) => catalogFoodId ? [catalogFoodId] : []))]
+    : [];
   const component = result.components.find((item) => item.catalogFoodId !== null);
   if (!component) return {
     version: result.catalogVersion,
     nutritionDatasetVersion: result.nutritionDatasetVersion,
     ruleSetVersion: result.ruleSetVersion,
     dataMode: result.dataMode,
+    supportedPhotoFoodIds,
+    conditions,
+    supportedRules,
     foods: [],
   };
   const nutritionSourceIds = component.nutrientSourceIds;
@@ -39,6 +55,9 @@ function catalogFor(result: AnalysisResult): ValidationCatalog {
     nutritionDatasetVersion: result.nutritionDatasetVersion,
     ruleSetVersion: result.ruleSetVersion,
     dataMode: result.dataMode,
+    supportedPhotoFoodIds,
+    conditions,
+    supportedRules,
     foods: [{
       id: component.catalogFoodId!,
       displayName: component.displayName,
@@ -51,11 +70,11 @@ function catalogFor(result: AnalysisResult): ValidationCatalog {
   };
 }
 
-function photoExpectation(result: AnalysisResult): AnalysisExpectation {
+function photoExpectation(result: AnalysisResult, profileContext = profile): AnalysisExpectation {
   return {
     kind: 'photo_analysis',
     operationId: result.operationId,
-    profile,
+    profile: profileContext,
     catalogVersion: result.catalogVersion,
     ruleSetVersion: result.ruleSetVersion,
   };
@@ -65,6 +84,51 @@ describe('validateAnalysisResult', () => {
   it.each(['analysis-complete', 'analysis-partial', 'analysis-unrecognized'])('accepts the valid %s photo result', (name) => {
     const result = resultFixture(name);
     expect(() => validateAnalysisResult(result, photoExpectation(result), catalogFor(result))).not.toThrow();
+  });
+
+  it('rejects a photo food match outside the imported supported-photo allowlist', () => {
+    const result = resultFixture('analysis-complete');
+    const catalog = catalogFor(result);
+    catalog.supportedPhotoFoodIds = [];
+
+    expect(() => validateAnalysisResult(result, photoExpectation(result), catalog)).toThrow();
+  });
+
+  it('rejects an attention without imported rule and supported-condition authority', () => {
+    const result = resultFixture('analysis-complete');
+    const catalog = catalogFor(result);
+    catalog.conditions = [{ id: 'fixture-condition', personalizationSupported: true }];
+    catalog.supportedRules = [];
+
+    expect(() => validateAnalysisResult(result, photoExpectation(result), catalog)).toThrow();
+  });
+
+  it('rejects attention when the frozen profile has no eligible condition or profile version', () => {
+    const result = resultFixture('analysis-complete');
+    const emptyProfile = { ...profile, profileVersion: 0, conditionIds: [] };
+
+    expect(() => validateAnalysisResult(result, photoExpectation(result, emptyProfile), catalogFor(result))).toThrow();
+  });
+
+  it('rejects a supported rule claim for a condition absent from the frozen profile', () => {
+    const result = resultFixture('analysis-complete');
+    const noMatchingCondition = { ...profile, conditionIds: [] };
+
+    expect(() => validateAnalysisResult(result, photoExpectation(result, noMatchingCondition), catalogFor(result))).toThrow();
+  });
+
+  it('rejects a health-rule source whose exact imported source authority differs', () => {
+    const result = resultFixture('analysis-complete');
+    const ruleSource = result.sources.find((source) => source.id === 'synthetic-rule')!;
+    const catalog = catalogFor(result);
+    catalog.conditions = [{ id: 'fixture-condition', personalizationSupported: true }];
+    catalog.supportedRules = [{
+      ruleId: 'fixture-rule-001',
+      conditionId: 'fixture-condition',
+      sources: [{ ...ruleSource, itemRef: 'different imported rule citation' }],
+    }];
+
+    expect(() => validateAnalysisResult(result, photoExpectation(result), catalog)).toThrow();
   });
 
   it('accepts a correction whose half serving math and selected component match', () => {

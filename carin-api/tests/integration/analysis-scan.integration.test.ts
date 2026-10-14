@@ -56,12 +56,44 @@ async function seedCatalog(): Promise<void> {
   const complete = fixture('complete');
   const sample = complete.components[0]!;
   const sources = complete.sources.filter((source) => sample.sourceIds.includes(source.id));
+  const manifest: components['schemas']['CapabilityManifest'] = {
+    contractVersion: '1.0.0',
+    catalogVersion,
+    nutritionDatasetVersion: complete.nutritionDatasetVersion,
+    ruleSetVersion: complete.ruleSetVersion,
+    conditions: [{
+      id: 'fixture-condition',
+      displayName: 'Synthetic fixture condition',
+      personalizationSupported: true,
+      requiredProfileFields: [],
+      requiredNutrients: [],
+      supportedAgeMinimum: null,
+      supportedAgeMaximum: null,
+    }],
+    supportedPhotoFoodIds: ['fixture-food-001'],
+    supportedRules: [{
+      ruleId: 'fixture-rule-001',
+      conditionId: 'fixture-condition',
+      sources: [complete.sources.find((source) => source.id === 'synthetic-rule')!],
+    }],
+    nutrients: ['energyKcal', 'carbohydrateG', 'proteinG', 'fatG', 'fiberG', 'sugarsG', 'sodiumMg'],
+    dataMode: 'synthetic',
+    publishedAt: complete.computedAt,
+  };
   await pool.query(
     `INSERT INTO catalog_version (version,nutrition_dataset_version,rule_set_version,data_mode,published_at,digest,is_current)
      VALUES ($1,$2,$3,'synthetic',now(),'c18-test-digest',true)`,
     [catalogVersion, complete.nutritionDatasetVersion, complete.ruleSetVersion],
   );
-  for (const [foodId, displayName] of [['fixture-food-001', sample.displayName], ['fixture-food-002', 'Makanan pengganti sintetis']] as const) {
+  await pool.query(
+    'INSERT INTO catalog_capability_manifest (catalog_version,manifest) VALUES ($1,$2)',
+    [catalogVersion, JSON.stringify(manifest)],
+  );
+  for (const [foodId, displayName] of [
+    ['fixture-food-001', sample.displayName],
+    ['fixture-food-002', 'Makanan pengganti sintetis'],
+    ['fixture-food-not-photo-supported', 'Makanan sintetis hanya untuk koreksi'],
+  ] as const) {
     await pool.query(
       `INSERT INTO catalog_food
        (id,version,display_name,preparation,energy_kcal,carbohydrate_g,protein_g,fat_g,fiber_g,sugars_g,sodium_mg,source_refs,nutrient_source_ids)
@@ -80,7 +112,7 @@ function fixture(name: keyof typeof aiFixtures): components['schemas']['Analysis
   return JSON.parse(readFileSync(new URL(`../../fixtures/ai/${aiFixtures[name]}`, import.meta.url), 'utf8')) as components['schemas']['AnalysisResult'];
 }
 
-async function createOwner(profile?: { version: number; heightCm: number; weightKg: number }): Promise<Owner> {
+async function createOwner(profile?: { version: number; heightCm: number; weightKg: number; conditionIds?: string[] }): Promise<Owner> {
   const userId = randomUUID();
   const sessionId = randomUUID();
   const legal = getLegalRegistry();
@@ -99,10 +131,13 @@ async function createOwner(profile?: { version: number; heightCm: number; weight
     [userId, legal.aiProcessing.version],
   );
   if (profile) {
+    const conditionIds = profile.conditionIds ?? [];
     await pool.query(
       `INSERT INTO health_profile (user_id,version,height_cm,weight_kg,diagnosis_state,conditions,family_history_state,family_history,allergy_state,allergies)
-       VALUES ($1,$2,$3,$4,'not_provided','[]','not_provided','[]','not_provided','[]')`,
-      [userId, profile.version, String(profile.heightCm), String(profile.weightKg)],
+       VALUES ($1,$2,$3,$4,$5,$6,'not_provided','[]','not_provided','[]')`,
+      [userId, profile.version, String(profile.heightCm), String(profile.weightKg),
+        conditionIds.length > 0 ? 'reported' : 'not_provided',
+        JSON.stringify(conditionIds.map((conditionId) => ({ conditionId })))],
     );
   }
   return { userId, sessionId };
@@ -160,6 +195,25 @@ async function analyzeOnce(scenario: 'complete' | 'partial' | 'unrecognized' | '
       }
     : createAiClient(config, scenario);
   return runAnalysisWorkerOnce(database, client, {
+    photoUrlForJob: async (_userId, photoId) => `http://minio.internal.invalid/photos/${photoId}`,
+  });
+}
+
+async function analyzeMutatedResult(mutate: (result: components['schemas']['AnalysisResult']) => void) {
+  const config = loadConfig({ APP_ENV: 'dev', AI_MODE: 'fixture', DATABASE_URL: 'postgresql://postgres@localhost/carin' });
+  const client = createAiClient(config, 'complete');
+  return runAnalysisWorkerOnce(database, {
+    ...client,
+    async analyzePhoto(request) {
+      const result = fixture('complete');
+      result.operationId = request.operationId;
+      result.profileVersion = request.profile.profileVersion;
+      result.catalogVersion = request.catalogVersion;
+      result.ruleSetVersion = request.ruleSetVersion;
+      mutate(result);
+      return result;
+    },
+  }, {
     photoUrlForJob: async (_userId, photoId) => `http://minio.internal.invalid/photos/${photoId}`,
   });
 }
@@ -222,8 +276,81 @@ describe('C18 scan and analysis API', () => {
     await cancelOpenJobs(owner.userId);
   });
 
+  it('rejects a matched photo food outside the imported supported-photo ID set', async () => {
+    const owner = await createOwner({ version: 1, heightCm: 170, weightKg: 65, conditionIds: ['fixture-condition'] });
+    const created = await createScan(owner, await createPhoto(owner));
+    const job = await created.json() as { id: string; scanId: string };
+
+    expect(await analyzeMutatedResult((result) => {
+      result.components[0]!.catalogFoodId = 'fixture-food-not-photo-supported';
+      result.components[0]!.displayName = 'Makanan sintetis hanya untuk koreksi';
+    })).toBe('failed');
+    const current = await pool.query('SELECT revision,current_result_id FROM scan WHERE id=$1', [job.scanId]);
+    expect(current.rows[0]).toMatchObject({ revision: 1, current_result_id: null });
+    const failed = await pool.query('SELECT status FROM analysis_job WHERE id=$1', [job.id]);
+    expect(failed.rows[0].status).toBe('failed');
+  });
+
+  it('rejects health-rule outputs whose claimed citation differs from the imported rule source', async () => {
+    const owner = await createOwner({ version: 1, heightCm: 170, weightKg: 65, conditionIds: ['fixture-condition'] });
+    const created = await createScan(owner, await createPhoto(owner));
+
+    expect(await analyzeMutatedResult((result) => {
+      result.sources.find((source) => source.id === 'synthetic-rule')!.itemRef = 'unbacked citation';
+    })).toBe('failed');
+    const response = await created.json() as { scanId: string };
+    const current = await pool.query('SELECT revision,current_result_id FROM scan WHERE id=$1', [response.scanId]);
+    expect(current.rows[0]).toMatchObject({ revision: 1, current_result_id: null });
+  });
+
+  it('rejects a rule/condition pair outside the imported supported condition authority', async () => {
+    const owner = await createOwner({ version: 1, heightCm: 170, weightKg: 65, conditionIds: ['fixture-condition'] });
+    const created = await createScan(owner, await createPhoto(owner));
+
+    expect(await analyzeMutatedResult((result) => {
+      result.attentions[0]!.conditionId = 'condition-not-supported';
+    })).toBe('failed');
+    const response = await created.json() as { scanId: string };
+    const current = await pool.query('SELECT revision,current_result_id FROM scan WHERE id=$1', [response.scanId]);
+    expect(current.rows[0]).toMatchObject({ revision: 1, current_result_id: null });
+  });
+
+  it('rejects attention output when the immutable profile snapshot has no eligible condition', async () => {
+    const owner = await createOwner();
+    const created = await createScan(owner, await createPhoto(owner));
+    const job = await created.json() as { id: string; scanId: string };
+
+    expect(await analyzeMutatedResult(() => {})).toBe('failed');
+    const current = await pool.query('SELECT revision,current_result_id FROM scan WHERE id=$1', [job.scanId]);
+    expect(current.rows[0]).toMatchObject({ revision: 1, current_result_id: null });
+  });
+
+  it('fails closed when the frozen catalog version has no imported capability manifest', async () => {
+    const missingAuthorityVersion = 'fixture-catalog-without-authority';
+    await pool.query('UPDATE catalog_version SET is_current=false WHERE version=$1', [catalogVersion]);
+    await pool.query(
+      `INSERT INTO catalog_version (version,nutrition_dataset_version,rule_set_version,data_mode,published_at,digest,is_current)
+       VALUES ($1,'synthetic-nutrition-1','synthetic-rules-1','synthetic',now(),'missing-authority',true)`,
+      [missingAuthorityVersion],
+    );
+    try {
+      const owner = await createOwner();
+      const created = await createScan(owner, await createPhoto(owner));
+      const job = await created.json() as { id: string; scanId: string };
+      expect(await analyzeMutatedResult(() => {})).toBe('failed');
+      const current = await pool.query('SELECT revision,current_result_id FROM scan WHERE id=$1', [job.scanId]);
+      expect(current.rows[0]).toMatchObject({ revision: 1, current_result_id: null });
+      const storedJob = await pool.query('SELECT status,error FROM analysis_job WHERE id=$1', [job.id]);
+      expect(storedJob.rows[0].status).toBe('failed');
+      expect(storedJob.rows[0].error.code).toBe('INVALID_RESPONSE');
+    } finally {
+      await pool.query('UPDATE catalog_version SET is_current=false WHERE version=$1', [missingAuthorityVersion]);
+      await pool.query('UPDATE catalog_version SET is_current=true WHERE version=$1', [catalogVersion]);
+    }
+  });
+
   it('keeps the initial profile snapshot for corrections, blocks competing edits while pending, and advances only after success', async () => {
-    const owner = await createOwner({ version: 4, heightCm: 168, weightKg: 65 });
+    const owner = await createOwner({ version: 4, heightCm: 168, weightKg: 65, conditionIds: ['fixture-condition'] });
     const photoId = await createPhoto(owner);
     const app = appFor(owner);
     const created = await createScan(owner, photoId, app);
