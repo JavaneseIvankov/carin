@@ -6,8 +6,10 @@ export function resolvePhotoMimeType(
   fileName?: string | null
 ): 'image/jpeg' | 'image/png' | null {
   const normalizedMimeType = mimeType?.split(';', 1)[0]?.trim().toLowerCase();
-  if (normalizedMimeType && supportedPhotoMimeTypes.has(normalizedMimeType)) {
-    return normalizedMimeType as 'image/jpeg' | 'image/png';
+  if (normalizedMimeType) {
+    return supportedPhotoMimeTypes.has(normalizedMimeType)
+      ? (normalizedMimeType as 'image/jpeg' | 'image/png')
+      : null;
   }
 
   const paths = [fileName, uri.split(/[?#]/, 1)[0]];

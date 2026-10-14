@@ -23,7 +23,8 @@
   structurally identical queued/processing responses); portion quantity, unit, basis,
   source, and unknown-grams state are preserved; attention adjustments are displayed;
   gallery MIME types are inferred only from supported MIME metadata or known file
-  extensions, with unknown formats rejected.
+  extensions only when MIME metadata is absent; unsupported declared MIME types and
+  unknown formats are rejected.
 - Added Expo SDK 56 `expo-camera` and `expo-image-picker` dependencies and
   permission copy/plugin settings. OpenAPI and generated files are unchanged.
 

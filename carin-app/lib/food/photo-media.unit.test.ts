@@ -10,5 +10,6 @@ describe('photo MIME type resolution', () => {
   it('rejects unknown image bytes instead of labeling them as JPEG', () => {
     expect(resolvePhotoMimeType(null, 'file:///photos/meal')).toBeNull();
     expect(resolvePhotoMimeType('image/heic', 'file:///photos/meal')).toBeNull();
+    expect(resolvePhotoMimeType('image/heic', 'content://media/123', 'meal.jpg')).toBeNull();
   });
 });
