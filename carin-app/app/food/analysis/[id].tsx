@@ -473,7 +473,7 @@ export default function AnalysisResultScreen() {
             {consumptionActions?.primary ? (
               <Button
                 className="min-h-12"
-                onPress={() => router.push(consumptionActions.primary as Href)}>
+                onPress={() => router.push(consumptionActions.primary as unknown as Href)}>
                 <Text>{consumptionActions.primary.label}</Text>
               </Button>
             ) : null}
@@ -481,7 +481,7 @@ export default function AnalysisResultScreen() {
               <Button
                 variant="outline"
                 className="min-h-12"
-                onPress={() => router.push(consumptionActions.secondary as Href)}>
+                onPress={() => router.push(consumptionActions.secondary as unknown as Href)}>
                 <Text>{consumptionActions.secondary.label}</Text>
               </Button>
             ) : null}
