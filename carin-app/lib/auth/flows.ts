@@ -1,20 +1,36 @@
 export const PASSWORD_RESET_REQUEST_CONFIRMATION =
   'Jika akun dengan alamat tersebut tersedia, instruksi pengaturan ulang akan dikirim. Periksa kotak masuk dan folder spam.';
 
-export type SignInFailure = 'unverified-email' | 'invalid-credentials';
+export type SignInFailure =
+  'unverified-email' | 'invalid-credentials' | 'rate-limited' | 'service-unavailable';
 
 export function classifySignInError(error: unknown): SignInFailure {
   const visited = new Set<object>();
-  const hasUnverifiedCode = (value: unknown, depth: number): boolean => {
-    if (depth > 4 || !value || typeof value !== 'object' || visited.has(value)) return false;
+  const classify = (value: unknown, depth: number): SignInFailure | null => {
+    if (depth > 4 || !value || typeof value !== 'object' || visited.has(value)) return null;
     visited.add(value);
     const record = value as Record<string, unknown>;
-    if (record.code === 'EMAIL_NOT_VERIFIED') return true;
-    return ['error', 'cause', 'body'].some((key) => hasUnverifiedCode(record[key], depth + 1));
+    if (record.status === 429 || record.code === 'TOO_MANY_REQUESTS') return 'rate-limited';
+    if (typeof record.status === 'number' && record.status >= 500) return 'service-unavailable';
+    if (record.code === 'EMAIL_NOT_VERIFIED') return 'unverified-email';
+    if (record.code === 'INVALID_EMAIL_OR_PASSWORD') return 'invalid-credentials';
+    for (const key of ['error', 'cause', 'body']) {
+      const failure = classify(record[key], depth + 1);
+      if (failure) return failure;
+    }
+    return null;
   };
 
-  return hasUnverifiedCode(error, 0) ? 'unverified-email' : 'invalid-credentials';
+  return classify(error, 0) ?? 'service-unavailable';
 }
+
+export const SIGN_IN_FAILURE_MESSAGES: Record<SignInFailure, string> = {
+  'invalid-credentials': 'Email atau kata sandi tidak sesuai. Periksa kembali lalu coba lagi.',
+  'unverified-email':
+    'Email belum diverifikasi. Buka instruksi verifikasi atau kirim ulang email terlebih dahulu.',
+  'rate-limited': 'Terlalu banyak percobaan masuk. Tunggu sebentar lalu coba lagi.',
+  'service-unavailable': 'Belum dapat terhubung ke layanan Carin. Periksa koneksi lalu coba lagi.',
+};
 
 export async function requestPasswordResetPrivately<TInput>(
   request: (input: TInput) => Promise<unknown>,

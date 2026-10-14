@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 import { expoClient } from '@better-auth/expo/client';
 import { createAuthClient } from 'better-auth/react';
-import * as Crypto from 'expo-crypto';
+import { createRequestId } from '@/lib/request-id';
 import * as SecureStore from 'expo-secure-store';
 import { requireApiUrl } from '@/lib/config';
 import { errorLogDetails, logAppEvent } from '@/lib/logging';
@@ -47,7 +47,7 @@ export const authClient = createAuthClient({
   baseURL: `${requireApiUrl()}/api/auth`,
   fetchOptions: {
     onRequest: (context) => {
-      const requestId = Crypto.randomUUID();
+      const requestId = createRequestId();
       context.headers.set('x-request-id', requestId);
       const url = new URL(context.url.toString(), `${requireApiUrl()}/api/auth`);
       const route = url.pathname.split('/api/auth/')[1] ?? 'root';

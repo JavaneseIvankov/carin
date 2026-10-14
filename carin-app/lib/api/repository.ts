@@ -1,5 +1,5 @@
 import type { operations } from './generated/app-api';
-import * as Crypto from 'expo-crypto';
+import { createRequestId } from '@/lib/request-id';
 import { appOperations } from './generated/operations';
 import { prepareAppRequest, type AppOperation, type AppRequestInput } from './contracts';
 import { requireApiUrl } from '@/lib/config';
@@ -59,7 +59,7 @@ export function createAppRepository(deps: Dependencies) {
     assertCurrentScope(deps.storage, deps.scope, generation, deps.isCurrentScope);
   async function send<O extends AppOperation>(name: O, input: AppRequestInput<O>) {
     const request = prepareAppRequest(name, input);
-    const requestId = Crypto.randomUUID();
+    const requestId = createRequestId();
     request.headers['x-request-id'] = requestId;
     if (request.method !== 'GET') requireOnline(deps.connectivity());
     const cookie = await deps.getCookie?.();

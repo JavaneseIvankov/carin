@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { resolveApiUrl } from './config';
+import { resolveDevelopmentApiUrl as resolveApiUrl } from './api-url';
 
-describe('resolveApiUrl', () => {
+describe('development API URL normalization', () => {
   it('keeps localhost unchanged when no dev host is available', () => {
     expect(resolveApiUrl('http://localhost:3000', null)).toBe('http://localhost:3000');
   });

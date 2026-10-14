@@ -2,7 +2,7 @@ import Constants from 'expo-constants';
 import { resolveDevelopmentApiUrl } from './api-url';
 
 const environment = process.env.EXPO_PUBLIC_ENV ?? 'development';
-const configuredUrl = process.env.EXPO_PUBLIC_API_URL?.replace(/\/$/, '') ?? '';
+const configuredUrl = process.env.EXPO_PUBLIC_API_URL?.replace(/\/+$/, '') ?? '';
 
 export const apiEnvironment = {
   name: environment,

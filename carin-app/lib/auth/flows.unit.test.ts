@@ -6,7 +6,31 @@ describe('auth flow helpers', () => {
     expect(classifySignInError({ code: 'EMAIL_NOT_VERIFIED' })).toBe('unverified-email');
     expect(classifySignInError({ error: { code: 'EMAIL_NOT_VERIFIED' } })).toBe('unverified-email');
     expect(classifySignInError({ code: 'INVALID_EMAIL_OR_PASSWORD' })).toBe('invalid-credentials');
-    expect(classifySignInError(new Error('private backend detail'))).toBe('invalid-credentials');
+    expect(classifySignInError(new Error('private backend detail'))).toBe('service-unavailable');
+  });
+
+  it.each([
+    new TypeError('Failed to fetch'),
+    { status: 503, code: 'SERVICE_UNAVAILABLE' },
+    { status: 403, code: 'INVALID_ORIGIN' },
+    { status: 401 },
+    null,
+  ])('does not blame passwords for network or unrecognized failures: %j', (error) => {
+    expect(classifySignInError(error)).toBe('service-unavailable');
+  });
+
+  it('distinguishes throttled login requests', () => {
+    expect(classifySignInError({ status: 429 })).toBe('rate-limited');
+    expect(classifySignInError({ body: { code: 'TOO_MANY_REQUESTS' } })).toBe('rate-limited');
+  });
+
+  it('handles nested SDK errors and cycles', () => {
+    expect(classifySignInError({ cause: { body: { code: 'INVALID_EMAIL_OR_PASSWORD' } } })).toBe(
+      'invalid-credentials'
+    );
+    const error: { cause?: unknown } = {};
+    error.cause = error;
+    expect(classifySignInError(error)).toBe('service-unavailable');
   });
 
   it('requires an 8–128 character password and matching confirmation', () => {

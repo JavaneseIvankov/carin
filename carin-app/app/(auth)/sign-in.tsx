@@ -3,16 +3,11 @@ import { FormField } from '@/components/app/form-field';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { useAuth } from '@/lib/auth/provider';
-import { classifySignInError } from '@/lib/auth/flows';
+import { classifySignInError, SIGN_IN_FAILURE_MESSAGES } from '@/lib/auth/flows';
 import { resolvePostSignInDestination } from '@/lib/auth/routes';
 import { Href, useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
 import { View } from 'react-native';
-
-const INVALID_CREDENTIALS_MESSAGE =
-  'Email atau kata sandi tidak sesuai. Periksa kembali lalu coba lagi.';
-const UNVERIFIED_EMAIL_MESSAGE =
-  'Email belum diverifikasi. Buka instruksi verifikasi atau kirim ulang email terlebih dahulu.';
 
 export default function SignInScreen() {
   const router = useRouter();
@@ -44,17 +39,17 @@ export default function SignInScreen() {
       const result = await signIn({ email: normalizedEmail, password });
       if (result.error) {
         const failure = classifySignInError(result.error);
-        setSubmitError(
-          failure === 'unverified-email' ? UNVERIFIED_EMAIL_MESSAGE : INVALID_CREDENTIALS_MESSAGE
-        );
+        setSubmitError(SIGN_IN_FAILURE_MESSAGES[failure]);
         setCanResendVerification(failure === 'unverified-email');
         return;
       }
 
       // The provider resolves only after its server session restoration and cache-scope transition.
       router.replace((resolvePostSignInDestination(params.next) ?? '/(tabs)') as Href);
-    } catch {
-      setSubmitError(INVALID_CREDENTIALS_MESSAGE);
+    } catch (error) {
+      const failure = classifySignInError(error);
+      setSubmitError(SIGN_IN_FAILURE_MESSAGES[failure]);
+      setCanResendVerification(failure === 'unverified-email');
     } finally {
       submitInFlight.current = false;
       setIsSubmitting(false);
