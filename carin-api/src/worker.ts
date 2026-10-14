@@ -3,6 +3,8 @@ import { loadConfig } from './config.js';
 import { createPostgresPool } from './health/postgres-pool.js';
 import { createAiClient } from './integrations/ai/index.js';
 import { runAnalysisWorker } from './jobs/worker.js';
+import { createMediaService } from './modules/media/service.js';
+import { createMediaRuntimeOptions } from './modules/media/runtime.js';
 
 const config = loadConfig(process.env);
 const pool = createPostgresPool(config.databaseUrl, (entry) => {
@@ -19,9 +21,12 @@ process.once('SIGINT', () => shutdown.abort());
 process.once('SIGTERM', () => shutdown.abort());
 
 try {
-  await runAnalysisWorker(createDatabase(pool), createAiClient(config), {
+  const db = createDatabase(pool);
+  const media = createMediaService(createMediaRuntimeOptions(db, config));
+  await runAnalysisWorker(db, createAiClient(config), {
     concurrency,
     signal: shutdown.signal,
+    photoUrlForJob: media.createAiPhotoUrl,
     onError: () => process.stderr.write('{"code":"ANALYSIS_WORKER_FAILURE"}\n'),
   });
 } finally {

@@ -6390,6 +6390,15 @@ export const contracts = {
             type: 'array',
             uniqueItems: true,
           },
+          supportedRules: {
+            description:
+              'Exact rule, supported-condition and citation-source authority for rule outputs. Omission declares no publishable health-rule claims.',
+            items: {
+              $ref: '#/$defs/ai.SupportedRule',
+            },
+            type: 'array',
+            uniqueItems: true,
+          },
         },
         required: [
           'contractVersion',
@@ -7504,6 +7513,33 @@ export const contracts = {
           },
         },
         required: ['id', 'kind', 'title', 'datasetVersion', 'itemRef', 'url'],
+        type: 'object',
+      },
+      'ai.SupportedRule': {
+        additionalProperties: false,
+        description:
+          'Immutable capability authority binding one rule to a supported condition and its exact citation sources.',
+        properties: {
+          conditionId: {
+            maxLength: 500,
+            minLength: 1,
+            type: 'string',
+          },
+          ruleId: {
+            maxLength: 500,
+            minLength: 1,
+            type: 'string',
+          },
+          sources: {
+            items: {
+              $ref: '#/$defs/ai.Source',
+            },
+            minItems: 1,
+            type: 'array',
+            uniqueItems: true,
+          },
+        },
+        required: ['ruleId', 'conditionId', 'sources'],
         type: 'object',
       },
       'app.AccountDeletionAccepted': {

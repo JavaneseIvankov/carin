@@ -6,7 +6,7 @@ import type { components } from '../../src/contracts/generated/ai-service.js';
 import { createApp } from '../../src/app.js';
 import { createDatabase } from '../../src/db/client.js';
 import { applyMigrations } from '../../src/db/migrations.js';
-import { catalogVersion } from '../../src/db/schema/index.js';
+import { catalogCapabilityManifest, catalogVersion } from '../../src/db/schema/index.js';
 import type { AiClient } from '../../src/integrations/ai/index.js';
 import { importCatalog } from '../../src/catalog/importer.js';
 
@@ -54,6 +54,7 @@ function ai(version: string, foods: CatalogFood[], supported = false): Pick<AiCl
       supportedAgeMaximum: null,
     }],
     supportedPhotoFoodIds: [],
+    supportedRules: [],
     nutrients: ['energyKcal'],
     dataMode: 'synthetic',
     publishedAt: '2026-10-14T00:00:00Z',
@@ -137,6 +138,17 @@ describe('versioned catalog persistence and search', () => {
     const imported = await importCatalog(db, ai(versionOne, versionOneFoods));
     expect(imported).toMatchObject({ version: versionOne, foodCount: 3 });
     expect(await importCatalog(db, ai(versionOne, versionOneFoods))).toEqual(imported);
+    const [authority] = await db.select().from(catalogCapabilityManifest);
+    expect(authority?.manifest).toMatchObject({
+      catalogVersion: versionOne,
+      supportedPhotoFoodIds: [],
+      supportedRules: [],
+    });
+    await expect(pool.query('UPDATE catalog_capability_manifest SET manifest=$2 WHERE catalog_version=$1',
+      [versionOne, JSON.stringify(authority?.manifest)]))
+      .rejects.toMatchObject({ code: '23514' });
+    await expect(pool.query('DELETE FROM catalog_capability_manifest WHERE catalog_version=$1', [versionOne]))
+      .rejects.toMatchObject({ code: '23514' });
     await expect(pool.query('UPDATE catalog_version SET digest=$2 WHERE version=$1', [versionOne, 'changed-digest']))
       .rejects.toMatchObject({ code: '23514' });
     await expect(pool.query('DELETE FROM catalog_version WHERE version=$1', [versionOne]))

@@ -139,6 +139,17 @@ export const catalogVersion = pgTable(
   ],
 );
 
+export const catalogCapabilityManifest = pgTable(
+  'catalog_capability_manifest',
+  {
+    catalogVersion: text('catalog_version').primaryKey(),
+    manifest: jsonb('manifest').notNull(),
+  },
+  (t): PgTableExtraConfigValue[] => [
+    foreignKey({ columns: [t.catalogVersion], foreignColumns: [catalogVersion.version] }).onDelete('restrict'),
+  ],
+);
+
 export const catalogSearchCursor = pgTable(
   'catalog_search_cursor',
   {
