@@ -275,6 +275,29 @@ describe('photo confirmation draft mapping', () => {
       })
     ).toHaveProperty('error');
   });
+
+  it.each(['unmatched', 'unrecognized'] as const)(
+    'does not carry a server catalog match into a %s draft component',
+    (matchStatus) => {
+      const mapped = createPhotoConfirmationDraft(
+        result({
+          components: [
+            resultComponent('component-unmatched', {
+              matchStatus,
+              catalogFoodId: 'server-food-id',
+            }),
+          ],
+        }),
+        new Date('2026-10-14T05:30:00.000Z'),
+        'Asia/Jakarta'
+      );
+
+      expect(mapped.components[0]).toMatchObject({
+        id: 'component-unmatched',
+        catalogFoodId: null,
+      });
+    }
+  );
 });
 
 describe('photo consumption input', () => {
@@ -401,6 +424,24 @@ describe('photo confirmation availability', () => {
 
   it('blocks a fetched result that is no longer the scan latest result', () => {
     expect(availability({ resultId: 'older-result-row' })).toBe('unavailable');
+  });
+
+  it('marks a latest job for another scan as stale', () => {
+    expect(availability({ latestJob: job({ scanId: 'scan-2' }) })).toBe('unavailable');
+  });
+
+  it('marks a latest job for another scan revision as stale', () => {
+    expect(availability({ latestJob: job({ targetRevision: 1 }) })).toBe('unavailable');
+  });
+
+  it('marks a latest job with a mismatched target type or target ID as stale', () => {
+    expect(availability({ latestJob: job({ targetType: 'consumption' }) })).toBe('unavailable');
+    expect(availability({ latestJob: job({ targetId: 'scan-2' }) })).toBe('unavailable');
+  });
+
+  it('marks a different known latest job or result ID as stale', () => {
+    expect(availability({ latestJob: job({ id: 'job-2' }) })).toBe('unavailable');
+    expect(availability({ latestJob: job({ resultId: 'result-2' }) })).toBe('unavailable');
   });
 
   it('offers the existing default record while allowing an explicit new occurrence payload', () => {

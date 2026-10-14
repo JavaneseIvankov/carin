@@ -35,7 +35,7 @@ function mapPhotoComponent(component: AnalysisComponent): ManualFoodComponentDra
   return {
     id: component.id,
     displayName: component.displayName,
-    catalogFoodId: component.catalogFoodId,
+    catalogFoodId: component.matchStatus === 'matched' ? component.catalogFoodId : null,
     preparation: component.preparation,
     portion: editablePortion,
   };
@@ -111,9 +111,10 @@ export function getPhotoConfirmationAvailability(input: {
 
   const latestScanJob =
     latestJob.id === scan.latestJobId &&
+    latestJob.scanId === scan.id &&
     latestJob.targetType === 'scan' &&
     latestJob.targetId === scan.id;
-  if (!latestScanJob) return 'loading';
+  if (!latestScanJob || latestJob.targetRevision !== scan.revision) return 'unavailable';
   if (latestJob.status === 'queued' || latestJob.status === 'processing') {
     return 'correction_pending';
   }
@@ -123,7 +124,11 @@ export function getPhotoConfirmationAvailability(input: {
 
   if (latestJob.status === 'failed') {
     if (!explicitlyUseLastSuccessfulResult) return 'unavailable';
-  } else if (latestJob.status !== 'completed' || latestJob.resultId !== resultId) {
+  } else if (
+    latestJob.status !== 'completed' ||
+    latestJob.resultId !== scan.latestResultId ||
+    latestJob.resultId !== resultId
+  ) {
     return 'unavailable';
   }
 
