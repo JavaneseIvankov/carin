@@ -79,7 +79,10 @@ export function createApp({
   appEnv,
 }: AppDependencies): Hono<AppEnv> {
   const app = new Hono<AppEnv>();
-  const allowedOrigins = corsOrigins?.filter((origin) => origin.startsWith('http://') || origin.startsWith('https://')) ?? [];
+  const allowedOrigins = [
+    ...(corsOrigins ?? []),
+    ...(trustedWebOrigins ?? []),
+  ].filter((origin) => origin.startsWith('http://') || origin.startsWith('https://'));
   app.use(
     '*',
     cors({
@@ -97,7 +100,8 @@ export function createApp({
         return undefined;
       },
       credentials: true,
-      allowHeaders: ['Content-Type', 'Authorization', 'x-request-id'],
+      allowHeaders: ['Content-Type', 'Authorization', 'x-request-id', 'Idempotency-Key'],
+      exposeHeaders: ['x-request-id', 'X-Request-ID'],
       allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     }),
   );
@@ -137,13 +141,6 @@ export function createApp({
     }
   });
 
-  app.use('/api/*', cors({
-    origin: (origin) => trustedWebOrigins.includes(origin) ? origin : '',
-    credentials: true,
-    allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Idempotency-Key', 'X-Request-ID'],
-    exposeHeaders: ['X-Request-ID'],
-  }));
 
   registerHealthRoutes(app, readiness);
   registerLegalRegistryRoute(app);
