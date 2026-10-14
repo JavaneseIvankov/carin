@@ -44,7 +44,14 @@ export function createAuthRuntime({
       WHERE rate_limit.last_request <= EXCLUDED.last_request - 60000
       RETURNING key
     `);
-    if (claimed.rowCount) await sendEmail(mail);
+    if (!claimed.rowCount) return;
+    try {
+      await sendEmail(mail);
+    } catch (error) {
+      // A newer attempt may have claimed the key while delivery was in flight.
+      await db.execute(sql`DELETE FROM rate_limit WHERE key = ${key} AND last_request = ${now}`);
+      throw error;
+    }
   };
 
   const auth = betterAuth({

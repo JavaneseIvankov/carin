@@ -260,6 +260,30 @@ describe('Better Auth registration boundary', () => {
     expect(mail.filter((item) => item.kind === 'verification' && item.to === email)).toHaveLength(before + 1);
   });
 
+  it('releases a verification cooldown claim when delivery fails so the email can be retried', async () => {
+    const email = `${randomUUID()}@example.invalid`;
+    await register(email, '1976-10-14');
+    await pool.query('DELETE FROM rate_limit');
+    const failedDelivery = createAuthRuntime({
+      db: createDatabase(pool), baseURL: 'http://test.local',
+      secret: 'test-secret-that-is-long-enough-for-auth', trustedOrigins: ['carin://'],
+      sendEmail: async () => { throw new Error('test delivery failed'); },
+    });
+    const failingApp = createApp({ readiness: async () => true, auth: failedDelivery.auth });
+    const failed = await failingApp.request('/api/auth/send-verification-email', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email }),
+    });
+    expect(failed.status).toBeGreaterThanOrEqual(400);
+    const key = `verification-email:${createHash('sha256').update(email).digest('hex')}`;
+    expect((await pool.query('SELECT key FROM rate_limit WHERE key=$1', [key])).rowCount).toBe(0);
+    const before = mail.filter((item) => item.kind === 'verification' && item.to === email).length;
+    const retried = await app.request('/api/auth/send-verification-email', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email }),
+    });
+    expect(retried.status).toBe(200);
+    expect(mail.filter((item) => item.kind === 'verification' && item.to === email)).toHaveLength(before + 1);
+  });
+
   it('rejects expired verification links', async () => {
     const email = `${randomUUID()}@example.invalid`;
     await register(email, '1976-10-14');

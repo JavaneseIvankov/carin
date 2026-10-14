@@ -22,6 +22,17 @@ describe('pinned Better Auth 1.7.7 vendor schema', () => {
       ['/request-password-reset', 'post', ['email']],
       ['/reset-password', 'post', ['token', 'newPassword']],
     ] as const;
+    const validBodies: Record<string, Record<string, unknown>> = {
+      '/sign-up/email': {
+        name: 'User', email: 'user@example.com', password: 'password123',
+        birthDate: '1990-01-01', acceptedTermsVersion: '1', acceptedPrivacyVersion: '1',
+        acceptedAt: '2026-10-14T00:00:00.000Z',
+      },
+      '/sign-in/email': { email: 'user@example.com', password: 'password123' },
+      '/send-verification-email': { email: 'user@example.com' },
+      '/request-password-reset': { email: 'user@example.com' },
+      '/reset-password': { token: 'vendor-token', newPassword: 'replacement123' },
+    };
     const ajv = new Ajv2020({ strict: false });
     for (const [path, method, fields] of routes) {
       const operation = paths[path]?.[method];
@@ -32,7 +43,12 @@ describe('pinned Better Auth 1.7.7 vendor schema', () => {
         for (const field of fields) expect(body?.properties).toHaveProperty(field);
         const validate = ajv.compile(body!);
         const invalidField = path === '/reset-password' ? 'newPassword' : 'email';
-        expect(validate({ [invalidField]: 42 })).toBe(false);
+        const validBody = validBodies[path]!;
+        expect(validate(validBody), `${path} valid body: ${JSON.stringify(validate.errors)}`).toBe(true);
+        expect(validate({ ...validBody, [invalidField]: 42 })).toBe(false);
+        expect(validate.errors).toEqual(expect.arrayContaining([
+          expect.objectContaining({ instancePath: `/${invalidField}`, keyword: 'type' }),
+        ]));
       }
     }
     expect(paths['/delete-user']?.post).toBeDefined();
