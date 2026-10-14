@@ -13,11 +13,13 @@ import { registerCatalogRoutes, type CatalogRouteDependencies } from "./catalog/
 import { registerAccountRoutes } from './modules/account/routes.js';
 import { registerEmailLandingRoutes } from './modules/email/landing.js';
 import { registerProfileRoutes } from './modules/profile/routes.js';
+<<<<<<< HEAD
 import { registerAnalysisJobRoutes, type AnalysisJobRouteDependencies } from "./jobs/routes.js";
 import { registerMediaRoutes, type MediaRouteDependencies } from "./modules/media/routes.js";
 import { registerAnalysisRoutes, type AnalysisRouteDependencies } from './modules/analyses/routes.js';
 import { registerScanRoutes, type ScanRouteDependencies } from './modules/scans/routes.js';
 import { registerConsumptionRoutes, type ConsumptionRouteDependencies } from './modules/consumptions/routes.js';
+import { registerExaminationRoutes } from './modules/examinations/routes.js';
 
 export type RequestLog = {
   requestId: string;
@@ -33,6 +35,7 @@ export type AppDependencies = {
   legalConsent?: { db: Database; resolveSession: SessionResolver };
   catalog?: CatalogRouteDependencies;
   account?: { db: Database; resolveSession: SessionResolver };
+  examinations?: { db: Database; resolveSession: SessionResolver; cursorSecret: string };
   auth?: { handler: (request: Request) => Promise<Response> };
   appLinkScheme?: string;
   analysisJobs?: AnalysisJobRouteDependencies;
@@ -51,6 +54,7 @@ export function createApp({
   legalConsent,
   catalog,
   account,
+  examinations,
   auth,
   appLinkScheme,
   analysisJobs,
@@ -84,6 +88,7 @@ export function createApp({
     registerProfileRoutes(app, account);
   }
   if (appLinkScheme) registerEmailLandingRoutes(app, appLinkScheme);
+  if (examinations) registerExaminationRoutes(app, examinations);
   if (auth) app.all('/api/auth/*', (c) => auth.handler(c.req.raw));
   if (analysisJobs) registerAnalysisJobRoutes(app, analysisJobs);
   if (analyses) registerAnalysisRoutes(app, analyses);

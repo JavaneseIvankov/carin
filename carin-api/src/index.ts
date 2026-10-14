@@ -39,6 +39,7 @@ const app = createVerifiedApp({
   resolveSession: authRuntime.resolveSession,
   appLinkScheme: config.appLinkScheme,
   media: { ...mediaOptions, resolveSession: authRuntime.resolveSession },
+  examinations: { db, resolveSession: authRuntime.resolveSession, cursorSecret: authSecret },
 });
 
 serve({ fetch: app.fetch, port: config.port });
