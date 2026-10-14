@@ -17,7 +17,11 @@ in the app-only `ConsumptionSnapshot` schema while AI `AnalysisResult` remains
 strict. Unknown, unmatched, and missing-nutrient components remain saveable with
 null nutrition and explicit limitations. Evaluation consent, profile fields,
 condition/rule support, catalog authority, and nutrient coverage determine whether
-an immutable job is requested; evaluation failure never removes nutrition.
+an immutable job is requested. Reused photo attentions, limitations, and source
+references are copied into the consumption snapshot, so deleting the source
+scan/result cannot remove completed evaluation output. Stale food/serving selections
+return 422 without saving a record; unavailable catalog provenance remains a
+distinct catalog error. Evaluation failure never removes nutrition.
 
 Create/replay and update/delete state is committed with the idempotency response.
 The existing active-default unique index arbitrates concurrent photo confirmations;
@@ -37,10 +41,11 @@ Verification (API commands run from `carin-api/`):
 - `pnpm run lint` passed with no warnings.
 - `pnpm run test:unit` passed: 24 files, 193 tests. Final focused eligibility
   regressions passed: 1 file, 4 tests.
-- `pnpm run test:integration` passed: 15 files, 187 tests, with Docker PostgreSQL.
-  The focused consumption suite passed: 8 tests covering committed replay,
+- `pnpm run test:integration` passed: 15 files, 189 tests, with Docker PostgreSQL.
+  The focused consumption suite passed: 10 tests covering committed replay,
   concurrent/default confirmation, source ownership/currentness, pending scans,
-  nutrition snapshots, edits/deletes, and stale worker publication.
+  invalid selections without side effects, nutrition snapshots, source-result purge,
+  edits/deletes, and stale worker publication.
 - `pnpm run build` passed.
 - `pnpm run db:generate` reported no schema changes.
 - From `carin-app/`, `pnpm run contracts:check` passed: generated contracts match
@@ -58,6 +63,6 @@ Next step: Parent review from the merged C18 base. Leave TSK 21 `started` until
 review; do not push.
 
 Worktree state: Branch `feat/c21-consumptions-api` in the isolated
-`.worktrees/t21-consumptions-api` worktree. C21 implementation and C18 merge are
-committed locally; the final eligibility alignment is committed separately with a
-conventional message. No push was performed.
+`.worktrees/t21-consumptions-api` worktree. C21 implementation, C18 merge, and
+review follow-ups are committed locally with conventional messages. No push was
+performed.

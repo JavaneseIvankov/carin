@@ -360,6 +360,26 @@ describe('C21 consumption API and evaluation lifecycle', () => {
     expect(forbidden.status).toBe(404);
   });
 
+  it('rejects stale food and serving selections without creating a consumption', async () => {
+    const owner = await createOwner(false);
+    const staleFood = await postConsumption(owner, manualBody({
+      components: [component({ catalogFoodId: 'missing-from-catalog' })],
+    }));
+    expect(staleFood.status).toBe(422);
+    expect((await staleFood.json() as { error: { code: string } }).error.code).toBe('INVALID_INPUT');
+
+    const staleServing = await postConsumption(owner, manualBody({
+      components: [component({
+        portion: { kind: 'known', quantity: 1, unit: 'serving', servingId: 'missing-serving' },
+      })],
+    }));
+    expect(staleServing.status).toBe(422);
+    expect((await staleServing.json() as { error: { code: string } }).error.code).toBe('INVALID_INPUT');
+
+    const saved = await pool.query('SELECT count(*)::int AS count FROM consumption WHERE user_id = $1', [owner.userId]);
+    expect(saved.rows[0]?.count).toBe(0);
+  });
+
   it('returns the same default photo confirmation, rejects changed defaults, allows new occurrences and re-confirms after delete', async () => {
     const owner = await createOwner();
     const app = appFor(owner);
@@ -405,6 +425,34 @@ describe('C21 consumption API and evaluation lifecycle', () => {
     const leftValue = await left.json() as AppComponents['schemas']['Consumption'];
     const rightValue = await right.json() as AppComponents['schemas']['Consumption'];
     expect(leftValue.id).toBe(rightValue.id);
+  });
+
+  it('keeps reused photo attention after the source result is purged', async () => {
+    const owner = await createOwner();
+    const app = appFor(owner);
+    const source = await createScanWithResult(owner, app);
+    const created = await postConsumption(owner, photoBody(source, source.result), randomUUID(), app);
+    expect(created.status).toBe(201);
+    const original = await created.json() as AppComponents['schemas']['Consumption'];
+    expect(original.attentionState).toBe('available');
+    expect(original.snapshot.attentions).toEqual(source.result.attentions);
+    expect(original.snapshot.overallAttention).toBe(source.result.overallAttention);
+
+    await pool.query('UPDATE consumption SET photo_available=false WHERE id=$1', [original.id]);
+    await pool.query('DELETE FROM scan WHERE id=$1 AND user_id=$2', [source.scanId, owner.userId]);
+
+    const afterPurge = await app.request(`/api/v1/consumptions/${original.id}`, { headers: headers(owner) });
+    expect(afterPurge.status).toBe(200);
+    const preserved = await afterPurge.json() as AppComponents['schemas']['Consumption'];
+    expect(preserved.sourceAnalysisResultId).toBeNull();
+    expect(preserved.scanId).toBeNull();
+    expect(preserved.photoAvailable).toBe(false);
+    expect(preserved.attentionState).toBe('available');
+    expect(preserved.snapshot.attentions).toEqual(source.result.attentions);
+    expect(preserved.snapshot.overallAttention).toBe(source.result.overallAttention);
+    expect(preserved.snapshot.sources.map(({ id }) => id)).toEqual(expect.arrayContaining(
+      source.result.sources.map(({ id }) => id),
+    ));
   });
 
   it('checks scan ownership, current source revision and pending analysis before saving a photo confirmation', async () => {

@@ -15,6 +15,7 @@ import {
   listConsumptions,
   updateConsumption,
 } from './repository.js';
+import { ConsumptionCatalogInputError } from './nutrition.js';
 
 export type ConsumptionRouteDependencies = { db: Database; resolveSession: SessionResolver };
 
@@ -40,6 +41,12 @@ function mapConsumptionError(error: unknown): never {
     throw new ApiError(409, 'IDEMPOTENCY_CONFLICT', 'Idempotency key was already used for another request');
   if (error instanceof AnalysisCatalogUnavailableError)
     throw new ApiError(409, 'CATALOG_VERSION_UNAVAILABLE', 'The requested catalog version is unavailable');
+  if (error instanceof ConsumptionCatalogInputError) {
+    if (error.reason === 'serving_source_unavailable') {
+      throw new ApiError(409, 'CATALOG_VERSION_UNAVAILABLE', 'Catalog serving provenance is unavailable');
+    }
+    throw new ApiError(422, 'INVALID_INPUT', 'Consumption catalog selection is invalid');
+  }
   if (error instanceof ScanNotFoundError)
     throw new ApiError(404, 'RESOURCE_NOT_FOUND', 'Scan not found');
   if (error instanceof ScanAnalysisPendingError)
