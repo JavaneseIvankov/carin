@@ -125,6 +125,7 @@ function bindRequestedProvenance(
   const result = structuredClone(fixtureResult);
   result.operationId = request.operationId;
   result.profileVersion = request.profile.profileVersion;
+  if (!('image' in request)) result.inputKind = request.inputKind;
   result.attentions = result.attentions.filter((attention) =>
     request.profile.profileVersion > 0 && request.profile.conditionIds.includes(attention.conditionId),
   );
@@ -273,8 +274,8 @@ function createFixtureAiClient(options: {
       if (options.scenario === 'service-failure') {
         throw new AiAdapterError('SERVICE_UNAVAILABLE', 'Synthetic service failure scenario.', true);
       }
-      if (options.scenario !== 'correction' || input.inputKind !== 'correction') {
-        throw new AiAdapterError('INVALID_REQUEST', 'Correction scenario must be selected explicitly.', false);
+      if (options.scenario !== 'correction' || !['manual', 'correction'].includes(input.inputKind)) {
+        throw new AiAdapterError('INVALID_REQUEST', 'Recalculation fixture scenario must be selected explicitly.', false);
       }
       const result = bindRequestedProvenance(fixture('correction'), input);
       return validateResponseBody<Schemas['AnalysisResult']>('ai.recalculateComponents', result);

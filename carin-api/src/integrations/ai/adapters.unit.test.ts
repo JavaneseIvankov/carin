@@ -143,6 +143,16 @@ describe('fixture AI adapter', () => {
     expect(result.dataMode).toBe('synthetic');
   });
 
+  it('uses recalculation fixtures for manual consumption evaluation jobs', async () => {
+    const result = await fixtureClient('correction').recalculateComponents({
+      ...recalculationRequest,
+      inputKind: 'manual',
+    });
+
+    expect(result.inputKind).toBe('manual');
+    expect(result.components[0]?.id).toBe(recalculationRequest.components[0]?.id);
+  });
+
   it('preserves every selected fixture component field during recalculation', async () => {
     const client = fixtureClient('correction');
     const request = {

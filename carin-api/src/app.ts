@@ -17,6 +17,7 @@ import { registerAnalysisJobRoutes, type AnalysisJobRouteDependencies } from "./
 import { registerMediaRoutes, type MediaRouteDependencies } from "./modules/media/routes.js";
 import { registerAnalysisRoutes, type AnalysisRouteDependencies } from './modules/analyses/routes.js';
 import { registerScanRoutes, type ScanRouteDependencies } from './modules/scans/routes.js';
+import { registerConsumptionRoutes, type ConsumptionRouteDependencies } from './modules/consumptions/routes.js';
 
 export type RequestLog = {
   requestId: string;
@@ -37,6 +38,7 @@ export type AppDependencies = {
   analysisJobs?: AnalysisJobRouteDependencies;
   analyses?: AnalysisRouteDependencies;
   scans?: ScanRouteDependencies;
+  consumptions?: ConsumptionRouteDependencies;
   media?: MediaRouteDependencies;
 };
 
@@ -54,6 +56,7 @@ export function createApp({
   analysisJobs,
   analyses,
   scans,
+  consumptions,
   media,
 }: AppDependencies): Hono<AppEnv> {
   const app = new Hono<AppEnv>();
@@ -85,6 +88,7 @@ export function createApp({
   if (analysisJobs) registerAnalysisJobRoutes(app, analysisJobs);
   if (analyses) registerAnalysisRoutes(app, analyses);
   if (scans) registerScanRoutes(app, scans);
+  if (consumptions) registerConsumptionRoutes(app, consumptions);
   if (media) registerMediaRoutes(app, media);
 
   registerRoutes?.(app);
@@ -124,5 +128,6 @@ export function createVerifiedApp({ db, resolveSession, ...dependencies }: Verif
     analysisJobs: dependencies.analysisJobs ?? resources,
     analyses: dependencies.analyses ?? resources,
     scans: dependencies.scans ?? resources,
+    consumptions: dependencies.consumptions ?? resources,
   });
 }
