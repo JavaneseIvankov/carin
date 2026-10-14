@@ -34,9 +34,9 @@
 
 ## Task 3: Add immutable revision edits, deletion, and evaluation publication
 
-- [x] Add integration tests for edit math/revision, failed enrichment preserving nutrition, stale worker after edit/delete, source-result purge preserving reused photo attention, same/different duplicate inputs, explicit new occurrence, delete then reconfirm, and snapshot immutability.
+- [x] Add integration tests for edit math/revision, failed enrichment preserving nutrition, stale worker after edit/delete, source-result purge preserving reused photo attention after create and metadata-only edit, revoked-consent suppression of reuse, same/different duplicate inputs, explicit new occurrence, delete then reconfirm, and snapshot immutability.
 - [x] Run the focused integration tests and observe failures before implementation.
-- [x] Implement edit as an atomic generation/revision change with a new snapshot, profile snapshot, evaluation/job, and current pointer; preserve historical snapshots and make deletion immediately exclude the resource. Freeze reused photo evaluation output, limitations, and source references into the consumption snapshot.
+- [x] Implement edit as an atomic generation/revision change with a new snapshot, profile snapshot, evaluation/job, and current pointer; preserve historical snapshots and make deletion immediately exclude the resource. Freeze reused photo evaluation output, limitations, and source references into the consumption snapshot only while current AI consent is granted.
 - [x] Extend worker validation for frozen manual evaluation and reject stale catalog/profile/component/portion/source or unsupported capability output. Publish only through existing C16 target/lease/consent/deletion fences.
 - [x] Keep all nutrition values independent from evaluation pending/failure.
 

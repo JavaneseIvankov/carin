@@ -439,10 +439,11 @@ async function writeEvaluation(
     catalog: LoadedCatalog;
     sourceResultId: string | null;
     reusePhotoResultId: string | null;
+    consentGranted: boolean;
     now: Date;
   },
 ): Promise<void> {
-  const consentGranted = await lockAndCheckCurrentAiConsent(tx, input.userId);
+  const consentGranted = input.consentGranted;
   if (input.reusePhotoResultId && consentGranted) {
     await tx.insert(consumptionEvaluation).values({
       userId: input.userId,
@@ -676,7 +677,8 @@ export async function createConsumption(
     const [storedProfile] = await tx.select().from(healthProfile)
       .where(eq(healthProfile.userId, input.userId)).limit(1);
     const profile = profileView(account, storedProfile, now);
-    const reuse = Boolean(source && source.resultRow.profileSnapshotId === source.profileRow.id &&
+    const consentGranted = await lockAndCheckCurrentAiConsent(tx, input.userId);
+    const reuse = Boolean(consentGranted && source && source.resultRow.profileSnapshotId === source.profileRow.id &&
       canReusePhotoAttention({
         sourceResult: source.result,
         sourceProfile: source.profile,
@@ -743,6 +745,7 @@ export async function createConsumption(
       catalog,
       sourceResultId: source?.resultRow.id ?? null,
       reusePhotoResultId: reuse ? source!.resultRow.id : null,
+      consentGranted,
       now,
     });
     await tx.update(consumption).set({ currentSnapshotId: snapshotId }).where(and(
@@ -906,10 +909,11 @@ export async function updateConsumption(
     const [storedProfile] = await tx.select().from(healthProfile)
       .where(eq(healthProfile.userId, input.userId)).limit(1);
     const profile = profileView(account, storedProfile, now);
+    const consentGranted = await lockAndCheckCurrentAiConsent(tx, input.userId);
     const source = target.source === 'photo_confirmation' && target.sourceAnalysisResultId
       ? await loadExistingAttentionSource(tx, input.userId, target.sourceAnalysisResultId)
       : null;
-    const reuse = Boolean(source && canReusePhotoAttention({
+    const reuse = Boolean(consentGranted && source && canReusePhotoAttention({
       sourceResult: source.result,
       sourceProfile: source.profile,
       currentProfile: profile,
@@ -925,7 +929,7 @@ export async function updateConsumption(
     const snapshotId = randomUUID();
     const canonicalInput = updateCanonicalInput(input.body, consumedAt);
     await cancelPendingEvaluation(tx, input.userId, target.id, target.currentSnapshotId, now);
-    const snapshot = buildConsumptionNutritionSnapshot({
+    const nutritionSnapshot = buildConsumptionNutritionSnapshot({
       operationId: randomUUID(),
       computedAt: now.toISOString(),
       profileVersion: profile.profileVersion,
@@ -936,6 +940,9 @@ export async function updateConsumption(
       components: input.body.components,
       catalogFoods: catalog.foods,
     });
+    const snapshot = reuse && source
+      ? preservePhotoEvaluation(nutritionSnapshot, source.result)
+      : nutritionSnapshot;
     await tx.insert(consumptionSnapshot).values({
       id: snapshotId,
       userId: input.userId,
@@ -957,6 +964,7 @@ export async function updateConsumption(
       catalog,
       sourceResultId: source?.resultRow.id ?? null,
       reusePhotoResultId: reuse ? source!.resultRow.id : null,
+      consentGranted,
       now,
     });
     await tx.update(consumption).set({
