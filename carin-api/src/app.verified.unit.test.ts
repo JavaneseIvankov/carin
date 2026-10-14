@@ -22,6 +22,7 @@ describe("verified application composition", () => {
     '/api/v1/scans',
     '/api/v1/scans/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
     '/api/v1/scans/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/corrections',
+    '/api/v1/consumptions',
   ])('keeps C18 route %s behind the shared session resolver', async (path) => {
     const app = createVerifiedApp({
       readiness: async () => true,

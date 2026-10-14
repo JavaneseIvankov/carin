@@ -7776,7 +7776,7 @@ export const contracts = {
             ],
           },
           snapshot: {
-            $ref: '#/$defs/ai.AnalysisResult',
+            $ref: '#/$defs/app.ConsumptionSnapshot',
           },
           source: {
             enum: ['manual', 'photo_confirmation'],
@@ -7913,6 +7913,111 @@ export const contracts = {
           },
         },
         required: ['items', 'nextCursor'],
+        type: 'object',
+      },
+      'app.ConsumptionSnapshot': {
+        additionalProperties: false,
+        description:
+          'Immutable nutrition snapshot for a consumption. dataMode=unavailable is reserved for unmatched manual inputs with null nutrition and an explicit limitation; it is not an AI-service result mode.',
+        properties: {
+          attentions: {
+            items: {
+              $ref: '#/$defs/ai.Attention',
+            },
+            type: 'array',
+          },
+          catalogVersion: {
+            maxLength: 500,
+            minLength: 1,
+            type: 'string',
+          },
+          components: {
+            items: {
+              $ref: '#/$defs/ai.ComponentResult',
+            },
+            type: 'array',
+          },
+          computedAt: {
+            format: 'date-time',
+            type: 'string',
+          },
+          contractVersion: {
+            $ref: '#/$defs/ai.ContractVersion',
+          },
+          coverage: {
+            $ref: '#/$defs/ai.NutrientCoverage',
+          },
+          dataMode: {
+            description:
+              'unavailable is app-only and allowed only for unmatched manual input with null nutrients and a limitation.',
+            enum: ['real', 'synthetic', 'unavailable'],
+            type: 'string',
+          },
+          inputKind: {
+            enum: ['photo', 'manual', 'correction'],
+            type: 'string',
+          },
+          limitations: {
+            items: {
+              $ref: '#/$defs/ai.Limitation',
+            },
+            type: 'array',
+          },
+          nutritionDatasetVersion: {
+            maxLength: 500,
+            minLength: 1,
+            type: 'string',
+          },
+          operationId: {
+            format: 'uuid',
+            type: 'string',
+          },
+          overallAttention: {
+            enum: ['considerable', 'needs_attention', 'insufficient_information'],
+            type: 'string',
+          },
+          profileVersion: {
+            minimum: 0,
+            type: 'integer',
+          },
+          ruleSetVersion: {
+            maxLength: 500,
+            minLength: 1,
+            type: 'string',
+          },
+          sources: {
+            items: {
+              $ref: '#/$defs/ai.Source',
+            },
+            type: 'array',
+          },
+          supportStatus: {
+            enum: ['complete', 'partial', 'unrecognized'],
+            type: 'string',
+          },
+          totals: {
+            $ref: '#/$defs/ai.Nutrients',
+          },
+        },
+        required: [
+          'attentions',
+          'catalogVersion',
+          'components',
+          'computedAt',
+          'contractVersion',
+          'coverage',
+          'dataMode',
+          'inputKind',
+          'limitations',
+          'nutritionDatasetVersion',
+          'operationId',
+          'overallAttention',
+          'profileVersion',
+          'ruleSetVersion',
+          'sources',
+          'supportStatus',
+          'totals',
+        ],
         type: 'object',
       },
       'app.ConsumptionUpdate': {

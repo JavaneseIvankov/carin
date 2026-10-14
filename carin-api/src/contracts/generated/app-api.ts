@@ -705,7 +705,7 @@ export type components = {
       photoAvailable: boolean;
       revision: number;
       scanId: string | null;
-      snapshot: components['schemas']['ai__AnalysisResult'];
+      snapshot: components['schemas']['ConsumptionSnapshot'];
       /** @enum {string} */
       source: 'manual' | 'photo_confirmation';
       sourceAnalysisResultId: string | null;
@@ -730,6 +730,35 @@ export type components = {
     ConsumptionPage: {
       items: components['schemas']['Consumption'][];
       nextCursor: string | null;
+    };
+    /** @description Immutable nutrition snapshot for a consumption. dataMode=unavailable is reserved for unmatched manual inputs with null nutrition and an explicit limitation; it is not an AI-service result mode. */
+    ConsumptionSnapshot: {
+      attentions: components['schemas']['ai__Attention'][];
+      catalogVersion: string;
+      components: components['schemas']['ai__ComponentResult'][];
+      /** Format: date-time */
+      computedAt: string;
+      contractVersion: components['schemas']['ai__ContractVersion'];
+      coverage: components['schemas']['ai__NutrientCoverage'];
+      /**
+       * @description unavailable is app-only and allowed only for unmatched manual input with null nutrients and a limitation.
+       * @enum {string}
+       */
+      dataMode: 'real' | 'synthetic' | 'unavailable';
+      /** @enum {string} */
+      inputKind: 'photo' | 'manual' | 'correction';
+      limitations: components['schemas']['ai__Limitation'][];
+      nutritionDatasetVersion: string;
+      /** Format: uuid */
+      operationId: string;
+      /** @enum {string} */
+      overallAttention: 'considerable' | 'needs_attention' | 'insufficient_information';
+      profileVersion: number;
+      ruleSetVersion: string;
+      sources: components['schemas']['ai__Source'][];
+      /** @enum {string} */
+      supportStatus: 'complete' | 'partial' | 'unrecognized';
+      totals: components['schemas']['ai__Nutrients'];
     };
     ConsumptionUpdate: {
       /** @description Immutable catalog version used for food/serving selection. Corrections use the source result version. 'unavailable' allowed only for manual unmatched input with no catalog. */

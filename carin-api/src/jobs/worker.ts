@@ -150,6 +150,20 @@ export async function runAnalysisWorkerOnce(
     if (job.scanId) {
       const context = await loadAnalysisValidationContext(db, job, result);
       validateAnalysisResult(result, context.expectation, context.catalog);
+    } else if (job.consumptionId) {
+      const input = typeof job.inputSnapshot === 'object' && job.inputSnapshot !== null && !Array.isArray(job.inputSnapshot)
+        ? job.inputSnapshot as Record<string, unknown>
+        : null;
+      if (job.kind !== 'consumption_evaluation' || input?.inputKind !== 'manual' || result.inputKind !== 'manual') {
+        throw new InvalidAnalysisResult();
+      }
+      // C18's shared validator models component recalculation as a correction. Validate the
+      // consumption's manual result through the same catalog/provenance checks while preserving
+      // its actual manual inputKind in the stored result.
+      const correctionJob = { ...job, kind: 'correction' as const };
+      const validationResult = { ...result, inputKind: 'correction' as const };
+      const context = await loadAnalysisValidationContext(db, correctionJob, validationResult);
+      validateAnalysisResult(validationResult, context.expectation, context.catalog);
     }
     return await publishJobResult(db, {
       jobId: job.id,
