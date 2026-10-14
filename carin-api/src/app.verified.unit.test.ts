@@ -49,4 +49,55 @@ describe("verified application composition", () => {
     const response = await app.request('/api/v1/dashboard');
     expect(response.status).toBe(401);
   });
+
+  it('handles CORS preflight and response headers for trusted origins', async () => {
+    const app = createVerifiedApp({
+      readiness: async () => true,
+      db: {} as Database,
+      resolveSession: async () => null,
+      corsOrigins: ['http://localhost:8081'],
+    });
+
+    const preflight = await app.request('/health/live', {
+      method: 'OPTIONS',
+      headers: {
+        origin: 'http://localhost:8081',
+        'access-control-request-method': 'GET',
+      },
+    });
+
+    expect(preflight.status).toBe(204);
+    expect(preflight.headers.get('access-control-allow-origin')).toBe('http://localhost:8081');
+    expect(preflight.headers.get('access-control-allow-credentials')).toBe('true');
+
+    const response = await app.request('/health/live', {
+      method: 'GET',
+      headers: {
+        origin: 'http://localhost:8081',
+      },
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('access-control-allow-origin')).toBe('http://localhost:8081');
+  });
+
+  it('automatically allows internal LAN origins in dev mode without explicit allowlist', async () => {
+    const app = createVerifiedApp({
+      readiness: async () => true,
+      db: {} as Database,
+      resolveSession: async () => null,
+      appEnv: 'dev',
+    });
+
+    const preflight = await app.request('/health/live', {
+      method: 'OPTIONS',
+      headers: {
+        origin: 'http://192.168.1.50:8081',
+        'access-control-request-method': 'GET',
+      },
+    });
+
+    expect(preflight.status).toBe(204);
+    expect(preflight.headers.get('access-control-allow-origin')).toBe('http://192.168.1.50:8081');
+  });
 });

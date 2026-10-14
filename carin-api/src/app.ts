@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { registerHealthRoutes } from "./health/handler.js";
 import { ApiError, errorResponse } from "./http/errors.js";
 import type { AppEnv } from "./http/types.js";
@@ -20,6 +21,7 @@ import { registerScanRoutes, type ScanRouteDependencies } from './modules/scans/
 import { registerConsumptionRoutes, type ConsumptionRouteDependencies } from './modules/consumptions/routes.js';
 import { registerExaminationRoutes } from './modules/examinations/routes.js';
 import { registerDashboardRoutes, type DashboardRouteDependencies } from './modules/dashboard/routes.js';
+import { isInternalHost, type AppConfig } from './config.js';
 
 export type RequestLog = {
   requestId: string;
@@ -44,6 +46,8 @@ export type AppDependencies = {
   scans?: ScanRouteDependencies;
   consumptions?: ConsumptionRouteDependencies;
   media?: MediaRouteDependencies;
+  corsOrigins?: string[];
+  appEnv?: AppConfig['appEnv'];
 };
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -64,8 +68,32 @@ export function createApp({
   consumptions,
   media,
   dashboard,
+  corsOrigins,
+  appEnv,
 }: AppDependencies): Hono<AppEnv> {
   const app = new Hono<AppEnv>();
+  const allowedOrigins = corsOrigins?.filter((origin) => origin.startsWith('http://') || origin.startsWith('https://')) ?? [];
+  app.use(
+    '*',
+    cors({
+      origin: (origin) => {
+        if (!origin) return undefined;
+        if (allowedOrigins.includes(origin)) return origin;
+        if (appEnv === 'dev') {
+          try {
+            const parsed = new URL(origin);
+            if (isInternalHost(parsed.hostname)) return origin;
+          } catch {
+            return undefined;
+          }
+        }
+        return undefined;
+      },
+      credentials: true,
+      allowHeaders: ['Content-Type', 'Authorization', 'x-request-id'],
+      allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    }),
+  );
   app.use("*", async (c, next) => {
     const supplied = c.req.header("x-request-id");
     const requestId = supplied && uuid.test(supplied) ? supplied : randomUUID();
