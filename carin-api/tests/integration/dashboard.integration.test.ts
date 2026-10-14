@@ -103,6 +103,40 @@ async function seedConsumption(
   return consumptionId;
 }
 
+async function seedEvaluationResult(
+  owner: Owner,
+  consumptionId: string,
+  attentions: AiComponents['schemas']['Attention'][],
+): Promise<void> {
+  const rows = await pool.query<{ snapshotId: string; profileSnapshotId: string }>(
+    `SELECT id AS "snapshotId", profile_snapshot_id AS "profileSnapshotId"
+     FROM consumption_snapshot WHERE consumption_id=$1 AND user_id=$2`,
+    [consumptionId, owner.userId],
+  );
+  const snapshot = rows.rows[0];
+  if (!snapshot) throw new Error('Missing consumption snapshot for evaluation fixture');
+  const jobId = randomUUID();
+  const resultId = randomUUID();
+  const output = { ...completed, operationId: randomUUID(), attentions };
+  await pool.query(
+    `INSERT INTO analysis_job
+       (id,user_id,operation_id,kind,input_snapshot,target_revision,profile_snapshot_id,consumption_id,status,finished_at)
+     VALUES ($1,$2,$3,'consumption_evaluation','{}',1,$4,$5,'completed',now())`,
+    [jobId, owner.userId, randomUUID(), snapshot.profileSnapshotId, consumptionId],
+  );
+  await pool.query(
+    `INSERT INTO analysis_result
+       (id,user_id,job_id,profile_snapshot_id,catalog_version,rule_version,output)
+     VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+    [resultId, owner.userId, jobId, snapshot.profileSnapshotId, completed.catalogVersion, completed.ruleSetVersion, JSON.stringify(output)],
+  );
+  await pool.query(
+    `UPDATE consumption_evaluation SET job_id=$1,result_id=$2
+     WHERE user_id=$3 AND snapshot_id=$4 AND state='completed'`,
+    [jobId, resultId, owner.userId, snapshot.snapshotId],
+  );
+}
+
 function attention(ruleId: string, conditionId = 'fixture-condition'): AiComponents['schemas']['Attention'] {
   const fixtureAttention = (completed.attentions as AiComponents['schemas']['Attention'][])[0]!;
   return { ...fixtureAttention, ruleId, conditionId };
@@ -173,21 +207,49 @@ describe('dashboard API', () => {
     expect((await afterDelete.json()).consumptionCount).toBe(2);
   });
 
+  it('includes completed evaluation output linked by the current evaluation result', async () => {
+    const owner = await createOwner();
+    const first = await seedConsumption(owner, {
+      consumedAt: '2026-03-08T06:00:00.000Z',
+      state: 'completed',
+    });
+    const second = await seedConsumption(owner, {
+      consumedAt: '2026-03-08T07:00:00.000Z',
+      state: 'completed',
+    });
+    await seedEvaluationResult(owner, first, [attention('evaluated-rule')]);
+    await seedEvaluationResult(owner, second, [attention('evaluated-rule')]);
+
+    const response = await appFor(owner).request('/api/v1/dashboard?date=2026-03-08', {
+      headers: { 'x-test-user': owner.userId },
+    });
+
+    expect(response.status).toBe(200);
+    expect((await response.json()).recurringAttentions).toEqual([{
+      ruleId: 'evaluated-rule',
+      conditionId: 'fixture-condition',
+      count: 2,
+      consumptionIds: expect.arrayContaining([first, second]),
+    }]);
+  });
+
   it('isolates owner data and selects the latest historical examination per series', async () => {
     const owner = await createOwner();
     const other = await createOwner();
     await seedConsumption(owner, { consumedAt: '2026-03-08T12:00:00.000Z', state: 'not_requested' });
     await seedConsumption(other, { consumedAt: '2026-03-08T12:00:00.000Z', state: 'not_requested' });
     const oldPressureId = randomUUID();
+    const laterNewYorkClockId = randomUUID();
     const latestPressureId = randomUUID();
     const cholesterolId = randomUUID();
     await pool.query(
       `INSERT INTO examination (id,user_id,revision,type,subtype,context,series_key,measured_on,measured_time,timezone,value,systolic,diastolic,unit)
        VALUES
        ($1,$2,1,'pressure',NULL,NULL,'pressure','2026-03-07','23:00','America/New_York',NULL,120,80,'mmHg'),
-       ($3,$2,1,'pressure',NULL,NULL,'pressure','2026-03-08','08:00','America/New_York',NULL,118,78,'mmHg'),
-       ($4,$2,1,'cholesterol','total',NULL,'cholesterol:total','2026-03-06',NULL,'America/New_York',200,NULL,NULL,'mg/dL')`,
-      [oldPressureId, owner.userId, latestPressureId, cholesterolId],
+       ($3,$2,1,'pressure',NULL,NULL,'pressure','2026-03-08','13:00','America/New_York',NULL,118,78,'mmHg'),
+       ($4,$2,1,'pressure',NULL,NULL,'pressure','2026-03-08','11:00','America/Los_Angeles',NULL,117,77,'mmHg'),
+       ($5,$2,1,'cholesterol','total',NULL,'cholesterol:total','2026-03-06',NULL,'America/New_York',200,NULL,NULL,'mg/dL')`,
+      [oldPressureId, owner.userId, laterNewYorkClockId, latestPressureId, cholesterolId],
     );
     const response = await appFor(owner).request('/api/v1/dashboard?date=2026-03-08', {
       headers: { 'x-test-user': owner.userId },

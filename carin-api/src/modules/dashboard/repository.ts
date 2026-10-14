@@ -5,6 +5,7 @@ import { ContractValidationError, validateSchema } from '../../contracts/validat
 import { getCalendarDayWindow, getDashboardWindow, getDashboardWindowForDate } from '../../domain/time-window.js';
 import type { Database } from '../../db/client.js';
 import {
+  analysisResult,
   catalogCapabilityManifest,
   catalogVersion,
   consumption,
@@ -83,6 +84,11 @@ function parseSnapshot(value: unknown): ConsumptionSnapshot {
     throw new ContractValidationError('app.ConsumptionSnapshot');
   }
   return value as ConsumptionSnapshot;
+}
+
+function evaluationAttentions(value: unknown): Ai['AnalysisResult']['attentions'] {
+  validateSchema('ai.AnalysisResult', value);
+  return (value as Ai['AnalysisResult']).attentions;
 }
 
 function parseManifest(value: unknown): ProfileCapabilityManifest | null {
@@ -181,6 +187,7 @@ export async function getDashboard(
       consumedAt: consumption.consumedAt,
       snapshot: consumptionSnapshot.snapshot,
       evaluationState: consumptionEvaluation.state,
+      evaluationOutput: analysisResult.output,
     }).from(consumption)
       .innerJoin(consumptionSnapshot, and(
         eq(consumptionSnapshot.id, consumption.currentSnapshotId),
@@ -189,6 +196,10 @@ export async function getDashboard(
       .leftJoin(consumptionEvaluation, and(
         eq(consumptionEvaluation.snapshotId, consumptionSnapshot.id),
         eq(consumptionEvaluation.userId, consumption.userId),
+      ))
+      .leftJoin(analysisResult, and(
+        eq(analysisResult.id, consumptionEvaluation.resultId),
+        eq(analysisResult.userId, consumption.userId),
       ))
       .where(and(
         eq(consumption.userId, input.userId),
@@ -205,12 +216,19 @@ export async function getDashboard(
     }));
     const daily = snapshotRows.filter(({ consumedAt }) =>
       consumedAt >= new Date(consumptionWindow.startAt) && consumedAt < new Date(consumptionWindow.endAt));
-    const summaryItems: DashboardSummaryItem[] = snapshotRows.map(({ id, state, snapshot }) => ({
-      id,
-      evaluationState: state as DashboardSummaryItem['evaluationState'],
-      components: snapshot.components.map(({ id: componentId, nutrients }) => ({ id: componentId, nutrients })),
-      attentions: snapshot.attentions.map(({ ruleId, conditionId }) => ({ ruleId, conditionId })),
-    }));
+    const summaryItems: DashboardSummaryItem[] = rows.map((row, index) => {
+      const { id, snapshot } = snapshotRows[index]!;
+      const resultAttentions = row.evaluationState === 'completed' && row.evaluationOutput !== null
+        ? evaluationAttentions(row.evaluationOutput)
+        : [];
+      return {
+        id,
+        evaluationState: (row.evaluationState ?? 'not_requested') as DashboardSummaryItem['evaluationState'],
+        components: snapshot.components.map(({ id: componentId, nutrients }) => ({ id: componentId, nutrients })),
+        attentions: [...snapshot.attentions, ...resultAttentions]
+          .map(({ ruleId, conditionId }) => ({ ruleId, conditionId })),
+      };
+    });
     const dailyIds = new Set(daily.map(({ id }) => id));
     const dailyItems = summaryItems.filter(({ id }) => dailyIds.has(id));
     const summary = buildDashboardSummary(dailyItems, summaryItems);

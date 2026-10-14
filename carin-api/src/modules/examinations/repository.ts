@@ -171,7 +171,8 @@ export async function listAllActiveExaminations(
     eq(examination.userId, userId), isNull(examination.deletedAt),
   )).orderBy(
     desc(examination.measuredOn),
-    sql`${examination.measuredTime} DESC NULLS LAST`,
+    sql`(${examination.measuredTime} IS NULL) ASC`,
+    sql`(${examination.measuredOn} + ${examination.measuredTime}::time) AT TIME ZONE ${examination.timezone} DESC NULLS LAST`,
     desc(examination.createdAt),
     desc(examination.id),
   );
