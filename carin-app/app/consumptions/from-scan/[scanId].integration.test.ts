@@ -557,6 +557,40 @@ describe('photo confirmation conflict codes', () => {
 });
 
 describe('photo confirmation route identity', () => {
+  it('ignores deferred load and submit completions after the route blurs', async () => {
+    const guard = createPhotoConfirmationRouteGuard();
+    const route = {};
+    let resolveLoad!: (value: string) => void;
+    let resolveSubmit!: (value: string) => void;
+    const pendingLoad = new Promise<string>((resolve) => {
+      resolveLoad = resolve;
+    });
+    const pendingSubmit = new Promise<string>((resolve) => {
+      resolveSubmit = resolve;
+    });
+    const committed: string[] = [];
+    const navigate = vi.fn();
+    guard.activate(route);
+
+    const load = guard.run(route, () => pendingLoad, (value) => committed.push(`load:${value}`));
+    const submit = guard.run(route, () => pendingSubmit, (value) => {
+      committed.push(`submit:${value}`);
+      navigate(value);
+    });
+
+    guard.deactivate(route);
+    resolveLoad('late load');
+    resolveSubmit('saved-consumption-id');
+
+    const [loadResult, submitResult] = await Promise.all([load, submit]);
+
+    expect(loadResult).toEqual({ status: 'stale' });
+    expect(submitResult).toEqual({ status: 'stale' });
+    expect(committed).toEqual([]);
+    expect(navigate).not.toHaveBeenCalled();
+    expect(guard.isActive(route)).toBe(false);
+  });
+
   it('ignores a deferred load and submit after the active route changes', async () => {
     const guard = createPhotoConfirmationRouteGuard();
     const oldRoute = {};

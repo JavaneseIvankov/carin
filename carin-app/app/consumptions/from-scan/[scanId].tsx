@@ -93,9 +93,6 @@ export default function PhotoConsumptionConfirmation() {
 
   type FlowInstance = ReturnType<typeof createPhotoConfirmationFlow>;
   const routeGuard = React.useMemo(() => createPhotoConfirmationRouteGuard(), []);
-  React.useLayoutEffect(() => {
-    routeGuard.activate(flow);
-  }, [routeGuard, flow]);
 
   const [screenState, setScreenState] = React.useState<{
     owner: FlowInstance | null;
@@ -120,8 +117,14 @@ export default function PhotoConsumptionConfirmation() {
 
   useFocusEffect(
     React.useCallback(() => {
+      if (!flow) return;
+      routeGuard.activate(flow);
       load();
-    }, [load])
+      return () => {
+        routeGuard.deactivate(flow);
+        setSubmittingOwner((current) => (current === flow ? null : current));
+      };
+    }, [flow, load, routeGuard])
   );
 
   React.useEffect(() => {
@@ -142,14 +145,11 @@ export default function PhotoConsumptionConfirmation() {
     const owner = flow;
     if (!owner || !routeGuard.isActive(owner) || screenState.owner !== owner || isSubmitting) return;
     setSubmittingOwner(owner);
-    try {
-      await routeGuard.run(owner, () => owner.submit(form), (next) => {
-        commitSnapshot(owner, next);
-        if (next.savedId) openConsumption(next.savedId);
-      });
-    } finally {
+    await routeGuard.run(owner, () => owner.submit(form), (next) => {
       setSubmittingOwner((current) => (current === owner ? null : current));
-    }
+      commitSnapshot(owner, next);
+      if (next.savedId) openConsumption(next.savedId);
+    });
   };
 
   const restartFromLatestResult = async () => {

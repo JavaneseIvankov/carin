@@ -62,6 +62,11 @@ export function createPhotoConfirmationRouteGuard() {
       activeRoute = route;
       generation += 1;
     },
+    deactivate(route: object) {
+      if (activeRoute !== route) return;
+      activeRoute = null;
+      generation += 1;
+    },
     isActive(route: object) {
       return activeRoute === route;
     },
