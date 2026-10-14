@@ -158,7 +158,11 @@ export default function PhotoConsumptionConfirmation() {
       (next) => {
         setSubmittingOwner((current) => (current === owner ? null : current));
         commitSnapshot(owner, next);
-        if (next.savedId) openConsumption(next.savedId);
+        if (next.savedId) {
+          void owner.finalizeSaved(next.savedId).then(() => {
+            if (routeGuard.isActive(owner)) openConsumption(next.savedId!);
+          });
+        }
       }
     );
   };

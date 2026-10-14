@@ -46,6 +46,7 @@ type PhotoConfirmationActions = {
     draftId: string,
     body: components['schemas']['ConsumptionCreate']
   ) => Promise<Consumption>;
+  clearCreate: (draftId: string) => Promise<void>;
 };
 
 const FALLBACK_TIME_ZONE = 'Asia/Jakarta';
@@ -107,6 +108,7 @@ export function createPhotoConfirmationFlow(options: {
   let persistQueue = Promise.resolve();
   let lifecycleGeneration = 0;
   let loadGeneration = 0;
+  let acknowledged: { savedId: string; record: SavedPhotoDraft; generation: number } | null = null;
 
   const queueDraftWrite = (write: () => Promise<void>) => {
     persistQueue = persistQueue.catch(() => {}).then(write);
@@ -430,16 +432,7 @@ export function createPhotoConfirmationFlow(options: {
 
       const saved = await options.actions.create(currentRecord.draftId, payload.value);
       if (!isCurrent()) return snapshot;
-      try {
-        await queueDraftWrite(async () => {
-          if (!isCurrent()) return;
-          await store.remove(options.scope, draftName);
-          if (!isCurrent()) await store.save(options.scope, draftName, currentRecord);
-        });
-      } catch {
-        // The server acknowledged the save; retaining the request key makes replay safe.
-      }
-      if (!isCurrent()) return snapshot;
+      acknowledged = { savedId: saved.id, record: currentRecord, generation: routeGeneration };
       return setSnapshot({
         ...snapshot,
         availability: 'unavailable',
@@ -496,6 +489,30 @@ export function createPhotoConfirmationFlow(options: {
     }
   }
 
+  async function finalizeSaved(savedId: string) {
+    const pending = acknowledged;
+    if (
+      !pending ||
+      pending.savedId !== savedId ||
+      pending.generation !== lifecycleGeneration ||
+      snapshot.savedId !== savedId
+    )
+      return;
+    const isCurrent = () => pending.generation === lifecycleGeneration;
+    try {
+      await queueDraftWrite(async () => {
+        if (!isCurrent()) return;
+        await store.remove(options.scope, draftName);
+        if (!isCurrent()) await store.save(options.scope, draftName, pending.record);
+      });
+      if (!isCurrent()) return;
+      await options.actions.clearCreate(pending.record.draftId);
+      if (isCurrent()) acknowledged = null;
+    } catch {
+      // Cleanup failure does not change the server's acknowledged result.
+    }
+  }
+
   return {
     invalidate: () => {
       lifecycleGeneration += 1;
@@ -504,6 +521,7 @@ export function createPhotoConfirmationFlow(options: {
     refresh: load,
     updateDraft,
     submit,
+    finalizeSaved,
     restartFromLatestResult,
     refreshSources,
     getSnapshot: () => snapshot,

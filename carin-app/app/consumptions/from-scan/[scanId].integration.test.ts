@@ -363,6 +363,7 @@ describe('photo consumption route flow', () => {
     expect(failed.submitMessage).toContain('Layanan belum tersedia');
 
     const saved = await harness.flow.submit(loaded.record!.form);
+    await harness.flow.finalizeSaved(saved.savedId!);
 
     expect(saved.savedId).toBe('consumption-from-server');
     expect(calls).toHaveLength(2);
@@ -789,6 +790,12 @@ describe('photo confirmation route identity', () => {
         photoConfirmationDraftName('scan-1', 'new_occurrence')
       )
     ).toEqual(loaded.record);
+    expect(
+      await createDraftStore(harness.storage).load(
+        scope,
+        `manual-request:create:${loaded.record!.draftId}`
+      )
+    ).not.toBeNull();
 
     guard.activate(harness.flow);
     const reopened = await harness.flow.load();
@@ -798,6 +805,56 @@ describe('photo confirmation route identity', () => {
     expect(harness.makeKey).toHaveBeenCalledOnce();
     expect(harness.create).toHaveBeenCalledTimes(2);
     expect(harness.create.mock.calls[0]).toEqual(harness.create.mock.calls[1]);
+  });
+
+  it('clears the draft and request key after a current route commits a successful save', async () => {
+    const harness = createHarness({ occurrence: 'new_occurrence' });
+    const loaded = await harness.flow.load();
+    const guard = createPhotoConfirmationRouteGuard();
+    let cleanup: Promise<void> | undefined;
+    guard.activate(harness.flow);
+    const result = await guard.run(
+      harness.flow,
+      () => harness.flow.submit(loaded.record!.form),
+      (next) => {
+        if (next.savedId) cleanup = harness.flow.finalizeSaved(next.savedId);
+      }
+    );
+    await cleanup;
+
+    expect(result.status).toBe('current');
+    expect(
+      await createDraftStore(harness.storage).load(
+        scope,
+        photoConfirmationDraftName('scan-1', 'new_occurrence')
+      )
+    ).toBeNull();
+    expect(
+      await createDraftStore(harness.storage).load(
+        scope,
+        `manual-request:create:${loaded.record!.draftId}`
+      )
+    ).toBeNull();
+  });
+
+  it('keeps server success when post-commit cleanup fails', async () => {
+    const storage = new (class extends MemoryStorage {
+      override async removeItem(_key: string) {
+        throw new Error('storage unavailable');
+      }
+    })();
+    const harness = createHarness({ occurrence: 'new_occurrence', storage });
+    const loaded = await harness.flow.load();
+    const saved = await harness.flow.submit(loaded.record!.form);
+
+    await expect(harness.flow.finalizeSaved(saved.savedId!)).resolves.toBeUndefined();
+    expect(saved.savedId).toBe('consumption-saved');
+    expect(
+      await createDraftStore(storage).load(
+        scope,
+        photoConfirmationDraftName('scan-1', 'new_occurrence')
+      )
+    ).toEqual(loaded.record);
   });
 
   it('retains the draft and request key if blur interrupts post-ack cleanup', async () => {
@@ -819,13 +876,14 @@ describe('photo confirmation route identity', () => {
     })();
     const harness = createHarness({ occurrence: 'new_occurrence', storage });
     const loaded = await harness.flow.load();
-    const submit = harness.flow.submit(loaded.record!.form);
+    const saved = await harness.flow.submit(loaded.record!.form);
+    const cleanup = harness.flow.finalizeSaved(saved.savedId!);
     await removalStarted;
 
     harness.flow.invalidate();
     const refocusedLoad = harness.flow.load();
     releaseRemoval();
-    await submit;
+    await cleanup;
     const refocused = await refocusedLoad;
 
     expect(refocused.record).toEqual(loaded.record);
