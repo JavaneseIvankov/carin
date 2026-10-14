@@ -36,7 +36,32 @@ export function createCorrectionDraftWriter<T>(
     },
     flush,
     dispose: flush,
+    cancel() {
+      if (timer) clearTimeout(timer);
+      timer = undefined;
+    },
   };
+}
+
+type CorrectionDraftWriter<T> = ReturnType<typeof createCorrectionDraftWriter<T>>;
+
+export async function persistCorrectionDraft<T>(
+  writer: CorrectionDraftWriter<T>,
+  value: T,
+  enabled: boolean
+): Promise<boolean> {
+  if (!enabled) return false;
+  writer.schedule(value);
+  await writer.flush();
+  return true;
+}
+
+export async function disposeCorrectionDraftWriter<T>(
+  writer: CorrectionDraftWriter<T>,
+  shouldFlush: boolean
+): Promise<void> {
+  if (shouldFlush) await writer.dispose();
+  else writer.cancel();
 }
 
 export function getCorrectionScreenActions(input: {

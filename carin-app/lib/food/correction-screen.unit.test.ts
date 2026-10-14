@@ -3,6 +3,8 @@ import {
   createCorrectionDraftWriter,
   getCorrectionScreenActions,
   getResultScreenActions,
+  disposeCorrectionDraftWriter,
+  persistCorrectionDraft,
 } from './correction-screen';
 
 afterEach(() => vi.useRealTimers());
@@ -20,6 +22,30 @@ describe('food correction screen behavior', () => {
     expect(save).toHaveBeenCalledExactlyOnceWith('last edit');
     await vi.advanceTimersByTimeAsync(250);
     expect(save).toHaveBeenCalledExactlyOnceWith('last edit');
+  });
+
+  it('does not overwrite the stored draft when the route leaves before hydration', async () => {
+    vi.useFakeTimers();
+    const save = vi.fn(async (_draft: string[]) => {});
+    const writer = createCorrectionDraftWriter(save, 250);
+
+    await expect(persistCorrectionDraft(writer, [], false)).resolves.toBe(false);
+    await disposeCorrectionDraftWriter(writer, false);
+    await vi.advanceTimersByTimeAsync(250);
+
+    expect(save).not.toHaveBeenCalled();
+  });
+
+  it('cancels pending lifecycle writes after successful navigation starts', async () => {
+    vi.useFakeTimers();
+    const save = vi.fn(async (_draft: string[]) => {});
+    const writer = createCorrectionDraftWriter(save, 250);
+    writer.schedule(['latest edit']);
+
+    await disposeCorrectionDraftWriter(writer, false);
+
+    await vi.advanceTimersByTimeAsync(250);
+    expect(save).not.toHaveBeenCalled();
   });
 
   it('disables editing and submission while a correction is pending', () => {

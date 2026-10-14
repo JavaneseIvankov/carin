@@ -17,7 +17,9 @@ import {
 } from '@/lib/food/correction';
 import {
   createCorrectionDraftWriter,
+  disposeCorrectionDraftWriter,
   getCorrectionScreenActions,
+  persistCorrectionDraft,
 } from '@/lib/food/correction-screen';
 import { startAnalysisPolling } from '@/lib/food/analysis-polling';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
@@ -104,15 +106,19 @@ export default function FoodCorrectionScreen() {
 
   const persistLatestDraft = React.useCallback(async () => {
     if (!draftWriter) return;
-    draftWriter.schedule(draftRef.current);
     try {
-      await draftWriter.flush();
+      const persisted = await persistCorrectionDraft(
+        draftWriter,
+        draftRef.current,
+        draftInitialized && !navigationDone.current
+      );
+      if (!persisted) return;
       setDraftSaveError(false);
     } catch {
       setDraftSaveError(true);
       throw new Error('Draft koreksi belum berhasil disimpan.');
     }
-  }, [draftWriter]);
+  }, [draftInitialized, draftWriter]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -177,15 +183,20 @@ export default function FoodCorrectionScreen() {
   }, [draftName, draftStore, scope, sourceJob?.resultId, sourceResult]);
 
   React.useEffect(() => {
-    if (!draftInitialized) return;
+    if (!draftInitialized || navigationDone.current) return;
     draftWriter?.schedule(draft);
   }, [draft, draftInitialized, draftWriter]);
 
   React.useEffect(
     () => () => {
-      void draftWriter?.dispose().catch(() => {});
+      if (draftWriter) {
+        void disposeCorrectionDraftWriter(
+          draftWriter,
+          draftInitialized && !navigationDone.current
+        ).catch(() => {});
+      }
     },
-    [draftWriter]
+    [draftInitialized, draftWriter]
   );
 
   const isTrackingCorrection = !!sourceJobId && !!trackedJobId && trackedJobId !== sourceJobId;
@@ -257,7 +268,9 @@ export default function FoodCorrectionScreen() {
     navigationDone.current = true;
     void (async () => {
       try {
-        await persistLatestDraft();
+        if (draftWriter) {
+          await persistCorrectionDraft(draftWriter, draftRef.current, true);
+        }
       } catch {
         // A completed correction should still open even if local cleanup cannot be persisted.
       }
@@ -270,6 +283,7 @@ export default function FoodCorrectionScreen() {
     draftInitialized,
     draftName,
     draftStore,
+    draftWriter,
     latestJob,
     persistLatestDraft,
     router,
@@ -472,7 +486,7 @@ export default function FoodCorrectionScreen() {
           onChange={(nextDraft) => {
             draftRef.current = nextDraft;
             setDraft(nextDraft);
-            if (draftInitialized) draftWriter?.schedule(nextDraft);
+            if (draftInitialized && !navigationDone.current) draftWriter?.schedule(nextDraft);
           }}
         />
 
