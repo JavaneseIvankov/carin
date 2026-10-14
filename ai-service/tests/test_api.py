@@ -299,3 +299,96 @@ async def test_shared_contract_is_exposed_without_a_second_contract_copy(client)
     assert "/internal/v1/analyses" in spec["paths"]
     assert spec["components"]["securitySchemes"]["ServiceKey"]["name"] == "X-Carin-Service-Key"
     assert spec["servers"][0]["url"] == "/"
+
+
+async def test_recalculation_with_duplicate_ids_keeps_components_and_unique_limitations(client):
+    body = recalc_request()
+    second = dict(body["components"][0], displayName="ayam")
+    body["components"].append(second)
+    validate_payload("RecalculationRequest", body)
+    response = await client.post("/internal/v1/recalculations", headers=HEADERS, json=body)
+    assert response.status_code == 200
+    result = response.json()
+    validate_payload("AnalysisResult", result)
+    assert len(result["components"]) == 2
+    assert [item["displayName"] for item in result["components"]] == ["nasi putih", "ayam"]
+    assert result["coverage"]["energyKcal"]["totalComponentCount"] == 2
+    for limitation in result["limitations"]:
+        assert len(limitation["componentIds"]) == len(set(limitation["componentIds"]))
+
+
+async def test_analysis_normalizes_empty_preparation(client, monkeypatch):
+    async def fake_fetch(image, settings):
+        return NormalizedImage(b"normalized-photo")
+
+    class FakeVLM:
+        async def observe(self, data, mime_type):
+            return FoodObservation.model_validate({
+                "isFood": True,
+                "components": [{"displayName": "nasi", "preparation": "", "estimatedMassGrams": 120}],
+            })
+
+    monkeypatch.setattr(main, "fetch_and_normalize", fake_fetch)
+    main.app.state.vlm_client_factory = lambda settings: FakeVLM()
+    response = await client.post("/internal/v1/analyses", headers=HEADERS, json=photo_request())
+    assert response.status_code == 200
+    validate_payload("AnalysisResult", response.json())
+    assert response.json()["components"][0]["preparation"] is None
+
+
+@pytest.mark.parametrize("path", ["analyses", "recalculations"])
+@pytest.mark.parametrize("content_type", [None, "text/plain", "application/vnd.carin+json"])
+async def test_post_rejects_unsupported_media_type(client, path, content_type):
+    body = photo_request() if path == "analyses" else recalc_request()
+    headers = dict(HEADERS)
+    if content_type is not None:
+        headers["Content-Type"] = content_type
+    response = await client.post(f"/internal/v1/{path}", headers=headers, content=json.dumps(body))
+    assert response.status_code == 415
+    validate_payload("Error", response.json())
+    assert response.json()["error"]["code"] == "UNSUPPORTED_MEDIA_TYPE"
+    assert response.headers["X-Request-Id"] == response.json()["error"]["requestId"]
+
+
+async def test_json_content_type_with_charset_is_accepted(client):
+    response = await client.post(
+        "/internal/v1/recalculations",
+        headers={**HEADERS, "Content-Type": "application/json; charset=utf-8"},
+        content=json.dumps(recalc_request()),
+    )
+    assert response.status_code == 200
+    validate_payload("AnalysisResult", response.json())
+
+
+@pytest.mark.parametrize("path,schema", [
+    ("capabilities", "CapabilityManifest"),
+    ("catalog?version=unconfigured", "CatalogPage"),
+    ("analyses", "AnalysisResult"),
+    ("recalculations", "AnalysisResult"),
+])
+async def test_invalid_service_response_is_not_reported_as_invalid_input(client, monkeypatch, path, schema):
+    real_validate = main.validate_payload
+
+    def reject_response(name, payload):
+        real_validate(name, {} if name == schema else payload)
+
+    monkeypatch.setattr(main, "validate_payload", reject_response)
+    if path == "analyses":
+        async def fake_fetch(image, settings):
+            return NormalizedImage(b"normalized-photo")
+
+        class FakeVLM:
+            async def observe(self, data, mime_type):
+                return FoodObservation.model_validate({"isFood": False, "components": []})
+
+        monkeypatch.setattr(main, "fetch_and_normalize", fake_fetch)
+        main.app.state.vlm_client_factory = lambda settings: FakeVLM()
+        response = await client.post(f"/internal/v1/{path}", headers=HEADERS, json=photo_request())
+    elif path == "recalculations":
+        response = await client.post(f"/internal/v1/{path}", headers=HEADERS, json=recalc_request())
+    else:
+        response = await client.get(f"/internal/v1/{path}", headers=HEADERS)
+    assert response.status_code == 500
+    validate_payload("Error", response.json())
+    assert response.json()["error"]["code"] == "SERVICE_UNAVAILABLE"
+    assert response.headers["X-Request-Id"] == response.json()["error"]["requestId"]

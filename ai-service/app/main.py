@@ -95,6 +95,10 @@ async def require_service_key(request: Request) -> Settings:
 
 
 async def _json_body(request: Request, schema_name: str) -> dict[str, Any]:
+    media_type = request.headers.get("Content-Type", "").split(";", 1)[0].strip().lower()
+    if media_type != "application/json":
+        raise ServiceError(415, "UNSUPPORTED_MEDIA_TYPE", "Content-Type harus application/json.")
+
     try:
         payload = await request.json()
     except Exception as exc:
@@ -117,6 +121,13 @@ async def _json_body(request: Request, schema_name: str) -> dict[str, Any]:
     return payload
 
 
+def _validate_response(schema_name: str, payload: Any) -> None:
+    try:
+        validate_payload(schema_name, payload)
+    except PayloadValidationError as exc:
+        raise ContractViolation("Response does not match the shared contract") from exc
+
+
 @app.get("/openapi.json", include_in_schema=False)
 async def shared_openapi_contract(request: Request) -> dict[str, Any]:
     document = copy.deepcopy(OPENAPI_DOCUMENT)
@@ -132,7 +143,7 @@ async def swagger_docs() -> HTMLResponse:
 @app.get("/internal/v1/capabilities")
 async def get_capabilities(_settings: Settings = Depends(require_service_key)) -> JSONResponse:
     result = capabilities()
-    validate_payload("CapabilityManifest", result)
+    _validate_response("CapabilityManifest", result)
     return JSONResponse(result)
 
 
@@ -152,7 +163,7 @@ async def get_catalog(request: Request, settings: Settings = Depends(require_ser
     if len(query.get("cursor", "")) > 500:
         raise ServiceError(422, "INVALID_INPUT", "Parameter cursor terlalu panjang.", details={"field": "cursor"})
     result = catalog_page(version, query.get("cursor"), limit)
-    validate_payload("CatalogPage", result)
+    _validate_response("CatalogPage", result)
     return JSONResponse(result)
 
 
@@ -163,7 +174,7 @@ async def analyze_photo(request: Request, settings: Settings = Depends(require_s
     provider = getattr(request.app.state, "vlm_client_factory", VLMClient)
     observation = await provider(settings).observe(normalized.data, normalized.mime_type)
     result = photo_result(payload["operationId"], payload["profile"]["profileVersion"], observation)
-    validate_payload("AnalysisResult", result)
+    _validate_response("AnalysisResult", result)
     return JSONResponse(result)
 
 
@@ -171,5 +182,5 @@ async def analyze_photo(request: Request, settings: Settings = Depends(require_s
 async def recalculate(request: Request, settings: Settings = Depends(require_service_key)) -> JSONResponse:
     payload = await _json_body(request, "RecalculationRequest")
     result = recalculation_result(payload)
-    validate_payload("AnalysisResult", result)
+    _validate_response("AnalysisResult", result)
     return JSONResponse(result)

@@ -77,7 +77,7 @@ def photo_result(operation_id: str, profile_version: int, observation: FoodObser
                 "id": component_id,
                 "displayName": proposal.display_name,
                 "catalogFoodId": None,
-                "preparation": proposal.preparation,
+                "preparation": proposal.preparation or None,
                 "matchStatus": "unrecognized",
                 "portion": {
                     "quantity": grams,
@@ -212,7 +212,7 @@ def recalculation_result(payload: dict[str, Any]) -> dict[str, Any]:
             }
         )
 
-    ids = [item["id"] for item in components]
+    ids = list(dict.fromkeys(item["id"] for item in components))
     return {
         "contractVersion": CONTRACT_VERSION,
         "operationId": payload["operationId"],
