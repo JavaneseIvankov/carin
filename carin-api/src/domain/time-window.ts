@@ -47,12 +47,32 @@ function firstInstantOnOrAfterLocalDate(date: string, timeZone: string): Date {
   return new Date(after);
 }
 
+function assertCalendarDate(date: string): void {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) ||
+      new Date(`${date}T00:00:00.000Z`).toISOString().slice(0, 10) !== date) {
+    throw new RangeError('Invalid dashboard calendar date');
+  }
+}
+
+export function getCalendarDayWindow(date: string, timeZone: string): { startAt: string; endAt: string } {
+  assertCalendarDate(date);
+  new Intl.DateTimeFormat('en-US', { timeZone }).format(new Date(`${date}T12:00:00.000Z`));
+  return {
+    startAt: firstInstantOnOrAfterLocalDate(date, timeZone).toISOString(),
+    endAt: firstInstantOnOrAfterLocalDate(addDays(date, 1), timeZone).toISOString(),
+  };
+}
+
 export function getDashboardWindow(now: Date, timeZone: string): DashboardWindow {
   if (!Number.isFinite(now.getTime())) throw new RangeError('Invalid current instant');
   // Force timezone validation even for zones whose formatter might otherwise be skipped.
   new Intl.DateTimeFormat('en-US', { timeZone }).format(now);
+  return getDashboardWindowForDate(localDateAt(now, timeZone), timeZone);
+}
 
-  const endDate = localDateAt(now, timeZone);
+export function getDashboardWindowForDate(endDate: string, timeZone: string): DashboardWindow {
+  assertCalendarDate(endDate);
+  new Intl.DateTimeFormat('en-US', { timeZone }).format(new Date(`${endDate}T12:00:00.000Z`));
   const startDate = addDays(endDate, -6);
   const endExclusiveDate = addDays(endDate, 1);
   return {

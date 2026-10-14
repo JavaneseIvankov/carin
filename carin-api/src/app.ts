@@ -13,13 +13,13 @@ import { registerCatalogRoutes, type CatalogRouteDependencies } from "./catalog/
 import { registerAccountRoutes } from './modules/account/routes.js';
 import { registerEmailLandingRoutes } from './modules/email/landing.js';
 import { registerProfileRoutes } from './modules/profile/routes.js';
-<<<<<<< HEAD
 import { registerAnalysisJobRoutes, type AnalysisJobRouteDependencies } from "./jobs/routes.js";
 import { registerMediaRoutes, type MediaRouteDependencies } from "./modules/media/routes.js";
 import { registerAnalysisRoutes, type AnalysisRouteDependencies } from './modules/analyses/routes.js';
 import { registerScanRoutes, type ScanRouteDependencies } from './modules/scans/routes.js';
 import { registerConsumptionRoutes, type ConsumptionRouteDependencies } from './modules/consumptions/routes.js';
 import { registerExaminationRoutes } from './modules/examinations/routes.js';
+import { registerDashboardRoutes, type DashboardRouteDependencies } from './modules/dashboard/routes.js';
 
 export type RequestLog = {
   requestId: string;
@@ -36,6 +36,7 @@ export type AppDependencies = {
   catalog?: CatalogRouteDependencies;
   account?: { db: Database; resolveSession: SessionResolver };
   examinations?: { db: Database; resolveSession: SessionResolver; cursorSecret: string };
+  dashboard?: DashboardRouteDependencies;
   auth?: { handler: (request: Request) => Promise<Response> };
   appLinkScheme?: string;
   analysisJobs?: AnalysisJobRouteDependencies;
@@ -62,6 +63,7 @@ export function createApp({
   scans,
   consumptions,
   media,
+  dashboard,
 }: AppDependencies): Hono<AppEnv> {
   const app = new Hono<AppEnv>();
   app.use("*", async (c, next) => {
@@ -89,6 +91,7 @@ export function createApp({
   }
   if (appLinkScheme) registerEmailLandingRoutes(app, appLinkScheme);
   if (examinations) registerExaminationRoutes(app, examinations);
+  if (dashboard) registerDashboardRoutes(app, dashboard);
   if (auth) app.all('/api/auth/*', (c) => auth.handler(c.req.raw));
   if (analysisJobs) registerAnalysisJobRoutes(app, analysisJobs);
   if (analyses) registerAnalysisRoutes(app, analyses);
@@ -134,5 +137,6 @@ export function createVerifiedApp({ db, resolveSession, ...dependencies }: Verif
     analyses: dependencies.analyses ?? resources,
     scans: dependencies.scans ?? resources,
     consumptions: dependencies.consumptions ?? resources,
+    dashboard: dependencies.dashboard ?? resources,
   });
 }

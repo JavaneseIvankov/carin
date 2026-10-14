@@ -39,4 +39,14 @@ describe("verified application composition", () => {
     });
     expect(response.status).toBe(401);
   });
+
+  it('keeps dashboard data behind the shared verified session resolver', async () => {
+    const app = createVerifiedApp({
+      readiness: async () => true,
+      db: {} as Database,
+      resolveSession: async () => null,
+    });
+    const response = await app.request('/api/v1/dashboard');
+    expect(response.status).toBe(401);
+  });
 });

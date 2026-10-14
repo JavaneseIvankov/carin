@@ -62,7 +62,7 @@ function recordFromRow(row: ExaminationRow): ExaminationInput {
   throw new Error('Stored examination type is invalid');
 }
 
-function examinationFromRow(row: ExaminationRow): Examination {
+export function examinationFromRow(row: ExaminationRow): Examination {
   return {
     id: row.id,
     revision: row.revision,
