@@ -1,7 +1,7 @@
 # Carin UI Design System — Design
 
-**Status:** Draft for user review  
-**Date:** 2026-10-14  
+**Status:** Approved design baseline
+**Date:** 2026-10-14
 **Scope:** Mobile UI foundation for `carin-app/`, based on Expo, React Native, NativeWind v4, and React Native Reusables (RNR).
 
 ## Problem and goal
