@@ -15,6 +15,10 @@ import {
   isCurrentScanResult,
   type CorrectionDraftComponent,
 } from '@/lib/food/correction';
+import {
+  createCorrectionDraftWriter,
+  getCorrectionScreenActions,
+} from '@/lib/food/correction-screen';
 import { startAnalysisPolling } from '@/lib/food/analysis-polling';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
@@ -74,6 +78,7 @@ export default function FoodCorrectionScreen() {
   const refetchLatestJob = latestJobQuery.refetch;
   const draftName = `food-correction:${scanId ?? ''}:${sourceJob?.resultId ?? ''}`;
   const [draft, setDraft] = React.useState<CorrectionDraftComponent[]>([]);
+  const draftRef = React.useRef(draft);
   const [draftInitialized, setDraftInitialized] = React.useState(false);
   const [draftSaveError, setDraftSaveError] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
@@ -84,6 +89,30 @@ export default function FoodCorrectionScreen() {
   const initializedDraftName = React.useRef<string | null>(null);
   const navigationDone = React.useRef(false);
   const correctionPollStartedAt = React.useRef(0);
+  const draftWriter = React.useMemo(
+    () =>
+      scope
+        ? createCorrectionDraftWriter(
+            (value: CorrectionDraftComponent[]) => draftStore.save(scope, draftName, value),
+            250,
+            () => setDraftSaveError(true),
+            () => setDraftSaveError(false)
+          )
+        : null,
+    [draftName, draftStore, scope]
+  );
+
+  const persistLatestDraft = React.useCallback(async () => {
+    if (!draftWriter) return;
+    draftWriter.schedule(draftRef.current);
+    try {
+      await draftWriter.flush();
+      setDraftSaveError(false);
+    } catch {
+      setDraftSaveError(true);
+      throw new Error('Draft koreksi belum berhasil disimpan.');
+    }
+  }, [draftWriter]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -92,6 +121,15 @@ export default function FoodCorrectionScreen() {
       if (sourceJobId) void refetchSourceJob();
       return () => setFocused(false);
     }, [refetchScan, refetchSourceJob, sourceJobId])
+  );
+
+  useFocusEffect(
+    React.useCallback(
+      () => () => {
+        void persistLatestDraft().catch(() => {});
+      },
+      [persistLatestDraft]
+    )
   );
 
   React.useEffect(() => {
@@ -121,12 +159,16 @@ export default function FoodCorrectionScreen() {
       .load<CorrectionDraftComponent[]>(scope, draftName)
       .then((saved) => {
         if (!current) return;
-        setDraft(Array.isArray(saved) ? saved : createCorrectionDraft(sourceResult));
+        const loadedDraft = Array.isArray(saved) ? saved : createCorrectionDraft(sourceResult);
+        draftRef.current = loadedDraft;
+        setDraft(loadedDraft);
         setDraftInitialized(true);
       })
       .catch(() => {
         if (!current) return;
-        setDraft(createCorrectionDraft(sourceResult));
+        const initialDraft = createCorrectionDraft(sourceResult);
+        draftRef.current = initialDraft;
+        setDraft(initialDraft);
         setDraftInitialized(true);
       });
     return () => {
@@ -135,15 +177,16 @@ export default function FoodCorrectionScreen() {
   }, [draftName, draftStore, scope, sourceJob?.resultId, sourceResult]);
 
   React.useEffect(() => {
-    if (!scope || !draftInitialized) return;
-    const timer = setTimeout(() => {
-      void draftStore
-        .save(scope, draftName, draft)
-        .then(() => setDraftSaveError(false))
-        .catch(() => setDraftSaveError(true));
-    }, 250);
-    return () => clearTimeout(timer);
-  }, [draft, draftInitialized, draftName, draftStore, scope]);
+    if (!draftInitialized) return;
+    draftWriter?.schedule(draft);
+  }, [draft, draftInitialized, draftWriter]);
+
+  React.useEffect(
+    () => () => {
+      void draftWriter?.dispose().catch(() => {});
+    },
+    [draftWriter]
+  );
 
   const isTrackingCorrection = !!sourceJobId && !!trackedJobId && trackedJobId !== sourceJobId;
   const latestJobStatus = latestJob?.status;
@@ -212,9 +255,27 @@ export default function FoodCorrectionScreen() {
   React.useEffect(() => {
     if (!successfulCorrection || !latestJob || navigationDone.current) return;
     navigationDone.current = true;
-    if (scope && draftInitialized) void draftStore.remove(scope, draftName);
-    router.replace({ pathname: '/food/analysis/[id]', params: { id: latestJob.id } });
-  }, [draftInitialized, draftName, draftStore, latestJob, router, scope, successfulCorrection]);
+    void (async () => {
+      try {
+        await persistLatestDraft();
+      } catch {
+        // A completed correction should still open even if local cleanup cannot be persisted.
+      }
+      if (scope && draftInitialized) {
+        await draftStore.remove(scope, draftName).catch(() => {});
+      }
+      router.replace({ pathname: '/food/analysis/[id]', params: { id: latestJob.id } });
+    })();
+  }, [
+    draftInitialized,
+    draftName,
+    draftStore,
+    latestJob,
+    persistLatestDraft,
+    router,
+    scope,
+    successfulCorrection,
+  ]);
 
   const allComponentsNamed =
     draft.length > 0 && draft.every((component) => component.displayName.trim());
@@ -228,12 +289,21 @@ export default function FoodCorrectionScreen() {
     allComponentsNamed &&
     !correctionPending &&
     !submitting;
+  const screenActions = getCorrectionScreenActions({
+    canSubmit,
+    correctionPending,
+    sourceIsCurrent,
+    submitting,
+    failedCorrection,
+    retrying,
+  });
 
   const submit = async () => {
     if (!canSubmit || !actions || !scan || !sourceJob?.resultId || !sourceResult) return;
     setSubmitting(true);
     setErrorMessage(null);
     try {
+      await persistLatestDraft();
       const job = await actions.submit(
         scan.id,
         scan,
@@ -275,8 +345,13 @@ export default function FoodCorrectionScreen() {
     }
   };
 
-  const returnToOldResult = () => {
+  const returnToOldResult = async () => {
     if (!sourceJobId) return;
+    try {
+      await persistLatestDraft();
+    } catch {
+      return;
+    }
     router.replace({
       pathname: '/food/analysis/[id]',
       params: {
@@ -362,22 +437,24 @@ export default function FoodCorrectionScreen() {
           </Text>
         ) : null}
 
-        {failedCorrection ? (
+        {screenActions.retryVisible && latestJob ? (
           <View
             className="gap-3 rounded-xl border border-destructive/40 p-4"
             accessibilityRole="alert">
             <Text variant="large">Koreksi gagal; draft tetap tersimpan.</Text>
             <Text>{latestJob.error?.message ?? 'Hasil sebelumnya tetap dapat dibuka.'}</Text>
-            <Button onPress={retry} disabled={retrying}>
+            <Button onPress={retry} disabled={screenActions.retryDisabled}>
               {retrying ? (
                 <ActivityIndicator color="white" />
               ) : (
                 <Text>Coba ulang koreksi yang gagal</Text>
               )}
             </Button>
-            <Button variant="outline" onPress={returnToOldResult}>
-              <Text>Kembali ke hasil sebelumnya</Text>
-            </Button>
+            {screenActions.returnVisible ? (
+              <Button variant="outline" onPress={returnToOldResult}>
+                <Text>Kembali ke hasil sebelumnya</Text>
+              </Button>
+            ) : null}
           </View>
         ) : null}
 
@@ -391,18 +468,22 @@ export default function FoodCorrectionScreen() {
         <ComponentPortionEditor
           components={draft}
           catalogVersion={sourceResult.catalogVersion}
-          disabled={correctionPending || !sourceIsCurrent}
-          onChange={setDraft}
+          disabled={screenActions.editorDisabled}
+          onChange={(nextDraft) => {
+            draftRef.current = nextDraft;
+            setDraft(nextDraft);
+            if (draftInitialized) draftWriter?.schedule(nextDraft);
+          }}
         />
 
-        <Button onPress={submit} disabled={!canSubmit}>
+        <Button onPress={submit} disabled={screenActions.submitDisabled}>
           {submitting ? <ActivityIndicator color="white" /> : <Text>Kirim koreksi</Text>}
         </Button>
-        {failedCorrection ? null : (
+        {!failedCorrection && screenActions.returnVisible ? (
           <Button variant="outline" onPress={returnToOldResult}>
             <Text>Kembali ke hasil sebelumnya</Text>
           </Button>
-        )}
+        ) : null}
         <Text variant="muted">
           Komponen yang tidak cocok tetap disimpan sebagai nama bebas. Porsi dapat diisi dalam gram,
           takaran katalog, atau tidak diketahui.

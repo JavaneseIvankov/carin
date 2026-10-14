@@ -4,6 +4,7 @@ import { useAppRead, useAppRepository } from '@/lib/api/query';
 import type { components } from '@/lib/api/generated/app-api';
 import { useAppData } from '@/lib/data/provider';
 import { canConfirmSelectedScanResult, isCurrentScanResult } from '@/lib/food/correction';
+import { getResultScreenActions } from '@/lib/food/correction-screen';
 import {
   getAnalysisFailurePresentation,
   getAnalysisPresentation,
@@ -91,6 +92,11 @@ export default function AnalysisResultScreen() {
     !!actionLatestJob &&
     actionLatestJob.inputKind === 'correction' &&
     (actionLatestJob.status === 'queued' || actionLatestJob.status === 'processing');
+  const screenActions = getResultScreenActions({
+    latestResultIsCurrent,
+    canConfirm,
+    correctionIsActive,
+  });
   const conditionsQuery = useAppRead('getConditions', {});
   const [foreground, setForeground] = React.useState(AppState.currentState === 'active');
   const [focused, setFocused] = React.useState(true);
@@ -380,7 +386,7 @@ export default function AnalysisResultScreen() {
             <Text variant="h3">Tindakan hasil</Text>
             <Button
               variant="outline"
-              disabled={!latestResultIsCurrent || correctionIsActive}
+              disabled={screenActions.correctionDisabled}
               onPress={() =>
                 router.push({
                   pathname: '/food/correction/[id]',
@@ -392,7 +398,7 @@ export default function AnalysisResultScreen() {
               </Text>
             </Button>
             <Button
-              disabled={!canConfirm}
+              disabled={screenActions.consumptionDisabled}
               onPress={() =>
                 router.push({
                   pathname: '/consumptions/new',
