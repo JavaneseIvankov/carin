@@ -26,4 +26,4 @@ Unverified work / blockers: Independent C26 re-review of mixed-precision latest-
 
 Next step: Obtain independent review, resolve any findings, rerun affected checks, then set T26 to `review` in `tsk` (never `done` without user approval).
 
-Worktree state: `feat/c26-dashboard-api`; initial dashboard and attention-source fixes are committed at `d024fd7` and `a21cc58`; mixed-precision timezone follow-up is under verification before commit. Preserve the existing merged C21 and C24 commits and all current user-owned files in the root `dev` worktree.
+Worktree state: `feat/c26-dashboard-api`; implementation commits are `d024fd7`, `a21cc58`, and `8d65ee7`. The final mixed-precision follow-up awaits independent review. Preserve the existing merged C21 and C24 commits and all current user-owned files in the root `dev` worktree.
