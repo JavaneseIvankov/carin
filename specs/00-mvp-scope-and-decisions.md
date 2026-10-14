@@ -18,7 +18,7 @@ dari PRD tetap berlaku sepanjang tidak diubah secara eksplisit di sini.
 | [AI API](contracts/ai-service.openapi.yaml) | Kontrak internal backend–AI dan schema hasil bersama |
 | [AI/data](04-ai-data-and-policy.md) | Cakupan, provenance, aturan hasil, dan evaluasi |
 | [Verifikasi/deployment](05-verification-and-deployment.md) | Uji, fixture, environment, dan gate demo |
-| [UI design system](06-ui-design-system.md) | Token visual, kustomisasi RNR, batas komponen, dan pola komposisi layar |
+| [UI design system](06-ui-design-system.md) | Kontrak implementasi, kustomisasi RNR, pola produk, dan verifikasi. Nilai token visual normatif ada di [`DESIGN.md`](../DESIGN.md). |
 
 Schema OpenAPI menjadi sumber bentuk wire payload. Domain spec menjadi sumber
 semantik dan aturan yang tidak dapat dinyatakan hanya dengan schema. Jika keduanya

@@ -1,106 +1,137 @@
-# Carin UI Design System — Design
+# Carin UI Design System Implementation Design
 
-**Status:** Approved design baseline
-**Date:** 2026-10-14
-**Scope:** Mobile UI foundation for `carin-app/`, based on Expo, React Native, NativeWind v4, and React Native Reusables (RNR).
+## Goal
 
-## Problem and goal
+Define an implementable visual system for `carin-app/` that turns the approved warm, playful dashboard direction into shared rules for every screen. The system customizes and extends React Native Reusables (RNR), uses one theme-token source, and keeps product patterns separate from data/API behavior. This document defines the implementation contract; it does not claim the target tokens or components have already shipped.
 
-The dashboard pilot establishes a warmer, more playful visual direction for Carin, but its custom palette and screen-level styling currently sit beside the existing RNR theme. If the same approach spreads screen by screen, color values, contrast, card treatments, and interaction states will drift. The goal is to establish one adaptable design system that preserves the approved Carin character while making future screen work consistent, accessible, and straightforward to delegate.
+## Existing contracts and decisions
 
-The design system is a product layer over RNR. RNR components are intended to be modified and extended for Carin; their current styles are a starting point, not a visual constraint. The system will keep a single source of truth for tokens and avoid building abstractions without repeated product need.
+- `carin-app/AGENTS.md` makes `components/ui/` the reusable RNR component layer, `lib/` the home for shared helpers/theme configuration, and route-specific UI local to its route.
+- The app uses Expo Router, React Native, NativeWind v4, RNR-style components, `class-variance-authority`, and dark-mode class support.
+- Current shared UI primitives are `Button`, `Text`, and `Icon` in `carin-app/components/ui/`. `Button` and `Text` use CVA. There is no shared Card or Input component in that directory yet.
+- `carin-app/global.css` currently has a generic teal/neutral theme; `tailwind.config.js` maps standard RNR color roles to CSS variables.
+- The dashboard pilot defines a separate light/dark `DASHBOARD_COLORS` palette in `carin-app/lib/dashboard/theme.ts` and uses inline React Native styles. The app tab bar also consumes this palette. The desired end state is one semantic CSS-variable theme, not two coexisting systems.
+- The pilot's light muted text (`#747667`) measures 3.42:1 on peach, 3.73:1 on butter, and 3.87:1 on olive-soft. The proposed secondary-text token in this design is darker and has been checked against those pilot tint values.
+- MVP product rules remain authoritative: no calorie targets or adequacy claims, disease-risk scores, streaks, unsupported clinical interpretations, invented meal history, or claims that missing data is normal/zero. The two food-entry intents remain distinct: analyze before eating and record food already consumed.
+- Accepted visual choices: warm and playful, characterful like Yazio; use the original Carin mascot contextually; RNR is the base to customize; the dashboard is a tone reference, not a component template.
 
-## Accepted product direction
+## Design
 
-- Warm, approachable colors and patterns, with a playful and recognizable character inspired by the energy of Yazio.
-- The Carin mascot is used with intent, such as contextual guidance or a useful empty state, rather than as decoration on every screen.
-- React Native Reusables is the component foundation.
-- Carin must communicate only information supported by the product contracts and approved domain rules. Do not introduce unsupported calorie targets, calorie adequacy claims, scores, streaks, clinical interpretations, or invented meal data to imitate references.
-- Dashboard pilot is the tone and personality reference, not a screen template to copy wholesale.
+### System architecture
 
-## Architecture
-
-The system has four layers with one-way dependencies:
+Dependencies flow in one direction:
 
 ```text
-Screen composition
-       ↓
-Carin product patterns
-       ↓
-Carin RNR components and variants
-       ↓
-Semantic theme tokens
+Routes and screen composition
+  -> Carin product patterns
+    -> Carin RNR primitives and variants
+      -> Semantic theme tokens
 ```
 
-### 1. Semantic theme tokens
+`global.css` owns token values for light and dark themes. `tailwind.config.js` maps those variables to semantic NativeWind utilities. RNR primitives consume the utilities and expose supported variants. Product patterns compose those primitives. Screens arrange patterns and connect to feature/data flows.
 
-`carin-app/global.css` is the canonical source of CSS variable values for light and dark themes. Tokens describe roles rather than particular screens or raw palette names. Core roles include page background, surface, raised surface, primary text, secondary text, border, primary/secondary action, accent, and status colors. Add domain accent tokens only when they communicate a stable meaning across multiple product surfaces.
+Do not add API calls, nutrition calculations, or domain decisions to `components/ui/` or visual patterns. Do not put route-specific structure in the shared primitive layer.
 
-`carin-app/tailwind.config.js` maps those variables to NativeWind utility classes. It should not duplicate literal color values. Existing standard semantic aliases remain the default vocabulary; any additions must map to variables in `global.css`.
+### Token contract
 
-Dashboard-specific hex colors in `carin-app/lib/dashboard/theme.ts` are not a second theme. During implementation, migrate reusable palette roles into global tokens, replace direct values with semantic classes where practical, and remove the dashboard palette after its remaining consumers are migrated. Preserve separate light and dark values through the canonical theme.
+The canonical light and dark color values, descriptive names, type scale, spacing, radius, and supported component tokens live in the YAML frontmatter of [`DESIGN.md`](../DESIGN.md). The token set starts from the approved dashboard palette. Secondary text is deliberately darkened in light mode and lightened in dark mode to correct the contrast failures found in the pilot. Treat `DESIGN.md` frontmatter as the sole visual-token source of truth; do not copy color literals into this implementation spec.
 
-All token pairs used for normal text must meet WCAG AA contrast (4.5:1); large text and non-text controls follow applicable contrast requirements. Palette changes must be checked in both themes and on tinted surfaces, not only against the page background.
+Token mapping requirements:
 
-### 2. Carin RNR components and variants
+- Keep RNR-compatible roles: `background`, `foreground`, `card`, `card-foreground`, `primary`, `primary-foreground`, `secondary`, `secondary-foreground`, `muted`, `muted-foreground`, `accent`, `accent-foreground`, `destructive`, `border`, `input`, and `ring`.
+- Add only reusable Carin surface roles needed by the pilot: `carin-olive-soft`, `carin-butter`, and `carin-peach`. Map each Tailwind color to its CSS variable; do not put literal hex values in `tailwind.config.js` or feature components.
+- Use `foreground` for ordinary content and `muted-foreground` for supporting content. Tinted surfaces must use an explicitly contrast-checked text role; opacity alone is not an acceptable way to create readable secondary text.
+- Validate normal text at 4.5:1 or better, large text at 3:1 or better, and meaningful control/icon boundaries at 3:1 or better. Test every foreground/background pairing in both themes.
+- Keep system error/success/warning semantics distinct from brand accents. Never communicate a state by color alone.
 
-`carin-app/components/ui/` remains the home for reusable primitives based on RNR. Existing components such as `Button` and `Text` may be restyled and extended to expose Carin's semantic variants. Add or adapt a primitive only when a shared need exists. Keep component APIs explicit and small, preserve RNR's accessibility and interaction behavior, and follow the installed RNR conventions (`className`, NativeWind, CVA variants, and `TextClassContext`).
+### Type and spacing contract
 
-Likely variants include action hierarchy for buttons and text roles for page titles, section headings, body, labels, and captions. The exact component and variant inventory is part of implementation planning and should be driven by repeated usage. Avoid wrapping every RNR primitive in a Carin component without a concrete benefit.
+Use the platform system sans family. Do not add a font dependency for the dashboard refinement. Maintain a compact mobile scale with these roles:
 
-### 3. Carin product patterns
+| Role | Size / line height | Weight | Use |
+| --- | --- | --- | --- |
+| Page heading | 24 / 30 dp | 700–800 | One greeting or screen title |
+| Metric | 26 / 32 dp | 700–800 | A single key recorded value, never a goal score |
+| Section heading | 18 / 24 dp | 700 | Section starts |
+| Body | 14 / 20 dp | 400 | Supporting information and explanations |
+| Body emphasis | 16 / 22 dp | 600–700 | Action title or important row value |
+| Label | 12 / 16 dp | 600 | Short labels and status |
+| Caption | 12 / 16 dp | 400–500 | Coverage, date, and secondary metadata |
 
-Product patterns compose primitives into repeated Carin-specific structures. Initial candidates are a nutrition summary, nutrient data rows, contextual action group, compact empty state, and an informative mascot hint. These patterns contain presentation and accessibility composition only; they do not own API requests, domain calculations, or unsupported health claims. Put them in a product-level component area (for example, `components/patterns/`) only when at least two screens or flows need them. Screen-specific structures stay near their route.
+Avoid text below 12 dp for essential content. Support system font scaling and wrapping; do not clip labels to preserve a fixed layout.
 
-### 4. Screen composition and recipes
+Use a 4 dp base spacing scale: `1=4`, `2=8`, `3=12`, `4=16`, `5=20`, `6=24`, `8=32`. Mobile screen gutters are 16 dp on narrow widths and 20 dp on standard widths. Use 20 dp between major sections, 12–16 dp inside surfaces, and 8 dp between tightly related rows. Layout must remain readable at 320 dp width.
 
-Screens own layout, content ordering, navigation, and connection to data. They select established tokens, components, and patterns; they should not define parallel palette constants or bespoke variants that are likely to recur. The design guide will include a dashboard recipe as the first reference for hierarchy, surfaces, section spacing, empty states, mascot placement, and accessibility semantics.
+### Shape and elevation contract
 
-## Visual principles
+- Control radius: 12 dp. Compact tonal surface: 16 dp. Primary summary surface: 20 dp. Pills are reserved for compact status/filter treatments.
+- Default surfaces are flat, distinguished by warm tonal contrast and spacing. No decorative card shadows and no nested cards.
+- Use a thin border only when it clarifies an actionable or separated boundary. Do not outline every content group.
+- The centered add action may use one soft shadow for affordance. Other content remains tonal and mostly flat.
+- Slightly rotated illustration is allowed; rotate buttons or data containers only if their function remains visually stable and easy to tap.
 
-- **Warm but legible:** use cream and earthy neutrals for the base; reserve stronger olive and warm accents for clear actions or meaningful emphasis. Accent surfaces require text colors chosen for contrast, not merely palette harmony.
-- **Playful with purpose:** personality comes from typography, illustration, small moments of feedback, and contextual mascot use. It should not compete with nutritional information or turn every section into a decorative card.
-- **Hierarchy over containers:** use spacing, type, and dividers to group supporting information. Reserve prominent surfaces for content that needs emphasis; avoid repeated nested card shells.
-- **Clear action hierarchy:** distinguish primary, secondary, and utility actions. Keep the two food-entry intents clear, while making the central add affordance's relationship to those routes predictable.
-- **Data honesty:** show coverage, uncertainty, source, and absence according to the existing product contracts. Empty or unavailable data must not imply zero, normal, or completion.
+### RNR component contract
 
-## Accessibility and behavior
+| Primitive | Required Carin treatment | States and constraints |
+| --- | --- | --- |
+| `Button` (existing) | Keep CVA variants: primary/default, secondary, outline, ghost, destructive, link. Tune default touch height to 48 dp; compact/icon actions remain at least 44 dp. Use 12 dp control radius. | Default, pressed, focused (web), disabled, loading. Primary is reserved for the main action; use one primary action per local decision area. Loading retains the label or accessible name. |
+| `Text` (existing) | Replace generic RNR display defaults with the Page heading, Section heading, Body, Body emphasis, Label, Caption, and Metric roles above. Add matching heading semantics and heading levels. | Avoid embedding screen-specific margins in text variants. Color is supplied by semantic tokens or explicit semantic classes. |
+| `Icon` (existing) | Standard sizes 16, 20, and 24 dp. Use Lucide React Native through the existing wrapper. | Icon-only actions require a 44 dp minimum hit area and a descriptive accessible label. Pair state icons with text. |
+| `Card` / Surface (not currently shared) | Add or scaffold an RNR Card primitive only if implementation confirms repeated use across at least three screens. Support `plain`, `tonal`, and `summary` treatments; keep ownership generic. | `summary` is the only prominent surface. `tonal` is for a compact related group. Do not nest or create identical card grids. |
+| `Input` (not currently in `components/ui/`) | Adopt the RNR Input component when shared field styling is part of the implementation slice; do not invent a parallel native control. Minimum 48 dp height, 12 dp radius, semantic border/background/text tokens. | Default, focused, invalid, disabled, and accessibility error description. Preserve native keyboard and autofill behavior. |
+| App tab bar (existing custom shell) | Keep its navigation behavior and four tabs plus central food-action sheet. Migrate colors/type to tokens; selected state uses both icon treatment and label. | Selected, unselected, focused, sheet expanded. Each tab stays a minimum 44 dp target; the center action stays clearly separate from tabs. |
 
-- Use semantic headings with a sensible page/section order and descriptive accessible names for icon-only controls.
-- Maintain platform-appropriate touch targets, visible focus/pressed/disabled states, and readable content when text scales or wraps on narrow screens.
-- Pair status colors with text, iconography, or labels; never rely on color alone.
-- Respect reduced-motion preferences and use motion only when it clarifies feedback or state changes.
-- Verify token contrast in both themes and with every supported surface treatment.
+When adding an RNR component, prefer the installed RNR CLI so primitive dependencies and aliases stay correct. Customize copied RNR source under `components/ui/`; do not fork the library wholesale.
 
-## Ownership and boundaries
+### Carin patterns and screen recipe
 
-- Theme tokens are shared by all `carin-app` routes and components.
-- `components/ui/` contains generic RNR-derived primitives and visual variants, not product data behavior.
-- Product patterns compose primitives and remain independent of API/domain logic.
-- Routes/screens arrange content and connect to existing feature/data flows.
-- References such as Yazio, Lifesum, Alma, Noom, and MacroFactor are inspiration for hierarchy and interaction patterns only; no visual identity or unsupported product behavior is copied.
+Create a product pattern only after the same intent appears in at least three places or a shared behavior needs one testable owner. Initial candidates:
 
-## Non-goals
+- **Nutrition summary:** one surface for recorded energy and the most relevant macro values, followed by compact supporting rows. It reports recorded intake and coverage only. It never implies daily goals, adequacy, or completion.
+- **Nutrient row:** label, value/unit, and optional coverage/source note. Missing values remain explicit and must not render as zero.
+- **Empty state:** one short explanation plus one clear next action when a valid action exists. Use the mascot only when it teaches the next step or reassures about an important rule.
+- **Contextual action group:** distinct pre-meal photo analysis and already-consumed manual logging. The bottom-center add action opens the same two choices. Avoid adding a third repeated logging CTA lower on the page.
+- **Section row:** a heading and optional detail paired with compact content. Use dividers or spacing for supporting sections instead of an outer card by default.
 
-- Rewriting application navigation, API contracts, domain rules, or feature behavior as part of defining the design system.
-- Redesigning every screen before the dashboard recipe is validated.
-- Replacing RNR with another component library.
-- Creating a large generic design-system package or component catalog before actual reuse demonstrates a need.
-- Introducing new health metrics, user goals, scores, streaks, meal records, or hydration features without product and data approval.
+Dashboard composition order: greeting/date and contextual mascot; two food-entry actions; daily intake summary; recurring attention; latest examinations; relevant profile completion steps. Keep the page title as the only level-one heading, section starts as level-two headings, and item titles below those. Empty attention/examination sections collapse to a compact explanation/row rather than full-size shells. Do not remove product-required navigation destinations or either food-entry path.
 
-## Delivery and validation criteria
+### Interaction and accessibility contract
 
-The design system is established when:
+- Every interactive component defines default, pressed/active, focused on web, disabled, and loading/error states when relevant. State changes do not depend on animation alone.
+- Minimum touch target is 44 by 44 dp. Focus treatment is visible on web and uses the semantic ring token.
+- Normal text contrast is 4.5:1 or better; large text and meaningful non-text boundaries are 3:1 or better. Recheck light/dark and tinted surfaces whenever a token changes.
+- Use `accessibilityRole="header"` or the appropriate heading role and explicit level for page/section headings. Icon-only controls need labels. Tab selection and expanded action-sheet state are exposed to assistive technology.
+- Support Dynamic Type/text scaling and 320 dp layouts without truncating essential values, actions, or coverage context.
+- Pair color-coded nutrient/status content with text or labels. Never imply that a warm/green tint means clinically normal or healthy.
+- Motion is state feedback only, normally 150–220 ms, with easing out. Respect reduced-motion settings. Do not animate layout geometry or add page-load choreography.
 
-1. A reviewed guide documents the visual principles, semantic tokens, component boundaries, accessibility rules, and dashboard recipe.
-2. One token source in `global.css` defines light and dark theme values, and Tailwind classes map to it without duplicated literal values.
-3. RNR component customization guidance explains how to modify/extend existing primitives while preserving their behavior and keeping APIs small.
-4. The dashboard can be expressed using those shared tokens and selected RNR variants without its own independent palette.
-5. Text contrast passes WCAG AA for normal text on every approved surface, including tinted accents, in light and dark themes.
-6. A later implementation pass verifies narrow layouts, text scaling, semantic heading navigation, action states, and the Expo app on supported target platforms.
+## Implementation seams
 
-This design document does not claim criteria 2–6 are already implemented or validated. They are design/implementation acceptance criteria.
+1. **Theme foundation:** update `carin-app/global.css` with the approved light/dark CSS variables; extend `tailwind.config.js` with aliases for the three Carin tinted surfaces; add contrast verification for every semantic pair. No screen-specific literals should be added to those files.
+2. **RNR foundation:** update `components/ui/button.tsx` and `text.tsx` variants without breaking existing props or call sites; keep `icon.tsx` API stable. Scaffold Card/Input only when actual reuse is confirmed. Run `pnpm exec react-native-reusables doctor` if the installed CLI supports it; otherwise document that the CLI check is unavailable.
+3. **Pilot migration:** migrate `components/dashboard/dashboard-screen.tsx`, `components/profile/missing-field-actions.tsx`, and `app/(tabs)/_layout.tsx` from direct palette references to theme classes/shared variants. Remove `lib/dashboard/theme.ts` only after all consumers are migrated. Preserve existing routes, data behavior, and navigation.
+4. **Guidance:** keep strategic product context in root `PRODUCT.md`, the visual token/component reference in root `DESIGN.md`, and implementation boundaries here in `specs/06-ui-design-system.md`. Root `.impeccable/design.json` holds panel-only extensions such as shadow/motion data and component previews, not a second source of token values.
 
-## Implementation handoff boundary
+## Verification
 
-After this document is reviewed and approved, create a separate implementation plan. The first implementation slice should establish canonical theme tokens and RNR variants, then migrate the dashboard pilot to those shared foundations. Only after that foundation and dashboard recipe are validated should independent screen refinements be delegated to subagents.
+For the implementation pass, run from `carin-app/`:
+
+```bash
+pnpm run typecheck
+pnpm run lint
+pnpm run test:unit
+pnpm run test:integration
+```
+
+Also:
+
+- Validate CSS variable names and Tailwind aliases resolve in both light and dark themes.
+- Add a deterministic contrast check for all approved text/surface pairs; include the warm tints and dark equivalents.
+- Verify heading order, accessible labels, state exposure, and 44 dp targets in the dashboard and tab shell.
+- Inspect at 320 dp and a standard 390 dp mobile width with text scaling; confirm no clipped copy or horizontal overflow.
+- Manually inspect Expo rendering on the supported device/platform available. Typecheck or web preview alone does not prove native behavior.
+- Record visual regressions and unsupported platform/device coverage in the handoff. This design document has not run these implementation checks.
+
+## Approval boundary
+
+The cozy companion direction, mostly-flat tonal surfaces, and warm/tactile controls are user-approved. The exact token table and detailed component rules above are proposed for visual review. Do not treat them as shipped behavior until implemented and verified. Any change to domain claims or nutrition data requires a separate product/data decision.
