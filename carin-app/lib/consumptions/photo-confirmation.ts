@@ -114,23 +114,31 @@ export function getPhotoConfirmationAvailability(input: {
     latestJob.scanId === scan.id &&
     latestJob.targetType === 'scan' &&
     latestJob.targetId === scan.id;
-  if (!latestScanJob || latestJob.targetRevision !== scan.revision) return 'unavailable';
-  if (latestJob.status === 'queued' || latestJob.status === 'processing') {
-    return 'correction_pending';
-  }
+  if (!latestScanJob) return 'unavailable';
 
-  if (!resultId || !result) return 'loading';
-  if (resultId !== scan.latestResultId) return 'unavailable';
+  if (latestJob.status === 'queued' || latestJob.status === 'processing') {
+    return latestJob.inputKind === 'correction' && latestJob.targetRevision === scan.revision + 1
+      ? 'correction_pending'
+      : 'unavailable';
+  }
 
   if (latestJob.status === 'failed') {
+    if (latestJob.inputKind !== 'correction' || latestJob.targetRevision !== scan.revision + 1) {
+      return 'unavailable';
+    }
     if (!explicitlyUseLastSuccessfulResult) return 'unavailable';
-  } else if (
-    latestJob.status !== 'completed' ||
-    latestJob.resultId !== scan.latestResultId ||
-    latestJob.resultId !== resultId
-  ) {
+    if (resultId && resultId !== scan.latestResultId) return 'unavailable';
+    if (!resultId || !result) return 'loading';
+    return scan.defaultConsumptionId ? 'open_existing' : 'confirm';
+  }
+
+  if (latestJob.status !== 'completed' || latestJob.targetRevision !== scan.revision) {
     return 'unavailable';
   }
+  if (latestJob.resultId !== scan.latestResultId) return 'unavailable';
+  if (resultId && resultId !== scan.latestResultId) return 'unavailable';
+  if (!resultId || !result) return 'loading';
+  if (latestJob.resultId !== resultId) return 'unavailable';
 
   return scan.defaultConsumptionId ? 'open_existing' : 'confirm';
 }

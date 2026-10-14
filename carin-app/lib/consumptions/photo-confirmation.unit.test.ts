@@ -408,12 +408,19 @@ describe('photo confirmation availability', () => {
   it.each(['queued', 'processing'] as const)(
     'blocks while the latest scan analysis job is %s',
     (status) => {
-      expect(availability({ latestJob: job({ status }) })).toBe('correction_pending');
+      expect(
+        availability({ latestJob: job({ status, inputKind: 'correction', targetRevision: 3 }) })
+      ).toBe('correction_pending');
     }
   );
 
   it('requires an explicit choice to use the retained result after a failed correction', () => {
-    const latestJob = job({ status: 'failed', resultId: null });
+    const latestJob = job({
+      status: 'failed',
+      inputKind: 'correction',
+      resultId: null,
+      targetRevision: 3,
+    });
     expect(availability({ latestJob })).toBe('unavailable');
     expect(availability({ latestJob, explicitlyUseLastSuccessfulResult: true })).toBe('confirm');
   });
@@ -432,6 +439,47 @@ describe('photo confirmation availability', () => {
 
   it('marks a latest job for another scan revision as stale', () => {
     expect(availability({ latestJob: job({ targetRevision: 1 }) })).toBe('unavailable');
+  });
+
+  it.each([
+    ['queued', 2],
+    ['queued', 4],
+    ['processing', 4],
+    ['failed', 2],
+    ['failed', 4],
+  ] as const)('rejects a %s correction targeting stale revision %s', (status, targetRevision) => {
+    expect(
+      availability({
+        latestJob: job({
+          status,
+          inputKind: 'correction',
+          targetRevision,
+          resultId: status === 'failed' ? null : 'result-1',
+        }),
+        explicitlyUseLastSuccessfulResult: true,
+      })
+    ).toBe('unavailable');
+  });
+
+  it.each(['queued', 'failed'] as const)(
+    'does not treat a %s non-correction job as the current scan correction',
+    (status) => {
+      expect(
+        availability({
+          latestJob: job({
+            status,
+            inputKind: 'photo',
+            targetRevision: 3,
+            resultId: status === 'failed' ? null : 'result-1',
+          }),
+          explicitlyUseLastSuccessfulResult: true,
+        })
+      ).toBe('unavailable');
+    }
+  );
+
+  it('requires a completed job to target the current scan revision', () => {
+    expect(availability({ latestJob: job({ targetRevision: 3 }) })).toBe('unavailable');
   });
 
   it('marks a latest job with a mismatched target type or target ID as stale', () => {
