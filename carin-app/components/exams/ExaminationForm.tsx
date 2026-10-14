@@ -11,7 +11,10 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { DatePickerField } from '@/components/app/date-picker-field';
 import { FormField } from '@/components/app/form-field';
 import { TimePickerField } from '@/components/app/time-picker-field';
+import { Drawer } from '@/components/ui/drawer';
+import { Icon } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
+import { FlaskConical, HeartPulse } from 'lucide-react-native';
 
 type GlucoseContext = Extract<ExaminationInput, { type: 'glucose' }>['context'];
 type CholesterolSubtype = Extract<ExaminationInput, { type: 'cholesterol' }>['subtype'];
@@ -370,57 +373,138 @@ export function ExaminationForm({
         className="min-h-24"
       />
 
-      {preview ? (
-        <View
-          className="gap-3 rounded-summary border border-primary/40 bg-card p-5"
-          accessibilityRole="summary">
-          <Text variant="large">Periksa sebelum menyimpan</Text>
-          <Text className="text-base font-semibold text-foreground">{recordTitle(preview)}</Text>
-          {preview.type === 'pressure' ? (
-            <Text variant="h2" className="text-primary">
-              {formatMeasurement(preview.systolic)} / {formatMeasurement(preview.diastolic)} mmHg
-            </Text>
-          ) : (
-            <Text variant="h2" className="text-primary">
-              {formatMeasurement(preview.value)} {preview.unit}
-            </Text>
-          )}
-          <Text variant="body" className="text-foreground">
-            Diukur {formatMeasuredAt(preview)}
-          </Text>
-          <Text variant="caption" className="text-muted-foreground">
-            Zona waktu: {preview.timezone}
-          </Text>
-          <View className="rounded-control bg-carin-olive-soft/40 p-3">
-            <Text variant="caption" className="text-foreground">
-              Angka ditampilkan sebagai catatan pengukuran, tanpa penilaian klinis.
-            </Text>
-          </View>
-          <View className="flex-row flex-wrap gap-2 pt-2">
-            <Button variant="outline" disabled={pending} onPress={() => setPreview(null)}>
-              <Text>Ubah catatan</Text>
-            </Button>
-            <Button
-              variant="tactile"
-              disabled={pending || submissionDisabled || !timezone}
-              onPress={() => void onSubmit(preview)}>
-              <Text>{pending ? 'Menyimpan…' : 'Konfirmasi dan simpan'}</Text>
-            </Button>
-          </View>
-          {!!submitError && (
-            <Text className="text-sm text-destructive" accessibilityRole="alert">
-              {submitError}
-            </Text>
-          )}
-        </View>
-      ) : (
-        <Button
-          variant="tactile"
-          onPress={showPreview}
-          disabled={pending || submissionDisabled || !timezone}>
-          <Text>{submitLabel}</Text>
-        </Button>
+      <Button
+        variant="tactile"
+        onPress={showPreview}
+        disabled={pending || submissionDisabled || !timezone}
+        accessibilityLabel={submitLabel}>
+        <Text>{submitLabel}</Text>
+      </Button>
+
+      {!!submitError && !preview && (
+        <Text className="text-sm text-destructive" accessibilityRole="alert">
+          {submitError}
+        </Text>
       )}
+
+      <Drawer
+        isOpen={Boolean(preview)}
+        onClose={() => setPreview(null)}
+        title="Konfirmasi Pemeriksaan"
+        footer={
+          preview ? (
+            <View className="gap-2.5">
+              <Button
+                variant="tactile"
+                disabled={pending || submissionDisabled || !timezone}
+                onPress={() => void onSubmit(preview)}
+                accessibilityLabel="Ya, Simpan Pemeriksaan">
+                <Text>{pending ? 'Menyimpan…' : 'Ya, Simpan Pemeriksaan'}</Text>
+              </Button>
+              <Button
+                variant="ghost"
+                disabled={pending}
+                onPress={() => setPreview(null)}
+                accessibilityLabel="Ubah Data">
+                <Text variant="muted">Ubah Data</Text>
+              </Button>
+            </View>
+          ) : undefined
+        }>
+        {preview ? (
+          <View className="items-center gap-4 py-2">
+            <View className="h-16 w-16 items-center justify-center rounded-2xl bg-carin-olive-soft">
+              <Icon
+                as={preview.type === 'pressure' ? HeartPulse : FlaskConical}
+                size={32}
+                className="text-primary"
+              />
+            </View>
+
+            <View className="items-center gap-1">
+              <Text variant="caption" className="font-semibold uppercase tracking-wider text-muted-foreground">
+                {recordTitle(preview)}
+              </Text>
+              {preview.type === 'pressure' ? (
+                <View className="flex-row items-baseline gap-2">
+                  <Text className="text-4xl font-extrabold tracking-tight text-foreground">
+                    {formatMeasurement(preview.systolic)} / {formatMeasurement(preview.diastolic)}
+                  </Text>
+                  <Text className="text-xl font-semibold text-muted-foreground">
+                    mmHg
+                  </Text>
+                </View>
+              ) : (
+                <View className="flex-row items-baseline gap-2">
+                  <Text className="text-4xl font-extrabold tracking-tight text-foreground">
+                    {formatMeasurement(preview.value)}
+                  </Text>
+                  <Text className="text-xl font-semibold text-muted-foreground">
+                    {preview.unit}
+                  </Text>
+                  {preview.type === 'glucose' && preview.context !== 'unknown' ? (
+                    <View className="ml-1 rounded-full bg-carin-olive-soft px-3 py-1">
+                      <Text variant="caption" className="font-semibold text-primary">
+                        {contextLabels[preview.context]}
+                      </Text>
+                    </View>
+                  ) : null}
+                  {preview.type === 'cholesterol' ? (
+                    <View className="ml-1 rounded-full bg-carin-olive-soft px-3 py-1">
+                      <Text variant="caption" className="font-semibold text-primary">
+                        {subtypeLabels[preview.subtype]}
+                      </Text>
+                    </View>
+                  ) : null}
+                </View>
+              )}
+            </View>
+
+            <View className="w-full gap-2 rounded-2xl border border-border/60 bg-muted/20 p-4">
+              <View className="flex-row items-center justify-between">
+                <Text variant="caption" className="text-muted-foreground">
+                  Waktu Pengukuran
+                </Text>
+                <Text variant="body" className="font-medium text-foreground">
+                  {formatMeasuredAt(preview)}
+                </Text>
+              </View>
+              <View className="flex-row items-center justify-between">
+                <Text variant="caption" className="text-muted-foreground">
+                  Zona Waktu
+                </Text>
+                <Text variant="caption" className="font-medium text-foreground">
+                  {preview.timezone}
+                </Text>
+              </View>
+              {preview.note ? (
+                <View className="mt-1 pt-2 border-t border-border/40">
+                  <Text variant="caption" className="text-muted-foreground">
+                    Catatan
+                  </Text>
+                  <Text variant="body" className="text-foreground mt-0.5">
+                    {preview.note}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+
+            <View className="w-full rounded-xl bg-carin-olive-soft/40 p-3">
+              <Text variant="caption" className="text-foreground text-center">
+                Angka ditampilkan sebagai catatan pengukuran, tanpa penilaian klinis otomatis.
+              </Text>
+            </View>
+
+            {!!submitError && (
+              <View className="w-full rounded-xl border border-destructive/20 bg-destructive/10 p-3">
+                <Text className="text-sm text-destructive text-center" accessibilityRole="alert">
+                  {submitError}
+                </Text>
+              </View>
+            )}
+          </View>
+        ) : null}
+      </Drawer>
     </ScrollView>
   );
 }

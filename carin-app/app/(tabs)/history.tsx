@@ -1,10 +1,20 @@
 import { OnlineIndicator } from '@/components/app/online-indicator';
+import { serviceErrorMessage } from '@/components/app/presentation';
 import { ScanDeletionControl } from '@/components/food/scan-deletion-control';
 import { ServiceError } from '@/components/app/service-error';
+import { ConsumptionForm } from '@/components/consumptions/consumption-form';
 import { Button } from '@/components/ui/button';
+import { Drawer } from '@/components/ui/drawer';
 import { Text } from '@/components/ui/text';
-import { useAppRepository } from '@/lib/api/query';
-import { formatLocalDateTime } from '@/lib/consumptions/consumption';
+import { useAppRead, useAppRepository, useAppWrite } from '@/lib/api/query';
+import {
+  buildManualConsumptionInput,
+  createEmptyManualConsumptionDraft,
+  formatLocalDateTime,
+  MANUAL_CONSUMPTION_CREATE_DRAFT_NAME,
+  type ManualConsumptionDraft,
+  type SavedManualConsumptionDraft,
+} from '@/lib/consumptions/consumption';
 import { getConsumptionDetailPresentation } from '@/lib/consumptions/attention-presentation';
 import {
   CONSUMPTION_HISTORY_PAGE_LIMIT,
@@ -14,6 +24,8 @@ import {
   getNextConsumptionCursor,
   type ConsumptionHistoryFilter,
 } from '@/lib/consumptions/history';
+import { createManualConsumptionActions } from '@/lib/consumptions/manual-actions';
+import { createDraftStore } from '@/lib/data/drafts';
 import { useAppData } from '@/lib/data/provider';
 import { scopeKey } from '@/lib/data/scope';
 import {
@@ -23,6 +35,7 @@ import {
   getScanHistoryPresentation,
   SCAN_HISTORY_PAGE_LIMIT,
 } from '@/lib/food/history';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useInfiniteQuery, useQueries, useQueryClient } from '@tanstack/react-query';
 import { useFocusEffect, useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import * as React from 'react';
@@ -48,6 +61,134 @@ export default function History() {
   const [filter, setFilter] = React.useState<ConsumptionHistoryFilter>('all');
   const [filterNow, setFilterNow] = React.useState(() => new Date());
   const range = getHistoryDateRange(filter, filterNow);
+
+  const refreshVisible = React.useCallback(() => {
+    setFilterNow(new Date());
+    if (scope) void queryClient.invalidateQueries({ queryKey: scopeKey(scope) });
+  }, [queryClient, scope]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (repository) refreshVisible();
+    }, [repository, refreshVisible])
+  );
+  React.useEffect(() => {
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active' && repository) refreshVisible();
+    });
+    return () => subscription.remove();
+  }, [repository, refreshVisible]);
+
+  const meQuery = useAppRead('getMe', {});
+  const createMutation = useAppWrite('createConsumption');
+  const updateMutation = useAppWrite('updateConsumption');
+  const deleteMutation = useAppWrite('deleteConsumption');
+  const createConsumption = createMutation.mutateAsync;
+  const updateConsumption = updateMutation.mutateAsync;
+  const deleteConsumption = deleteMutation.mutateAsync;
+
+  const [isCreateDrawerOpen, setIsCreateDrawerOpen] = React.useState(false);
+  const [createSubmitError, setCreateSubmitError] = React.useState<string | null>(null);
+  const [isSubmittingCreate, setIsSubmittingCreate] = React.useState(false);
+
+  const draftStore = React.useMemo(() => createDraftStore(AsyncStorage), []);
+  const manualActions = React.useMemo(
+    () =>
+      scope
+        ? createManualConsumptionActions({
+            scope,
+            storage: AsyncStorage,
+            api: {
+              create: createConsumption,
+              update: updateConsumption,
+              delete: deleteConsumption,
+            },
+          })
+        : null,
+    [scope, createConsumption, updateConsumption, deleteConsumption]
+  );
+
+  const [draftLoadState, setDraftLoadState] = React.useState<
+    | { scopeId: string; status: 'loaded'; record: SavedManualConsumptionDraft }
+    | { scopeId: string; status: 'error'; error: unknown }
+    | null
+  >(null);
+  const recordRef = React.useRef<SavedManualConsumptionDraft | null>(null);
+  const persistQueue = React.useRef<Promise<void>>(Promise.resolve());
+
+  const scopeId = scope
+    ? `${encodeURIComponent(scope.environment)}:${encodeURIComponent(scope.userId)}`
+    : null;
+  const currentLoadState = draftLoadState?.scopeId === scopeId ? draftLoadState : null;
+  const draftRecord = currentLoadState?.status === 'loaded' ? currentLoadState.record : null;
+  const draftLoadError = currentLoadState?.status === 'error' ? currentLoadState.error : null;
+  const defaultTimeZone = meQuery.data?.data.timezone ?? 'Asia/Jakarta';
+  const canLoadDraft = !!scope && (!!meQuery.data || !meQuery.isPending);
+
+  React.useEffect(() => {
+    if (!isCreateDrawerOpen || !scope || !scopeId || !canLoadDraft) return;
+    let active = true;
+    void draftStore
+      .load<SavedManualConsumptionDraft>(scope, MANUAL_CONSUMPTION_CREATE_DRAFT_NAME)
+      .then((saved) => {
+        if (!active) return;
+        const next = saved ?? createEmptyManualConsumptionDraft(defaultTimeZone);
+        recordRef.current = next;
+        setDraftLoadState({ scopeId, status: 'loaded', record: next });
+      })
+      .catch((error: unknown) => {
+        if (active) setDraftLoadState({ scopeId, status: 'error', error });
+      });
+    return () => {
+      active = false;
+    };
+  }, [isCreateDrawerOpen, scope, scopeId, canLoadDraft, defaultTimeZone, draftStore]);
+
+  const updateDraftForm = (form: ManualConsumptionDraft) => {
+    if (!scope || !recordRef.current) return;
+    const next = { ...recordRef.current, form };
+    recordRef.current = next;
+    if (scopeId) setDraftLoadState({ scopeId, status: 'loaded', record: next });
+    persistQueue.current = persistQueue.current
+      .catch(() => {})
+      .then(() => draftStore.save(scope, MANUAL_CONSUMPTION_CREATE_DRAFT_NAME, next));
+  };
+
+  const closeCreateDrawer = () => {
+    setIsCreateDrawerOpen(false);
+    setCreateSubmitError(null);
+  };
+
+  const submitCreate = async (form: ManualConsumptionDraft) => {
+    const current = recordRef.current;
+    if (!current || !scope || !manualActions || isSubmittingCreate) return;
+    setCreateSubmitError(null);
+    const payload = buildManualConsumptionInput(form, current.timeZone);
+    if ('error' in payload) {
+      setCreateSubmitError(payload.error);
+      return;
+    }
+    setIsSubmittingCreate(true);
+    try {
+      await persistQueue.current;
+      await manualActions.create(current.draftId, payload.value);
+      try {
+        await draftStore.remove(scope, MANUAL_CONSUMPTION_CREATE_DRAFT_NAME);
+        await manualActions.clearCreate(current.draftId);
+      } catch {
+        // acknowledged
+      }
+      recordRef.current = null;
+      setDraftLoadState(null);
+      setIsCreateDrawerOpen(false);
+      refreshVisible();
+    } catch (error) {
+      setCreateSubmitError(serviceErrorMessage(error));
+    } finally {
+      setIsSubmittingCreate(false);
+    }
+  };
+
   const consumptionQuery = useInfiniteQuery({
     queryKey: scope
       ? scopeKey(scope, 'listConsumptions', {
@@ -93,21 +234,6 @@ export default function History() {
           : false,
     })),
   });
-  const refreshVisible = React.useCallback(() => {
-    setFilterNow(new Date());
-    if (scope) void queryClient.invalidateQueries({ queryKey: scopeKey(scope) });
-  }, [queryClient, scope]);
-  useFocusEffect(
-    React.useCallback(() => {
-      if (repository) refreshVisible();
-    }, [repository, refreshVisible])
-  );
-  React.useEffect(() => {
-    const subscription = AppState.addEventListener('change', (state) => {
-      if (state === 'active' && repository) refreshVisible();
-    });
-    return () => subscription.remove();
-  }, [repository, refreshVisible]);
 
   return (
     <View className="flex-1 bg-background">
@@ -122,7 +248,9 @@ export default function History() {
             tactile
             size="sm"
             onPress={() =>
-              router.push((tab === 'consumption' ? '/consumptions/new' : '/food/capture') as Href)
+              tab === 'consumption'
+                ? setIsCreateDrawerOpen(true)
+                : router.push('/food/capture' as Href)
             }
             accessibilityLabel={
               tab === 'consumption' ? 'Catat makanan manual' : 'Ambil foto makanan'
@@ -278,7 +406,7 @@ export default function History() {
                 <Button
                   tactile
                   className="mt-2 min-h-12"
-                  onPress={() => router.push('/consumptions/new' as Href)}>
+                  onPress={() => setIsCreateDrawerOpen(true)}>
                   <Text>Catat makanan manual</Text>
                 </Button>
               </View>
@@ -450,6 +578,63 @@ export default function History() {
           </View>
         )}
       </ScrollView>
+
+      {/* In-place Meal Logging Drawer */}
+      <Drawer
+        isOpen={isCreateDrawerOpen}
+        onClose={closeCreateDrawer}
+        title="Catat makanan manual"
+        description="Catatan manual tidak memerlukan foto atau analisis kamera."
+        maxHeightRatio={0.92}>
+        {draftLoadError ? (
+          <View className="gap-4 py-4" accessibilityRole="alert">
+            <View className="gap-2 rounded-summary border border-destructive/30 bg-destructive/10 p-5">
+              <Text variant="h3" className="text-destructive">
+                Draft belum dapat dibuka
+              </Text>
+              <Text className="text-foreground">{serviceErrorMessage(draftLoadError)}</Text>
+            </View>
+            <Button
+              variant="outline"
+              className="min-h-12 w-full"
+              onPress={closeCreateDrawer}>
+              <Text>Tutup</Text>
+            </Button>
+          </View>
+        ) : draftRecord ? (
+          <ConsumptionForm
+            isDrawer
+            draft={draftRecord.form}
+            timeZone={draftRecord.timeZone}
+            title="Catat yang sudah dimakan"
+            description="Catatan manual tidak memerlukan foto atau analisis kamera."
+            submitLabel="Simpan catatan"
+            isSubmitting={isSubmittingCreate}
+            submitError={createSubmitError}
+            onChange={updateDraftForm}
+            onSubmit={(form) => void submitCreate(form)}
+            onBack={closeCreateDrawer}
+          />
+        ) : (
+          <View className="items-center justify-center gap-3 py-12">
+            <View
+              className="items-center justify-center bg-carin-butter"
+              style={{
+                borderTopLeftRadius: 25,
+                borderTopRightRadius: 31,
+                borderBottomRightRadius: 23,
+                borderBottomLeftRadius: 29,
+                width: 64,
+                height: 64,
+              }}>
+              <ActivityIndicator size="small" accessibilityLabel="Membuka draft konsumsi" />
+            </View>
+            <Text variant="caption" className="text-muted-foreground">
+              Membuka draft konsumsi…
+            </Text>
+          </View>
+        )}
+      </Drawer>
     </View>
   );
 }

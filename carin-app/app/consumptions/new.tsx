@@ -6,45 +6,26 @@ import { Text } from '@/components/ui/text';
 import { useAppRead, useAppWrite } from '@/lib/api/query';
 import {
   buildManualConsumptionInput,
-  formatLocalDateTime,
+  createEmptyManualConsumptionDraft,
+  MANUAL_CONSUMPTION_CREATE_DRAFT_NAME,
   type ManualConsumptionDraft,
+  type SavedManualConsumptionDraft,
 } from '@/lib/consumptions/consumption';
 import { createManualConsumptionActions } from '@/lib/consumptions/manual-actions';
 import { createDraftStore } from '@/lib/data/drafts';
 import { useAppData } from '@/lib/data/provider';
-import { createIdempotencyKey } from '@/lib/profile/profile';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter, type Href } from 'expo-router';
 import * as React from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
-const DRAFT_NAME = 'manual-consumption:create';
+const DRAFT_NAME = MANUAL_CONSUMPTION_CREATE_DRAFT_NAME;
 
-type SavedManualDraft = {
-  draftId: string;
-  timeZone: string;
-  form: ManualConsumptionDraft;
-};
+type SavedManualDraft = SavedManualConsumptionDraft;
 
 type ManualDraftLoadState =
   | { scopeId: string; status: 'loaded'; record: SavedManualDraft }
   | { scopeId: string; status: 'error'; error: unknown };
-
-function createEmptyDraft(timeZone: string): SavedManualDraft {
-  const local = formatLocalDateTime(new Date(), timeZone);
-  return {
-    draftId: createIdempotencyKey(),
-    timeZone,
-    form: {
-      consumedDate: local.date,
-      consumedTime: local.time,
-      catalogVersion: 'unavailable',
-      components: [],
-      activeComponent: null,
-      editingComponentId: null,
-    },
-  };
-}
 
 export default function NewConsumption() {
   const router = useRouter();
@@ -93,7 +74,7 @@ export default function NewConsumption() {
       .load<SavedManualDraft>(scope, DRAFT_NAME)
       .then((saved) => {
         if (!active) return;
-        const next = saved ?? createEmptyDraft(defaultTimeZone);
+        const next = saved ?? createEmptyManualConsumptionDraft(defaultTimeZone);
         recordRef.current = next;
         setDraftLoadState({ scopeId, status: 'loaded', record: next });
       })

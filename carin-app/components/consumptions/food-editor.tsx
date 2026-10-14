@@ -4,12 +4,14 @@ import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import {
   formatNutrient,
+  parsePortionQuantity,
   type CatalogFood,
   type ManualFoodComponentDraft,
 } from '@/lib/consumptions/consumption';
+import { cn } from '@/lib/utils';
 import { Check } from 'lucide-react-native';
 import * as React from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Pressable, View } from 'react-native';
 
 type Props = {
   component: ManualFoodComponentDraft;
@@ -21,12 +23,14 @@ type Props = {
   canUseOther: boolean;
   validationError: string | null;
   disabled: boolean;
+  showCardWrapper?: boolean;
+  showFooterButtons?: boolean;
   onNameChange: (name: string) => void;
   onChooseFood: (food: CatalogFood) => void;
   onUseOther: () => void;
   onChange: (component: ManualFoodComponentDraft) => void;
-  onCommit: () => void;
-  onCancel: () => void;
+  onCommit?: () => void;
+  onCancel?: () => void;
 };
 
 export function FoodEditor({
@@ -39,6 +43,8 @@ export function FoodEditor({
   canUseOther,
   validationError,
   disabled,
+  showCardWrapper = false,
+  showFooterButtons = false,
   onNameChange,
   onChooseFood,
   onUseOther,
@@ -49,14 +55,16 @@ export function FoodEditor({
   const selectedFood = foods.find((food) => food.id === component.catalogFoodId) ?? null;
   const portion = component.portion;
 
-  return (
-    <View className="gap-4 rounded-summary border border-border/70 bg-card p-4 sm:p-5">
-      <View className="gap-1">
-        <Text variant="h3">{isEditing ? 'Ubah komponen' : 'Tambah makanan'}</Text>
-        <Text variant="caption" className="text-muted-foreground">
-          Pilih hasil katalog yang cocok atau simpan nama sebagai Makanan lain.
-        </Text>
-      </View>
+  const content = (
+    <>
+      {showCardWrapper ? (
+        <View className="gap-1">
+          <Text variant="h3">{isEditing ? 'Ubah komponen' : 'Tambah makanan'}</Text>
+          <Text variant="caption" className="text-muted-foreground">
+            Pilih hasil katalog yang cocok atau simpan nama sebagai Makanan lain.
+          </Text>
+        </View>
+      ) : null}
 
       <FormField
         label="Nama makanan"
@@ -194,7 +202,10 @@ export function FoodEditor({
                 ...component,
                 portion: {
                   kind: 'known',
-                  quantity: portion.kind === 'known' ? portion.quantity : '',
+                  quantity:
+                    portion.kind === 'known' && portion.unit === 'g' && portion.quantity
+                      ? portion.quantity
+                      : '100',
                   unit: 'g',
                 },
               })
@@ -224,7 +235,10 @@ export function FoodEditor({
                     ...component,
                     portion: {
                       kind: 'known',
-                      quantity: (portion.kind === 'known' && portion.quantity) || '1',
+                      quantity:
+                        portion.kind === 'known' && portion.unit === 'serving' && portion.quantity
+                          ? portion.quantity
+                          : '1',
                       unit: 'serving',
                       servingId,
                     },
@@ -236,22 +250,95 @@ export function FoodEditor({
           ) : null}
         </View>
 
-        {portion.kind === 'known' ? (
+        {portion.kind === 'known' && portion.unit === 'serving' ? (
           <View className="gap-3 pt-1">
-            <FormField
-              label={portion.unit === 'g' ? 'Jumlah porsi (g)' : 'Jumlah takaran'}
-              unit={portion.unit === 'g' ? 'g' : undefined}
-              value={portion.quantity}
-              onChangeText={(quantity) =>
-                onChange({ ...component, portion: { ...portion, quantity } })
-              }
-              editable={!disabled}
-              placeholder={portion.unit === 'g' ? 'Contoh: 125,5' : 'Contoh: 1'}
-              keyboardType="decimal-pad"
-            />
+            <View className="flex-row items-end gap-3">
+              <View className="flex-1">
+                <FormField
+                  label="Jumlah takaran porsi"
+                  unit="porsi"
+                  unitBadge
+                  keyboardType="decimal-pad"
+                  value={portion.quantity}
+                  onChangeText={(quantity) =>
+                    onChange({ ...component, portion: { ...portion, quantity } })
+                  }
+                  editable={!disabled}
+                  placeholder="Contoh: 1"
+                />
+              </View>
+              {/* Steppers [-] and [+] */}
+              <View className="flex-row items-center gap-1.5 pb-0.5">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={
+                    disabled ||
+                    (() => {
+                      const p = parsePortionQuantity(portion.quantity);
+                      return 'value' in p && p.value <= 0.25;
+                    })()
+                  }
+                  onPress={() => {
+                    const parsed = parsePortionQuantity(portion.quantity);
+                    const curr = 'value' in parsed ? parsed.value : 1;
+                    const next = Math.max(0.25, Math.round((curr - 0.25) * 100) / 100);
+                    onChange({ ...component, portion: { ...portion, quantity: String(next) } });
+                  }}
+                  accessibilityLabel="Kurangi porsi 0.25"
+                  className="h-12 w-12 rounded-control p-0 items-center justify-center">
+                  <Text className="text-xl font-bold text-foreground">−</Text>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={disabled}
+                  onPress={() => {
+                    const parsed = parsePortionQuantity(portion.quantity);
+                    const curr = 'value' in parsed ? parsed.value : 0;
+                    const next = Math.round((curr + 0.25) * 100) / 100;
+                    onChange({ ...component, portion: { ...portion, quantity: String(next) } });
+                  }}
+                  accessibilityLabel="Tambah porsi 0.25"
+                  className="h-12 w-12 rounded-control p-0 items-center justify-center">
+                  <Text className="text-xl font-bold text-foreground">+</Text>
+                </Button>
+              </View>
+            </View>
 
-            {portion.unit === 'serving' && selectedFood ? (
-              <View className="gap-2">
+            {/* Quick multiplier chips */}
+            <View className="flex-row flex-wrap items-center gap-2">
+              {['0.5', '1', '1.5', '2'].map((val) => {
+                const isSelected = portion.quantity === val;
+                return (
+                  <Pressable
+                    key={val}
+                    onPress={() =>
+                      onChange({ ...component, portion: { ...portion, quantity: val } })
+                    }
+                    accessibilityRole="button"
+                    accessibilityLabel={`Pilih ${val} porsi`}
+                    className={cn(
+                      'rounded-full border px-3 py-1.5',
+                      isSelected
+                        ? 'border-primary bg-carin-olive-soft'
+                        : 'border-border/80 bg-muted/20 active:bg-muted/40'
+                    )}>
+                    <Text
+                      variant="caption"
+                      className={cn(
+                        'font-medium text-foreground',
+                        isSelected && 'font-semibold text-primary'
+                      )}>
+                      {val}x porsi
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            {selectedFood?.servings.length ? (
+              <View className="gap-2 pt-1">
                 <Text variant="caption" className="text-muted-foreground">
                   Pilih takaran yang cocok:
                 </Text>
@@ -276,6 +363,93 @@ export function FoodEditor({
               </View>
             ) : null}
           </View>
+        ) : portion.kind === 'known' && portion.unit === 'g' ? (
+          <View className="gap-3 pt-1">
+            <View className="flex-row items-end gap-3">
+              <View className="flex-1">
+                <FormField
+                  label="Jumlah porsi (g)"
+                  unit="g"
+                  unitBadge
+                  keyboardType="decimal-pad"
+                  value={portion.quantity}
+                  onChangeText={(quantity) =>
+                    onChange({ ...component, portion: { ...portion, quantity } })
+                  }
+                  editable={!disabled}
+                  placeholder="Contoh: 100"
+                />
+              </View>
+              {/* Steppers [-25g] and [+25g] */}
+              <View className="flex-row items-center gap-1.5 pb-0.5">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={
+                    disabled ||
+                    (() => {
+                      const p = parsePortionQuantity(portion.quantity);
+                      return 'value' in p && p.value <= 25;
+                    })()
+                  }
+                  onPress={() => {
+                    const parsed = parsePortionQuantity(portion.quantity);
+                    const curr = 'value' in parsed ? parsed.value : 100;
+                    const next = Math.max(25, Math.round(curr - 25));
+                    onChange({ ...component, portion: { ...portion, quantity: String(next) } });
+                  }}
+                  accessibilityLabel="Kurangi 25 gram"
+                  className="h-12 px-3 rounded-control items-center justify-center">
+                  <Text className="text-sm font-bold text-foreground">−25g</Text>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={disabled}
+                  onPress={() => {
+                    const parsed = parsePortionQuantity(portion.quantity);
+                    const curr = 'value' in parsed ? parsed.value : 0;
+                    const next = Math.round(curr + 25);
+                    onChange({ ...component, portion: { ...portion, quantity: String(next) } });
+                  }}
+                  accessibilityLabel="Tambah 25 gram"
+                  className="h-12 px-3 rounded-control items-center justify-center">
+                  <Text className="text-sm font-bold text-foreground">+25g</Text>
+                </Button>
+              </View>
+            </View>
+
+            {/* Quick gram chips */}
+            <View className="flex-row flex-wrap items-center gap-2">
+              {['50', '100', '150', '200', '250'].map((val) => {
+                const isSelected = portion.quantity === val;
+                return (
+                  <Pressable
+                    key={val}
+                    onPress={() =>
+                      onChange({ ...component, portion: { ...portion, quantity: val } })
+                    }
+                    accessibilityRole="button"
+                    accessibilityLabel={`Pilih ${val} gram`}
+                    className={cn(
+                      'rounded-full border px-3 py-1.5',
+                      isSelected
+                        ? 'border-primary bg-carin-olive-soft'
+                        : 'border-border/80 bg-muted/20 active:bg-muted/40'
+                    )}>
+                    <Text
+                      variant="caption"
+                      className={cn(
+                        'font-medium text-foreground',
+                        isSelected && 'font-semibold text-primary'
+                      )}>
+                      {val} g
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
         ) : null}
       </View>
 
@@ -285,18 +459,30 @@ export function FoodEditor({
         </Text>
       ) : null}
 
-      <View className="flex-row gap-3 pt-2">
-        <Button
-          variant="tactile"
-          className="min-h-12 flex-1"
-          disabled={disabled}
-          onPress={onCommit}>
-          <Text>{isEditing ? 'Simpan komponen' : 'Tambah komponen'}</Text>
-        </Button>
-        <Button variant="outline" className="min-h-12" disabled={disabled} onPress={onCancel}>
-          <Text>Batal</Text>
-        </Button>
-      </View>
-    </View>
+      {showFooterButtons && onCommit && onCancel ? (
+        <View className="flex-row gap-3 pt-2">
+          <Button
+            variant="tactile"
+            className="min-h-12 flex-1"
+            disabled={disabled}
+            onPress={onCommit}>
+            <Text>{isEditing ? 'Simpan komponen' : 'Tambah komponen'}</Text>
+          </Button>
+          <Button variant="outline" className="min-h-12" disabled={disabled} onPress={onCancel}>
+            <Text>Batal</Text>
+          </Button>
+        </View>
+      ) : null}
+    </>
   );
+
+  if (showCardWrapper) {
+    return (
+      <View className="gap-4 rounded-summary border border-border/70 bg-card p-4 sm:p-5">
+        {content}
+      </View>
+    );
+  }
+
+  return <View className="gap-4">{content}</View>;
 }

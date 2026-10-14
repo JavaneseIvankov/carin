@@ -114,11 +114,15 @@ export default function Exams() {
                 accessibilityState={{ selected }}
                 onPress={() => changeFilter(filter.value)}
                 className={`min-h-11 justify-center rounded-full border px-4 py-2 ${
-                  selected ? 'border-primary bg-primary' : 'border-border/60 bg-card'
+                  selected
+                    ? 'border-primary/40 bg-carin-olive-soft'
+                    : 'border-border/60 bg-card'
                 }`}>
                 <Text
-                  className={`text-xs font-semibold ${
-                    selected ? 'text-primary-foreground' : 'text-foreground'
+                  className={`text-xs ${
+                    selected
+                      ? 'font-semibold text-foreground'
+                      : 'font-medium text-muted-foreground'
                   }`}>
                   {filter.label}
                 </Text>
@@ -140,11 +144,15 @@ export default function Exams() {
               accessibilityState={{ selected: !seriesKey }}
               onPress={() => changeSeries(null)}
               className={`min-h-11 justify-center rounded-full border px-4 py-2 ${
-                !seriesKey ? 'border-primary bg-primary' : 'border-border/60 bg-card'
+                !seriesKey
+                  ? 'border-primary/40 bg-carin-olive-soft'
+                  : 'border-border/60 bg-card'
               }`}>
               <Text
-                className={`text-xs font-semibold ${
-                  !seriesKey ? 'text-primary-foreground' : 'text-foreground'
+                className={`text-xs ${
+                  !seriesKey
+                    ? 'font-semibold text-foreground'
+                    : 'font-medium text-muted-foreground'
                 }`}>
                 Semua seri
               </Text>
@@ -158,11 +166,15 @@ export default function Exams() {
                   accessibilityState={{ selected }}
                   onPress={() => changeSeries(selected ? null : item.key)}
                   className={`min-h-11 justify-center rounded-full border px-4 py-2 ${
-                    selected ? 'border-primary bg-primary' : 'border-border/60 bg-card'
+                    selected
+                      ? 'border-primary/40 bg-carin-olive-soft'
+                      : 'border-border/60 bg-card'
                   }`}>
                   <Text
-                    className={`text-xs font-semibold ${
-                      selected ? 'text-primary-foreground' : 'text-foreground'
+                    className={`text-xs ${
+                      selected
+                        ? 'font-semibold text-foreground'
+                        : 'font-medium text-muted-foreground'
                     }`}>
                     {localizedSeriesLabel(item)}
                   </Text>

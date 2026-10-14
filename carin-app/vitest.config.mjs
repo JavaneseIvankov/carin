@@ -9,6 +9,7 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('.', import.meta.url)),
       'react-native': 'react-native-web',
+      'expo-crypto': fileURLToPath(new URL('./test/mocks/expo-crypto.ts', import.meta.url)),
     },
   },
 });

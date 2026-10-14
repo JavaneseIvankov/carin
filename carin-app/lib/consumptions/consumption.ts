@@ -160,6 +160,30 @@ export function formatLocalDateTime(
   return zonedDateParts(instant, timeZone);
 }
 
+export const MANUAL_CONSUMPTION_CREATE_DRAFT_NAME = 'manual-consumption:create';
+
+export type SavedManualConsumptionDraft = {
+  draftId: string;
+  timeZone: string;
+  form: ManualConsumptionDraft;
+};
+
+export function createEmptyManualConsumptionDraft(timeZone: string): SavedManualConsumptionDraft {
+  const local = formatLocalDateTime(new Date(), timeZone);
+  return {
+    draftId: createIdempotencyKey(),
+    timeZone,
+    form: {
+      consumedDate: local.date,
+      consumedTime: local.time,
+      catalogVersion: 'unavailable',
+      components: [],
+      activeComponent: null,
+      editingComponentId: null,
+    },
+  };
+}
+
 export function localDateTimeToIso(
   date: string,
   time: string,
