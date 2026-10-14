@@ -1,0 +1,482 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { components } from '@/lib/api/generated/app-api';
+import { createAppRepository, ApiError } from '@/lib/api/repository';
+import { createDraftStore } from '@/lib/data/drafts';
+import type { DataScope, StorageAdapter } from '@/lib/data/scope';
+import { createManualConsumptionActions } from '@/lib/consumptions/manual-actions';
+import {
+  createPhotoConfirmationFlow,
+  photoConfirmationDraftName,
+} from '@/lib/consumptions/photo-confirmation-flow';
+
+type AnalysisJob = components['schemas']['AnalysisJob'];
+type AnalysisResult = components['schemas']['ai__AnalysisResult'];
+type Scan = components['schemas']['Scan'];
+
+const scope: DataScope = { environment: 'test', userId: 'user-1' };
+
+class MemoryStorage implements StorageAdapter {
+  private readonly values = new Map<string, string>();
+
+  async getItem(key: string) {
+    return this.values.get(key) ?? null;
+  }
+
+  async setItem(key: string, value: string) {
+    this.values.set(key, value);
+  }
+
+  async getAllKeys() {
+    return [...this.values.keys()];
+  }
+
+  async removeItem(key: string) {
+    this.values.delete(key);
+  }
+}
+
+function makeScan(fields: Partial<Scan> = {}): Scan {
+  return {
+    createdAt: '2026-10-14T04:00:00.000Z',
+    defaultConsumptionId: null,
+    id: 'scan-1',
+    latestJobId: 'job-1',
+    latestResultId: 'result-1',
+    photoId: 'photo-1',
+    revision: 2,
+    ...fields,
+  } as Scan;
+}
+
+function makeJob(fields: Partial<AnalysisJob> = {}): AnalysisJob {
+  return {
+    attempts: 1,
+    createdAt: '2026-10-14T04:00:00.000Z',
+    error: null,
+    finishedAt: '2026-10-14T04:01:00.000Z',
+    id: 'job-1',
+    inputKind: 'photo',
+    result: null,
+    resultId: 'result-1',
+    scanId: 'scan-1',
+    startedAt: '2026-10-14T04:00:10.000Z',
+    status: 'completed',
+    targetId: 'scan-1',
+    targetRevision: 2,
+    targetType: 'scan',
+    ...fields,
+  } as AnalysisJob;
+}
+
+function makeResult(fields: Partial<AnalysisResult> = {}): AnalysisResult {
+  return {
+    attentions: [],
+    catalogVersion: 'catalog-v5',
+    components: [
+      {
+        id: 'component-1',
+        displayName: 'Nasi goreng',
+        catalogFoodId: 'food-rice',
+        preparation: 'digoreng',
+        matchStatus: 'matched',
+        nutrients: {},
+        nutrientSourceIds: {},
+        per100g: {},
+        portion: {
+          basis: 'porsi',
+          grams: 125,
+          origin: 'photo_estimate',
+          quantity: 125,
+          servingId: null,
+          sourceId: null,
+          unit: 'g',
+        },
+        sourceIds: [],
+      },
+    ],
+    computedAt: '2026-10-14T04:00:00.000Z',
+    contractVersion: '1.0.0',
+    coverage: {},
+    dataMode: 'synthetic',
+    inputKind: 'photo',
+    limitations: [],
+    nutritionDatasetVersion: 'nutrition-v1',
+    operationId: 'job-operation-1',
+    overallAttention: 'insufficient_information',
+    profileVersion: 1,
+    ruleSetVersion: 'rules-v1',
+    sources: [],
+    supportStatus: 'partial',
+    totals: {},
+    ...fields,
+  } as AnalysisResult;
+}
+
+function read<T>(data: T, stale = false) {
+  return { data, stale, updatedAt: 1 };
+}
+
+function errorWithCode(code: string) {
+  return Object.assign(new ApiError(409, code), { code });
+}
+
+function createHarness(options: {
+  occurrence?: 'default_confirmation' | 'new_occurrence';
+  useLastSuccessfulResult?: boolean;
+  onCreate?: (input: unknown, remote: RemoteState) => Promise<unknown>;
+  storage?: MemoryStorage;
+} = {}) {
+  const storage = options.storage ?? new MemoryStorage();
+  const remote: RemoteState = {
+    me: { timezone: 'Asia/Jakarta' },
+    scan: makeScan(),
+    jobs: new Map([['job-1', makeJob()]]),
+    results: new Map([['result-1', makeResult()]]),
+  };
+  const getMe = vi.fn(async () => read(remote.me));
+  const getScan = vi.fn(async (id: string) => read(remote.scan));
+  const getAnalysisJob = vi.fn(async (id: string) => {
+    const found = remote.jobs.get(id);
+    if (!found) throw new Error(`Missing job ${id}`);
+    return read(found);
+  });
+  const getAnalysisResult = vi.fn(async (id: string) => {
+    const found = remote.results.get(id);
+    if (!found) throw new Error(`Missing result ${id}`);
+    return read(found);
+  });
+  const api = { getMe, getScan, getAnalysisJob, getAnalysisResult };
+  const create = vi.fn(async (input: unknown) =>
+    options.onCreate ? options.onCreate(input, remote) : { id: 'consumption-saved' }
+  );
+  const makeKey = vi.fn(() => '00000000-0000-4000-8000-000000000101');
+  const actions = createManualConsumptionActions({
+    scope,
+    storage,
+    api: { create: create as never, update: vi.fn() as never, delete: vi.fn() as never },
+    makeKey,
+  });
+  const connectivity = { current: 'online' as 'online' | 'offline' | 'unknown' };
+  const flow = createPhotoConfirmationFlow({
+    scanId: 'scan-1',
+    occurrence: options.occurrence ?? 'default_confirmation',
+    useLastSuccessfulResult: options.useLastSuccessfulResult ?? false,
+    scope,
+    storage,
+    api: api as never,
+    actions,
+    connectivity: () => connectivity.current,
+    now: () => new Date('2026-10-14T05:30:00.000Z'),
+  });
+
+  return { flow, storage, remote, api, create, makeKey, connectivity, actions };
+}
+
+type RemoteState = {
+  me: { timezone: string };
+  scan: Scan;
+  jobs: Map<string, AnalysisJob>;
+  results: Map<string, AnalysisResult>;
+};
+
+describe('photo consumption route flow', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('follows the scan latest job and result IDs and persists a scoped draft for confirmation', async () => {
+    const harness = createHarness({ occurrence: 'new_occurrence' });
+    const snapshot = await harness.flow.load();
+
+    expect(harness.api.getMe).toHaveBeenCalledOnce();
+    expect(harness.api.getScan).toHaveBeenCalledWith('scan-1');
+    expect(harness.api.getAnalysisJob).toHaveBeenCalledWith('job-1');
+    expect(harness.api.getAnalysisResult).toHaveBeenCalledWith('result-1');
+    expect(snapshot.availability).toBe('confirm');
+    expect(snapshot.record?.sourceResultId).toBe('result-1');
+
+    const saved = await createDraftStore(harness.storage).load(
+      scope,
+      photoConfirmationDraftName('scan-1', 'new_occurrence')
+    );
+    expect(saved).toEqual(snapshot.record);
+  });
+
+  it('does not expose the form while a latest correction is pending or no result exists', async () => {
+    const pending = createHarness({ occurrence: 'new_occurrence' });
+    pending.remote.jobs.set(
+      'job-1',
+      makeJob({ status: 'processing', inputKind: 'correction', targetRevision: 3 })
+    );
+    const pendingSnapshot = await pending.flow.load();
+    expect(pendingSnapshot.availability).toBe('correction_pending');
+    expect(pendingSnapshot.record).toBeUndefined();
+
+    const noResult = createHarness({ occurrence: 'new_occurrence' });
+    noResult.remote.scan = makeScan({ latestResultId: null });
+    const unavailable = await noResult.flow.load();
+    expect(unavailable.availability).toBe('unavailable');
+    expect(unavailable.record).toBeUndefined();
+    expect(noResult.api.getAnalysisResult).not.toHaveBeenCalled();
+  });
+
+  it('opens a saved default record before analysis gates, while new occurrences remain gated', async () => {
+    const defaultRecord = createHarness();
+    defaultRecord.remote.scan = makeScan({ defaultConsumptionId: 'consumption-existing' });
+    defaultRecord.remote.jobs.set('job-1', makeJob({ status: 'processing', inputKind: 'correction', targetRevision: 3 }));
+    const openExisting = await defaultRecord.flow.load();
+    expect(openExisting.availability).toBe('open_existing');
+    expect(openExisting.scan?.defaultConsumptionId).toBe('consumption-existing');
+    expect(defaultRecord.api.getAnalysisJob).not.toHaveBeenCalled();
+
+    const newOccurrence = createHarness({ occurrence: 'new_occurrence' });
+    newOccurrence.remote.scan = makeScan({ defaultConsumptionId: 'consumption-existing', latestResultId: null });
+    const gated = await newOccurrence.flow.load();
+    expect(gated.availability).toBe('unavailable');
+  });
+
+  it('requires the explicit last-successful-result choice after a failed correction', async () => {
+    const failed = createHarness({ occurrence: 'new_occurrence' });
+    failed.remote.jobs.set(
+      'job-1',
+      makeJob({ status: 'failed', inputKind: 'correction', resultId: null, targetRevision: 3 })
+    );
+    const blocked = await failed.flow.load();
+    expect(blocked.availability).toBe('unavailable');
+    expect(blocked.record).toBeUndefined();
+
+    const selected = createHarness({ occurrence: 'new_occurrence', useLastSuccessfulResult: true });
+    selected.remote.jobs.set(
+      'job-1',
+      makeJob({ status: 'failed', inputKind: 'correction', resultId: null, targetRevision: 3 })
+    );
+    const confirmed = await selected.flow.load();
+    expect(confirmed.availability).toBe('confirm');
+    expect(confirmed.record?.sourceResultId).toBe('result-1');
+  });
+
+  it('refetches scan, latest job, and latest result before submit and blocks a stale draft', async () => {
+    const harness = createHarness({ occurrence: 'new_occurrence' });
+    const loaded = await harness.flow.load();
+    expect(loaded.record).toBeDefined();
+
+    harness.remote.scan = makeScan({ latestJobId: 'job-2', latestResultId: 'result-2' });
+    harness.remote.jobs.set('job-2', makeJob({ id: 'job-2', resultId: 'result-2' }));
+    harness.remote.results.set('result-2', makeResult());
+    const afterSubmit = await harness.flow.submit(loaded.record!.form);
+
+    expect(harness.api.getScan).toHaveBeenCalledTimes(2);
+    expect(harness.api.getAnalysisJob).toHaveBeenLastCalledWith('job-2');
+    expect(harness.api.getAnalysisResult).toHaveBeenLastCalledWith('result-2');
+    expect(afterSubmit.availability).toBe('unavailable');
+    expect(afterSubmit.record?.sourceResultId).toBe('result-1');
+    expect(harness.create).not.toHaveBeenCalled();
+  });
+
+  it('does not attempt a write when offline and retains the draft', async () => {
+    const harness = createHarness({ occurrence: 'new_occurrence' });
+    const loaded = await harness.flow.load();
+    harness.connectivity.current = 'offline';
+
+    const afterSubmit = await harness.flow.submit(loaded.record!.form);
+
+    expect(harness.create).not.toHaveBeenCalled();
+    expect(afterSubmit.record).toEqual(loaded.record);
+    expect(afterSubmit.submitMessage).toContain('Perlu koneksi internet');
+  });
+
+  it('retries an identical ambiguous save with the same draft ID and idempotency key', async () => {
+    const calls: unknown[] = [];
+    let attempt = 0;
+    const harness = createHarness({
+      occurrence: 'new_occurrence',
+      onCreate: async (input) => {
+        calls.push(input);
+        attempt += 1;
+        if (attempt === 1) throw new TypeError('request timed out');
+        return { id: 'consumption-from-server' };
+      },
+    });
+    const loaded = await harness.flow.load();
+    const failed = await harness.flow.submit(loaded.record!.form);
+    expect(failed.record).toEqual(loaded.record);
+    expect(failed.submitMessage).toContain('Layanan belum tersedia');
+
+    const saved = await harness.flow.submit(loaded.record!.form);
+
+    expect(saved.savedId).toBe('consumption-from-server');
+    expect(calls).toHaveLength(2);
+    expect(calls[0]).toEqual(calls[1]);
+    expect((calls[0] as { headers: { 'Idempotency-Key': string } }).headers['Idempotency-Key']).toBe(
+      '00000000-0000-4000-8000-000000000101'
+    );
+    expect(harness.makeKey).toHaveBeenCalledOnce();
+    expect(
+      await createDraftStore(harness.storage).load(
+        scope,
+        photoConfirmationDraftName('scan-1', 'new_occurrence')
+      )
+    ).toBeNull();
+  });
+
+  it.each([
+    [201, 'consumption-created'],
+    [200, 'consumption-existing'],
+  ])('uses the server record ID from a %i response', async (status, id) => {
+    const storage = new MemoryStorage();
+    const repository = createAppRepository({
+      scope,
+      storage,
+      connectivity: () => 'online',
+      onUnauthorized: async () => {},
+      fetcher: vi.fn(async () => Response.json({ id }, { status })) as unknown as typeof fetch,
+      baseUrl: 'https://api.test',
+    });
+    const actions = createManualConsumptionActions({
+      scope,
+      storage,
+      api: {
+        create: (input) => repository.write('createConsumption', input),
+        update: vi.fn() as never,
+        delete: vi.fn() as never,
+      },
+      makeKey: () => '00000000-0000-4000-8000-000000000102',
+    });
+    const harness = createHarness({ occurrence: 'default_confirmation', storage });
+    harness.flow = createPhotoConfirmationFlow({
+      scanId: 'scan-1',
+      occurrence: 'default_confirmation',
+      useLastSuccessfulResult: false,
+      scope,
+      storage,
+      api: harness.api as never,
+      actions,
+      connectivity: () => 'online',
+      now: () => new Date('2026-10-14T05:30:00.000Z'),
+    });
+    const loaded = await harness.flow.load();
+    const saved = await harness.flow.submit(loaded.record!.form);
+
+    expect(saved.savedId).toBe(id);
+  });
+
+  it('refreshes after ANALYSIS_PENDING and retains the draft with a wait message', async () => {
+    const harness = createHarness({
+      occurrence: 'new_occurrence',
+      onCreate: async (_input, remote) => {
+        remote.scan = makeScan({ latestJobId: 'job-pending' });
+        remote.jobs.set(
+          'job-pending',
+          makeJob({
+            id: 'job-pending',
+            status: 'queued',
+            inputKind: 'correction',
+            resultId: null,
+            targetRevision: 3,
+          })
+        );
+        throw errorWithCode('ANALYSIS_PENDING');
+      },
+    });
+    const loaded = await harness.flow.load();
+
+    const afterConflict = await harness.flow.submit(loaded.record!.form);
+
+    expect(harness.api.getScan).toHaveBeenCalledTimes(3);
+    expect(harness.api.getAnalysisJob).toHaveBeenLastCalledWith('job-pending');
+    expect(afterConflict.availability).toBe('correction_pending');
+    expect(afterConflict.submitMessage).toContain('Perbaikan analisis masih berlangsung');
+    expect(afterConflict.record).toEqual(loaded.record);
+  });
+
+  it('refreshes after a stale-source conflict and keeps the old draft for an explicit rebuild', async () => {
+    const harness = createHarness({
+      occurrence: 'new_occurrence',
+      onCreate: async (_input, remote) => {
+        remote.scan = makeScan({ latestJobId: 'job-2', latestResultId: 'result-2' });
+        remote.jobs.set('job-2', makeJob({ id: 'job-2', resultId: 'result-2' }));
+        remote.results.set('result-2', makeResult({ components: [{
+          ...makeResult().components[0],
+          id: 'component-2',
+          displayName: 'Nasi putih',
+        }] }));
+        throw errorWithCode('SOURCE_REVISION_CONFLICT');
+      },
+    });
+    const loaded = await harness.flow.load();
+
+    const afterConflict = await harness.flow.submit(loaded.record!.form);
+
+    expect(harness.api.getScan).toHaveBeenCalledTimes(3);
+    expect(afterConflict.availability).toBe('unavailable');
+    expect(afterConflict.scan?.latestResultId).toBe('result-2');
+    expect(afterConflict.record).toEqual(loaded.record);
+    expect(afterConflict.submitMessage).toContain('Hasil analisis berubah');
+
+    const rebuilt = await harness.flow.restartFromLatestResult();
+    expect(rebuilt.availability).toBe('confirm');
+    expect(rebuilt.record?.sourceResultId).toBe('result-2');
+    expect(rebuilt.record?.draftId).not.toBe(loaded.record?.draftId);
+    expect(rebuilt.record?.form.components[0]?.displayName).toBe('Nasi putih');
+    expect(rebuilt.record?.form.consumedTime).toBe(loaded.record?.form.consumedTime);
+  });
+
+  it('reloads an existing default after CONSUMPTION_ALREADY_CONFIRMED', async () => {
+    const harness = createHarness({
+      onCreate: async (_input, remote) => {
+        remote.scan = makeScan({ defaultConsumptionId: 'consumption-existing' });
+        throw errorWithCode('CONSUMPTION_ALREADY_CONFIRMED');
+      },
+    });
+    const loaded = await harness.flow.load();
+
+    const afterConflict = await harness.flow.submit(loaded.record!.form);
+
+    expect(harness.api.getScan).toHaveBeenCalledTimes(3);
+    expect(afterConflict.availability).toBe('open_existing');
+    expect(afterConflict.scan?.defaultConsumptionId).toBe('consumption-existing');
+    expect(afterConflict.conflict).toBe('already_confirmed');
+    expect(afterConflict.record).toEqual(loaded.record);
+  });
+});
+
+describe('photo confirmation conflict codes', () => {
+  it('preserves API error codes needed to map analysis and duplicate conflicts', async () => {
+    const storage = new MemoryStorage();
+    const repository = createAppRepository({
+      scope,
+      storage,
+      connectivity: () => 'online',
+      onUnauthorized: async () => {},
+      fetcher: vi.fn(async () =>
+        Response.json(
+          { error: { code: 'ANALYSIS_PENDING', message: 'pending', details: {}, requestId: 'req-1', retryable: true } },
+          { status: 409 }
+        )
+      ) as unknown as typeof fetch,
+      baseUrl: 'https://api.test',
+    });
+
+    await expect(
+      repository.write('createConsumption', {
+        headers: { 'Idempotency-Key': '00000000-0000-4000-8000-000000000103' },
+        body: {
+          source: 'manual',
+          scanId: null,
+          sourceAnalysisResultId: null,
+          occurrence: 'new_occurrence',
+          consumedAt: '2026-10-14T05:30:00.000Z',
+          timezone: 'Asia/Jakarta',
+          components: [
+            {
+              id: 'component-1',
+              displayName: 'Nasi goreng',
+              catalogFoodId: null,
+              preparation: null,
+              portion: { kind: 'unknown' },
+            },
+          ],
+          catalogVersion: 'catalog-v5',
+        },
+      })
+    ).rejects.toMatchObject({ status: 409, code: 'ANALYSIS_PENDING' });
+  });
+});

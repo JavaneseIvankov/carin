@@ -30,7 +30,8 @@ export type ReadResult<T> = { data: T; updatedAt: number; stale: boolean };
 export class ApiError extends Error {
   constructor(
     public readonly status: number,
-    message: string
+    message: string,
+    public readonly code?: string
   ) {
     super(message);
     this.name = 'ApiError';
@@ -69,7 +70,14 @@ export function createAppRepository(deps: Dependencies) {
       throw new ApiError(401, 'Sesi berakhir. Silakan masuk kembali.');
     }
     if (!response.ok) {
-      throw new ApiError(response.status, `Permintaan gagal (${response.status}). Coba lagi.`);
+      let code: string | undefined;
+      try {
+        const error = (await response.clone().json()) as { error?: { code?: unknown } };
+        if (typeof error.error?.code === 'string') code = error.error.code;
+      } catch {
+        // Keep the transport error useful even when the response has no JSON error envelope.
+      }
+      throw new ApiError(response.status, `Permintaan gagal (${response.status}). Coba lagi.`, code);
     }
     if (response.status === 204) return undefined as AppResponse<O>;
     if (response.headers.get('content-type')?.startsWith('image/')) {
