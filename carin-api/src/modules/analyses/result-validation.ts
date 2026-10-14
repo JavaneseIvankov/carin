@@ -22,7 +22,7 @@ export type ValidationCatalog = {
   ruleSetVersion: string;
   dataMode: 'real' | 'synthetic';
   supportedPhotoFoodIds: string[];
-  conditions: Array<Pick<Ai['Condition'], 'id' | 'personalizationSupported'>>;
+  conditions: Ai['Condition'][];
   supportedRules: Array<Pick<Ai['SupportedRule'], 'ruleId' | 'conditionId' | 'sources'>>;
   foods: Array<{
     id: string;
@@ -77,6 +77,88 @@ function rounded(value: number): number {
 
 function equalNutrients(left: Nutrients, right: Nutrients): boolean {
   return nutrientKeys.every((key) => sameNumber(left[key], right[key]));
+}
+
+function hasRequiredProfileFields(profile: ProfileContext, requiredFields: string[]): boolean {
+  const values: Record<string, unknown> = {
+    heightCm: profile.heightCm,
+    weightKg: profile.weightKg,
+    sexForReference: profile.sexForReference,
+    activity: profile.activity,
+    smoking: profile.smoking,
+    diagnoses: {
+      state: profile.diagnosisState,
+      entries: [
+        ...profile.conditionIds.map((conditionId) => ({ conditionId, label: conditionId })),
+        ...profile.unsupportedConditionLabels.map((label) => ({ conditionId: null, label })),
+      ],
+    },
+    familyHistory: { state: 'not_provided', entries: [] },
+    allergies: { state: profile.allergyState, entries: profile.allergies },
+    clinicianNotes: null,
+  };
+  for (const path of requiredFields) {
+    let value: unknown = values;
+    const segments = path.split('.');
+    for (const segment of segments) {
+      if (!segment || value === null || typeof value !== 'object' || Array.isArray(value)) {
+        value = undefined;
+        break;
+      }
+      value = (value as Record<string, unknown>)[segment];
+    }
+    if (value === null || value === undefined) return false;
+    if (typeof value === 'string' && (!value.trim() ||
+        (segments.at(-1) === 'state' && ['not_provided', 'unknown'].includes(value)))) return false;
+    if (typeof value === 'number' && !Number.isFinite(value)) return false;
+    if (Array.isArray(value) && value.length === 0) return false;
+    if (typeof value === 'object' && !Array.isArray(value)) {
+      const knowledge = value as { state?: unknown; entries?: unknown };
+      if (typeof knowledge.state === 'string' &&
+          (knowledge.state === 'not_provided' || knowledge.state === 'unknown' ||
+            (knowledge.state === 'reported' && (!Array.isArray(knowledge.entries) || knowledge.entries.length === 0)))) {
+        return false;
+      }
+      if (Object.keys(value).length === 0) return false;
+    }
+  }
+  return true;
+}
+
+function conditionRequirementsMet(
+  result: AnalysisResult,
+  profile: ProfileContext,
+  condition: Ai['Condition'],
+): boolean {
+  if (!condition.personalizationSupported || !hasRequiredProfileFields(profile, condition.requiredProfileFields)) return false;
+  if ((condition.supportedAgeMinimum !== null || condition.supportedAgeMaximum !== null) && profile.ageYears === null) return false;
+  if (condition.supportedAgeMinimum !== null && profile.ageYears! < condition.supportedAgeMinimum) return false;
+  if (condition.supportedAgeMaximum !== null && profile.ageYears! > condition.supportedAgeMaximum) return false;
+  return condition.requiredNutrients.every((nutrient) => result.components.length > 0 &&
+    result.components.every((component) => component.nutrients[nutrient] !== null));
+}
+
+function hasPersonalizationSupportGap(
+  result: AnalysisResult,
+  profile: ProfileContext,
+  catalog: ValidationCatalog,
+): boolean {
+  if (profile.unsupportedConditionLabels.length > 0) return true;
+  return profile.conditionIds.some((conditionId) => {
+    const conditions = catalog.conditions.filter(({ id }) => id === conditionId);
+    return conditions.length !== 1 ||
+      !conditionRequirementsMet(result, profile, conditions[0]!) ||
+      !catalog.supportedRules.some((rule) => rule.conditionId === conditionId);
+  });
+}
+
+function emptyProfile(profile: ProfileContext): boolean {
+  return profile.profileVersion === 0 || (
+    profile.heightCm === null && profile.weightKg === null && profile.sexForReference === null &&
+    profile.diagnosisState === 'not_provided' && profile.conditionIds.length === 0 &&
+    profile.unsupportedConditionLabels.length === 0 && profile.allergyState === 'not_provided' &&
+    profile.allergies.length === 0 && profile.activity === null && profile.smoking === null
+  );
 }
 
 function validateSources(result: AnalysisResult, catalog: ValidationCatalog): Map<string, Source> {
@@ -261,7 +343,7 @@ function validateRuleClaims(
     const rules = catalog.supportedRules.filter(({ ruleId, conditionId }) =>
       ruleId === attention.ruleId && conditionId === attention.conditionId,
     );
-    if (conditions.length !== 1 || !conditions[0]!.personalizationSupported || rules.length !== 1) invalid();
+    if (conditions.length !== 1 || !conditionRequirementsMet(result, profile, conditions[0]!) || rules.length !== 1) invalid();
     const supportedSources = rules[0]!.sources;
     if (attention.sourceIds.length === 0 || attention.sourceIds.some((sourceId) => {
       const returned = sources.get(sourceId);
@@ -276,6 +358,20 @@ function validateRuleClaims(
         (source.kind === 'synthetic' && source.datasetVersion === catalog.ruleSetVersion)) &&
         !citedRuleSourceIds.has(source.id)) invalid();
   }
+}
+
+function validateOverallAttention(
+  result: AnalysisResult,
+  profile: ProfileContext,
+  catalog: ValidationCatalog,
+): void {
+  const requiresInsufficient = result.limitations.some(({ critical }) => critical) || result.supportStatus === 'unrecognized';
+  const hasSupportGap = hasPersonalizationSupportGap(result, profile, catalog);
+  if ((requiresInsufficient || hasSupportGap || emptyProfile(profile)) && result.overallAttention !== 'insufficient_information') {
+    invalid();
+  }
+  if (result.overallAttention === 'needs_attention' && result.attentions.length === 0) invalid();
+  if (result.overallAttention === 'considerable' && result.attentions.length > 0) invalid();
 }
 
 export function validateAnalysisResult(
@@ -307,4 +403,5 @@ export function validateAnalysisResult(
     if (limitation.componentIds.some((id) => !componentIds.has(id))) invalid();
   }
   validateTotalsAndStatus(result);
+  validateOverallAttention(result, expectation.profile, catalog);
 }

@@ -13,21 +13,26 @@ follow-up adds the optional `supportedRules` AI capability contract and generate
 consumers, persists the exact imported capability manifest in append-only migration
 `carin-api/drizzle/0007_rare_ben_parker.sql`, and rejects photo-food matches outside
 the imported allowlist. Rule claims require an exact imported rule/condition/source,
-the condition must be present in the frozen profile, and profile-version-zero or
-empty-condition snapshots cannot publish attention claims. Missing or version-
-mismatched capability authority fails closed. Synthetic fixtures declare explicit
-supported food IDs, rules, conditions, and sources; no real source/rule data was
-invented. Tests cover missing authority, unsupported photo foods, unbacked or
-mismatched citations, absent profile conditions, and existing correction/fencing
-paths. The updated implementation plan is
+the condition must be present in the frozen profile, and its declared profile
+fields, nutrient coverage, and age range must be satisfied. `overallAttention` is
+rejected when it conflicts with critical limitations, unrecognized support, profile
+gaps, or an empty snapshot. Scan creation checks current manifest availability
+before persisting snapshot, scan, or job state and returns
+`CATALOG_VERSION_UNAVAILABLE` without side effects if authority is absent. Missing
+or version-mismatched capability authority also fails closed during worker
+validation. Synthetic fixtures declare explicit supported food IDs, rules,
+conditions, and sources; no real source/rule data was invented. Tests cover
+unsupported photo foods, unbacked or mismatched citations, missing profile
+requirements and conditions, attention-status conflicts, manifest-less catalog
+creation, and existing correction/fencing paths. The updated implementation plan is
 `docs/superpowers/plans/2026-10-14-c18-scan-analysis-api.md`.
 
 Verification (run from `carin-api/` unless stated otherwise):
 
 - `pnpm run typecheck` passed.
 - `pnpm run lint` passed.
-- `pnpm run test:unit` passed: 22 files, 171 tests.
-- `pnpm run test:integration` passed: 14 files, 178 tests, using disposable
+- `pnpm run test:unit` passed: 22 files, 180 tests.
+- `pnpm run test:integration` passed: 14 files, 179 tests, using disposable
   PostgreSQL containers through Docker.
 - `pnpm run build` passed.
 - `pnpm run db:generate` reported no schema changes after migration `0007`.
