@@ -1,5 +1,5 @@
 import { serve } from '@hono/node-server';
-import { createApp } from './app.js';
+import { createVerifiedApp } from './app.js';
 import { loadConfig } from './config.js';
 import { createPostgresPool } from './health/postgres-pool.js';
 import { postgresReadinessRepository } from './health/postgres-repository.js';
@@ -7,6 +7,7 @@ import { createReadinessService } from './health/readiness.js';
 import { createDatabase } from './db/client.js';
 import { createAuthRuntime } from './auth/runtime.js';
 import { enqueueAuthMail } from './modules/email/outbox.js';
+import { createMediaRuntimeOptions } from './modules/media/runtime.js';
 
 const config = loadConfig(process.env);
 const authSecret = config.betterAuthSecret;
@@ -29,13 +30,16 @@ const authRuntime = createAuthRuntime({
   },
   onEmailQueueFailure: () => process.stdout.write(`${JSON.stringify({ event: 'AUTH_EMAIL_QUEUE_FAILED' })}\n`),
 });
-const app = createApp({
+const mediaOptions = createMediaRuntimeOptions(db, config);
+const app = createVerifiedApp({
   readiness: createReadinessService(postgresReadinessRepository(pool)),
   log: (entry) => { process.stdout.write(`${JSON.stringify(entry)}\n`); },
   auth: authRuntime.auth,
-  account: { db, resolveSession: authRuntime.resolveSession },
-  legalConsent: { db, resolveSession: authRuntime.resolveSession },
+  db,
+  resolveSession: authRuntime.resolveSession,
   appLinkScheme: config.appLinkScheme,
+  media: { ...mediaOptions, resolveSession: authRuntime.resolveSession },
+  examinations: { db, resolveSession: authRuntime.resolveSession, cursorSecret: authSecret },
 });
 
 serve({ fetch: app.fetch, port: config.port });

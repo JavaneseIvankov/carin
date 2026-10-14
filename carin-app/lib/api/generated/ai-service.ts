@@ -126,6 +126,8 @@ export type components = {
       publishedAt: string;
       ruleSetVersion: string;
       supportedPhotoFoodIds: string[];
+      /** @description Exact rule, supported-condition and citation-source authority for rule outputs. Omission declares no publishable health-rule claims. */
+      supportedRules?: components['schemas']['SupportedRule'][];
     };
     CatalogFood: {
       aliases: string[];
@@ -330,6 +332,12 @@ export type components = {
       kind: 'nutrition' | 'portion' | 'health_rule' | 'synthetic';
       title: string;
       url: string | null;
+    };
+    /** @description Immutable capability authority binding one rule to a supported condition and its exact citation sources. */
+    SupportedRule: {
+      conditionId: string;
+      ruleId: string;
+      sources: components['schemas']['Source'][];
     };
   };
   responses: {

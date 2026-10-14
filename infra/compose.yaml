@@ -61,12 +61,20 @@ services:
       BETTER_AUTH_URL: ${BETTER_AUTH_URL:?Set BETTER_AUTH_URL in infra/.env}
       AUTH_TRUSTED_ORIGINS: ${AUTH_TRUSTED_ORIGINS:?Set AUTH_TRUSTED_ORIGINS in infra/.env}
       APP_LINK_SCHEME: ${APP_LINK_SCHEME:?Set APP_LINK_SCHEME in infra/.env}
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_BUCKET: ${MINIO_BUCKET:-carin-dev}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:?Set MINIO_ACCESS_KEY in infra/.env}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:?Set MINIO_SECRET_KEY in infra/.env}
+      MEDIA_SIGNING_SECRET: ${MEDIA_SIGNING_SECRET:?Set MEDIA_SIGNING_SECRET in infra/.env}
+      MEDIA_SIGNED_URL_BASE: ${MEDIA_SIGNED_URL_BASE:?Set MEDIA_SIGNED_URL_BASE in infra/.env}
       PORT: "3000"
     ports:
       - "${API_BIND_ADDRESS:-0.0.0.0}:${API_PORT:-3000}:3000"
     depends_on:
       migrate:
         condition: service_completed_successfully
+      minio:
+        condition: service_started
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health/live').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
       interval: 10s
@@ -98,7 +106,7 @@ services:
       - private
     restart: unless-stopped
 
-  # Prepared for C16. Do not start this profile before its worker entrypoint exists.
+  # Durable C16 worker; C18 injects private photo URL generation for scan jobs.
   worker:
     build:
       context: ../carin-api
@@ -111,6 +119,8 @@ services:
       MINIO_BUCKET: ${MINIO_BUCKET:-carin-dev}
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:?Set MINIO_ACCESS_KEY in infra/.env}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:?Set MINIO_SECRET_KEY in infra/.env}
+      MEDIA_SIGNING_SECRET: ${MEDIA_SIGNING_SECRET:?Set MEDIA_SIGNING_SECRET in infra/.env}
+      MEDIA_SIGNED_URL_BASE: ${MEDIA_SIGNED_URL_BASE:?Set MEDIA_SIGNED_URL_BASE in infra/.env}
       AI_SERVICE_URL: ${AI_SERVICE_URL:-http://ai-service:8000}
       AI_SERVICE_KEY: ${AI_SERVICE_KEY:-local-placeholder-change-before-use}
       AI_SERVICE_ALLOWED_HOSTS: ${AI_SERVICE_ALLOWED_HOSTS:-ai-service}

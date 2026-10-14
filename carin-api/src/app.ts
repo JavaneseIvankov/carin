@@ -9,8 +9,17 @@ import {
   registerAiConsentRoute,
   registerLegalRegistryRoute,
 } from "./modules/legal/routes.js";
+import { registerCatalogRoutes, type CatalogRouteDependencies } from "./catalog/routes.js";
 import { registerAccountRoutes } from './modules/account/routes.js';
 import { registerEmailLandingRoutes } from './modules/email/landing.js';
+import { registerProfileRoutes } from './modules/profile/routes.js';
+import { registerAnalysisJobRoutes, type AnalysisJobRouteDependencies } from "./jobs/routes.js";
+import { registerMediaRoutes, type MediaRouteDependencies } from "./modules/media/routes.js";
+import { registerAnalysisRoutes, type AnalysisRouteDependencies } from './modules/analyses/routes.js';
+import { registerScanRoutes, type ScanRouteDependencies } from './modules/scans/routes.js';
+import { registerConsumptionRoutes, type ConsumptionRouteDependencies } from './modules/consumptions/routes.js';
+import { registerExaminationRoutes } from './modules/examinations/routes.js';
+import { registerDashboardRoutes, type DashboardRouteDependencies } from './modules/dashboard/routes.js';
 
 export type RequestLog = {
   requestId: string;
@@ -24,9 +33,17 @@ export type AppDependencies = {
   log?: (entry: RequestLog) => void;
   registerRoutes?: (app: Hono<AppEnv>) => void;
   legalConsent?: { db: Database; resolveSession: SessionResolver };
+  catalog?: CatalogRouteDependencies;
   account?: { db: Database; resolveSession: SessionResolver };
+  examinations?: { db: Database; resolveSession: SessionResolver; cursorSecret: string };
+  dashboard?: DashboardRouteDependencies;
   auth?: { handler: (request: Request) => Promise<Response> };
   appLinkScheme?: string;
+  analysisJobs?: AnalysisJobRouteDependencies;
+  analyses?: AnalysisRouteDependencies;
+  scans?: ScanRouteDependencies;
+  consumptions?: ConsumptionRouteDependencies;
+  media?: MediaRouteDependencies;
 };
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -36,9 +53,17 @@ export function createApp({
   log,
   registerRoutes,
   legalConsent,
+  catalog,
   account,
+  examinations,
   auth,
   appLinkScheme,
+  analysisJobs,
+  analyses,
+  scans,
+  consumptions,
+  media,
+  dashboard,
 }: AppDependencies): Hono<AppEnv> {
   const app = new Hono<AppEnv>();
   app.use("*", async (c, next) => {
@@ -59,9 +84,20 @@ export function createApp({
   registerHealthRoutes(app, readiness);
   registerLegalRegistryRoute(app);
   if (legalConsent) registerAiConsentRoute(app, legalConsent);
-  if (account) registerAccountRoutes(app, account);
+  if (catalog) registerCatalogRoutes(app, catalog);
+  if (account) {
+    registerAccountRoutes(app, account);
+    registerProfileRoutes(app, account);
+  }
   if (appLinkScheme) registerEmailLandingRoutes(app, appLinkScheme);
+  if (examinations) registerExaminationRoutes(app, examinations);
+  if (dashboard) registerDashboardRoutes(app, dashboard);
   if (auth) app.all('/api/auth/*', (c) => auth.handler(c.req.raw));
+  if (analysisJobs) registerAnalysisJobRoutes(app, analysisJobs);
+  if (analyses) registerAnalysisRoutes(app, analyses);
+  if (scans) registerScanRoutes(app, scans);
+  if (consumptions) registerConsumptionRoutes(app, consumptions);
+  if (media) registerMediaRoutes(app, media);
 
   registerRoutes?.(app);
 
@@ -80,4 +116,27 @@ export function createApp({
     ),
   );
   return app;
+}
+
+export type VerifiedAppDependencies = Omit<
+  AppDependencies,
+  'account' | 'catalog' | 'legalConsent'
+> & {
+  db: Database;
+  resolveSession: SessionResolver;
+};
+
+export function createVerifiedApp({ db, resolveSession, ...dependencies }: VerifiedAppDependencies) {
+  const resources = { db, resolveSession };
+  return createApp({
+    ...dependencies,
+    account: resources,
+    legalConsent: resources,
+    catalog: resources,
+    analysisJobs: dependencies.analysisJobs ?? resources,
+    analyses: dependencies.analyses ?? resources,
+    scans: dependencies.scans ?? resources,
+    consumptions: dependencies.consumptions ?? resources,
+    dashboard: dependencies.dashboard ?? resources,
+  });
 }

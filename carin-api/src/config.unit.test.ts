@@ -72,6 +72,27 @@ describe('environment configuration', () => {
     }
   });
 
+  it('validates private photo storage configuration as one complete runtime seam', () => {
+    const media = {
+      ...valid,
+      MINIO_ENDPOINT: 'http://minio:9000',
+      MINIO_BUCKET: 'carin-dev',
+      MINIO_ACCESS_KEY: 'local-user',
+      MINIO_SECRET_KEY: 'local-secret',
+      MEDIA_SIGNING_SECRET: 'local-signing-secret-with-at-least-32-characters',
+      MEDIA_SIGNED_URL_BASE: 'http://192.168.1.50:3000',
+    };
+    expect(loadConfig(media)).toMatchObject({
+      minioEndpoint: media.MINIO_ENDPOINT,
+      minioBucket: media.MINIO_BUCKET,
+      minioAccessKey: media.MINIO_ACCESS_KEY,
+      mediaSignedUrlBase: media.MEDIA_SIGNED_URL_BASE,
+    });
+    expect(() => loadConfig({ ...media, MINIO_SECRET_KEY: undefined })).toThrow(/MINIO/);
+    expect(() => loadConfig({ ...media, MINIO_ENDPOINT: 'https://public.example' })).toThrow(/private/);
+    expect(() => loadConfig({ ...media, APP_ENV: 'staging', MEDIA_SIGNED_URL_BASE: 'http://api.example.test' })).toThrow(/HTTPS/);
+  });
+
   it.each([
     {}, { ...valid, APP_ENV: 'preview' }, { ...valid, DATABASE_URL: '' },
     { ...valid, DATABASE_URL: 'https://localhost/carin' },

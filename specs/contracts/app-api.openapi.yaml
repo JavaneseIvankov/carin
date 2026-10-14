@@ -2147,7 +2147,7 @@ components:
           type: "string"
           format: "date-time"
         snapshot:
-          $ref: "./ai-service.openapi.yaml#/components/schemas/AnalysisResult"
+          $ref: "#/components/schemas/ConsumptionSnapshot"
         attentionState:
           type: "string"
           enum: ["not_requested", "pending", "available", "failed"]
@@ -2159,6 +2159,68 @@ components:
             -
               type: "null"
       required: ["id", "revision", "source", "scanId", "sourceAnalysisResultId", "photoAvailable", "consumedAt", "timezone", "createdAt", "updatedAt", "snapshot", "attentionState", "attentionJobId"]
+    ConsumptionSnapshot:
+      type: "object"
+      additionalProperties: false
+      description: "Immutable nutrition snapshot for a consumption. dataMode=unavailable is reserved for unmatched manual inputs with null nutrition and an explicit limitation; it is not an AI-service result mode."
+      properties:
+        attentions:
+          type: "array"
+          items:
+            $ref: "./ai-service.openapi.yaml#/components/schemas/Attention"
+        catalogVersion:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        components:
+          type: "array"
+          items:
+            $ref: "./ai-service.openapi.yaml#/components/schemas/ComponentResult"
+        computedAt:
+          type: "string"
+          format: "date-time"
+        contractVersion:
+          $ref: "./ai-service.openapi.yaml#/components/schemas/ContractVersion"
+        coverage:
+          $ref: "./ai-service.openapi.yaml#/components/schemas/NutrientCoverage"
+        dataMode:
+          type: "string"
+          enum: ["real", "synthetic", "unavailable"]
+          description: "unavailable is app-only and allowed only for unmatched manual input with null nutrients and a limitation."
+        inputKind:
+          type: "string"
+          enum: ["photo", "manual", "correction"]
+        limitations:
+          type: "array"
+          items:
+            $ref: "./ai-service.openapi.yaml#/components/schemas/Limitation"
+        nutritionDatasetVersion:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        operationId:
+          type: "string"
+          format: "uuid"
+        overallAttention:
+          type: "string"
+          enum: ["considerable", "needs_attention", "insufficient_information"]
+        profileVersion:
+          type: "integer"
+          minimum: 0
+        ruleSetVersion:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        sources:
+          type: "array"
+          items:
+            $ref: "./ai-service.openapi.yaml#/components/schemas/Source"
+        supportStatus:
+          type: "string"
+          enum: ["complete", "partial", "unrecognized"]
+        totals:
+          $ref: "./ai-service.openapi.yaml#/components/schemas/Nutrients"
+      required: ["attentions", "catalogVersion", "components", "computedAt", "contractVersion", "coverage", "dataMode", "inputKind", "limitations", "nutritionDatasetVersion", "operationId", "overallAttention", "profileVersion", "ruleSetVersion", "sources", "supportStatus", "totals"]
     ConsumptionPage:
       type: "object"
       additionalProperties: false

@@ -848,6 +848,12 @@ components:
             minLength: 1
             maxLength: 500
           uniqueItems: true
+        supportedRules:
+          type: "array"
+          description: "Exact rule, supported-condition and citation-source authority for rule outputs. Omission declares no publishable health-rule claims."
+          items:
+            $ref: "#/components/schemas/SupportedRule"
+          uniqueItems: true
         nutrients:
           type: "array"
           items:
@@ -861,6 +867,26 @@ components:
           type: "string"
           format: "date-time"
       required: ["contractVersion", "catalogVersion", "nutritionDatasetVersion", "ruleSetVersion", "conditions", "supportedPhotoFoodIds", "nutrients", "dataMode", "publishedAt"]
+    SupportedRule:
+      type: "object"
+      additionalProperties: false
+      description: "Immutable capability authority binding one rule to a supported condition and its exact citation sources."
+      properties:
+        ruleId:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        conditionId:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        sources:
+          type: "array"
+          minItems: 1
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/Source"
+      required: ["ruleId", "conditionId", "sources"]
     CatalogPage:
       type: "object"
       additionalProperties: false

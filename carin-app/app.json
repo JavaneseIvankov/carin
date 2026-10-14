@@ -33,7 +33,24 @@
         }
       ],
       "expo-status-bar",
-      "expo-secure-store"
+      "@react-native-community/datetimepicker",
+      "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Carin menggunakan kamera untuk mengambil foto makanan yang ingin dianalisis.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Carin mengakses foto yang Anda pilih untuk analisis makanan.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

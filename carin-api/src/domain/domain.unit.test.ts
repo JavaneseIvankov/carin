@@ -10,7 +10,7 @@ import {
   scaleNutrients,
   type Nutrients,
 } from './nutrition.js';
-import { getDashboardWindow } from './time-window.js';
+import { getCalendarDayWindow, getDashboardWindow, getDashboardWindowForDate } from './time-window.js';
 import {
   getExaminationDatePrecision,
   getExaminationSeriesKey,
@@ -171,6 +171,44 @@ describe('timezone dashboard window', () => {
     expect(window.endExclusiveUtc).toBe('2026-03-10T04:00:00.000Z');
   });
 
+  it('uses the first occurrence of a local date when a midnight rollback repeats the prior date', () => {
+    expect(getCalendarDayWindow('1987-10-25', 'America/St_Johns').startAt).toBe(
+      '1987-10-25T02:30:00.000Z',
+    );
+  });
+
+  it.each([
+    ['0001-01-01', '0001-01-02'],
+    ['0099-01-01', '0099-01-02'],
+    ['0100-01-01', '0100-01-02'],
+  ])('supports early calendar year date %s', (date, nextDate) => {
+    expect(getCalendarDayWindow(date, 'UTC')).toEqual({
+      startAt: `${date}T00:00:00.000Z`,
+      endAt: `${nextDate}T00:00:00.000Z`,
+    });
+  });
+
+  it('builds the selected date and preceding six-day window across DST', () => {
+    expect(getDashboardWindowForDate('2026-03-09', 'America/New_York')).toEqual({
+      timezone: 'America/New_York',
+      startDate: '2026-03-03',
+      endDate: '2026-03-09',
+      startInclusiveUtc: '2026-03-03T05:00:00.000Z',
+      endExclusiveUtc: '2026-03-10T04:00:00.000Z',
+      dates: [
+        '2026-03-03', '2026-03-04', '2026-03-05', '2026-03-06',
+        '2026-03-07', '2026-03-08', '2026-03-09',
+      ],
+    });
+  });
+
+  it('uses half-open account-local day boundaries across the DST transition', () => {
+    expect(getCalendarDayWindow('2026-03-08', 'America/New_York')).toEqual({
+      startAt: '2026-03-08T05:00:00.000Z',
+      endAt: '2026-03-09T04:00:00.000Z',
+    });
+  });
+
   it('uses the first valid instant after a midnight DST gap', () => {
     const window = getDashboardWindow(new Date('2026-09-05T12:00:00.000Z'), 'America/Santiago');
     expect(window.endDate).toBe('2026-09-05');
@@ -234,6 +272,11 @@ describe('analysis job status invariants', () => {
       startedAt: null,
       finishedAt: null,
       error: null,
+    })).toBe(true);
+    expect(isValidAnalysisJobState({
+      ...failed,
+      startedAt: null,
+      error: { code: 'DEADLINE_EXCEEDED', message: 'Deadline passed before claim.', retryable: true },
     })).toBe(true);
     expect(isValidAnalysisJobState({ ...failed, status: 'processing', finishedAt: 'bad' })).toBe(false);
   });

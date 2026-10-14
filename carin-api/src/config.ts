@@ -12,6 +12,12 @@ export type AppConfig = {
   aiServiceUrl?: string;
   aiServiceKey?: string;
   aiServiceAllowedHosts: string[];
+  minioEndpoint?: string;
+  minioBucket?: string;
+  minioAccessKey?: string;
+  minioSecretKey?: string;
+  mediaSigningSecret?: string;
+  mediaSignedUrlBase?: string;
 };
 
 /**
@@ -110,6 +116,38 @@ export function loadConfig(env: Record<string, string | undefined>): AppConfig {
   if (authSettingsPresent && (!betterAuthSecret || !betterAuthUrl || !authTrustedOrigins.length || !appLinkScheme)) {
     throw new Error('BETTER_AUTH_SECRET, BETTER_AUTH_URL, AUTH_TRUSTED_ORIGINS, and APP_LINK_SCHEME must be configured together');
   }
+
+  const minioEndpoint = env.MINIO_ENDPOINT?.trim();
+  const minioBucket = env.MINIO_BUCKET?.trim();
+  const minioAccessKey = env.MINIO_ACCESS_KEY?.trim();
+  const minioSecretKey = env.MINIO_SECRET_KEY?.trim();
+  const mediaSigningSecret = env.MEDIA_SIGNING_SECRET?.trim();
+  const mediaSignedUrlBase = env.MEDIA_SIGNED_URL_BASE?.trim();
+  const mediaSettingsPresent = Boolean(
+    minioEndpoint || minioBucket || minioAccessKey || minioSecretKey || mediaSigningSecret || mediaSignedUrlBase,
+  );
+  if (mediaSettingsPresent) {
+    if (!minioEndpoint || !minioBucket || !minioAccessKey || !minioSecretKey || !mediaSigningSecret || !mediaSignedUrlBase) {
+      throw new Error('MINIO and MEDIA settings must be configured together');
+    }
+    let minioUrl: URL;
+    try { minioUrl = new URL(minioEndpoint); } catch { throw new Error('MINIO_ENDPOINT must be a valid private URL'); }
+    if (!['http:', 'https:'].includes(minioUrl.protocol) || minioUrl.username || minioUrl.password ||
+        minioUrl.search || minioUrl.hash || !['', '/'].includes(minioUrl.pathname) ||
+        (minioUrl.hostname.toLowerCase() !== 'minio' && !isInternalHost(minioUrl.hostname))) {
+      throw new Error('MINIO_ENDPOINT must use a private host without credentials or path');
+    }
+    if (mediaSigningSecret.length < 32) throw new Error('MEDIA_SIGNING_SECRET must be at least 32 characters');
+    let mediaBase: URL;
+    try { mediaBase = new URL(mediaSignedUrlBase); } catch { throw new Error('MEDIA_SIGNED_URL_BASE must be a valid API origin'); }
+    if (!['http:', 'https:'].includes(mediaBase.protocol) || !mediaBase.hostname || mediaBase.username || mediaBase.password ||
+        mediaBase.search || mediaBase.hash || !['', '/'].includes(mediaBase.pathname)) {
+      throw new Error('MEDIA_SIGNED_URL_BASE must be an API origin');
+    }
+    if (appEnv !== 'dev' && mediaBase.protocol !== 'https:') {
+      throw new Error('MEDIA_SIGNED_URL_BASE must use HTTPS outside dev');
+    }
+  }
   if (betterAuthSecret && betterAuthSecret.length < 32) {
     throw new Error('BETTER_AUTH_SECRET must be at least 32 characters');
   }
@@ -176,5 +214,13 @@ export function loadConfig(env: Record<string, string | undefined>): AppConfig {
     } : {}),
     ...(aiServiceUrl ? { aiServiceUrl } : {}),
     ...(aiServiceKey ? { aiServiceKey } : {}),
+    ...(mediaSettingsPresent ? {
+      minioEndpoint,
+      minioBucket,
+      minioAccessKey,
+      minioSecretKey,
+      mediaSigningSecret,
+      mediaSignedUrlBase,
+    } : {}),
   };
 }

@@ -540,6 +540,11 @@ describe('PostgreSQL baseline', () => {
       ]),
     ).rejects.toMatchObject({ code: '23514' });
     await pool.query(
+      `INSERT INTO catalog_version (version,nutrition_dataset_version,rule_set_version,data_mode,published_at,digest)
+       VALUES ('v1','synthetic-nutrition-v1','synthetic-rules-v1','synthetic',now(),'test-v1'),
+              ('v2','synthetic-nutrition-v2','synthetic-rules-v2','synthetic',now(),'test-v2')`,
+    );
+    await pool.query(
       'INSERT INTO catalog_food (id,version,display_name,energy_kcal,source_refs) VALUES ($1,$2,$3,$4,$5)',
       ['synthetic-food', 'v1', 'Synthetic', '100.000000', []],
     );

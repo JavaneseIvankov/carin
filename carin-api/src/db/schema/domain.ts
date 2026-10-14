@@ -37,8 +37,8 @@ export const healthProfile = pgTable(
   {
     userId: owner().primaryKey(),
     version: integer('version').default(1).notNull(),
-    heightCm: decimal('height_cm'),
-    weightKg: decimal('weight_kg'),
+    heightCm: numeric('height_cm'),
+    weightKg: numeric('weight_kg'),
     sexForReference: text('sex_for_reference'),
     clinicianNotes: text('clinician_notes'),
     activity: text('activity'),
@@ -121,12 +121,62 @@ export const consentEvent = pgTable(
   ],
 );
 
+export const catalogVersion = pgTable(
+  'catalog_version',
+  {
+    version: text('version').primaryKey(),
+    nutritionDatasetVersion: text('nutrition_dataset_version').notNull(),
+    ruleSetVersion: text('rule_set_version').notNull(),
+    dataMode: text('data_mode').notNull(),
+    publishedAt: timestamp('published_at', { withTimezone: true }).notNull(),
+    digest: text('digest').notNull(),
+    isCurrent: boolean('is_current').default(false).notNull(),
+    importedAt: created(),
+  },
+  (t): PgTableExtraConfigValue[] => [
+    check('catalog_version_data_mode', sql`${t.dataMode} IN ('real','synthetic')`),
+    uniqueIndex('catalog_version_one_current').on(t.isCurrent).where(sql`${t.isCurrent}`),
+  ],
+);
+
+export const catalogCapabilityManifest = pgTable(
+  'catalog_capability_manifest',
+  {
+    catalogVersion: text('catalog_version').primaryKey(),
+    manifest: jsonb('manifest').notNull(),
+  },
+  (t): PgTableExtraConfigValue[] => [
+    foreignKey({ columns: [t.catalogVersion], foreignColumns: [catalogVersion.version] }).onDelete('restrict'),
+  ],
+);
+
+export const catalogSearchCursor = pgTable(
+  'catalog_search_cursor',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: owner(),
+    catalogVersion: text('catalog_version').notNull(),
+    query: text('query').notNull(),
+    limit: integer('limit').notNull(),
+    afterDisplayName: text('after_display_name').notNull(),
+    afterFoodId: text('after_food_id').notNull(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    createdAt: created(),
+  },
+  (t): PgTableExtraConfigValue[] => [
+    foreignKey({ columns: [t.catalogVersion], foreignColumns: [catalogVersion.version] }).onDelete('restrict'),
+    check('catalog_search_cursor_limit', sql`${t.limit} BETWEEN 1 AND 100`),
+    index('catalog_search_cursor_expiry').on(t.expiresAt),
+  ],
+);
+
 export const catalogFood = pgTable(
   'catalog_food',
   {
     id: text('id').notNull(),
     version: text('version').notNull(),
     displayName: text('display_name').notNull(),
+    aliases: jsonb('aliases').$type<string[]>().default([]).notNull(),
     preparation: text('preparation'),
     energyKcal: decimal('energy_kcal'),
     carbohydrateG: decimal('carbohydrate_g'),
@@ -136,15 +186,33 @@ export const catalogFood = pgTable(
     sugarsG: decimal('sugars_g'),
     sodiumMg: decimal('sodium_mg'),
     sourceRefs: jsonb('source_refs').notNull(),
+    nutrientSourceIds: jsonb('nutrient_source_ids')
+      .default(sql`'{"energyKcal":null,"carbohydrateG":null,"proteinG":null,"fatG":null,"fiberG":null,"sugarsG":null,"sodiumMg":null}'::jsonb`)
+      .notNull(),
     createdAt: created(),
   },
   (t): PgTableExtraConfigValue[] => [
     primaryKey({ columns: [t.version, t.id] }),
+    foreignKey({ columns: [t.version], foreignColumns: [catalogVersion.version] }).onDelete('restrict'),
     index('catalog_search').on(t.version, t.displayName, t.id),
     check(
       'catalog_nutrients_nonnegative',
       sql`(${t.energyKcal} IS NULL OR ${t.energyKcal} >= 0 AND ${t.energyKcal} <> 'NaN'::numeric) AND (${t.carbohydrateG} IS NULL OR ${t.carbohydrateG} >= 0 AND ${t.carbohydrateG} <> 'NaN'::numeric) AND (${t.proteinG} IS NULL OR ${t.proteinG} >= 0 AND ${t.proteinG} <> 'NaN'::numeric) AND (${t.fatG} IS NULL OR ${t.fatG} >= 0 AND ${t.fatG} <> 'NaN'::numeric) AND (${t.fiberG} IS NULL OR ${t.fiberG} >= 0 AND ${t.fiberG} <> 'NaN'::numeric) AND (${t.sugarsG} IS NULL OR ${t.sugarsG} >= 0 AND ${t.sugarsG} <> 'NaN'::numeric) AND (${t.sodiumMg} IS NULL OR ${t.sodiumMg} >= 0 AND ${t.sodiumMg} <> 'NaN'::numeric)`,
     ),
+  ],
+);
+export const catalogCondition = pgTable(
+  'catalog_condition',
+  {
+    catalogVersion: text('catalog_version').notNull(),
+    conditionId: text('condition_id').notNull(),
+    displayName: text('display_name').notNull(),
+    condition: jsonb('condition').notNull(),
+  },
+  (t): PgTableExtraConfigValue[] => [
+    primaryKey({ columns: [t.catalogVersion, t.conditionId] }),
+    foreignKey({ columns: [t.catalogVersion], foreignColumns: [catalogVersion.version] }).onDelete('restrict'),
+    index('catalog_condition_search').on(t.catalogVersion, t.displayName, t.conditionId),
   ],
 );
 export const catalogServing = pgTable(
@@ -277,12 +345,14 @@ export const analysisJob = pgTable(
       .notNull(),
     leaseToken: uuid('lease_token'),
     leaseExpiresAt: timestamp('lease_expires_at', { withTimezone: true }),
+    startedAt: timestamp('started_at', { withTimezone: true }),
     deadlineAt: timestamp('deadline_at', { withTimezone: true })
       .default(sql`now() + interval '5 minutes'`)
       .notNull(),
     error: jsonb('error'),
     createdAt: created(),
     updatedAt: updated(),
+    finishedAt: timestamp('finished_at', { withTimezone: true }),
   },
   (t): PgTableExtraConfigValue[] => [
     unique('job_owner').on(t.userId, t.id),
@@ -524,9 +594,9 @@ export const examination = pgTable(
     measuredOn: date('measured_on').notNull(),
     measuredTime: text('measured_time'),
     timezone: text('timezone').notNull(),
-    value: decimal('value'),
-    systolic: integer('systolic'),
-    diastolic: integer('diastolic'),
+    value: numeric('value'),
+    systolic: numeric('systolic'),
+    diastolic: numeric('diastolic'),
     unit: text('unit').notNull(),
     notes: text('notes'),
     createdAt: created(),
@@ -541,7 +611,7 @@ export const examination = pgTable(
     ),
     check(
       'exam_measurements',
-      sql`(${t.type} = 'pressure' AND ${t.unit} = 'mmHg' AND ${t.systolic} > 0 AND ${t.diastolic} > 0 AND ${t.systolic} IS NOT NULL AND ${t.diastolic} IS NOT NULL AND ${t.value} IS NULL AND ${t.subtype} IS NULL AND ${t.context} IS NULL) OR (${t.type} = 'glucose' AND ${t.unit} = 'mg/dL' AND ${t.value} > 0 AND ${t.value} <> 'NaN'::numeric AND ${t.value} IS NOT NULL AND ${t.context} IN ('fasting','random','post_meal','unknown') AND ${t.context} IS NOT NULL AND ${t.subtype} IS NULL AND ${t.systolic} IS NULL AND ${t.diastolic} IS NULL) OR (${t.type} = 'cholesterol' AND ${t.unit} = 'mg/dL' AND ${t.value} > 0 AND ${t.value} <> 'NaN'::numeric AND ${t.value} IS NOT NULL AND ${t.subtype} IN ('total','ldl','hdl') AND ${t.subtype} IS NOT NULL AND ${t.context} IS NULL AND ${t.systolic} IS NULL AND ${t.diastolic} IS NULL)`,
+      sql`(${t.type} = 'pressure' AND ${t.unit} = 'mmHg' AND ${t.systolic} > 0 AND ${t.systolic} <> 'NaN'::numeric AND ${t.systolic} <> 'Infinity'::numeric AND ${t.diastolic} > 0 AND ${t.diastolic} <> 'NaN'::numeric AND ${t.diastolic} <> 'Infinity'::numeric AND ${t.systolic} = trunc(${t.systolic}) AND ${t.diastolic} = trunc(${t.diastolic}) AND ${t.systolic} IS NOT NULL AND ${t.diastolic} IS NOT NULL AND ${t.value} IS NULL AND ${t.subtype} IS NULL AND ${t.context} IS NULL) OR (${t.type} = 'glucose' AND ${t.unit} = 'mg/dL' AND ${t.value} > 0 AND ${t.value} <> 'NaN'::numeric AND ${t.value} <> 'Infinity'::numeric AND ${t.value} <> '-Infinity'::numeric AND ${t.value} IS NOT NULL AND ${t.context} IN ('fasting','random','post_meal','unknown') AND ${t.context} IS NOT NULL AND ${t.subtype} IS NULL AND ${t.systolic} IS NULL AND ${t.diastolic} IS NULL) OR (${t.type} = 'cholesterol' AND ${t.unit} = 'mg/dL' AND ${t.value} > 0 AND ${t.value} <> 'NaN'::numeric AND ${t.value} <> 'Infinity'::numeric AND ${t.value} <> '-Infinity'::numeric AND ${t.value} IS NOT NULL AND ${t.subtype} IN ('total','ldl','hdl') AND ${t.subtype} IS NOT NULL AND ${t.context} IS NULL AND ${t.systolic} IS NULL AND ${t.diastolic} IS NULL)`,
     ),
     index('exam_series_history').on(t.userId, t.seriesKey, t.measuredOn, t.id),
   ],
