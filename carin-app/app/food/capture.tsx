@@ -9,13 +9,27 @@ import {
 } from '@/lib/profile/profile';
 import { createScanActionState, createScanActions } from '@/lib/food/scan-actions';
 import { getPhotoPermissionFallback } from '@/lib/food/permissions';
-import { resolvePhotoMimeType } from '@/lib/food/photo-media';
+import { cachePhotoUri, resolvePhotoMimeType } from '@/lib/food/photo-media';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import * as Linking from 'expo-linking';
 import * as React from 'react';
 import { ActivityIndicator, Image, ScrollView, View } from 'react-native';
+
+import { Icon } from '@/components/ui/icon';
+import {
+  AlertCircle,
+  Camera,
+  Image as ImageIcon,
+  Info,
+  RotateCcw,
+  Settings,
+  ShieldCheck,
+  Sparkles,
+  Utensils,
+  X,
+} from 'lucide-react-native';
 
 type PhotoDraft = { id: string; uri: string; mimeType: string };
 type PermissionFallback = {
@@ -174,7 +188,11 @@ export default function Capture() {
       const blob = await response.blob();
       const typedBlob = new Blob([blob], { type: photo.mimeType });
       const job = await actions.start(typedBlob, photo.id, consentIsCurrent);
-      router.replace({ pathname: '/food/analysis/[id]', params: { id: job.id } });
+      cachePhotoUri(job.id, photo.uri);
+      if (job.scanId) {
+        cachePhotoUri(job.scanId, photo.uri);
+      }
+      router.replace({ pathname: '/food/analysis/[id]', params: { id: job.id, photoUri: photo.uri } });
     } catch (error) {
       setMessage(
         error instanceof Error && /persetujuan/i.test(error.message)
@@ -190,11 +208,19 @@ export default function Capture() {
     return (
       <View className="flex-1 bg-black">
         <CameraView ref={cameraRef} className="flex-1" facing="back" />
-        <View className="gap-3 bg-background px-5 py-5">
-          <Button onPress={takePhoto} accessibilityLabel="Ambil foto makanan">
+        <View className="gap-3 border-t border-border bg-background px-5 py-5">
+          <Button
+            variant="tactile"
+            onPress={takePhoto}
+            accessibilityLabel="Ambil foto makanan">
+            <Icon as={Camera} size={20} className="mr-2 text-primary-foreground" />
             <Text>Ambil foto</Text>
           </Button>
-          <Button variant="outline" onPress={() => setCameraOpen(false)}>
+          <Button
+            variant="outline"
+            className="rounded-[20px]"
+            onPress={() => setCameraOpen(false)}>
+            <Icon as={X} size={18} className="mr-1.5 text-foreground" />
             <Text>Tutup kamera</Text>
           </Button>
         </View>
@@ -206,78 +232,136 @@ export default function Capture() {
     <View className="flex-1 bg-background">
       <ScrollView contentContainerClassName="gap-5 px-5 py-8">
         <View className="gap-2">
-          <Text variant="h2">Analisis sebelum makan</Text>
+          <View className="flex-row items-center gap-2.5">
+            <View className="h-9 w-9 items-center justify-center rounded-full bg-carin-olive-soft">
+              <Icon as={Camera} size={20} className="text-primary" />
+            </View>
+            <Text variant="h1">Foto Makanan</Text>
+          </View>
           <Text variant="muted">
-            Ambil foto makanan yang masih tersedia. Hasil analisis tidak mencatat konsumsi.
+            Ambil foto makanan untuk melihat perkiraan komponen dan kandungan gizi. Hasil analisis foto ini tidak langsung mencatat konsumsi makananmu.
           </Text>
         </View>
 
         {photo ? (
-          <View className="gap-4">
-            <Image
-              source={{ uri: photo.uri }}
-              resizeMode="cover"
-              accessibilityLabel="Pratinjau foto makanan"
-              className="h-72 w-full rounded-xl bg-muted"
-            />
-            <Button variant="outline" onPress={() => setPhoto(null)}>
+          <View className="gap-3">
+            <View className="overflow-hidden rounded-[20px] border border-border bg-card shadow-sm">
+              <Image
+                source={{ uri: photo.uri }}
+                resizeMode="cover"
+                accessibilityLabel="Pratinjau foto makanan"
+                className="h-72 w-full"
+              />
+            </View>
+            <Button
+              variant="outline"
+              className="rounded-[20px]"
+              onPress={() => setPhoto(null)}>
+              <Icon as={RotateCcw} size={16} className="mr-1.5 text-foreground" />
               <Text>Pilih foto lain</Text>
             </Button>
           </View>
         ) : (
-          <View className="gap-3 rounded-xl border border-border bg-card p-5">
-            <Text variant="large">Pilih foto makanan</Text>
-            <Button onPress={openCamera}>
-              <Text>Buka kamera</Text>
-            </Button>
-            <Button variant="outline" onPress={selectFromGallery}>
-              <Text>Pilih dari galeri</Text>
-            </Button>
+          <View className="gap-4 rounded-[20px] border border-border bg-card p-5 shadow-sm">
+            <View className="gap-1">
+              <Text variant="large">Pilih Sumber Foto</Text>
+              <Text variant="muted">
+                Foto makanan yang masih tersedia di piring atau kemasan untuk perkiraan gizi.
+              </Text>
+            </View>
+            <View className="gap-3">
+              <Button
+                variant="tactile"
+                onPress={openCamera}
+                accessibilityLabel="Buka kamera">
+                <Icon as={Camera} size={20} className="mr-2 text-primary-foreground" />
+                <Text>Buka kamera</Text>
+              </Button>
+              <Button
+                variant="tactile-secondary"
+                onPress={selectFromGallery}
+                accessibilityLabel="Pilih dari galeri">
+                <Icon as={ImageIcon} size={20} className="mr-2 text-secondary-foreground" />
+                <Text>Pilih dari galeri</Text>
+              </Button>
+            </View>
           </View>
         )}
 
         {permissionFallback ? (
-          <View className="gap-2 rounded-lg border border-border p-4" accessibilityRole="alert">
-            <Text>{permissionFallback.message}</Text>
-            {permissionFallback.showSettings ? (
-              <Button variant="outline" onPress={() => void Linking.openSettings()}>
-                <Text>Buka Settings</Text>
-              </Button>
-            ) : null}
-            {permissionFallback.alternateSource === 'gallery' ? (
-              <Button variant="outline" onPress={() => void selectFromGallery()}>
-                <Text>Coba galeri</Text>
-              </Button>
-            ) : (
-              <Button variant="outline" onPress={() => void openCamera()}>
-                <Text>Coba kamera</Text>
-              </Button>
-            )}
-            <Button variant="ghost" onPress={openManual}>
-              <Text>Catat makanan yang sudah dimakan</Text>
-            </Button>
+          <View
+            className="gap-3 rounded-[20px] border border-border bg-card p-4 shadow-sm"
+            accessibilityRole="alert">
+            <View className="flex-row items-center gap-2">
+              <Icon as={AlertCircle} size={20} className="text-muted-foreground" />
+              <Text className="flex-1 font-medium">{permissionFallback.message}</Text>
+            </View>
+            <View className="gap-2">
+              {permissionFallback.showSettings ? (
+                <Button
+                  variant="outline"
+                  className="rounded-[16px]"
+                  onPress={() => void Linking.openSettings()}>
+                  <Icon as={Settings} size={16} className="mr-1.5 text-foreground" />
+                  <Text>Buka Settings</Text>
+                </Button>
+              ) : null}
+              {permissionFallback.alternateSource === 'gallery' ? (
+                <Button
+                  variant="outline"
+                  className="rounded-[16px]"
+                  onPress={() => void selectFromGallery()}>
+                  <Icon as={ImageIcon} size={16} className="mr-1.5 text-foreground" />
+                  <Text>Coba galeri</Text>
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  className="rounded-[16px]"
+                  onPress={() => void openCamera()}>
+                  <Icon as={Camera} size={16} className="mr-1.5 text-foreground" />
+                  <Text>Coba kamera</Text>
+                </Button>
+              )}
+            </View>
           </View>
         ) : null}
 
         {!consentCurrent && photo ? (
-          <View className="gap-3 rounded-xl border border-border p-4">
-            <Text variant="large">Persetujuan pemrosesan AI</Text>
+          <View className="gap-3 rounded-[20px] border border-border bg-card p-5 shadow-sm">
+            <View className="flex-row items-center gap-2.5">
+              <View className="h-8 w-8 items-center justify-center rounded-full bg-carin-butter">
+                <Icon as={ShieldCheck} size={18} className="text-foreground" />
+              </View>
+              <Text variant="large">Persetujuan Pemrosesan AI</Text>
+            </View>
             <Text variant="muted">
-              Foto makanan akan diproses untuk menyiapkan estimasi dan hasil analisis. Persetujuan
-              ini terpisah dari syarat penggunaan dan dapat dicabut di Pengaturan.
+              Foto makanan akan diproses untuk menyiapkan estimasi porsi dan komponen gizi. Persetujuan
+              ini terpisah dari syarat penggunaan dan dapat kamu sesuaikan kapan saja di Pengaturan.
             </Text>
-            <Button variant="outline" onPress={() => router.push('/legal/ai-processing')}>
+            <Button
+              variant="outline"
+              className="rounded-[16px]"
+              onPress={() => router.push('/legal/ai-processing')}>
+              <Icon as={Info} size={16} className="mr-1.5 text-foreground" />
               <Text>Baca penjelasan pemrosesan AI</Text>
             </Button>
             <Button
-              variant={consentChecked ? 'default' : 'outline'}
+              variant={consentChecked ? 'tactile-secondary' : 'outline'}
+              className="rounded-[16px]"
               onPress={() => setConsentChecked(!consentChecked)}>
+              <Icon
+                as={ShieldCheck}
+                size={18}
+                className={consentChecked ? 'mr-1.5 text-secondary-foreground' : 'mr-1.5 text-foreground'}
+              />
               <Text>
                 {consentChecked ? 'Persetujuan dipilih' : 'Saya menyetujui pemrosesan AI'}
               </Text>
             </Button>
             {consentChecked ? (
               <Button
+                variant="tactile"
                 onPress={grantConsent}
                 disabled={!legal || !!legalQuery.data?.stale || saveConsent.isPending}>
                 <Text>{saveConsent.isPending ? 'Menyimpan…' : 'Simpan persetujuan'}</Text>
@@ -289,15 +373,43 @@ export default function Capture() {
           </View>
         ) : null}
 
-        {message ? <Text accessibilityRole="alert">{message}</Text> : null}
+        {message ? (
+          <View className="rounded-[16px] border border-border bg-muted/60 p-3">
+            <Text accessibilityRole="alert" className="text-sm text-foreground">
+              {message}
+            </Text>
+          </View>
+        ) : null}
 
         {photo && consentCurrent ? (
-          <Button onPress={analyze} disabled={busy || connectivity === 'offline'}>
-            {busy ? <ActivityIndicator color="white" /> : <Text>Analisis makanan</Text>}
+          <Button
+            variant="tactile"
+            onPress={analyze}
+            disabled={busy || connectivity === 'offline'}
+            accessibilityLabel="Mulai analisis makanan">
+            {busy ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <>
+                <Icon as={Sparkles} size={20} className="mr-2 text-primary-foreground" />
+                <Text>Mulai Analisis Makanan</Text>
+              </>
+            )}
           </Button>
         ) : null}
-        <Button variant="ghost" onPress={openManual}>
-          <Text>Makanan sudah dimakan? Catat secara manual</Text>
+
+        {connectivity === 'offline' && photo ? (
+          <Text variant="muted" className="text-center text-xs">
+            Koneksi internet diperlukan untuk memulai analisis foto makanan.
+          </Text>
+        ) : null}
+
+        <Button
+          variant="ghost"
+          className="mt-1 rounded-[16px] py-3"
+          onPress={openManual}>
+          <Icon as={Utensils} size={16} className="mr-1.5 text-muted-foreground" />
+          <Text variant="muted">Makanan sudah dimakan? Catat secara manual</Text>
         </Button>
       </ScrollView>
     </View>

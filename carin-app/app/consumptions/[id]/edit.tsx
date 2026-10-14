@@ -1,23 +1,24 @@
 import { OnlineIndicator } from '@/components/app/online-indicator';
+import { serviceErrorMessage } from '@/components/app/presentation';
 import { ServiceError } from '@/components/app/service-error';
 import { ConsumptionForm } from '@/components/consumptions/consumption-form';
+import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { useAppRead, useAppWrite } from '@/lib/api/query';
 import { ApiError } from '@/lib/api/repository';
-import { createManualConsumptionActions } from '@/lib/consumptions/manual-actions';
 import {
   buildManualConsumptionUpdateInput,
   createManualConsumptionDraftFromRecord,
   type ManualConsumptionDraft,
 } from '@/lib/consumptions/consumption';
+import { createManualConsumptionActions } from '@/lib/consumptions/manual-actions';
 import { createDraftStore } from '@/lib/data/drafts';
 import { useAppData } from '@/lib/data/provider';
+import { createIdempotencyKey } from '@/lib/profile/profile';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import * as React from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { serviceErrorMessage } from '@/components/app/presentation';
-import { createIdempotencyKey } from '@/lib/profile/profile';
 
 type SavedEditDraft = {
   draftId: string;
@@ -188,9 +189,22 @@ export default function EditConsumptionScreen() {
     <View className="flex-1 bg-background">
       <OnlineIndicator connectivity={connectivity} />
       {consumptionQuery.isPending && !consumption ? (
-        <View className="flex-1 items-center justify-center gap-3 p-8">
-          <ActivityIndicator accessibilityLabel="Memuat catatan konsumsi" />
-          <Text variant="muted">Memuat catatan…</Text>
+        <View className="flex-1 items-center justify-center gap-3 bg-background p-8">
+          <View
+            className="items-center justify-center bg-carin-butter"
+            style={{
+              borderTopLeftRadius: 25,
+              borderTopRightRadius: 31,
+              borderBottomRightRadius: 23,
+              borderBottomLeftRadius: 29,
+              width: 64,
+              height: 64,
+            }}>
+            <ActivityIndicator size="small" accessibilityLabel="Memuat catatan konsumsi" />
+          </View>
+          <Text variant="caption" className="text-muted-foreground">
+            Memuat catatan…
+          </Text>
         </View>
       ) : consumptionQuery.error && !consumption ? (
         <View className="flex-1 gap-4 p-6">
@@ -201,22 +215,58 @@ export default function EditConsumptionScreen() {
           />
         </View>
       ) : !consumption ? (
-        <View className="flex-1 items-center justify-center p-8">
-          <Text>Catatan konsumsi tidak ditemukan.</Text>
+        <View className="flex-1 items-center justify-center gap-4 p-8">
+          <View className="w-full max-w-sm gap-2 rounded-summary border border-border/70 bg-card p-5">
+            <Text variant="h3">Catatan tidak ditemukan</Text>
+            <Text className="text-muted-foreground">Catatan konsumsi tidak tersedia.</Text>
+          </View>
+          <Button variant="outline" className="min-h-12 w-full max-w-sm" onPress={() => router.back()}>
+            <Text>Kembali</Text>
+          </Button>
         </View>
       ) : consumption.source !== 'manual' ? (
-        <View className="flex-1 items-center justify-center gap-3 p-8">
-          <Text variant="h3">Catatan ini tidak dapat diubah di sini</Text>
-          <Text variant="muted">Kembali ke detail untuk melihat pilihan yang tersedia.</Text>
+        <View className="flex-1 items-center justify-center gap-4 p-8">
+          <View className="w-full max-w-sm gap-2 rounded-summary border border-border/70 bg-card p-5">
+            <Text variant="h3">Catatan tidak dapat diubah di sini</Text>
+            <Text className="text-muted-foreground">
+              Catatan ini berasal dari konfirmasi foto. Kembali ke detail untuk melihat pilihan yang tersedia.
+            </Text>
+          </View>
+          <Button variant="outline" className="min-h-12 w-full max-w-sm" onPress={() => router.back()}>
+            <Text>Kembali</Text>
+          </Button>
         </View>
       ) : !editDraft ? (
-        <View className="flex-1 items-center justify-center gap-3 p-8">
+        <View className="flex-1 items-center justify-center gap-3 bg-background p-8">
           {editDraftLoadError ? (
-            <Text accessibilityRole="alert">{serviceErrorMessage(editDraftLoadError)}</Text>
+            <View
+              className="w-full max-w-sm gap-3 rounded-summary border border-destructive/30 bg-destructive/10 p-5"
+              accessibilityRole="alert">
+              <Text variant="h3" className="text-destructive">
+                Draft perubahan gagal dibuka
+              </Text>
+              <Text className="text-foreground">{serviceErrorMessage(editDraftLoadError)}</Text>
+              <Button variant="outline" className="min-h-12 w-full" onPress={() => router.back()}>
+                <Text>Kembali</Text>
+              </Button>
+            </View>
           ) : (
             <>
-              <ActivityIndicator accessibilityLabel="Membuka draft perubahan" />
-              <Text variant="muted">Membuka draft perubahan…</Text>
+              <View
+                className="items-center justify-center bg-carin-butter"
+                style={{
+                  borderTopLeftRadius: 25,
+                  borderTopRightRadius: 31,
+                  borderBottomRightRadius: 23,
+                  borderBottomLeftRadius: 29,
+                  width: 64,
+                  height: 64,
+                }}>
+                <ActivityIndicator size="small" accessibilityLabel="Membuka draft perubahan" />
+              </View>
+              <Text variant="caption" className="text-muted-foreground">
+                Membuka draft perubahan…
+              </Text>
             </>
           )}
         </View>

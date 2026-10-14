@@ -1,12 +1,25 @@
 import { Button } from '@/components/ui/button';
+import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
+import { getConsumptionDetailPresentation } from '@/lib/consumptions/attention-presentation';
 import {
   formatLocalDateTime,
   formatNutrient,
   type ManualConsumption,
 } from '@/lib/consumptions/consumption';
-import { getConsumptionDetailPresentation } from '@/lib/consumptions/attention-presentation';
-import { ActivityIndicator, ScrollView, View } from 'react-native';
+import {
+  ArrowLeft,
+  Camera,
+  ChevronDown,
+  ChevronUp,
+  ClipboardPlus,
+  Pencil,
+  RefreshCw,
+  Sparkles,
+  Trash2,
+} from 'lucide-react-native';
+import * as React from 'react';
+import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 
 type Props = {
   consumption: ManualConsumption;
@@ -35,176 +48,397 @@ export function ConsumptionDetail({
   onConfirmDelete,
   onRefresh,
 }: Props) {
+  const [otherNutrientsExpanded, setOtherNutrientsExpanded] = React.useState(false);
   const presentation = getConsumptionDetailPresentation(consumption);
   const localTime = formatLocalDateTime(new Date(consumption.consumedAt), consumption.timezone);
 
+  const energy = presentation.nutrients.find((n) => n.key === 'energyKcal');
+  const macroKeys = ['carbohydrateG', 'proteinG', 'fatG'];
+  const macroNutrients = presentation.nutrients.filter((n) => macroKeys.includes(n.key));
+  const otherNutrients = presentation.nutrients.filter(
+    (n) => !['energyKcal', ...macroKeys].includes(n.key)
+  );
+
   return (
-    <ScrollView contentContainerClassName="gap-5 px-5 pb-10 pt-7">
-      <View className="gap-2">
-        <Button variant="ghost" className="min-h-12 self-start px-0" onPress={onBack}>
+    <ScrollView
+      contentContainerClassName="gap-5 px-5 pb-12 pt-6"
+      showsVerticalScrollIndicator={false}>
+      {/* Header & Provenance */}
+      <View className="gap-3">
+        <Button
+          variant="ghost"
+          className="min-h-11 self-start px-0 -ml-1 flex-row items-center gap-1.5"
+          onPress={onBack}>
+          <Icon as={ArrowLeft} size={20} className="text-foreground" />
           <Text>Kembali</Text>
         </Button>
-        <Text variant="h2">Detail konsumsi</Text>
-        <Text variant="muted">
-          {presentation.source.label} · Revisi {consumption.revision}
-        </Text>
-        {presentation.source.photoDeleted ? (
-          <Text variant="muted">Foto sumber telah dihapus.</Text>
-        ) : null}
-        {isStale ? (
-          <Text variant="muted">Data terakhir tersimpan ditampilkan. Muat ulang saat online.</Text>
-        ) : null}
-      </View>
 
-      <View className="gap-2 rounded-xl border border-border bg-card p-4">
-        <Text variant="h4">Waktu makan</Text>
-        <Text>
-          {localTime.date} pukul {localTime.time}
-        </Text>
-        <Text variant="muted">Zona waktu: {consumption.timezone}</Text>
-      </View>
-
-      <View className="gap-3 rounded-xl border border-border bg-card p-4">
-        <Text variant="h4">Makanan dan porsi aktual</Text>
-        {presentation.components.length ? (
-          presentation.components.map((component) => (
-            <View key={component.id} className="gap-1 border-t border-border pt-3">
-              <Text variant="large">{component.name}</Text>
-              <Text>{component.portion}</Text>
-              {component.portionBasis ? (
-                <Text variant="muted">Dasar porsi: {component.portionBasis}</Text>
-              ) : null}
-              {component.grams !== null ? (
-                <Text variant="muted">{formatNutrient(component.grams, 'g')}</Text>
-              ) : null}
-              {component.matchStatus !== 'matched' ? (
-                <Text variant="muted">Makanan ini belum cocok dengan data katalog.</Text>
-              ) : null}
+        <View className="gap-1.5">
+          <View className="flex-row items-center gap-2 flex-wrap">
+            <View className="flex-row items-center gap-1.5 rounded-full bg-carin-olive-soft px-3 py-1">
+              <Icon
+                as={consumption.source === 'photo_confirmation' ? Camera : ClipboardPlus}
+                size={14}
+                className="text-primary"
+              />
+              <Text variant="caption" className="font-semibold text-primary">
+                {presentation.source.label}
+              </Text>
             </View>
-          ))
+            <View className="rounded-full bg-muted px-2.5 py-1">
+              <Text variant="caption" className="text-muted-foreground">
+                Revisi {consumption.revision}
+              </Text>
+            </View>
+          </View>
+
+          <Text variant="h1" className="mt-1">
+            Detail konsumsi
+          </Text>
+          <Text variant="caption" className="text-muted-foreground">
+            {localTime.date} pukul {localTime.time} ({consumption.timezone})
+          </Text>
+
+          {presentation.source.photoDeleted ? (
+            <Text variant="caption" className="text-muted-foreground">
+              Foto sumber telah dihapus.
+            </Text>
+          ) : null}
+
+          {isStale ? (
+            <View className="rounded-control bg-carin-butter/60 px-3 py-2 mt-1">
+              <Text variant="caption" className="text-foreground">
+                Data terakhir tersimpan ditampilkan. Muat ulang saat online.
+              </Text>
+            </View>
+          ) : null}
+        </View>
+      </View>
+
+      {/* Hero Summary Card: Energy & Macros */}
+      <View className="gap-4 rounded-summary border border-border/70 bg-card p-4 sm:p-5">
+        <View className="gap-0.5">
+          <Text variant="h3">Estimasi gizi tersimpan</Text>
+          <Text variant="caption" className="text-muted-foreground">
+            {consumption.snapshot.dataMode === 'synthetic'
+              ? 'Data sintetis untuk demonstrasi'
+              : consumption.snapshot.dataMode === 'unavailable'
+                ? 'Gizi belum tersedia dari katalog'
+                : 'Snapshot gizi dari katalog'}
+          </Text>
+        </View>
+
+        {energy ? (
+          <View className="gap-1 pb-1">
+            <Text variant="label" className="text-muted-foreground">
+              Energi tercatat
+            </Text>
+            <View className="flex-row items-baseline gap-1.5">
+              {energy.value === 'Belum tersedia' ? (
+                <Text className="text-2xl font-bold tracking-tight text-foreground">
+                  Belum tersedia
+                </Text>
+              ) : (
+                <>
+                  <Text className="text-[44px] font-bold tracking-tight leading-none text-foreground">
+                    {energy.value.replace(/ kkal$/, '')}
+                  </Text>
+                  <Text className="text-base font-semibold text-muted-foreground">
+                    kkal
+                  </Text>
+                </>
+              )}
+            </View>
+            <Text variant="caption" className="text-muted-foreground">
+              Cakupan {energy.coverage}
+            </Text>
+          </View>
+        ) : null}
+
+        {/* 3-column macro cards */}
+        <View className="flex-row gap-2">
+          {macroNutrients.map((macro) => (
+            <View
+              key={macro.key}
+              className="flex-1 rounded-[14px] bg-carin-olive-soft p-2.5 gap-1">
+              <Text className="text-[11px] font-medium text-muted-foreground leading-tight">
+                {macro.label}
+              </Text>
+              <Text className="text-[18px] font-bold text-foreground leading-tight">
+                {macro.value}
+              </Text>
+              <Text className="text-[11px] text-muted-foreground leading-tight">
+                {macro.coverage}
+              </Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Collapsible micro nutrients */}
+        {otherNutrients.length > 0 ? (
+          <View className="border-t border-border/70 pt-2 gap-2">
+            <Pressable
+              className="min-h-11 flex-row items-center justify-between py-1"
+              accessibilityRole="button"
+              accessibilityLabel="Zat gizi lainnya: serat, gula, dan natrium"
+              accessibilityState={{ expanded: otherNutrientsExpanded }}
+              onPress={() => setOtherNutrientsExpanded((prev) => !prev)}>
+              <Text className="text-sm font-medium text-foreground">
+                Serat, gula, dan natrium
+              </Text>
+              <Icon
+                as={otherNutrientsExpanded ? ChevronUp : ChevronDown}
+                size={18}
+                className="text-muted-foreground"
+              />
+            </Pressable>
+
+            {otherNutrientsExpanded ? (
+              <View className="gap-1 pb-1">
+                {otherNutrients.map((item) => (
+                  <View
+                    key={item.key}
+                    className="min-h-11 flex-row items-center justify-between gap-3 border-t border-border/50 py-2">
+                    <View className="flex-1 gap-0.5">
+                      <Text variant="label">{item.label}</Text>
+                      <Text variant="caption" className="text-muted-foreground">
+                        Cakupan {item.coverage}
+                      </Text>
+                    </View>
+                    <Text className="font-semibold text-foreground">{item.value}</Text>
+                  </View>
+                ))}
+              </View>
+            ) : null}
+          </View>
+        ) : null}
+      </View>
+
+      {/* Component Breakdown List */}
+      <View className="gap-3 rounded-summary border border-border/70 bg-card p-4 sm:p-5">
+        <View className="flex-row items-center justify-between">
+          <Text variant="h3">Makanan dan porsi aktual</Text>
+          <View className="rounded-full bg-carin-olive-soft px-2.5 py-0.5">
+            <Text variant="caption" className="font-medium text-primary">
+              {presentation.components.length} komponen
+            </Text>
+          </View>
+        </View>
+
+        {presentation.components.length ? (
+          <View className="gap-2.5 pt-1">
+            {presentation.components.map((component) => (
+              <View
+                key={component.id}
+                className="gap-1.5 rounded-compact bg-muted/40 p-3.5">
+                <View className="flex-row items-start justify-between gap-2">
+                  <Text variant="emphasis" className="flex-1 text-foreground">
+                    {component.name}
+                  </Text>
+                  <View className="rounded-full bg-card px-2.5 py-0.5 border border-border/60">
+                    <Text variant="caption" className="font-semibold text-foreground">
+                      {component.portion}
+                    </Text>
+                  </View>
+                </View>
+
+                {component.grams !== null ? (
+                  <Text variant="caption" className="text-muted-foreground">
+                    Bobot terhitung: {formatNutrient(component.grams, 'g')}
+                  </Text>
+                ) : null}
+
+                {component.portionBasis ? (
+                  <Text variant="caption" className="text-muted-foreground">
+                    Dasar porsi: {component.portionBasis}
+                  </Text>
+                ) : null}
+
+                {component.matchStatus !== 'matched' ? (
+                  <View className="self-start rounded-md bg-carin-butter/60 px-2 py-0.5 mt-0.5">
+                    <Text variant="caption" className="text-foreground">
+                      Makanan lain · belum cocok dengan katalog
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+            ))}
+          </View>
         ) : (
           <Text variant="muted">Komponen makanan belum tersedia.</Text>
         )}
       </View>
 
-      <View className="gap-3 rounded-xl border border-border bg-card p-4">
-        <Text variant="h4">Estimasi gizi tersimpan</Text>
-        <Text variant="muted">
-          {consumption.snapshot.dataMode === 'synthetic'
-            ? 'Data sintetis untuk demonstrasi'
-            : consumption.snapshot.dataMode === 'unavailable'
-              ? 'Gizi belum tersedia dari katalog'
-              : 'Snapshot gizi dari katalog'}
-        </Text>
-        {presentation.nutrients.map((nutrient) => (
-          <View
-            key={nutrient.key}
-            className="flex-row justify-between gap-3 border-t border-border pt-2">
-            <View className="flex-1 gap-1">
-              <Text>{nutrient.label}</Text>
-              <Text variant="muted">Cakupan: {nutrient.coverage}</Text>
-            </View>
-            <Text className="font-semibold">{nutrient.value}</Text>
+      {/* Attention Card */}
+      <View className="gap-3 rounded-summary border border-border/70 bg-card p-4 sm:p-5">
+        <View className="flex-row items-center gap-2">
+          <View className="h-7 w-7 items-center justify-center rounded-full bg-carin-butter">
+            <Icon as={Sparkles} size={15} className="text-primary" />
           </View>
-        ))}
-      </View>
+          <Text variant="h3">Perhatian personal</Text>
+        </View>
 
-      <View className="gap-2 rounded-xl border border-border bg-card p-4">
-        <Text variant="h4">Perhatian personal</Text>
-        <Text variant="large">{presentation.attention.title}</Text>
+        <Text variant="large" className="text-foreground font-semibold">
+          {presentation.attention.title}
+        </Text>
+
         {consumption.attentionState === 'pending' ? (
-          <ActivityIndicator accessibilityLabel="Memproses perhatian personal" />
+          <View className="flex-row items-center gap-2 py-1">
+            <ActivityIndicator size="small" accessibilityLabel="Memproses perhatian personal" />
+            <Text variant="caption" className="text-muted-foreground">
+              Memproses perhatian personal…
+            </Text>
+          </View>
         ) : null}
-        <Text variant="muted">{presentation.attention.message}</Text>
+
+        <Text className="text-muted-foreground">
+          {presentation.attention.message}
+        </Text>
+
         {presentation.attention.available ? (
-          <View className="gap-2">
+          <View className="gap-3 pt-1">
             {presentation.attentions.map((attention) => (
-              <View key={attention.id} className="gap-1 border-t border-border pt-3">
-                <Text>{attention.reason}</Text>
-                {attention.adjustments.map((adjustment, index) => (
-                  <Text key={`${index}:${adjustment}`} variant="muted">
-                    {adjustment}
-                  </Text>
-                ))}
-                {attention.limitations.map((limitation, index) => (
-                  <Text key={`${index}:${limitation}`} variant="muted">
-                    {limitation}
-                  </Text>
-                ))}
+              <View
+                key={attention.id}
+                className="gap-2 rounded-compact bg-carin-olive-soft/40 p-3.5 border border-border/50">
+                <Text className="font-semibold text-foreground">{attention.reason}</Text>
+                {attention.adjustments.length > 0 ? (
+                  <View className="gap-1">
+                    <Text variant="label" className="text-muted-foreground">
+                      Saran penyesuaian:
+                    </Text>
+                    {attention.adjustments.map((adjustment, index) => (
+                      <Text
+                        key={`${index}:${adjustment}`}
+                        variant="caption"
+                        className="text-foreground">
+                        • {adjustment}
+                      </Text>
+                    ))}
+                  </View>
+                ) : null}
+                {attention.limitations.length > 0 ? (
+                  <View className="gap-1">
+                    <Text variant="label" className="text-muted-foreground">
+                      Catatan pertimbangan:
+                    </Text>
+                    {attention.limitations.map((limitation, index) => (
+                      <Text
+                        key={`${index}:${limitation}`}
+                        variant="caption"
+                        className="text-muted-foreground">
+                        • {limitation}
+                      </Text>
+                    ))}
+                  </View>
+                ) : null}
               </View>
             ))}
-            <Text variant="muted">
-              Pertimbangan ini bukan diagnosis atau jaminan keamanan makanan.
-            </Text>
+            <View className="rounded-control bg-muted/50 p-2.5">
+              <Text variant="caption" className="text-muted-foreground">
+                Pertimbangan ini bukan diagnosis atau jaminan keamanan makanan.
+              </Text>
+            </View>
           </View>
         ) : null}
       </View>
 
+      {/* Limitations Card */}
       {presentation.limitations.length ? (
-        <View className="gap-2 rounded-xl border border-border p-4">
-          <Text variant="large">Keterbatasan data</Text>
-          {presentation.limitations.map((limitation, index) => (
-            <Text key={`${index}:${limitation}`} variant="muted">
-              {limitation}
-            </Text>
-          ))}
+        <View className="gap-2 rounded-summary border border-border/70 bg-card p-4 sm:p-5">
+          <Text variant="emphasis">Keterbatasan data</Text>
+          <View className="gap-1">
+            {presentation.limitations.map((limitation, index) => (
+              <Text
+                key={`${index}:${limitation}`}
+                variant="caption"
+                className="text-muted-foreground">
+                • {limitation}
+              </Text>
+            ))}
+          </View>
         </View>
       ) : null}
 
+      {/* Sources Card */}
       {presentation.sources.length ? (
-        <View className="gap-2 rounded-xl border border-border p-4">
-          <Text variant="large">Sumber data</Text>
-          {presentation.sources.map((source) => (
-            <Text key={source.id} variant="muted">
-              {source.title}
-            </Text>
-          ))}
+        <View className="gap-2 rounded-summary border border-border/70 bg-card p-4 sm:p-5">
+          <Text variant="emphasis">Sumber data</Text>
+          <View className="gap-1">
+            {presentation.sources.map((source) => (
+              <Text key={source.id} variant="caption" className="text-muted-foreground">
+                • {source.title}
+              </Text>
+            ))}
+          </View>
         </View>
       ) : null}
 
-      <Button
-        variant="outline"
-        className="min-h-12"
-        onPress={onRefresh}
-        accessibilityLabel="Muat ulang catatan konsumsi">
-        <Text>Muat ulang</Text>
-      </Button>
-
-      {consumption.source === 'manual' ? (
-        <Button variant="outline" className="min-h-12" onPress={onEdit}>
-          <Text>Ubah catatan</Text>
-        </Button>
-      ) : null}
-
-      {!deleteConfirmation ? (
-        <Button
-          variant="destructive"
-          className="min-h-12"
-          onPress={onRequestDelete}
-          accessibilityLabel="Hapus catatan konsumsi">
-          <Text>Hapus catatan</Text>
-        </Button>
-      ) : (
-        <View className="gap-3 rounded-xl border border-destructive/40 p-4">
-          <Text variant="large">Hapus catatan ini?</Text>
-          <Text variant="muted">Catatan ini akan dikeluarkan dari ringkasan konsumsi.</Text>
-          {deleteError ? <Text accessibilityRole="alert">{deleteError}</Text> : null}
+      {/* Actions */}
+      <View className="gap-3 pt-1">
+        {consumption.source === 'manual' ? (
           <Button
-            variant="destructive"
-            className="min-h-12"
-            disabled={isDeleting}
-            onPress={onConfirmDelete}>
-            {isDeleting ? <ActivityIndicator color="white" /> : <Text>Ya, hapus catatan</Text>}
+            variant="tactile"
+            className="min-h-12 w-full flex-row items-center justify-center gap-2"
+            onPress={onEdit}>
+            <Icon as={Pencil} size={16} className="text-primary-foreground" />
+            <Text>Ubah catatan</Text>
           </Button>
+        ) : null}
+
+        <Button
+          variant="outline"
+          className="min-h-12 w-full flex-row items-center justify-center gap-2"
+          onPress={onRefresh}
+          accessibilityLabel="Muat ulang catatan konsumsi">
+          <Icon as={RefreshCw} size={16} className="text-foreground" />
+          <Text>Muat ulang</Text>
+        </Button>
+
+        {!deleteConfirmation ? (
           <Button
             variant="ghost"
-            className="min-h-12"
-            disabled={isDeleting}
-            onPress={onCancelDelete}>
-            <Text>Batal</Text>
+            className="min-h-12 w-full flex-row items-center justify-center gap-2 text-destructive"
+            onPress={onRequestDelete}
+            accessibilityLabel="Hapus catatan konsumsi">
+            <Icon as={Trash2} size={16} className="text-destructive" />
+            <Text className="text-destructive">Hapus catatan</Text>
           </Button>
-        </View>
-      )}
+        ) : (
+          <View className="gap-3 rounded-summary border border-destructive/40 bg-destructive/10 p-4 sm:p-5">
+            <View className="gap-1">
+              <Text variant="h3" className="text-destructive">
+                Hapus catatan ini?
+              </Text>
+              <Text variant="caption" className="text-muted-foreground">
+                Catatan ini akan dikeluarkan dari ringkasan konsumsi.
+              </Text>
+            </View>
+            {deleteError ? (
+              <Text className="text-sm font-medium text-destructive" accessibilityRole="alert">
+                {deleteError}
+              </Text>
+            ) : null}
+            <View className="flex-row gap-3 pt-1">
+              <Button
+                variant="destructive"
+                tactile
+                className="min-h-12 flex-1"
+                disabled={isDeleting}
+                onPress={onConfirmDelete}>
+                {isDeleting ? <ActivityIndicator color="white" /> : <Text>Ya, hapus</Text>}
+              </Button>
+              <Button
+                variant="outline"
+                className="min-h-12"
+                disabled={isDeleting}
+                onPress={onCancelDelete}>
+                <Text>Batal</Text>
+              </Button>
+            </View>
+          </View>
+        )}
+      </View>
     </ScrollView>
   );
 }

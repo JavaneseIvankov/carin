@@ -103,7 +103,7 @@ export default function ResetPasswordScreen() {
                 {submitError}
               </Text>
             ) : null}
-            <Button size="lg" disabled={isSubmitting} onPress={() => void submit()}>
+            <Button variant="tactile" disabled={isSubmitting} onPress={() => void submit()}>
               <Text>{isSubmitting ? 'Menyimpan…' : 'Simpan kata sandi baru'}</Text>
             </Button>
           </>

@@ -1,21 +1,22 @@
 import { OnlineIndicator } from '@/components/app/online-indicator';
-import { Text } from '@/components/ui/text';
-import { ConsumptionForm } from '@/components/consumptions/consumption-form';
 import { serviceErrorMessage } from '@/components/app/presentation';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ActivityIndicator, View } from 'react-native';
-import { useRouter, type Href } from 'expo-router';
-import * as React from 'react';
+import { ConsumptionForm } from '@/components/consumptions/consumption-form';
+import { Button } from '@/components/ui/button';
+import { Text } from '@/components/ui/text';
 import { useAppRead, useAppWrite } from '@/lib/api/query';
-import { useAppData } from '@/lib/data/provider';
-import { createDraftStore } from '@/lib/data/drafts';
-import { createManualConsumptionActions } from '@/lib/consumptions/manual-actions';
 import {
   buildManualConsumptionInput,
   formatLocalDateTime,
   type ManualConsumptionDraft,
 } from '@/lib/consumptions/consumption';
+import { createManualConsumptionActions } from '@/lib/consumptions/manual-actions';
+import { createDraftStore } from '@/lib/data/drafts';
+import { useAppData } from '@/lib/data/provider';
 import { createIdempotencyKey } from '@/lib/profile/profile';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter, type Href } from 'expo-router';
+import * as React from 'react';
+import { ActivityIndicator, View } from 'react-native';
 
 const DRAFT_NAME = 'manual-consumption:create';
 
@@ -146,9 +147,19 @@ export default function NewConsumption() {
     <View className="flex-1 bg-background">
       <OnlineIndicator connectivity={connectivity} />
       {loadError ? (
-        <View className="flex-1 items-center justify-center gap-3 p-6" accessibilityRole="alert">
-          <Text variant="h3">Draft belum dapat dibuka</Text>
-          <Text>{serviceErrorMessage(loadError)}</Text>
+        <View className="flex-1 items-center justify-center gap-4 p-6" accessibilityRole="alert">
+          <View className="w-full max-w-sm gap-2 rounded-summary border border-destructive/30 bg-destructive/10 p-5">
+            <Text variant="h3" className="text-destructive">
+              Draft belum dapat dibuka
+            </Text>
+            <Text className="text-foreground">{serviceErrorMessage(loadError)}</Text>
+          </View>
+          <Button
+            variant="outline"
+            className="min-h-12 w-full max-w-sm"
+            onPress={() => router.back()}>
+            <Text>Kembali</Text>
+          </Button>
         </View>
       ) : record ? (
         <ConsumptionForm
@@ -165,8 +176,21 @@ export default function NewConsumption() {
         />
       ) : (
         <View className="flex-1 items-center justify-center gap-3 bg-background p-8">
-          <ActivityIndicator accessibilityLabel="Membuka draft konsumsi" />
-          <Text variant="muted">Membuka draft…</Text>
+          <View
+            className="items-center justify-center bg-carin-butter"
+            style={{
+              borderTopLeftRadius: 25,
+              borderTopRightRadius: 31,
+              borderBottomRightRadius: 23,
+              borderBottomLeftRadius: 29,
+              width: 64,
+              height: 64,
+            }}>
+            <ActivityIndicator size="small" accessibilityLabel="Membuka draft konsumsi" />
+          </View>
+          <Text variant="caption" className="text-muted-foreground">
+            Membuka draft konsumsi…
+          </Text>
         </View>
       )}
     </View>

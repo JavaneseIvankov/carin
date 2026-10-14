@@ -1,5 +1,22 @@
 const supportedPhotoMimeTypes = new Set(['image/jpeg', 'image/png']);
 
+const photoUriCache = new Map<string, string>();
+
+export function cachePhotoUri(key: string, uri: string): void {
+  if (key && uri) {
+    photoUriCache.set(key, uri);
+  }
+}
+
+export function getCachedPhotoUri(key: string): string | undefined {
+  if (!key) return undefined;
+  return photoUriCache.get(key);
+}
+
+export function clearPhotoUriCache(): void {
+  photoUriCache.clear();
+}
+
 export function resolvePhotoMimeType(
   mimeType: string | null | undefined,
   uri: string,

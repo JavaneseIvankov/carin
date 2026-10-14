@@ -1,11 +1,12 @@
-import { ConsumptionDetail } from '@/components/consumptions/consumption-detail';
 import { OnlineIndicator } from '@/components/app/online-indicator';
 import { serviceErrorMessage } from '@/components/app/presentation';
 import { ServiceError } from '@/components/app/service-error';
+import { ConsumptionDetail } from '@/components/consumptions/consumption-detail';
+import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { useAppRead, useAppWrite } from '@/lib/api/query';
-import { useAppData } from '@/lib/data/provider';
 import { createManualConsumptionActions } from '@/lib/consumptions/manual-actions';
+import { useAppData } from '@/lib/data/provider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import * as React from 'react';
@@ -116,9 +117,22 @@ export default function ConsumptionDetailScreen() {
     <View className="flex-1 bg-background">
       <OnlineIndicator connectivity={connectivity} />
       {consumptionQuery.isPending && !consumption ? (
-        <View className="flex-1 items-center justify-center gap-3 p-8">
-          <ActivityIndicator accessibilityLabel="Memuat catatan konsumsi" />
-          <Text variant="muted">Memuat catatan…</Text>
+        <View className="flex-1 items-center justify-center gap-3 bg-background p-8">
+          <View
+            className="items-center justify-center bg-carin-butter"
+            style={{
+              borderTopLeftRadius: 25,
+              borderTopRightRadius: 31,
+              borderBottomRightRadius: 23,
+              borderBottomLeftRadius: 29,
+              width: 64,
+              height: 64,
+            }}>
+            <ActivityIndicator size="small" accessibilityLabel="Memuat catatan konsumsi" />
+          </View>
+          <Text variant="caption" className="text-muted-foreground">
+            Memuat catatan…
+          </Text>
         </View>
       ) : consumptionQuery.error && !consumption ? (
         <View className="flex-1 gap-4 p-6">
@@ -152,8 +166,13 @@ export default function ConsumptionDetailScreen() {
         />
       ) : (
         <View className="flex-1 items-center justify-center gap-4 p-8">
-          <Text variant="h3">Catatan konsumsi tidak ditemukan</Text>
-          <Text variant="muted">Catatan ini tidak tersedia atau sudah dihapus.</Text>
+          <View className="w-full max-w-sm gap-2 rounded-summary border border-border/70 bg-card p-5">
+            <Text variant="h3">Catatan tidak ditemukan</Text>
+            <Text className="text-muted-foreground">Catatan ini tidak tersedia atau sudah dihapus.</Text>
+          </View>
+          <Button variant="outline" className="min-h-12 w-full max-w-sm" onPress={() => router.back()}>
+            <Text>Kembali</Text>
+          </Button>
         </View>
       )}
     </View>

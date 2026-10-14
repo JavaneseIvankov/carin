@@ -115,7 +115,7 @@ export default function SignInScreen() {
           </Button>
         ) : null}
 
-        <Button size="lg" disabled={isSubmitting} onPress={() => void submit()}>
+        <Button variant="tactile" disabled={isSubmitting} onPress={() => void submit()}>
           <Text>{isSubmitting ? 'Memeriksa…' : 'Masuk'}</Text>
         </Button>
         <Button variant="link" onPress={() => router.push('/(auth)/forgot-password' as Href)}>

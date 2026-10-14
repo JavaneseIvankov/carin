@@ -2,6 +2,7 @@ import { AuthScreen } from '@/components/auth/auth-screen';
 import { LegalCheckbox } from '@/components/auth/legal-checkbox';
 import { LegalDocumentModal } from '@/components/auth/legal-document-modal';
 import { Button } from '@/components/ui/button';
+import { DatePickerField } from '@/components/app/date-picker-field';
 import { FormField } from '@/components/app/form-field';
 import { Text } from '@/components/ui/text';
 import type { LegalRegistry } from '@/lib/auth/legal';
@@ -32,6 +33,7 @@ export default function SignUpScreen() {
   const [name, setName] = React.useState('');
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const [confirmPassword, setConfirmPassword] = React.useState('');
   const [birthDate, setBirthDate] = React.useState('');
   const [registry, setRegistry] = React.useState<LegalRegistry | null>(null);
   const [isLoadingLegal, setIsLoadingLegal] = React.useState(true);
@@ -39,9 +41,9 @@ export default function SignUpScreen() {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [acceptedTerms, setAcceptedTerms] = React.useState(false);
   const [acceptedPrivacy, setAcceptedPrivacy] = React.useState(false);
-  const [fieldErrors, setFieldErrors] = React.useState<Partial<Record<RegistrationField, string>>>(
-    {}
-  );
+  const [fieldErrors, setFieldErrors] = React.useState<
+    Partial<Record<RegistrationField | 'confirmPassword', string>>
+  >({});
   const [submitError, setSubmitError] = React.useState<string | null>(null);
   const [versionNotice, setVersionNotice] = React.useState<string | null>(null);
   const [activeDocument, setActiveDocument] = React.useState<'terms' | 'privacy' | null>(null);
@@ -102,7 +104,10 @@ export default function SignUpScreen() {
     };
   }, []);
 
-  const updateField = <Key extends RegistrationField>(key: Key, message?: string) => {
+  const updateField = <Key extends RegistrationField | 'confirmPassword'>(
+    key: Key,
+    message?: string
+  ) => {
     setFieldErrors((current) => {
       const next = { ...current };
       if (message) next[key] = message;
@@ -115,6 +120,14 @@ export default function SignUpScreen() {
     if (submitInFlight.current || !registry) return;
     setSubmitError(null);
     setFieldErrors({});
+
+    const localErrors: Partial<Record<RegistrationField | 'confirmPassword', string>> = {};
+    if (!confirmPassword) {
+      localErrors.confirmPassword = 'Ulangi kata sandi wajib diisi.';
+    } else if (password !== confirmPassword) {
+      localErrors.confirmPassword = 'Konfirmasi kata sandi tidak cocok.';
+    }
+
     const validation = validateRegistration({
       name,
       email,
@@ -125,8 +138,11 @@ export default function SignUpScreen() {
       termsVersion: registry.terms.version,
       privacyVersion: registry.privacy.version,
     });
-    if (!validation.valid) {
-      setFieldErrors(validation.errors);
+    if (!validation.valid || Object.keys(localErrors).length > 0) {
+      setFieldErrors({
+        ...(validation.valid ? {} : validation.errors),
+        ...localErrors,
+      });
       return;
     }
 
@@ -197,7 +213,14 @@ export default function SignUpScreen() {
         <FormField
           label="Kata sandi"
           value={password}
-          onChangeText={setPassword}
+          onChangeText={(val) => {
+            setPassword(val);
+            if (confirmPassword && val !== confirmPassword) {
+              updateField('confirmPassword', 'Konfirmasi kata sandi tidak cocok.');
+            } else if (confirmPassword && val === confirmPassword) {
+              updateField('confirmPassword', undefined);
+            }
+          }}
           error={fieldErrors.password}
           placeholder="Minimal 8 karakter"
           autoCapitalize="none"
@@ -207,14 +230,33 @@ export default function SignUpScreen() {
           returnKeyType="next"
         />
         <FormField
+          label="Ulangi kata sandi"
+          value={confirmPassword}
+          onChangeText={(val) => {
+            setConfirmPassword(val);
+            if (password && val !== password) {
+              updateField('confirmPassword', 'Konfirmasi kata sandi tidak cocok.');
+            } else {
+              updateField('confirmPassword', undefined);
+            }
+          }}
+          error={fieldErrors.confirmPassword}
+          placeholder="Ketik ulang kata sandi Anda"
+          autoCapitalize="none"
+          autoComplete="new-password"
+          textContentType="newPassword"
+          secureTextEntry
+          returnKeyType="next"
+        />
+        <DatePickerField
           label="Tanggal lahir"
           value={birthDate}
-          onChangeText={setBirthDate}
+          onChange={(val) => {
+            setBirthDate(val);
+            updateField('birthDate', undefined);
+          }}
           error={fieldErrors.birthDate}
-          hint="Format YYYY-MM-DD. Pendaftaran tersedia untuk usia 18–50 tahun."
-          placeholder="YYYY-MM-DD"
-          keyboardType="numbers-and-punctuation"
-          returnKeyType="done"
+          hint="Pilih tanggal lahir (tersedia untuk usia 18–50 tahun)."
         />
 
         <View className="gap-3 border-t border-border pt-4">
@@ -283,7 +325,7 @@ export default function SignUpScreen() {
           </Text>
         ) : null}
         <Button
-          size="lg"
+          variant="tactile"
           onPress={() => void submit()}
           disabled={
             isSubmitting ||

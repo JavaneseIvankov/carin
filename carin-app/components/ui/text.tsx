@@ -34,6 +34,7 @@ const textVariants = cva(
         muted: 'text-sm leading-5 text-muted-foreground',
         metric: 'text-[26px] font-extrabold leading-8 tracking-tight',
         emphasis: 'text-base font-semibold leading-[22px]',
+        body: 'text-sm leading-5',
         label: 'text-xs font-semibold leading-4',
         caption: 'text-xs leading-4',
       },

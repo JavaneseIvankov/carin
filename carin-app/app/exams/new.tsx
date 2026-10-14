@@ -41,24 +41,28 @@ export default function NewExamination() {
   };
 
   return (
-    <View className="flex-1 gap-4 bg-background p-5">
-      <Button
-        variant="ghost"
-        className="self-start"
-        onPress={() => router.replace('/(tabs)/exams')}>
-        <Text>‹ Kembali ke pemeriksaan</Text>
-      </Button>
-      <View className="gap-1">
-        <Text variant="h3">Catat pemeriksaan</Text>
+    <View className="flex-1 bg-background pt-5">
+      <View className="mx-5 gap-1">
+        <Button
+          variant="ghost"
+          className="self-start px-0"
+          onPress={() => router.replace('/(tabs)/exams')}>
+          <Text className="font-medium text-primary">‹ Kembali ke pemeriksaan</Text>
+        </Button>
+        <Text variant="h2">Catat pemeriksaan</Text>
         <Text variant="muted">Masukkan nilai persis seperti hasil pengukuran.</Text>
       </View>
-      {me.isPending && !timezone ? <Text variant="muted">Memuat pengaturan akun…</Text> : null}
-      <View className="flex-1 gap-4">
-        <View>
-          {timezoneRead.status === 'error' && (
-            <ServiceError error={me.error} onRetry={() => void me.refetch()} />
-          )}
+      {me.isPending && !timezone ? (
+        <View className="mx-5 mt-2">
+          <Text variant="muted">Memuat pengaturan akun…</Text>
         </View>
+      ) : null}
+      <View className="flex-1">
+        {timezoneRead.status === 'error' && (
+          <View className="mx-5 mt-2">
+            <ServiceError error={me.error} onRetry={() => void me.refetch()} />
+          </View>
+        )}
         {timezone && (
           <ExaminationForm
             timezone={timezone}

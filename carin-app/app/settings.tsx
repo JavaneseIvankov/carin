@@ -19,8 +19,9 @@ import {
 } from '@/lib/profile/profile';
 import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
+import { cn } from '@/lib/utils';
 import * as React from 'react';
-import { ActivityIndicator, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -183,25 +184,91 @@ export default function SettingsScreen() {
   return (
     <ScrollView className="flex-1 bg-background" contentContainerClassName="gap-5 px-5 pb-10 pt-7">
       <View className="gap-2">
-        <Text variant="h2">Pengaturan</Text>
+        <Text variant="h1">Pengaturan</Text>
         <Text variant="muted">Perubahan disimpan ke akun Anda saat server mengonfirmasi.</Text>
       </View>
 
-      <View className="gap-4 rounded-xl border border-border bg-card p-4">
-        <Text variant="h4">Zona waktu</Text>
+      <View className="gap-4 rounded-summary border border-border/60 bg-card p-5">
+        <Text variant="h3">Zona waktu</Text>
         <Text variant="muted">
-          Zona waktu menentukan batas hari pada ringkasan dan catatan waktu.
+          Zona waktu menentukan batas hari pada ringkasan dan catatan asupan Anda.
         </Text>
+
+        {/* Quick regional preset pills */}
+        <View className="gap-2">
+          <Text className="font-medium text-foreground">Pilih zona wilayah Indonesia</Text>
+          <View className="flex-row flex-wrap gap-2.5">
+            {[
+              { code: 'WIB', tz: 'Asia/Jakarta', region: 'Barat (Jawa, Sumatera)' },
+              { code: 'WITA', tz: 'Asia/Makassar', region: 'Tengah (Bali, Sulawesi)' },
+              { code: 'WIT', tz: 'Asia/Jayapura', region: 'Timur (Maluku, Papua)' },
+            ].map((item) => {
+              const isSelected = timezone === item.tz;
+              return (
+                <Pressable
+                  key={item.tz}
+                  onPress={() => setTimezoneDraft(item.tz)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${item.code}: ${item.tz}`}
+                  accessibilityState={{ selected: isSelected }}
+                  className={cn(
+                    'flex-1 min-w-[95px] items-center justify-center rounded-control border p-3 gap-1',
+                    isSelected
+                      ? 'border-primary bg-carin-olive-soft'
+                      : 'border-border bg-card active:bg-muted/30'
+                  )}>
+                  <Text
+                    className={cn(
+                      'text-base font-bold',
+                      isSelected ? 'text-primary' : 'text-foreground'
+                    )}>
+                    {item.code}
+                  </Text>
+                  <Text
+                    variant="caption"
+                    className={cn(
+                      'text-center text-[11px]',
+                      isSelected ? 'font-medium text-primary' : 'text-muted-foreground'
+                    )}>
+                    {item.region}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+
+          {/* Device Auto-detect */}
+          <Pressable
+            onPress={() => {
+              try {
+                const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                if (detected) setTimezoneDraft(detected);
+              } catch {
+                setTimezoneDraft('Asia/Jakarta');
+              }
+            }}
+            accessibilityRole="button"
+            accessibilityLabel="Gunakan zona waktu perangkat"
+            className="mt-1 self-start rounded-full border border-border/80 bg-muted/20 px-3.5 py-1.5 active:bg-muted/40">
+            <Text variant="caption" className="font-medium text-foreground">
+              ⚡ Gunakan waktu perangkat
+            </Text>
+          </Pressable>
+        </View>
+
         <FormField
-          label="Zona waktu"
+          label="Zona waktu aktif (IANA)"
           value={timezone}
           onChangeText={(value) => setTimezoneDraft(value)}
           error={timezoneError ?? undefined}
           placeholder="Asia/Jakarta"
           autoCapitalize="none"
           autoCorrect={false}
+          hint="Pilih tombol wilayah di atas atau ubah manual jika berada di luar negeri."
         />
         <Button
+          variant="tactile"
+          className="min-h-12"
           onPress={() => void saveTimezone()}
           disabled={updateMe.isPending || timezone === account.timezone}>
           <Text>{updateMe.isPending ? 'Menyimpan…' : 'Simpan zona waktu'}</Text>
@@ -214,6 +281,7 @@ export default function SettingsScreen() {
         {timezoneConflict ? (
           <Button
             variant="outline"
+            className="min-h-12"
             onPress={() => void reloadTimezoneRevision()}
             disabled={meQuery.isFetching}>
             <Text>{meQuery.isFetching ? 'Memuat versi terbaru…' : 'Muat versi terbaru'}</Text>
@@ -221,9 +289,9 @@ export default function SettingsScreen() {
         ) : null}
       </View>
 
-      <View className="gap-4 rounded-xl border border-border bg-card p-4">
+      <View className="gap-4 rounded-summary border border-border/60 bg-card p-5">
         <View className="gap-2">
-          <Text variant="h4">Persetujuan pemrosesan AI</Text>
+          <Text variant="h3">Persetujuan pemrosesan AI</Text>
           <Text>
             Persetujuan ini pilihan dan terpisah dari persetujuan saat pendaftaran. Tanpa
             persetujuan aktif, profil, pencatatan makanan manual, dan catatan pemeriksaan tetap
@@ -246,6 +314,7 @@ export default function SettingsScreen() {
             {!legalQuery.error ? (
               <Button
                 variant="outline"
+                className="min-h-12"
                 onPress={() => void legalQuery.refetch()}
                 disabled={legalQuery.isFetching}>
                 <Text>
@@ -267,8 +336,8 @@ export default function SettingsScreen() {
         ) : null}
         {registry ? (
           <>
-            <View className="gap-3 rounded-lg border border-border bg-muted/30 p-3">
-              <Text className="font-semibold">
+            <View className="gap-3 rounded-compact border border-border/60 bg-muted/20 p-4">
+              <Text className="font-semibold text-foreground">
                 {registryCurrent ? 'Pemberitahuan yang berlaku' : 'Pemberitahuan tersimpan'}
               </Text>
               <LegalContent document={registry.aiProcessing} />
@@ -298,6 +367,8 @@ export default function SettingsScreen() {
             : ''}
         </Text>
         <Button
+          tactile
+          className="min-h-12"
           onPress={() => void saveConsent()}
           disabled={!registryCurrent || !dirtyConsent || consentConflict || setAiConsent.isPending}>
           <Text>
@@ -322,17 +393,18 @@ export default function SettingsScreen() {
         {consentConflict ? (
           <Button
             variant="outline"
+            className="min-h-12"
             onPress={() => void reloadConsentVersion()}
             disabled={legalQuery.isFetching}>
             <Text>{legalQuery.isFetching ? 'Memuat dokumen…' : 'Muat dokumen terbaru'}</Text>
           </Button>
         ) : null}
-        <Button variant="outline" onPress={openConsentDocument}>
+        <Button variant="outline" className="min-h-12" onPress={openConsentDocument}>
           <Text>Baca pemberitahuan pemrosesan AI</Text>
         </Button>
       </View>
 
-      <Button variant="outline" onPress={() => router.back()}>
+      <Button variant="outline" className="min-h-12" onPress={() => router.back()}>
         <Text>Kembali ke profil</Text>
       </Button>
     </ScrollView>

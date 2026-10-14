@@ -169,17 +169,18 @@ export function DashboardScreen() {
 
         <View className={stackFoodActions ? 'gap-3' : 'flex-row gap-3'}>
           <Button
+            tactile
             className={
               stackFoodActions
-                ? 'h-auto min-h-16 w-full justify-start rounded-control px-4 py-3'
-                : 'h-auto min-h-28 flex-1 flex-col items-start justify-center rounded-control px-4 py-3'
+                ? 'h-auto min-h-16 w-full justify-start rounded-[20px] px-4 py-3'
+                : 'h-auto min-h-28 flex-1 flex-col items-start justify-center rounded-[20px] px-4 py-3'
             }
             accessibilityLabel="Catat makanan yang sudah dikonsumsi"
             onPress={() => router.push('/consumptions/new' as Href)}>
-            <Icon as={ClipboardPlus} size={20} />
-            <View className={stackFoodActions ? 'flex-1 gap-0.5' : 'w-full gap-2'}>
-              <Text className="text-sm font-medium">Catat makanan</Text>
-              <Text variant="caption" className="text-xs font-normal text-primary-foreground">
+            <Icon as={ClipboardPlus} size={22} />
+            <View className={stackFoodActions ? 'flex-1 gap-0.5' : 'w-full gap-0.5'}>
+              <Text className="text-base font-bold">Catat makanan</Text>
+              <Text className="text-[13px] font-normal leading-4 text-primary-foreground/90">
                 Sudah dikonsumsi
               </Text>
             </View>
@@ -187,18 +188,19 @@ export function DashboardScreen() {
           </Button>
 
           <Button
+            tactile
             variant="secondary"
             className={
               stackFoodActions
-                ? 'h-auto min-h-16 w-full justify-start rounded-control px-4 py-3'
-                : 'h-auto min-h-28 flex-1 flex-col items-start justify-center rounded-control px-4 py-3'
+                ? 'h-auto min-h-16 w-full justify-start rounded-[20px] px-4 py-3'
+                : 'h-auto min-h-28 flex-1 flex-col items-start justify-center rounded-[20px] px-4 py-3'
             }
             accessibilityLabel="Analisis foto makanan sebelum makan"
             onPress={() => router.push('/food/capture' as Href)}>
-            <Icon as={Camera} className="text-secondary-foreground" size={20} />
-            <View className={stackFoodActions ? 'flex-1 gap-0.5' : 'w-full gap-2'}>
-              <Text className="text-sm font-medium">Analisis foto</Text>
-              <Text variant="caption" className="text-xs font-normal text-secondary-foreground">
+            <Icon as={Camera} className="text-secondary-foreground" size={22} />
+            <View className={stackFoodActions ? 'flex-1 gap-0.5' : 'w-full gap-0.5'}>
+              <Text className="text-base font-bold">Analisis foto</Text>
+              <Text className="text-[13px] font-normal leading-4 text-secondary-foreground/90">
                 Sebelum makan
               </Text>
             </View>

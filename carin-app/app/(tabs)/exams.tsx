@@ -14,6 +14,8 @@ import {
 import { Link, useRouter } from 'expo-router';
 import * as React from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
+import { Icon } from '@/components/ui/icon';
+import { ChevronRight, FlaskConical } from 'lucide-react-native';
 import { useAppData } from '@/lib/data/provider';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { scopeKey } from '@/lib/data/scope';
@@ -78,10 +80,11 @@ export default function Exams() {
     <ScrollView className="flex-1 bg-background" contentContainerClassName="gap-5 p-5 pb-10">
       <View className="flex-row items-start justify-between gap-4">
         <View className="flex-1 gap-1">
-          <Text variant="h3">Pemeriksaan</Text>
+          <Text variant="h1">Pemeriksaan</Text>
           <Text variant="muted">Simpan hasil pengukuran untuk dilihat kembali.</Text>
         </View>
         <Button
+          tactile
           onPress={() => router.push('/exams/new')}
           accessibilityLabel="Catat pemeriksaan baru">
           <Text>Tambah</Text>
@@ -97,8 +100,11 @@ export default function Exams() {
       )}
 
       <View className="gap-2">
-        <Text className="font-medium">Filter jenis</Text>
-        <View className="flex-row flex-wrap gap-2">
+        <Text className="font-semibold text-foreground">Filter jenis</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerClassName="gap-2">
           {filters.map((filter) => {
             const selected = type === filter.value && !seriesKey;
             return (
@@ -107,19 +113,24 @@ export default function Exams() {
                 accessibilityRole="radio"
                 accessibilityState={{ selected }}
                 onPress={() => changeFilter(filter.value)}
-                className={`min-h-11 justify-center rounded-full border px-4 ${selected ? 'border-primary bg-accent' : 'border-border bg-card'}`}>
-                <Text className={selected ? 'font-semibold text-accent-foreground' : ''}>
+                className={`min-h-11 justify-center rounded-full border px-4 py-2 ${
+                  selected ? 'border-primary bg-primary' : 'border-border/60 bg-card'
+                }`}>
+                <Text
+                  className={`text-xs font-semibold ${
+                    selected ? 'text-primary-foreground' : 'text-foreground'
+                  }`}>
                   {filter.label}
                 </Text>
               </Pressable>
             );
           })}
-        </View>
+        </ScrollView>
       </View>
 
       {(series.data?.data?.length ?? 0) > 0 && (
         <View className="gap-2">
-          <Text className="font-medium">Seri sebanding</Text>
+          <Text className="font-semibold text-foreground">Seri sebanding</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -128,32 +139,49 @@ export default function Exams() {
               accessibilityRole="radio"
               accessibilityState={{ selected: !seriesKey }}
               onPress={() => changeSeries(null)}
-              className={`min-h-11 justify-center rounded-full border px-4 ${!seriesKey ? 'border-primary bg-accent' : 'border-border bg-card'}`}>
-              <Text>Semua seri</Text>
+              className={`min-h-11 justify-center rounded-full border px-4 py-2 ${
+                !seriesKey ? 'border-primary bg-primary' : 'border-border/60 bg-card'
+              }`}>
+              <Text
+                className={`text-xs font-semibold ${
+                  !seriesKey ? 'text-primary-foreground' : 'text-foreground'
+                }`}>
+                Semua seri
+              </Text>
             </Pressable>
-            {series.data!.data.map((item) => (
-              <Pressable
-                key={item.key}
-                accessibilityRole="radio"
-                accessibilityState={{ selected: seriesKey === item.key }}
-                onPress={() => changeSeries(seriesKey === item.key ? null : item.key)}
-                className={`min-h-11 justify-center rounded-full border px-4 ${seriesKey === item.key ? 'border-primary bg-accent' : 'border-border bg-card'}`}>
-                <Text>{localizedSeriesLabel(item)}</Text>
-              </Pressable>
-            ))}
+            {series.data!.data.map((item) => {
+              const selected = seriesKey === item.key;
+              return (
+                <Pressable
+                  key={item.key}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected }}
+                  onPress={() => changeSeries(selected ? null : item.key)}
+                  className={`min-h-11 justify-center rounded-full border px-4 py-2 ${
+                    selected ? 'border-primary bg-primary' : 'border-border/60 bg-card'
+                  }`}>
+                  <Text
+                    className={`text-xs font-semibold ${
+                      selected ? 'text-primary-foreground' : 'text-foreground'
+                    }`}>
+                    {localizedSeriesLabel(item)}
+                  </Text>
+                </Pressable>
+              );
+            })}
           </ScrollView>
         </View>
       )}
 
       {series.isPending ? (
-        <View className="gap-3 rounded-xl border border-border bg-card p-4">
+        <View className="gap-3 rounded-summary border border-border/60 bg-card p-4">
           <Text variant="muted">Memuat ringkasan seri…</Text>
         </View>
       ) : series.error ? (
         <ServiceError error={series.error} onRetry={() => void series.refetch()} />
       ) : (series.data?.data.length ?? 0) > 0 ? (
         <View className="gap-3">
-          <Text variant="h4">Ringkasan pengukuran</Text>
+          <Text variant="h3">Ringkasan pengukuran</Text>
           {series.data!.data.map((item) => (
             <ExaminationSeriesChart key={item.key} series={item} />
           ))}
@@ -161,44 +189,72 @@ export default function Exams() {
       ) : null}
 
       {list.isPending && items.length === 0 ? (
-        <View className="gap-2 rounded-xl border border-border bg-card p-5">
+        <View className="gap-3 rounded-summary border border-border/60 bg-card p-5">
           <Text variant="large">Memuat pemeriksaan…</Text>
-          <View className="h-2 rounded bg-muted" />
-          <View className="h-2 w-2/3 rounded bg-muted" />
+          <View className="h-2 rounded-full bg-muted" />
+          <View className="h-2 w-2/3 rounded-full bg-muted" />
         </View>
       ) : list.error && items.length === 0 ? (
         <ServiceError error={list.error} onRetry={() => void list.refetch()} />
       ) : items.length === 0 ? (
-        <View className="items-start gap-3 rounded-xl border border-border bg-card p-5">
-          <Text variant="large">Belum ada catatan pemeriksaan</Text>
-          <Text variant="muted">
-            Tambahkan hasil tekanan darah, gula darah, atau kolesterol untuk menyimpannya dengan
-            tanggal pengukuran.
+        <View className="items-center gap-3 rounded-summary border border-border/60 bg-card p-6 py-8">
+          <View
+            className="items-center justify-center bg-carin-butter"
+            style={{
+              borderTopLeftRadius: 25,
+              borderTopRightRadius: 31,
+              borderBottomRightRadius: 23,
+              borderBottomLeftRadius: 29,
+              width: 68,
+              height: 68,
+            }}>
+            <Icon as={FlaskConical} className="text-primary" size={26} />
+          </View>
+          <Text variant="h3" className="text-center font-bold">
+            Belum ada catatan pemeriksaan
           </Text>
-          <Button variant="outline" onPress={() => router.push('/exams/new')}>
-            <Text>Catat pemeriksaan</Text>
+          <Text className="text-center text-muted-foreground">
+            Tambahkan hasil tekanan darah, gula darah, atau kolesterol untuk menyimpannya dengan tanggal pengukuran.
+          </Text>
+          <Button
+            tactile
+            className="mt-2 min-h-12"
+            onPress={() => router.push('/exams/new')}>
+            <Text>Catat pemeriksaan baru</Text>
           </Button>
         </View>
       ) : (
         <View className="gap-3">
-          <Text variant="h4">Catatan pemeriksaan</Text>
+          <Text variant="h3">Catatan pemeriksaan</Text>
           {list.error && <ServiceError error={list.error} onRetry={() => void list.refetch()} />}
           {items.map((item) => (
             <Link key={item.id} href={{ pathname: '/exams/[id]', params: { id: item.id } }} asChild>
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={`${recordTitle(item.record)}, ${recordValue(item.record)}, ${formatMeasuredAt(item.record)}`}
-                className="gap-2 rounded-xl border border-border bg-card p-4">
+                className="gap-2.5 rounded-summary border border-border/60 bg-card p-4 active:bg-accent/30">
                 <View className="flex-row items-start justify-between gap-3">
-                  <Text className="flex-1 font-semibold">{recordTitle(item.record)}</Text>
-                  <Text variant="muted">Buka</Text>
+                  <View className="flex-1 gap-0.5">
+                    <Text variant="h4" className="font-bold text-foreground">
+                      {recordTitle(item.record)}
+                    </Text>
+                    <Text variant="caption" className="text-muted-foreground">
+                      Diukur {formatMeasuredAt(item.record)}
+                    </Text>
+                  </View>
+                  <View className="flex-row items-center gap-1 mt-0.5">
+                    <Icon as={ChevronRight} size={16} className="text-muted-foreground" />
+                  </View>
                 </View>
-                <Text variant="large">{recordValue(item.record)}</Text>
-                <Text variant="muted">Diukur {formatMeasuredAt(item.record)}</Text>
+                <Text variant="metric" className="text-foreground">
+                  {recordValue(item.record)}
+                </Text>
                 {!!item.record.note && (
-                  <Text variant="muted" numberOfLines={2}>
-                    {item.record.note}
-                  </Text>
+                  <View className="rounded-control bg-muted/40 p-2.5">
+                    <Text variant="caption" className="text-muted-foreground" numberOfLines={2}>
+                      {item.record.note}
+                    </Text>
+                  </View>
                 )}
               </Pressable>
             </Link>

@@ -47,6 +47,14 @@ const buttonVariants = cva(
           Platform.select({ web: 'hover:bg-accent dark:hover:bg-accent/50' })
         ),
         link: '',
+        tactile: cn(
+          'rounded-[20px] bg-primary border-b-4 border-[#33451f] dark:border-[#151d0c] active:opacity-95',
+          Platform.select({ web: 'hover:bg-primary/95 transition-transform' })
+        ),
+        'tactile-secondary': cn(
+          'rounded-[20px] bg-secondary border-b-4 border-[#e2b899] dark:border-[#241b14] active:opacity-95',
+          Platform.select({ web: 'hover:bg-secondary/95 transition-transform' })
+        ),
       },
       size: {
         default: cn('h-12 px-4 py-3', Platform.select({ web: 'has-[>svg]:px-3' })),
@@ -82,6 +90,8 @@ const buttonTextVariants = cva(
           'text-primary group-active:underline',
           Platform.select({ web: 'underline-offset-4 hover:underline group-hover:underline' })
         ),
+        tactile: 'text-primary-foreground',
+        'tactile-secondary': 'text-secondary-foreground',
       },
       size: {
         default: '',
@@ -102,6 +112,7 @@ type ButtonProps = Omit<React.ComponentProps<typeof Pressable>, 'accessibilitySt
   VariantProps<typeof buttonVariants> & {
     accessibilityState?: React.ComponentProps<typeof Pressable>['accessibilityState'];
     loading?: boolean;
+    tactile?: boolean;
   };
 
 const SPINNER_TOKEN_BY_VARIANT = {
@@ -111,6 +122,8 @@ const SPINNER_TOKEN_BY_VARIANT = {
   secondary: 'secondary-foreground',
   ghost: 'foreground',
   link: 'primary',
+  tactile: 'primary-foreground',
+  'tactile-secondary': 'secondary-foreground',
 } as const;
 
 function NativeButtonSpinner({ token }: { token: string }) {
@@ -145,19 +158,29 @@ function Button({
   size,
   loading = false,
   disabled = false,
+  tactile = false,
   accessibilityState,
   onPress,
   children,
+  style,
   ...props
 }: ButtonProps) {
   const unavailable = disabled || loading;
+  const effectiveVariant = variant ?? (tactile ? 'tactile' : 'default');
+  const resolvedVariant =
+    tactile && effectiveVariant === 'secondary'
+      ? 'tactile-secondary'
+      : tactile && effectiveVariant === 'default'
+        ? 'tactile'
+        : effectiveVariant;
+  const isTactile = resolvedVariant === 'tactile' || resolvedVariant === 'tactile-secondary';
 
   return (
-    <TextClassContext.Provider value={buttonTextVariants({ variant, size })}>
+    <TextClassContext.Provider value={buttonTextVariants({ variant: resolvedVariant, size })}>
       <Pressable
         className={cn(
           disabled && !loading && 'opacity-50',
-          buttonVariants({ variant, size }),
+          buttonVariants({ variant: resolvedVariant, size }),
           className
         )}
         role="button"
@@ -168,11 +191,18 @@ function Button({
           busy: loading,
         }}
         onPress={loading ? undefined : onPress}
+        style={(state: PressableStateCallbackType) => {
+          const userStyle = typeof style === 'function' ? style(state) : style;
+          if (isTactile && state.pressed) {
+            return [userStyle, { transform: [{ translateY: 2 }] }];
+          }
+          return userStyle;
+        }}
         {...props}>
         {(state: PressableStateCallbackType) => (
           <>
             {typeof children === 'function' ? children(state) : children}
-            {loading ? <ButtonSpinner variant={variant ?? 'default'} /> : null}
+            {loading ? <ButtonSpinner variant={resolvedVariant ?? 'default'} /> : null}
           </>
         )}
       </Pressable>

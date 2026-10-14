@@ -2,18 +2,20 @@ import { OnlineIndicator } from '@/components/app/online-indicator';
 import { serviceErrorMessage } from '@/components/app/presentation';
 import { ConsumptionForm } from '@/components/consumptions/consumption-form';
 import { Button } from '@/components/ui/button';
+import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import { useAppRepository, useAppWrite } from '@/lib/api/query';
 import { createManualConsumptionActions } from '@/lib/consumptions/manual-actions';
+import type { PhotoConfirmationOccurrence } from '@/lib/consumptions/photo-confirmation';
 import {
-  createPhotoConfirmationRouteGuard,
   createPhotoConfirmationFlow,
+  createPhotoConfirmationRouteGuard,
   type PhotoConfirmationSnapshot,
 } from '@/lib/consumptions/photo-confirmation-flow';
-import type { PhotoConfirmationOccurrence } from '@/lib/consumptions/photo-confirmation';
 import { useAppData } from '@/lib/data/provider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useLocalSearchParams, useRouter, type Href } from 'expo-router';
+import { ArrowLeft, CheckCircle2 } from 'lucide-react-native';
 import * as React from 'react';
 import { ActivityIndicator, AppState, View } from 'react-native';
 
@@ -207,9 +209,25 @@ export default function PhotoConsumptionConfirmation() {
     <View className="flex-1 bg-background">
       <OnlineIndicator connectivity={connectivity} />
       {snapshot.availability === 'loading' ? (
-        <View className="flex-1 items-center justify-center gap-3 p-8">
-          <ActivityIndicator accessibilityLabel="Memuat hasil untuk konfirmasi konsumsi" />
-          <Text variant="muted">Memuat hasil analisis…</Text>
+        <View className="flex-1 items-center justify-center gap-3 bg-background p-8">
+          <View
+            className="items-center justify-center bg-carin-butter"
+            style={{
+              borderTopLeftRadius: 25,
+              borderTopRightRadius: 31,
+              borderBottomRightRadius: 23,
+              borderBottomLeftRadius: 29,
+              width: 64,
+              height: 64,
+            }}>
+            <ActivityIndicator
+              size="small"
+              accessibilityLabel="Memuat hasil untuk konfirmasi konsumsi"
+            />
+          </View>
+          <Text variant="caption" className="text-muted-foreground">
+            Memuat hasil analisis…
+          </Text>
         </View>
       ) : snapshot.availability === 'confirm' && snapshot.record ? (
         <ConsumptionForm
@@ -225,80 +243,116 @@ export default function PhotoConsumptionConfirmation() {
           onBack={goBack}
         />
       ) : (
-        <View className="flex-1 gap-4 bg-background p-6">
-          <Button variant="ghost" className="min-h-12 self-start px-0" onPress={goBack}>
-            <Text>Kembali</Text>
-          </Button>
-          <Text variant="h2">
-            {snapshot.availability === 'open_existing'
-              ? 'Konsumsi sudah dicatat'
-              : 'Konfirmasi konsumsi'}
-          </Text>
-          {snapshot.availability === 'open_existing' && snapshot.scan?.defaultConsumptionId ? (
-            <>
-              <Text>Catatan konsumsi default untuk foto ini sudah tersimpan.</Text>
-              <Button
-                className="min-h-12"
-                onPress={() => openConsumption(snapshot.scan!.defaultConsumptionId!)}>
-                <Text>Buka catatan konsumsi</Text>
-              </Button>
-              <Button variant="outline" className="min-h-12" onPress={startNewOccurrence}>
-                <Text>Catat sebagai konsumsi baru</Text>
-              </Button>
-            </>
-          ) : snapshot.availability === 'correction_pending' ? (
-            <>
-              <Text accessibilityRole="alert">
-                Perbaikan analisis masih berlangsung. Tunggu sampai selesai sebelum mengonfirmasi
-                konsumsi.
-              </Text>
-              <Button variant="outline" className="min-h-12" onPress={load}>
-                <Text>Coba periksa lagi</Text>
-              </Button>
-            </>
-          ) : (
-            <>
-              <Text accessibilityRole="alert">
-                {snapshot.submitMessage ??
-                  (snapshot.loadError
-                    ? `Hasil analisis belum dapat dimuat. ${serviceErrorMessage(snapshot.loadError)}`
-                    : 'Hasil analisis yang dapat dikonfirmasi tidak tersedia.')}
-              </Text>
-              {snapshot.conflict === 'already_confirmed' && snapshot.scan?.defaultConsumptionId ? (
-                <Button
-                  className="min-h-12"
-                  onPress={() => openConsumption(snapshot.scan!.defaultConsumptionId!)}>
-                  <Text>Buka catatan konsumsi</Text>
-                </Button>
-              ) : null}
-              {snapshot.record &&
-              snapshot.scan?.latestResultId !== snapshot.record.sourceResultId &&
-              snapshot.latestJob?.status === 'completed' ? (
-                <>
-                  <Text variant="muted">
-                    Draft lama tetap tersimpan sampai Anda memilih mengganti makanan dan porsi dari
-                    hasil terbaru.
-                  </Text>
+        <View className="flex-1 gap-5 bg-background p-6">
+          <View className="gap-2">
+            <Button
+              variant="ghost"
+              className="min-h-11 self-start px-0 -ml-1 flex-row items-center gap-1.5"
+              onPress={goBack}>
+              <Icon as={ArrowLeft} size={20} className="text-foreground" />
+              <Text>Kembali</Text>
+            </Button>
+            <Text variant="h1">
+              {snapshot.availability === 'open_existing'
+                ? 'Konsumsi sudah dicatat'
+                : 'Konfirmasi konsumsi'}
+            </Text>
+          </View>
+
+          <View className="gap-4 rounded-summary border border-border/70 bg-card p-5">
+            {snapshot.availability === 'open_existing' && snapshot.scan?.defaultConsumptionId ? (
+              <View className="gap-3">
+                <View className="flex-row items-center gap-2">
+                  <View className="h-8 w-8 items-center justify-center rounded-full bg-carin-olive-soft">
+                    <Icon as={CheckCircle2} size={18} className="text-primary" />
+                  </View>
+                  <Text variant="emphasis">Catatan sudah tersimpan</Text>
+                </View>
+                <Text className="text-muted-foreground">
+                  Catatan konsumsi default untuk foto ini sudah tersimpan di riwayat.
+                </Text>
+                <View className="gap-2 pt-2">
+                  <Button
+                    variant="tactile"
+                    className="min-h-12 w-full"
+                    onPress={() => openConsumption(snapshot.scan!.defaultConsumptionId!)}>
+                    <Text>Buka catatan konsumsi</Text>
+                  </Button>
                   <Button
                     variant="outline"
-                    className="min-h-12"
-                    onPress={() => void restartFromLatestResult()}>
-                    <Text>Ganti dengan hasil terbaru</Text>
+                    className="min-h-12 w-full"
+                    onPress={startNewOccurrence}>
+                    <Text>Catat sebagai konsumsi baru</Text>
                   </Button>
-                </>
-              ) : null}
-              {isCurrentFailedCorrection(snapshot) && !useLastSuccessfulResult ? (
-                <Button className="min-h-12" onPress={chooseLastSuccessful}>
-                  <Text>Gunakan hasil berhasil terakhir</Text>
+                </View>
+              </View>
+            ) : snapshot.availability === 'correction_pending' ? (
+              <View className="gap-3">
+                <View className="flex-row items-center gap-2">
+                  <ActivityIndicator size="small" />
+                  <Text variant="emphasis">Perbaikan analisis sedang berjalan</Text>
+                </View>
+                <Text className="text-muted-foreground" accessibilityRole="alert">
+                  Perbaikan analisis masih berlangsung. Tunggu beberapa saat sampai selesai sebelum
+                  mengonfirmasi konsumsi.
+                </Text>
+                <Button variant="outline" className="min-h-12 w-full" onPress={load}>
+                  <Text>Coba periksa lagi</Text>
                 </Button>
-              ) : null}
-              {snapshot.availability !== 'open_existing' ? (
-                <Button variant="outline" className="min-h-12" onPress={load}>
-                  <Text>Coba muat lagi</Text>
-                </Button>
-              ) : null}
-            </>
-          )}
+              </View>
+            ) : (
+              <View className="gap-3">
+                <Text className="text-foreground" accessibilityRole="alert">
+                  {snapshot.submitMessage ??
+                    (snapshot.loadError
+                      ? `Hasil analisis belum dapat dimuat. ${serviceErrorMessage(snapshot.loadError)}`
+                      : 'Hasil analisis yang dapat dikonfirmasi tidak tersedia.')}
+                </Text>
+
+                {snapshot.conflict === 'already_confirmed' &&
+                snapshot.scan?.defaultConsumptionId ? (
+                  <Button
+                    variant="tactile"
+                    className="min-h-12 w-full"
+                    onPress={() => openConsumption(snapshot.scan!.defaultConsumptionId!)}>
+                    <Text>Buka catatan konsumsi</Text>
+                  </Button>
+                ) : null}
+
+                {snapshot.record &&
+                snapshot.scan?.latestResultId !== snapshot.record.sourceResultId &&
+                snapshot.latestJob?.status === 'completed' ? (
+                  <View className="gap-2">
+                    <Text variant="caption" className="text-muted-foreground">
+                      Draft lama tetap tersimpan sampai Anda memilih mengganti makanan dan porsi dari
+                      hasil terbaru.
+                    </Text>
+                    <Button
+                      variant="outline"
+                      className="min-h-12 w-full"
+                      onPress={() => void restartFromLatestResult()}>
+                      <Text>Ganti dengan hasil terbaru</Text>
+                    </Button>
+                  </View>
+                ) : null}
+
+                {isCurrentFailedCorrection(snapshot) && !useLastSuccessfulResult ? (
+                  <Button
+                    variant="tactile"
+                    className="min-h-12 w-full"
+                    onPress={chooseLastSuccessful}>
+                    <Text>Gunakan hasil berhasil terakhir</Text>
+                  </Button>
+                ) : null}
+
+                {snapshot.availability !== 'open_existing' ? (
+                  <Button variant="outline" className="min-h-12 w-full" onPress={load}>
+                    <Text>Coba muat lagi</Text>
+                  </Button>
+                ) : null}
+              </View>
+            )}
+          </View>
         </View>
       )}
     </View>

@@ -24,11 +24,15 @@ import * as React from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Image,
+  Platform,
   Pressable,
   ScrollView,
   View,
   type LayoutChangeEvent,
 } from 'react-native';
+
+const MASCOT = require('../../assets/images/carin-mascot.png');
 
 type ProfileFields = components['schemas']['Profile']['fields'];
 type Condition = components['schemas']['ai__Condition'];
@@ -107,7 +111,7 @@ export default function HealthProfileScreen() {
   const account = accountQuery.data?.data;
   const [draft, setDraft] = React.useState<ProfileFields | null>(null);
   const fields = draft ?? profile?.fields ?? null;
-  const setFields = setDraft;
+
   const [heightInput, setHeightInput] = React.useState<string | null>(null);
   const [weightInput, setWeightInput] = React.useState<string | null>(null);
   const heightText = heightInput ?? (fields?.heightCm == null ? '' : String(fields.heightCm));
@@ -156,12 +160,16 @@ export default function HealthProfileScreen() {
   const unsupportedConditions = profile?.personalization.unsupportedConditions ?? [];
 
   const patchFields = (patch: Partial<ProfileFields>) => {
-    setFields((current) => (current ? { ...current, ...patch } : current));
+    setDraft((current) => {
+      const base = current ?? profile?.fields;
+      return base ? { ...base, ...patch } : null;
+    });
   };
 
   const applyKnowledgeState = (area: KnowledgeArea, state: string, confirmed = false) => {
-    if (!fields) return;
-    const current = fields[area] as { state: string; entries: unknown[] };
+    const base = draft ?? profile?.fields;
+    if (!base) return;
+    const current = base[area] as { state: string; entries: unknown[] };
     const transition = transitionKnowledgeState(current, state, confirmed);
     if (transition.kind === 'unchanged') return;
     if (transition.kind === 'confirmation-required') {
@@ -171,6 +179,13 @@ export default function HealthProfileScreen() {
           : area === 'familyHistory'
             ? 'Ubah status riwayat keluarga?'
             : 'Ubah status alergi dan pantangan?';
+      if (Platform.OS === 'web') {
+        const ok = window.confirm(
+          `${heading}\n\nDaftar yang sudah dicatat akan dihapus. Perubahan baru berlaku setelah Anda menyimpan profil.`
+        );
+        if (ok) applyKnowledgeState(area, state, true);
+        return;
+      }
       Alert.alert(
         heading,
         'Daftar yang sudah dicatat akan dihapus. Perubahan baru berlaku setelah Anda menyimpan profil.',
@@ -185,60 +200,65 @@ export default function HealthProfileScreen() {
       );
       return;
     }
-    setFields((currentFields) =>
-      currentFields ? ({ ...currentFields, [area]: transition.value } as ProfileFields) : null
-    );
+    setDraft((currentFields) => {
+      const b = currentFields ?? profile?.fields;
+      return b ? ({ ...b, [area]: transition.value } as ProfileFields) : null;
+    });
   };
 
   const addCondition = (condition: Condition) => {
-    if (!fields) return;
-    if (fields.diagnoses.entries.some((entry) => entry.conditionId === condition.id)) return;
+    const base = draft ?? profile?.fields;
+    if (!base) return;
+    if (base.diagnoses.entries.some((entry) => entry.conditionId === condition.id)) return;
     const entry: DiagnosisEntry = {
       id: createIdempotencyKey(),
       conditionId: condition.id,
       label: condition.displayName,
     };
-    setFields({
-      ...fields,
-      diagnoses: { state: 'reported', entries: [...fields.diagnoses.entries, entry] },
+    setDraft({
+      ...base,
+      diagnoses: { state: 'reported', entries: [...base.diagnoses.entries, entry] },
     });
     setConditionInput('');
   };
 
   const addOtherCondition = () => {
-    if (!fields) return;
+    const base = draft ?? profile?.fields;
+    if (!base) return;
     const entry = createOtherDiagnosisEntry(otherCondition);
     if (!entry) {
       setFieldErrors((current) => ({ ...current, otherCondition: 'Masukkan nama kondisi lain.' }));
       return;
     }
     setFieldErrors((current) => ({ ...current, otherCondition: '' }));
-    setFields({
-      ...fields,
-      diagnoses: { state: 'reported', entries: [...fields.diagnoses.entries, entry] },
+    setDraft({
+      ...base,
+      diagnoses: { state: 'reported', entries: [...base.diagnoses.entries, entry] },
     });
     setOtherCondition('');
   };
 
   const removeDiagnosis = (entryId: string) => {
-    if (!fields) return;
-    setFields({
-      ...fields,
+    const base = draft ?? profile?.fields;
+    if (!base) return;
+    setDraft({
+      ...base,
       diagnoses: {
-        ...fields.diagnoses,
-        entries: fields.diagnoses.entries.filter((entry) => entry.id !== entryId),
+        ...base.diagnoses,
+        entries: base.diagnoses.entries.filter((entry) => entry.id !== entryId),
       },
     });
   };
 
   const addFamilyHistory = () => {
-    if (!fields || !familyCondition.trim()) return;
-    setFields({
-      ...fields,
+    const base = draft ?? profile?.fields;
+    if (!base || !familyCondition.trim()) return;
+    setDraft({
+      ...base,
       familyHistory: {
         state: 'reported',
         entries: [
-          ...fields.familyHistory.entries,
+          ...base.familyHistory.entries,
           {
             conditionId: null,
             label: familyCondition.trim(),
@@ -252,10 +272,11 @@ export default function HealthProfileScreen() {
   };
 
   const addAllergy = () => {
-    if (!fields || !allergyText.trim()) return;
-    setFields({
-      ...fields,
-      allergies: { state: 'reported', entries: [...fields.allergies.entries, allergyText.trim()] },
+    const base = draft ?? profile?.fields;
+    if (!base || !allergyText.trim()) return;
+    setDraft({
+      ...base,
+      allergies: { state: 'reported', entries: [...base.allergies.entries, allergyText.trim()] },
     });
     setAllergyText('');
   };
@@ -290,7 +311,7 @@ export default function HealthProfileScreen() {
         body: payload,
       });
       keyFactory.clear();
-      setFields(result.fields);
+      setDraft(result.fields);
       setHeightInput(result.fields.heightCm === null ? '' : String(result.fields.heightCm));
       setWeightInput(result.fields.weightKg === null ? '' : String(result.fields.weightKg));
       setConflict(false);
@@ -359,26 +380,74 @@ export default function HealthProfileScreen() {
       <ScrollView
         ref={scrollRef}
         keyboardShouldPersistTaps="handled"
-        contentContainerClassName="gap-5 px-5 pb-10 pt-7">
-        <View className="gap-2">
-          <Text variant="h2">Profil kesehatan</Text>
-          <Text variant="muted">
-            Isi yang Anda ketahui. Profil ini opsional dan bisa dilengkapi kapan saja.
-          </Text>
-          <Text variant="muted">
-            Data yang belum diketahui tidak dianggap normal. Informasi ini membantu personalisasi
-            jika sesuai kebutuhan.
-          </Text>
+        contentContainerClassName="gap-5 px-5 pb-10 pt-4">
+        {/* Top bar with instant skip (explicitly optional invariant) */}
+        <View className="flex-row items-center justify-between pt-1">
+          <View className="flex-row items-center gap-1.5">
+            <View className="h-2 w-2 rounded-full bg-carin-olive" />
+            <Text variant="caption" className="font-medium text-muted-foreground">
+              Langkah opsional
+            </Text>
+          </View>
+          <Button
+            variant="ghost"
+            size="sm"
+            onPress={skip}
+            accessibilityRole="button"
+            accessibilityLabel="Lewati pengisian profil kesehatan"
+            className="h-8 rounded-full px-3">
+            <Text className="text-xs font-semibold text-primary">Nanti saja →</Text>
+          </Button>
+        </View>
+
+        {/* Welcoming mascot hero card */}
+        <View className="overflow-hidden rounded-summary border border-border bg-card p-5">
+          <View className="flex-row items-center gap-4">
+            <View
+              className="items-center justify-center bg-carin-butter"
+              style={{
+                borderRadius: 24,
+                width: 72,
+                height: 72,
+              }}>
+              <Image
+                source={MASCOT}
+                resizeMode="contain"
+                accessibilityLabel="Maskot Carin"
+                style={{
+                  width: 80,
+                  height: 84,
+                  transform: [{ rotate: '-4deg' }],
+                }}
+              />
+            </View>
+            <View className="flex-1 gap-1.5">
+              <Text variant="h2">Profil kesehatan</Text>
+              <View className="self-start rounded-full bg-carin-olive-soft px-3 py-1">
+                <Text variant="caption" className="font-semibold text-foreground">
+                  Profil bersifat opsional
+                </Text>
+              </View>
+            </View>
+          </View>
+          <View className="mt-4 gap-1.5 border-t border-border pt-3">
+            <Text variant="body" className="text-foreground">
+              Isi yang Anda ketahui. Profil ini opsional dan bisa dilengkapi kapan saja tanpa tekanan.
+            </Text>
+            <Text variant="caption" className="text-muted-foreground">
+              Data yang belum diketahui tidak dianggap normal atau nol. Informasi ini membantu personalisasi jika sesuai kebutuhan Anda.
+            </Text>
+          </View>
           {focusLabel ? (
-            <View className="rounded-lg border border-primary/40 bg-primary/10 p-3">
-              <Text className="font-semibold">Lengkapi: {focusLabel}</Text>
-              <Text variant="muted">Bagian tersebut sudah dituju dari tindakan sebelumnya.</Text>
+            <View className="mt-3 rounded-control border border-primary/40 bg-carin-olive-soft/30 p-3">
+              <Text className="font-semibold text-foreground">Lengkapi: {focusLabel}</Text>
+              <Text variant="caption" className="text-muted-foreground">Bagian tersebut sudah dituju dari tindakan sebelumnya.</Text>
             </View>
           ) : null}
         </View>
 
         <View
-          className="gap-4 rounded-xl border border-border bg-card p-4"
+          className="gap-4 rounded-summary border border-border bg-card p-5"
           onLayout={registerOffset('basics')}>
           <Text variant="h4">Informasi dasar</Text>
           <FormField
@@ -389,6 +458,7 @@ export default function HealthProfileScreen() {
           <FormField
             label="Tinggi badan"
             unit="cm"
+            unitBadge
             value={heightText}
             onChangeText={setHeightInput}
             error={fieldErrors.heightCm}
@@ -398,6 +468,7 @@ export default function HealthProfileScreen() {
           <FormField
             label="Berat badan"
             unit="kg"
+            unitBadge
             value={weightText}
             onChangeText={setWeightInput}
             error={fieldErrors.weightKg}
@@ -415,7 +486,7 @@ export default function HealthProfileScreen() {
         </View>
 
         <View
-          className="gap-4 rounded-xl border border-border bg-card p-4"
+          className="gap-4 rounded-summary border border-border bg-card p-5"
           onLayout={registerOffset('diagnoses')}>
           <View className="gap-1">
             <Text variant="h4">Diagnosis</Text>
@@ -457,13 +528,13 @@ export default function HealthProfileScreen() {
                 return (
                   <Pressable
                     key={condition.id}
-                    className="min-h-12 gap-1 rounded-lg border border-border p-3"
+                    className="min-h-12 gap-1 rounded-control border border-border bg-background p-3"
                     accessibilityRole="button"
                     accessibilityLabel={`${condition.displayName}. ${supportText(condition)}`}
                     accessibilityState={{ disabled: selected }}
                     disabled={selected}
                     onPress={() => addCondition(condition)}>
-                    <Text className="font-medium">{condition.displayName}</Text>
+                    <Text className="font-medium text-foreground">{condition.displayName}</Text>
                     <Text variant="muted">
                       {selected ? 'Sudah ditambahkan' : supportText(condition)}
                     </Text>
@@ -477,8 +548,8 @@ export default function HealthProfileScreen() {
                   Kondisi tidak ditemukan. Anda dapat menambahkannya sebagai kondisi lain.
                 </Text>
               ) : null}
-              <View className="gap-2 rounded-lg border border-dashed border-border p-3">
-                <Text className="font-medium">Kondisi lain</Text>
+              <View className="gap-2 rounded-control border border-dashed border-border p-3">
+                <Text className="font-medium text-foreground">Kondisi lain</Text>
                 <Text variant="muted">
                   Teks ini disimpan sebagai keterangan Anda dan tidak dicocokkan otomatis ke
                   katalog.
@@ -503,9 +574,9 @@ export default function HealthProfileScreen() {
                 return (
                   <View
                     key={entry.id}
-                    className="flex-row items-center justify-between gap-3 rounded-lg bg-muted/50 p-3">
+                    className="flex-row items-center justify-between gap-3 rounded-control bg-muted/50 p-3">
                     <View className="flex-1 gap-1">
-                      <Text className="font-medium">{entry.label}</Text>
+                      <Text className="font-medium text-foreground">{entry.label}</Text>
                       {unsupported ? <Text variant="muted">{unsupported}</Text> : null}
                     </View>
                     <Pressable
@@ -526,7 +597,7 @@ export default function HealthProfileScreen() {
         </View>
 
         <View
-          className="gap-4 rounded-xl border border-border bg-card p-4"
+          className="gap-4 rounded-summary border border-border bg-card p-5"
           onLayout={registerOffset('familyHistory')}>
           <View className="gap-1">
             <Text variant="h4">Riwayat keluarga</Text>
@@ -563,8 +634,8 @@ export default function HealthProfileScreen() {
               {fields.familyHistory.entries.map((entry, index) => (
                 <View
                   key={`${entry.label}-${index}`}
-                  className="flex-row items-center justify-between rounded-lg bg-muted/50 p-3">
-                  <Text className="flex-1">
+                  className="flex-row items-center justify-between rounded-control bg-muted/50 p-3">
+                  <Text className="flex-1 text-foreground">
                     {entry.label}
                     {entry.relation ? ` · ${entry.relation}` : ''}
                   </Text>
@@ -594,7 +665,7 @@ export default function HealthProfileScreen() {
         </View>
 
         <View
-          className="gap-4 rounded-xl border border-border bg-card p-4"
+          className="gap-4 rounded-summary border border-border bg-card p-5"
           onLayout={registerOffset('allergies')}>
           <View className="gap-1">
             <Text variant="h4">Alergi dan pantangan</Text>
@@ -623,8 +694,8 @@ export default function HealthProfileScreen() {
               {fields.allergies.entries.map((entry, index) => (
                 <View
                   key={`${entry}-${index}`}
-                  className="flex-row items-center justify-between rounded-lg bg-muted/50 p-3">
-                  <Text className="flex-1">{entry}</Text>
+                  className="flex-row items-center justify-between rounded-control bg-muted/50 p-3">
+                  <Text className="flex-1 text-foreground">{entry}</Text>
                   <Pressable
                     className="min-h-11 justify-center px-2"
                     accessibilityRole="button"
@@ -651,7 +722,7 @@ export default function HealthProfileScreen() {
         </View>
 
         <View
-          className="gap-4 rounded-xl border border-border bg-card p-4"
+          className="gap-4 rounded-summary border border-border bg-card p-5"
           onLayout={registerOffset('other')}>
           <Text variant="h4">Informasi tambahan (opsional)</Text>
           <FormField
@@ -678,7 +749,7 @@ export default function HealthProfileScreen() {
         </View>
 
         {conflictMessage ? (
-          <View className="gap-3 rounded-lg border border-destructive/40 bg-destructive/10 p-4">
+          <View className="gap-3 rounded-summary border border-destructive/40 bg-card p-4">
             <Text accessibilityRole="alert">{conflictMessage}</Text>
             {conflict ? (
               <Button
@@ -693,7 +764,7 @@ export default function HealthProfileScreen() {
           </View>
         ) : null}
         {saveError ? <ServiceError error={saveError} /> : null}
-        <Button onPress={() => void save()} disabled={updateProfile.isPending}>
+        <Button variant="tactile" onPress={() => void save()} disabled={updateProfile.isPending}>
           <Text>{updateProfile.isPending ? 'Menyimpan profil…' : 'Simpan profil'}</Text>
         </Button>
         <Button variant="outline" onPress={skip}>

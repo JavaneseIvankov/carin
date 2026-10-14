@@ -13,7 +13,9 @@ import {
 import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
-import { ActivityIndicator, ScrollView, View } from 'react-native';
+import { Icon } from '@/components/ui/icon';
+import { ChevronRight } from 'lucide-react-native';
+import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -95,42 +97,75 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView className="flex-1 bg-background" contentContainerClassName="gap-5 px-5 pb-10 pt-7">
-      <View className="gap-1">
-        <Text variant="h2">Profil</Text>
-        <Text variant="muted">{account?.name ?? 'Akun Carin'}</Text>
-        <Text variant="muted">{account?.email ?? ''}</Text>
+      <View className="flex-row items-center gap-4">
+        <View
+          className="h-16 w-16 items-center justify-center bg-carin-butter border border-border/60"
+          style={{
+            borderTopLeftRadius: 28,
+            borderTopRightRadius: 36,
+            borderBottomRightRadius: 26,
+            borderBottomLeftRadius: 32,
+          }}>
+          <Text className="text-2xl font-bold text-foreground">
+            {(account?.name?.trim()?.[0] || 'C').toUpperCase()}
+          </Text>
+        </View>
+        <View className="flex-1 gap-1">
+          <Text variant="h1">{account?.name || 'Akun Carin'}</Text>
+          {account?.email ? (
+            <Text variant="muted">{account.email}</Text>
+          ) : null}
+          <View className="self-start rounded-full bg-carin-olive-soft px-2.5 py-0.5 mt-0.5">
+            <Text className="text-xs font-semibold text-foreground">Pengguna Carin</Text>
+          </View>
+        </View>
       </View>
 
       {accountQuery.error ? (
         <ServiceError error={accountQuery.error} onRetry={() => void accountQuery.refetch()} />
       ) : null}
 
-      <View className="gap-3 rounded-xl border border-border bg-card p-4">
+      <View className="gap-3.5 rounded-summary border border-border/60 bg-card p-4">
         <View className="gap-1">
-          <Text variant="h4">Profil kesehatan</Text>
-          <Text variant="muted">
+          <View className="flex-row items-center justify-between">
+            <Text variant="h3">Profil kesehatan</Text>
+            <View className="rounded-full bg-muted/80 px-2.5 py-0.5">
+              <Text className="text-xs font-medium text-muted-foreground">Opsional</Text>
+            </View>
+          </View>
+          <Text variant="caption" className="text-muted-foreground">
             {profile.version === 0
               ? 'Belum ada informasi kesehatan yang disimpan. Profil ini opsional.'
               : `Terakhir diperbarui ${profile.updatedAt ? new Date(profile.updatedAt).toLocaleString('id-ID') : '—'}.`}
           </Text>
         </View>
-        <Text>
-          Diagnosis: {getKnowledgeStateLabel('diagnoses', profile.fields.diagnoses.state)}
-        </Text>
-        <Text>
-          Riwayat keluarga:{' '}
-          {getKnowledgeStateLabel('familyHistory', profile.fields.familyHistory.state)}
-        </Text>
-        <Text>
-          Alergi/pantangan: {getKnowledgeStateLabel('allergies', profile.fields.allergies.state)}
-        </Text>
+        <View className="gap-2 rounded-compact bg-muted/20 p-3">
+          <View className="flex-row items-center justify-between py-1 border-b border-border/40">
+            <Text variant="caption" className="text-muted-foreground">Diagnosis</Text>
+            <Text className="text-sm font-semibold text-foreground">
+              {getKnowledgeStateLabel('diagnoses', profile.fields.diagnoses.state)}
+            </Text>
+          </View>
+          <View className="flex-row items-center justify-between py-1 border-b border-border/40">
+            <Text variant="caption" className="text-muted-foreground">Riwayat keluarga</Text>
+            <Text className="text-sm font-semibold text-foreground">
+              {getKnowledgeStateLabel('familyHistory', profile.fields.familyHistory.state)}
+            </Text>
+          </View>
+          <View className="flex-row items-center justify-between py-1">
+            <Text variant="caption" className="text-muted-foreground">Alergi/pantangan</Text>
+            <Text className="text-sm font-semibold text-foreground">
+              {getKnowledgeStateLabel('allergies', profile.fields.allergies.state)}
+            </Text>
+          </View>
+        </View>
         {profile.personalization.unsupportedConditions.length > 0 ? (
-          <View className="gap-2 rounded-lg border border-border bg-muted/40 p-3">
-            <Text className="font-semibold">Belum didukung untuk personalisasi</Text>
+          <View className="gap-2 rounded-compact border border-border/60 bg-carin-butter/30 p-3.5">
+            <Text className="font-semibold text-foreground">Belum didukung untuk personalisasi</Text>
             {profile.personalization.unsupportedConditions.map((condition) => (
-              <Text key={condition}>• {condition}</Text>
+              <Text key={condition} className="text-sm text-foreground">• {condition}</Text>
             ))}
-            <Text variant="muted">Informasi tetap tersimpan di profil Anda.</Text>
+            <Text variant="caption" className="text-muted-foreground">Informasi tetap tersimpan di profil Anda.</Text>
           </View>
         ) : null}
         <MissingFieldActions
@@ -141,6 +176,7 @@ export default function ProfileScreen() {
         />
         <Button
           variant="outline"
+          className="min-h-12"
           onPress={() => router.push('/(onboarding)/health-profile' as Href)}>
           <Text>
             {profile.version === 0 ? 'Lengkapi profil kesehatan' : 'Ubah profil kesehatan'}
@@ -148,10 +184,20 @@ export default function ProfileScreen() {
         </Button>
       </View>
 
-      <View className="gap-3 rounded-xl border border-border bg-card p-4">
-        <Text variant="h4">Pengaturan dan persetujuan</Text>
-        <Text variant="muted">Zona waktu: {account?.timezone ?? 'Belum tersedia'}</Text>
-        <Text variant="muted">Persetujuan pemrosesan AI: {consentMessage}</Text>
+      <View className="gap-3.5 rounded-summary border border-border/60 bg-card p-4">
+        <Text variant="h3">Pengaturan dan persetujuan</Text>
+        <View className="gap-2 rounded-compact bg-muted/20 p-3">
+          <View className="flex-row items-center justify-between py-1 border-b border-border/40">
+            <Text variant="caption" className="text-muted-foreground">Zona waktu</Text>
+            <Text className="text-sm font-semibold text-foreground">
+              {account?.timezone ?? 'Belum tersedia'}
+            </Text>
+          </View>
+          <View className="gap-1 py-1">
+            <Text variant="caption" className="text-muted-foreground">Persetujuan pemrosesan AI</Text>
+            <Text className="text-sm font-medium text-foreground">{consentMessage}</Text>
+          </View>
+        </View>
         {legalRegistryState === 'loading' ? (
           <View className="flex-row items-center gap-2">
             <ActivityIndicator accessibilityLabel="Memeriksa versi persetujuan AI" />
@@ -170,6 +216,7 @@ export default function ProfileScreen() {
             {!legalQuery.error ? (
               <Button
                 variant="outline"
+                className="min-h-12"
                 onPress={() => void legalQuery.refetch()}
                 disabled={legalQuery.isFetching}>
                 <Text>
@@ -182,22 +229,37 @@ export default function ProfileScreen() {
         {legalRegistryState === 'refreshing' ? (
           <Text variant="muted">Memeriksa versi pemberitahuan terbaru…</Text>
         ) : null}
-        <Button variant="outline" onPress={() => router.push('/settings' as Href)}>
+        <Button variant="outline" className="min-h-12" onPress={() => router.push('/settings' as Href)}>
           <Text>Buka pengaturan</Text>
         </Button>
       </View>
 
-      <View className="gap-3 rounded-xl border border-border bg-card p-4">
-        <Text variant="h4">Dokumen</Text>
-        <Button variant="ghost" onPress={() => openLegal('terms')}>
-          <Text>Syarat dan Ketentuan</Text>
-        </Button>
-        <Button variant="ghost" onPress={() => openLegal('privacy')}>
-          <Text>Pemberitahuan Privasi</Text>
-        </Button>
-        <Button variant="ghost" onPress={() => openLegal('ai-processing')}>
-          <Text>Pemrosesan AI</Text>
-        </Button>
+      <View className="gap-2 rounded-summary border border-border/60 bg-card p-4">
+        <Text variant="h3">Dokumen dan kebijakan</Text>
+        <Pressable
+          className="min-h-12 flex-row items-center justify-between py-2 border-b border-border/40"
+          accessibilityRole="link"
+          accessibilityLabel="Syarat dan Ketentuan"
+          onPress={() => openLegal('terms')}>
+          <Text className="text-sm font-medium text-foreground">Syarat dan Ketentuan</Text>
+          <Icon as={ChevronRight} size={18} className="text-muted-foreground" />
+        </Pressable>
+        <Pressable
+          className="min-h-12 flex-row items-center justify-between py-2 border-b border-border/40"
+          accessibilityRole="link"
+          accessibilityLabel="Pemberitahuan Privasi"
+          onPress={() => openLegal('privacy')}>
+          <Text className="text-sm font-medium text-foreground">Pemberitahuan Privasi</Text>
+          <Icon as={ChevronRight} size={18} className="text-muted-foreground" />
+        </Pressable>
+        <Pressable
+          className="min-h-12 flex-row items-center justify-between py-2"
+          accessibilityRole="link"
+          accessibilityLabel="Pemrosesan AI"
+          onPress={() => openLegal('ai-processing')}>
+          <Text className="text-sm font-medium text-foreground">Pemrosesan AI</Text>
+          <Icon as={ChevronRight} size={18} className="text-muted-foreground" />
+        </Pressable>
       </View>
 
       {actionError ? (
@@ -205,11 +267,13 @@ export default function ProfileScreen() {
           {actionError}
         </Text>
       ) : null}
-      <Button variant="outline" onPress={() => void leaveAccount()}>
+      <Button variant="outline" className="min-h-12" onPress={() => void leaveAccount()}>
         <Text>Keluar dari akun</Text>
       </Button>
-      <View className="gap-2 rounded-xl border border-destructive/40 p-4">
-        <Text variant="h4">Penghapusan data</Text>
+      <View className="gap-3 rounded-summary border border-destructive/30 bg-destructive/5 p-4">
+        <Text variant="h4" className="font-bold text-destructive">
+          Penghapusan data
+        </Text>
         <Text variant="muted">
           Hapus akun dan data, atau hapus satu hasil analisis beserta foto sumbernya.
         </Text>

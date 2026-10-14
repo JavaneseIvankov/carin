@@ -23,6 +23,8 @@ import {
   loadCorrectionDraft,
   persistCorrectionDraft,
 } from '@/lib/food/correction-screen';
+import { Icon } from '@/components/ui/icon';
+import { AlertCircle, Check, Edit3, RefreshCw } from 'lucide-react-native';
 import { startAnalysisPolling } from '@/lib/food/analysis-polling';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
@@ -499,55 +501,88 @@ export default function FoodCorrectionScreen() {
 
   if (sourceJobQuery.isPending || scanQuery.isPending) {
     return (
-      <View className="flex-1 items-center justify-center gap-3 bg-background p-8">
-        <ActivityIndicator accessibilityLabel="Memuat hasil koreksi" />
-        <Text variant="muted">Memuat hasil dan porsi…</Text>
+      <View className="flex-1 items-center justify-center gap-4 bg-background p-8">
+        <View className="h-16 w-16 items-center justify-center rounded-[24px] bg-carin-butter">
+          <ActivityIndicator size="large" color="#506B35" accessibilityLabel="Memuat hasil koreksi" />
+        </View>
+        <Text variant="h2">Memuat Data Koreksi</Text>
+        <Text variant="muted" className="text-center">
+          Menyiapkan daftar komponen dan takaran porsi…
+        </Text>
       </View>
     );
   }
 
   if (!sourceJob || !scan || !sourceResult) {
     return (
-      <View className="flex-1 gap-4 bg-background p-6">
-        <Text variant="h2">Koreksi makanan</Text>
-        <Text accessibilityRole="alert">
-          Hasil sumber belum dapat dimuat. Versi katalog dan porsi lama tetap dipertahankan.
-        </Text>
-        <Button
-          className="min-h-12"
-          variant="outline"
-          onPress={() => void Promise.all([refetchSourceJob(), refetchScan()])}>
-          <Text>Muat ulang</Text>
-        </Button>
-        <Button className="min-h-12" variant="ghost" onPress={returnToOldResult}>
-          <Text>Kembali ke hasil sebelumnya</Text>
-        </Button>
+      <View className="flex-1 justify-center gap-4 bg-background p-6">
+        <View className="gap-4 rounded-[20px] border border-border bg-card p-6 shadow-sm">
+          <View className="flex-row items-center gap-3">
+            <View className="h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
+              <Icon as={AlertCircle} size={22} className="text-destructive" />
+            </View>
+            <Text variant="h2">Koreksi Makanan</Text>
+          </View>
+          <Text accessibilityRole="alert" className="text-muted-foreground">
+            Hasil sumber belum dapat dimuat. Versi katalog dan porsi lama tetap dipertahankan.
+          </Text>
+          <Button
+            variant="tactile"
+            onPress={() => void Promise.all([refetchSourceJob(), refetchScan()])}>
+            <Icon as={RefreshCw} size={18} className="mr-1.5 text-primary-foreground" />
+            <Text>Muat ulang</Text>
+          </Button>
+          <Button
+            variant="outline"
+            className="rounded-[20px]"
+            onPress={returnToOldResult}>
+            <Text>Kembali ke hasil sebelumnya</Text>
+          </Button>
+        </View>
       </View>
     );
   }
 
   if (draftLoadError) {
     return (
-      <View className="flex-1 gap-4 bg-background p-6">
-        <Text variant="h2">Koreksi makanan</Text>
-        <Text accessibilityRole="alert">
-          Draft koreksi belum dapat dibaca. Muat ulang draft sebelum melanjutkan.
-        </Text>
-        <Button className="min-h-12" onPress={retryDraftLoad}>
-          <Text>Coba muat draft lagi</Text>
-        </Button>
-        <Button className="min-h-12" variant="ghost" onPress={returnToOldResult}>
-          <Text>Kembali ke hasil sebelumnya</Text>
-        </Button>
+      <View className="flex-1 justify-center gap-4 bg-background p-6">
+        <View className="gap-4 rounded-[20px] border border-border bg-card p-6 shadow-sm">
+          <View className="flex-row items-center gap-3">
+            <View className="h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
+              <Icon as={AlertCircle} size={22} className="text-destructive" />
+            </View>
+            <Text variant="h2">Koreksi Makanan</Text>
+          </View>
+          <Text accessibilityRole="alert" className="text-muted-foreground">
+            Draft koreksi belum dapat dibaca. Muat ulang draft sebelum melanjutkan.
+          </Text>
+          <Button
+            variant="tactile"
+            onPress={retryDraftLoad}>
+            <Icon as={RefreshCw} size={18} className="mr-1.5 text-primary-foreground" />
+            <Text>Coba muat draft lagi</Text>
+          </Button>
+          <Button
+            variant="outline"
+            className="rounded-[20px]"
+            onPress={returnToOldResult}>
+            <Text>Kembali ke hasil sebelumnya</Text>
+          </Button>
+        </View>
       </View>
     );
   }
 
   if (!draftInitialized) {
     return (
-      <View className="flex-1 items-center justify-center gap-3 bg-background p-8">
-        <ActivityIndicator accessibilityLabel="Memuat hasil koreksi" />
-        <Text variant="muted">Memuat hasil dan porsi…</Text>
+      <View className="flex-1 items-center justify-center gap-4 bg-background p-8">
+        <View className="h-16 w-16 items-center justify-center rounded-[24px] bg-carin-butter">
+          <ActivityIndicator size="large" color="#506B35" accessibilityLabel="Memuat hasil koreksi" />
+        </View>
+        <Text variant="h2">Memuat Data Koreksi</Text>
+        <Text variant="muted" className="text-center">
+          Menyiapkan daftar komponen dan takaran porsi…
+        </Text>
       </View>
     );
   }
@@ -556,80 +591,114 @@ export default function FoodCorrectionScreen() {
     <View className="flex-1 bg-background">
       <ScrollView contentContainerClassName="gap-5 px-5 py-8">
         <View className="gap-2">
-          <Text variant="h2">Koreksi komponen dan porsi</Text>
+          <View className="flex-row items-center gap-2.5">
+            <View className="h-9 w-9 items-center justify-center rounded-full bg-carin-olive-soft">
+              <Icon as={Edit3} size={20} className="text-primary" />
+            </View>
+            <Text variant="h1">Koreksi Komponen & Porsi</Text>
+          </View>
           <Text variant="muted">
-            Hasil sebelumnya tetap tersimpan sampai koreksi terbaru berhasil.
+            Hasil sebelumnya tetap tersimpan sampai koreksi terbaru berhasil. Kamu dapat menyesuaikan komponen atau takaran porsi makanan.
           </Text>
-          <Text variant="muted">
-            Katalog terkunci pada versi hasil: {sourceResult.catalogVersion}
-          </Text>
+          <View className="self-start rounded-full bg-carin-olive-soft px-3 py-1">
+            <Text variant="caption" className="font-semibold text-primary">
+              Katalog: {sourceResult.catalogVersion}
+            </Text>
+          </View>
         </View>
 
         {correctionPending ? (
-          <View className="gap-2 rounded-xl border border-border p-4">
-            <Text variant="large">Koreksi sedang diproses</Text>
-            <Text variant="muted">
-              Hasil lama masih menampilkan input sebelumnya. Konfirmasi konsumsi tersedia setelah
-              hasil koreksi terbaru valid.
+          <View className="items-center gap-3.5 rounded-[20px] border border-border bg-card p-6 shadow-sm">
+            <ActivityIndicator size="large" color="#506B35" accessibilityLabel="Koreksi sedang diproses" />
+            <Text variant="h3" className="text-center">Koreksi Sedang Diproses</Text>
+            <Text variant="muted" className="text-center">
+              Hasil lama masih menampilkan input sebelumnya. Konfirmasi konsumsi akan tersedia setelah hasil koreksi terbaru selesai.
             </Text>
-            <ActivityIndicator accessibilityLabel="Koreksi sedang diproses" />
             <Button
-              className="min-h-12"
               variant="outline"
+              className="rounded-[20px]"
               disabled={scanQuery.isFetching || latestJobQuery.isFetching}
               onPress={() => void Promise.all([refetchScan(), refetchLatestJob()])}>
+              <Icon as={RefreshCw} size={16} className="mr-1.5 text-foreground" />
               <Text>Muat status terbaru</Text>
             </Button>
           </View>
         ) : null}
 
         {!sourceIsCurrent && !correctionPending ? (
-          <Text accessibilityRole="alert">
-            Hasil ini bukan revisi terbaru. Muat hasil terbaru sebelum membuat koreksi lain.
-          </Text>
+          <View className="rounded-[16px] border border-border bg-muted/60 p-3.5">
+            <Text accessibilityRole="alert" className="text-sm text-foreground">
+              Hasil ini bukan revisi terbaru. Muat hasil terbaru sebelum membuat koreksi lain.
+            </Text>
+          </View>
         ) : null}
 
         {failedCorrection && latestJob ? (
           <View
-            className="gap-3 rounded-xl border border-destructive/40 p-4"
+            className="gap-3 rounded-[20px] border border-destructive/40 bg-card p-5 shadow-sm"
             accessibilityRole="alert">
-            <Text variant="large">Koreksi gagal; draft tetap tersimpan.</Text>
-            <Text>{latestJob.error?.message ?? 'Hasil sebelumnya tetap dapat dibuka.'}</Text>
+            <View className="flex-row items-center gap-2">
+              <Icon as={AlertCircle} size={20} className="text-destructive" />
+              <Text variant="large" className="text-destructive">Koreksi belum berhasil</Text>
+            </View>
+            <Text className="text-muted-foreground">
+              {latestJob.error?.message ?? 'Hasil sebelumnya tetap dapat dibuka.'}
+            </Text>
             {draftChangedSinceFailedJob ? (
-              <Text>
+              <Text className="text-sm text-foreground">
                 Draft berubah setelah koreksi gagal. Perubahan terbaru akan dikirim sebagai koreksi
                 baru; coba ulang hanya tersedia untuk input yang gagal.
               </Text>
             ) : failedPayloadUnavailable ? (
-              <Text>
+              <Text className="text-sm text-foreground">
                 Input koreksi yang gagal tidak dapat dipastikan. Kirim draft ini sebagai koreksi
                 baru untuk menjaga perubahan terbaru.
               </Text>
             ) : !allPortionsValid ? (
-              <Text>Perbaiki angka porsi atau pilih Tidak tahu porsi sebelum mencoba ulang.</Text>
+              <Text className="text-sm text-destructive">
+                Perbaiki angka porsi atau pilih Tidak tahu porsi sebelum mencoba ulang.
+              </Text>
             ) : null}
             {screenActions.retryVisible ? (
-              <Button className="min-h-12" onPress={retry} disabled={screenActions.retryDisabled}>
+              <Button
+                variant="tactile"
+                onPress={retry}
+                disabled={screenActions.retryDisabled}>
                 {retrying ? (
                   <ActivityIndicator color="white" />
                 ) : (
-                  <Text>Coba ulang koreksi yang gagal</Text>
+                  <>
+                    <Icon as={RefreshCw} size={18} className="mr-1.5 text-primary-foreground" />
+                    <Text>Coba ulang koreksi yang gagal</Text>
+                  </>
                 )}
               </Button>
             ) : null}
             {screenActions.returnVisible ? (
-              <Button className="min-h-12" variant="outline" onPress={returnToOldResult}>
+              <Button
+                variant="outline"
+                className="rounded-[20px]"
+                onPress={returnToOldResult}>
                 <Text>Kembali ke hasil sebelumnya</Text>
               </Button>
             ) : null}
           </View>
         ) : null}
 
-        {errorMessage ? <Text accessibilityRole="alert">{errorMessage}</Text> : null}
+        {errorMessage ? (
+          <View className="rounded-[16px] border border-destructive/30 bg-destructive/10 p-3">
+            <Text accessibilityRole="alert" className="text-sm text-destructive">
+              {errorMessage}
+            </Text>
+          </View>
+        ) : null}
+
         {draftSaveError ? (
-          <Text accessibilityRole="alert">
-            Draft belum tersimpan di perangkat. Tetap di layar ini sebelum mencoba lagi.
-          </Text>
+          <View className="rounded-[16px] border border-destructive/30 bg-destructive/10 p-3">
+            <Text accessibilityRole="alert" className="text-sm text-destructive">
+              Draft belum tersimpan di perangkat. Tetap di layar ini sebelum mencoba lagi.
+            </Text>
+          </View>
         ) : null}
 
         <ComponentPortionEditor
@@ -644,23 +713,39 @@ export default function FoodCorrectionScreen() {
           }}
         />
 
-        <Button className="min-h-12" onPress={submit} disabled={screenActions.submitDisabled}>
+        <Button
+          variant="tactile"
+          onPress={submit}
+          disabled={screenActions.submitDisabled}
+          accessibilityLabel={
+            draftChangedSinceFailedJob || failedPayloadUnavailable
+              ? 'Kirim koreksi baru'
+              : 'Kirim koreksi'
+          }>
           {submitting ? (
             <ActivityIndicator color="white" />
           ) : (
-            <Text>
-              {draftChangedSinceFailedJob || failedPayloadUnavailable
-                ? 'Kirim koreksi baru'
-                : 'Kirim koreksi'}
-            </Text>
+            <>
+              <Icon as={Check} size={20} className="mr-2 text-primary-foreground" />
+              <Text>
+                {draftChangedSinceFailedJob || failedPayloadUnavailable
+                  ? 'Kirim Koreksi Baru'
+                  : 'Kirim Koreksi'}
+              </Text>
+            </>
           )}
         </Button>
+
         {!failedCorrection && screenActions.returnVisible ? (
-          <Button className="min-h-12" variant="outline" onPress={returnToOldResult}>
+          <Button
+            variant="outline"
+            className="rounded-[20px]"
+            onPress={returnToOldResult}>
             <Text>Kembali ke hasil sebelumnya</Text>
           </Button>
         ) : null}
-        <Text variant="muted">
+
+        <Text variant="muted" className="text-center text-xs">
           Komponen yang tidak cocok tetap disimpan sebagai nama bebas. Porsi dapat diisi dalam gram,
           takaran katalog, atau tidak diketahui.
         </Text>

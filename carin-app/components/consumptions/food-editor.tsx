@@ -1,12 +1,15 @@
 import { FormField } from '@/components/app/form-field';
 import { Button } from '@/components/ui/button';
+import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import {
   formatNutrient,
   type CatalogFood,
   type ManualFoodComponentDraft,
 } from '@/lib/consumptions/consumption';
-import { View } from 'react-native';
+import { Check } from 'lucide-react-native';
+import * as React from 'react';
+import { ActivityIndicator, View } from 'react-native';
 
 type Props = {
   component: ManualFoodComponentDraft;
@@ -47,10 +50,10 @@ export function FoodEditor({
   const portion = component.portion;
 
   return (
-    <View className="gap-4 rounded-xl border border-border bg-card p-4">
+    <View className="gap-4 rounded-summary border border-border/70 bg-card p-4 sm:p-5">
       <View className="gap-1">
-        <Text variant="h4">{isEditing ? 'Ubah komponen' : 'Tambah makanan'}</Text>
-        <Text variant="muted">
+        <Text variant="h3">{isEditing ? 'Ubah komponen' : 'Tambah makanan'}</Text>
+        <Text variant="caption" className="text-muted-foreground">
           Pilih hasil katalog yang cocok atau simpan nama sebagai Makanan lain.
         </Text>
       </View>
@@ -60,129 +63,183 @@ export function FoodEditor({
         value={component.displayName}
         onChangeText={onNameChange}
         editable={!disabled}
-        placeholder="Contoh: nasi goreng"
+        placeholder="Contoh: nasi goreng, tempe bacem"
         autoCapitalize="sentences"
         returnKeyType="search"
       />
 
       {isStale ? (
-        <Text variant="muted">
+        <Text variant="caption" className="text-muted-foreground">
           Hasil katalog terakhir tersimpan. Periksa koneksi sebelum menyimpan.
         </Text>
       ) : null}
-      {errorMessage ? <Text accessibilityRole="alert">{errorMessage}</Text> : null}
-      {isLoading ? <Text variant="muted">Mencari katalog…</Text> : null}
-
-      {foods.length ? (
-        <View className="gap-2" accessibilityLabel="Pilihan katalog makanan">
-          {foods.map((food) => (
-            <Button
-              key={`${food.catalogVersion}:${food.id}`}
-              variant={component.catalogFoodId === food.id ? 'secondary' : 'outline'}
-              className="min-h-12 justify-start"
-              accessibilityLabel={`Pilih ${food.displayName}${food.preparation ? `, ${food.preparation}` : ''}`}
-              accessibilityState={{ selected: component.catalogFoodId === food.id }}
-              disabled={disabled}
-              onPress={() => onChooseFood(food)}>
-              <View className="flex-1 items-start gap-1">
-                <Text className="font-semibold">{food.displayName}</Text>
-                <Text variant="muted">
-                  {food.preparation ?? 'Cara saji belum ditentukan'} · {food.servings.length}{' '}
-                  takaran katalog
-                </Text>
-              </View>
-            </Button>
-          ))}
+      {errorMessage ? (
+        <Text variant="caption" className="text-destructive" accessibilityRole="alert">
+          {errorMessage}
+        </Text>
+      ) : null}
+      {isLoading ? (
+        <View className="flex-row items-center gap-2 py-1">
+          <ActivityIndicator size="small" />
+          <Text variant="caption" className="text-muted-foreground">
+            Mencari di katalog makanan…
+          </Text>
         </View>
       ) : null}
 
-      {component.displayName.trim() ? (
+      {foods.length ? (
+        <View className="gap-2" accessibilityLabel="Pilihan katalog makanan">
+          <Text variant="label" className="text-muted-foreground">
+            Hasil pencarian katalog
+          </Text>
+          {foods.map((food) => {
+            const isSelected = component.catalogFoodId === food.id;
+            return (
+              <Button
+                key={`${food.catalogVersion}:${food.id}`}
+                variant={isSelected ? 'secondary' : 'outline'}
+                className="min-h-12 justify-start py-2.5"
+                accessibilityLabel={`Pilih ${food.displayName}${food.preparation ? `, ${food.preparation}` : ''}`}
+                accessibilityState={{ selected: isSelected }}
+                disabled={disabled}
+                onPress={() => onChooseFood(food)}>
+                <View className="w-full flex-row items-center justify-between gap-2">
+                  <View className="flex-1 items-start gap-0.5">
+                    <Text className="font-semibold text-foreground">{food.displayName}</Text>
+                    <Text variant="caption" className="text-muted-foreground">
+                      {food.preparation ?? 'Cara saji belum ditentukan'} · {food.servings.length}{' '}
+                      takaran katalog
+                    </Text>
+                  </View>
+                  {isSelected ? (
+                    <View className="h-6 w-6 items-center justify-center rounded-full bg-primary">
+                      <Icon as={Check} size={14} className="text-primary-foreground" />
+                    </View>
+                  ) : null}
+                </View>
+              </Button>
+            );
+          })}
+        </View>
+      ) : null}
+
+      {component.displayName.trim().length >= 2 ? (
         <Button
           variant="outline"
-          className="min-h-12"
-          disabled={disabled || !canUseOther}
+          className="min-h-12 border-dashed border-border"
+          disabled={disabled}
           onPress={onUseOther}
           accessibilityLabel={`Simpan ${component.displayName.trim()} sebagai Makanan lain`}>
           <Text>Gunakan sebagai Makanan lain</Text>
         </Button>
       ) : null}
-      {component.displayName.trim() && !canUseOther ? (
-        <Text variant="muted">Tunggu pencarian katalog selesai sebelum memilih Makanan lain.</Text>
-      ) : null}
 
       {selectedFood ? (
-        <View className="gap-1 rounded-lg bg-muted/40 p-3">
-          <Text variant="large">Cocok dengan katalog</Text>
-          <Text variant="muted">{selectedFood.displayName}</Text>
+        <View className="gap-1.5 rounded-compact bg-carin-olive-soft p-3.5">
+          <View className="flex-row items-center gap-1.5">
+            <Icon as={Check} size={16} className="text-primary" />
+            <Text variant="emphasis" className="text-primary">
+              Cocok dengan katalog
+            </Text>
+          </View>
+          <Text className="font-semibold text-foreground">{selectedFood.displayName}</Text>
           {selectedFood.preparation ? (
-            <Text variant="muted">Cara saji: {selectedFood.preparation}</Text>
+            <Text variant="caption" className="text-muted-foreground">
+              Cara saji: {selectedFood.preparation}
+            </Text>
           ) : null}
-          <Text variant="muted">
+          <Text variant="caption" className="text-muted-foreground">
             Estimasi gizi dari pilihan ini akan dihitung dan dibekukan oleh server saat disimpan.
           </Text>
         </View>
       ) : component.catalogFoodId ? (
-        <View className="gap-1 rounded-lg bg-muted/40 p-3">
-          <Text variant="large">Pilihan katalog tersimpan</Text>
-          <Text variant="muted">{component.displayName}</Text>
-          <Text variant="muted">Gizi akan ditampilkan setelah server menghitung catatan ini.</Text>
+        <View className="gap-1.5 rounded-compact bg-carin-olive-soft p-3.5">
+          <Text variant="emphasis" className="text-primary">
+            Pilihan katalog tersimpan
+          </Text>
+          <Text className="font-semibold text-foreground">{component.displayName}</Text>
+          <Text variant="caption" className="text-muted-foreground">
+            Gizi akan ditampilkan setelah server menghitung catatan ini.
+          </Text>
         </View>
       ) : null}
 
-      <View className="gap-2">
-        <Text variant="large">Porsi</Text>
-        <Button
-          variant={portion.kind === 'unknown' ? 'secondary' : 'outline'}
-          className="min-h-12"
-          accessibilityState={{ selected: portion.kind === 'unknown' }}
-          disabled={disabled}
-          onPress={() => onChange({ ...component, portion: { kind: 'unknown' } })}>
-          <Text>Tidak tahu porsi</Text>
-        </Button>
+      <View className="gap-3 pt-1">
+        <View className="gap-0.5">
+          <Text variant="emphasis">Porsi</Text>
+          <Text variant="caption" className="text-muted-foreground">
+            Pilih takaran yang sesuai dengan porsi yang Anda makan.
+          </Text>
+        </View>
 
-        {portion.kind === 'known' ? (
-          <View className="gap-3">
-            <View className="flex-row gap-2">
-              <Button
-                variant={portion.unit === 'g' ? 'secondary' : 'outline'}
-                className="min-h-12 flex-1"
-                accessibilityState={{ selected: portion.unit === 'g' }}
-                disabled={disabled}
-                onPress={() =>
+        <View className="flex-row gap-2">
+          <Button
+            variant={portion.kind === 'unknown' ? 'secondary' : 'outline'}
+            size="sm"
+            className="min-h-11 flex-1"
+            accessibilityState={{ selected: portion.kind === 'unknown' }}
+            disabled={disabled}
+            onPress={() => onChange({ ...component, portion: { kind: 'unknown' } })}>
+            <Text>Tidak tahu</Text>
+          </Button>
+
+          <Button
+            variant={portion.kind === 'known' && portion.unit === 'g' ? 'secondary' : 'outline'}
+            size="sm"
+            className="min-h-11 flex-1"
+            accessibilityState={{ selected: portion.kind === 'known' && portion.unit === 'g' }}
+            disabled={disabled}
+            onPress={() =>
+              onChange({
+                ...component,
+                portion: {
+                  kind: 'known',
+                  quantity: portion.kind === 'known' ? portion.quantity : '',
+                  unit: 'g',
+                },
+              })
+            }>
+            <Text>Gram (g)</Text>
+          </Button>
+
+          {selectedFood?.servings.length ? (
+            <Button
+              variant={
+                portion.kind === 'known' && portion.unit === 'serving' ? 'secondary' : 'outline'
+              }
+              size="sm"
+              className="min-h-11 flex-1"
+              accessibilityState={{
+                selected: portion.kind === 'known' && portion.unit === 'serving',
+              }}
+              disabled={disabled}
+              onPress={() => {
+                const servingId =
+                  (portion.kind === 'known' &&
+                    portion.unit === 'serving' &&
+                    portion.servingId) ||
+                  selectedFood.servings[0]?.id;
+                if (servingId) {
                   onChange({
                     ...component,
-                    portion: { kind: 'known', quantity: portion.quantity, unit: 'g' },
-                  })
-                }>
-                <Text>Gram</Text>
-              </Button>
-              {selectedFood?.servings.length ? (
-                <Button
-                  variant={portion.unit === 'serving' ? 'secondary' : 'outline'}
-                  className="min-h-12 flex-1"
-                  accessibilityState={{ selected: portion.unit === 'serving' }}
-                  disabled={disabled}
-                  onPress={() => {
-                    const servingId = selectedFood.servings[0]?.id;
-                    if (servingId) {
-                      onChange({
-                        ...component,
-                        portion: {
-                          kind: 'known',
-                          quantity: portion.quantity || '1',
-                          unit: 'serving',
-                          servingId,
-                        },
-                      });
-                    }
-                  }}>
-                  <Text>Takaran katalog</Text>
-                </Button>
-              ) : null}
-            </View>
+                    portion: {
+                      kind: 'known',
+                      quantity: (portion.kind === 'known' && portion.quantity) || '1',
+                      unit: 'serving',
+                      servingId,
+                    },
+                  });
+                }
+              }}>
+              <Text>Takaran</Text>
+            </Button>
+          ) : null}
+        </View>
 
+        {portion.kind === 'known' ? (
+          <View className="gap-3 pt-1">
             <FormField
-              label={portion.unit === 'g' ? 'Jumlah porsi' : 'Jumlah takaran'}
+              label={portion.unit === 'g' ? 'Jumlah porsi (g)' : 'Jumlah takaran'}
               unit={portion.unit === 'g' ? 'g' : undefined}
               value={portion.quantity}
               onChangeText={(quantity) =>
@@ -195,64 +252,48 @@ export function FoodEditor({
 
             {portion.unit === 'serving' && selectedFood ? (
               <View className="gap-2">
-                <Text variant="muted">Pilih takaran yang cocok:</Text>
+                <Text variant="caption" className="text-muted-foreground">
+                  Pilih takaran yang cocok:
+                </Text>
                 {selectedFood.servings.map((serving) => (
                   <Button
                     key={serving.id}
                     variant={portion.servingId === serving.id ? 'secondary' : 'outline'}
-                    className="min-h-12 justify-start"
+                    className="min-h-12 justify-start py-2.5"
                     accessibilityState={{ selected: portion.servingId === serving.id }}
                     disabled={disabled}
                     onPress={() =>
                       onChange({ ...component, portion: { ...portion, servingId: serving.id } })
                     }>
-                    <Text>
-                      {serving.label} · {formatNutrient(serving.grams, 'g')}
-                    </Text>
+                    <View className="w-full flex-row items-center justify-between">
+                      <Text className="font-medium text-foreground">{serving.label}</Text>
+                      <Text variant="caption" className="text-muted-foreground">
+                        {formatNutrient(serving.grams, 'g')}
+                      </Text>
+                    </View>
                   </Button>
                 ))}
               </View>
             ) : null}
           </View>
-        ) : (
-          <View className="flex-row gap-2">
-            <Button
-              variant="outline"
-              className="min-h-12 flex-1"
-              disabled={disabled}
-              onPress={() =>
-                onChange({ ...component, portion: { kind: 'known', quantity: '', unit: 'g' } })
-              }>
-              <Text>Masukkan gram</Text>
-            </Button>
-            {selectedFood?.servings.length ? (
-              <Button
-                variant="outline"
-                className="min-h-12 flex-1"
-                disabled={disabled}
-                onPress={() => {
-                  const servingId = selectedFood.servings[0]?.id;
-                  if (servingId) {
-                    onChange({
-                      ...component,
-                      portion: { kind: 'known', quantity: '1', unit: 'serving', servingId },
-                    });
-                  }
-                }}>
-                <Text>Pilih takaran</Text>
-              </Button>
-            ) : null}
-          </View>
-        )}
+        ) : null}
       </View>
 
-      {validationError ? <Text accessibilityRole="alert">{validationError}</Text> : null}
+      {validationError ? (
+        <Text className="text-sm font-medium text-destructive" accessibilityRole="alert">
+          {validationError}
+        </Text>
+      ) : null}
 
-      <View className="flex-row gap-2">
-        <Button className="min-h-12 flex-1" disabled={disabled} onPress={onCommit}>
+      <View className="flex-row gap-3 pt-2">
+        <Button
+          variant="tactile"
+          className="min-h-12 flex-1"
+          disabled={disabled}
+          onPress={onCommit}>
           <Text>{isEditing ? 'Simpan komponen' : 'Tambah komponen'}</Text>
         </Button>
-        <Button variant="ghost" className="min-h-12" disabled={disabled} onPress={onCancel}>
+        <Button variant="outline" className="min-h-12" disabled={disabled} onPress={onCancel}>
           <Text>Batal</Text>
         </Button>
       </View>

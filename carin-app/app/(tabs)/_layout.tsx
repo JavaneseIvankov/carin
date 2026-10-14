@@ -1,6 +1,5 @@
 import { ActionSheet } from '@/components/app/action-sheet';
 import { Icon } from '@/components/ui/icon';
-import { Text } from '@/components/ui/text';
 import { Tabs, useRouter } from 'expo-router';
 import { ClipboardList, House, Plus, Stethoscope, UserRound } from 'lucide-react-native';
 import * as React from 'react';
@@ -30,9 +29,10 @@ function AppTabBar({ state, navigation }: BarProps) {
   return (
     <>
       <View
-        className="flex-row items-center border-t border-border bg-background px-2 pt-2"
+        className="flex-row items-center border-t border-border bg-card px-2 pt-1"
         style={{
           paddingBottom: Math.max(bottom, 8),
+          overflow: 'visible',
         }}>
         {items.map((item, index) => {
           const selected = state.routes[state.index]?.name === item.name;
@@ -40,24 +40,25 @@ function AppTabBar({ state, navigation }: BarProps) {
             <React.Fragment key={item.name}>
               {index === 2 && (
                 <Pressable
-                  className="mx-1 min-h-12 min-w-12 items-center justify-center rounded-control bg-primary"
+                  className="-mt-6 mx-1.5 h-14 w-14 items-center justify-center rounded-[20px] bg-primary border-b-4 border-[#33451f] shadow-md z-10 active:translate-y-0.5 active:opacity-95"
                   accessibilityRole="button"
                   accessibilityLabel="Tambah makanan"
                   accessibilityState={{ expanded: sheetOpen }}
                   onPress={() => sheetAction('open-sheet')}
                   style={{
-                    transform: [{ rotate: '-6deg' }],
+                    transform: [{ rotate: '-8deg' }],
                   }}>
                   <Icon
                     as={Plus}
                     className="text-primary-foreground"
-                    size={25}
-                    style={{ transform: [{ rotate: '6deg' }] }}
+                    size={28}
+                    strokeWidth={2.75}
+                    style={{ transform: [{ rotate: '8deg' }] }}
                   />
                 </Pressable>
               )}
               <Pressable
-                className="min-h-12 flex-1 items-center justify-center gap-1"
+                className="min-h-12 flex-1 items-center justify-center py-1"
                 accessibilityRole="tab"
                 accessibilityLabel={item.label}
                 accessibilityState={{ selected }}
@@ -66,18 +67,15 @@ function AppTabBar({ state, navigation }: BarProps) {
                   navigation.navigate(item.name);
                 }}>
                 <View
-                  className={`min-h-7 min-w-10 items-center justify-center rounded-compact ${selected ? 'bg-carin-olive-soft' : ''}`}>
+                  className={`min-h-9 min-w-12 items-center justify-center rounded-compact ${
+                    selected ? 'bg-carin-olive-soft' : ''
+                  }`}>
                   <Icon
                     as={item.icon}
-                    size={20}
+                    size={22}
                     className={selected ? 'text-primary' : 'text-muted-foreground'}
                   />
                 </View>
-                <Text
-                  variant="label"
-                  className={selected ? 'text-primary' : 'text-muted-foreground'}>
-                  {item.label}
-                </Text>
               </Pressable>
             </React.Fragment>
           );

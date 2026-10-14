@@ -93,7 +93,7 @@ export default function ForgotPasswordScreen() {
               : SERVICE_UNAVAILABLE_MESSAGE}
           </Text>
         ) : null}
-        <Button size="lg" disabled={isSubmitting} onPress={() => void submit()}>
+        <Button variant="tactile" disabled={isSubmitting} onPress={() => void submit()}>
           <Text>{isSubmitting ? 'Mengirim…' : 'Kirim tautan reset'}</Text>
         </Button>
         <Button variant="outline" onPress={() => router.replace('/(auth)/sign-in' as Href)}>

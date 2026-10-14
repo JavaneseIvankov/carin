@@ -26,6 +26,8 @@ import {
 import { useInfiniteQuery, useQueries, useQueryClient } from '@tanstack/react-query';
 import { useFocusEffect, useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import * as React from 'react';
+import { Icon } from '@/components/ui/icon';
+import { Camera, ChevronRight, Utensils } from 'lucide-react-native';
 import { ActivityIndicator, AppState, Pressable, ScrollView, View } from 'react-native';
 
 type HistoryTab = 'consumption' | 'analysis';
@@ -111,51 +113,86 @@ export default function History() {
     <View className="flex-1 bg-background">
       <OnlineIndicator connectivity={connectivity} />
       <ScrollView contentContainerClassName="gap-5 px-5 pb-10 pt-7">
-        <View className="gap-2">
-          <Text variant="h2">Riwayat</Text>
-          <Text variant="muted">Konsumsi dan hasil analisis merupakan catatan yang berbeda.</Text>
-          <Button className="min-h-12" onPress={() => router.push('/consumptions/new' as Href)}>
-            <Text>Catat makanan secara manual</Text>
+        <View className="flex-row items-start justify-between gap-4">
+          <View className="flex-1 gap-1">
+            <Text variant="h1">Riwayat</Text>
+            <Text variant="muted">Konsumsi dan hasil analisis merupakan catatan yang berbeda.</Text>
+          </View>
+          <Button
+            tactile
+            size="sm"
+            onPress={() =>
+              router.push((tab === 'consumption' ? '/consumptions/new' : '/food/capture') as Href)
+            }
+            accessibilityLabel={
+              tab === 'consumption' ? 'Catat makanan manual' : 'Ambil foto makanan'
+            }>
+            <Icon as={tab === 'consumption' ? Utensils : Camera} size={16} />
+            <Text>{tab === 'consumption' ? 'Catat' : 'Foto'}</Text>
           </Button>
         </View>
-        <View className="flex-row gap-2" accessibilityRole="tablist">
+        <View
+          className="flex-row rounded-full border border-border/60 bg-muted/40 p-1"
+          accessibilityRole="tablist">
           {(
             [
               { value: 'consumption', label: 'Konsumsi' },
               { value: 'analysis', label: 'Analisis' },
             ] as const
-          ).map((entry) => (
-            <Pressable
-              key={entry.value}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: tab === entry.value }}
-              onPress={() => {
-                setSelectedTab(entry.value);
-                if (tabParam) router.setParams({ tab: undefined });
-              }}
-              className={`min-h-12 flex-1 items-center justify-center rounded-xl border p-3 ${tab === entry.value ? 'border-primary bg-primary' : 'border-border bg-card'}`}>
-              <Text className={tab === entry.value ? 'text-primary-foreground' : ''}>
-                {entry.label}
-              </Text>
-            </Pressable>
-          ))}
+          ).map((entry) => {
+            const selected = tab === entry.value;
+            return (
+              <Pressable
+                key={entry.value}
+                accessibilityRole="tab"
+                accessibilityState={{ selected }}
+                onPress={() => {
+                  setSelectedTab(entry.value);
+                  if (tabParam) router.setParams({ tab: undefined });
+                }}
+                className={`min-h-11 flex-1 items-center justify-center rounded-full px-4 py-2 ${
+                  selected ? 'shadow-xs bg-card' : 'bg-transparent'
+                }`}>
+                <Text
+                  className={`text-sm ${
+                    selected ? 'font-semibold text-foreground' : 'font-medium text-muted-foreground'
+                  }`}>
+                  {entry.label}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
         {tab === 'consumption' ? (
           <View className="gap-3">
             <View className="flex-row gap-2" accessibilityLabel="Filter waktu konsumsi">
-              {filters.map((entry) => (
-                <Pressable
-                  key={entry.value}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: filter === entry.value }}
-                  onPress={() => {
-                    setFilterNow(new Date());
-                    setFilter(entry.value);
-                  }}
-                  className={`min-h-11 flex-1 items-center justify-center rounded-lg border p-2 ${filter === entry.value ? 'border-primary' : 'border-border'}`}>
-                  <Text>{entry.label}</Text>
-                </Pressable>
-              ))}
+              {filters.map((entry) => {
+                const selected = filter === entry.value;
+                return (
+                  <Pressable
+                    key={entry.value}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected }}
+                    onPress={() => {
+                      setFilterNow(new Date());
+                      setFilter(entry.value);
+                    }}
+                    className={`min-h-11 flex-1 items-center justify-center rounded-full border px-3 py-2 ${
+                      selected
+                        ? 'border-primary/40 bg-carin-olive-soft'
+                        : 'border-border/60 bg-card'
+                    }`}>
+                    <Text
+                      className={`text-xs ${
+                        selected
+                          ? 'font-semibold text-foreground'
+                          : 'font-medium text-muted-foreground'
+                      }`}>
+                      {entry.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
             </View>
             {consumptions.length ? (
               consumptions.map((item) => {
@@ -167,7 +204,7 @@ export default function History() {
                 return (
                   <Pressable
                     key={item.id}
-                    className="min-h-16 gap-1 rounded-xl border border-border bg-card p-4"
+                    className="min-h-16 gap-2.5 rounded-summary border border-border/60 bg-card p-4 active:bg-accent/30"
                     accessibilityRole="button"
                     accessibilityLabel={`Buka catatan ${foods.join(', ') || 'konsumsi'} tanggal ${local.date}`}
                     onPress={() =>
@@ -176,17 +213,37 @@ export default function History() {
                         params: { id: item.id },
                       } as Href)
                     }>
-                    <Text variant="large">{foods.join(' · ') || 'Catatan konsumsi'}</Text>
-                    <Text variant="muted">
-                      {local.date} · {local.time} ({item.timezone})
+                    <View className="flex-row items-start justify-between gap-2">
+                      <Text variant="h4" className="flex-1 font-bold text-foreground">
+                        {foods.join(' · ') || 'Catatan konsumsi'}
+                      </Text>
+                      <View className="flex-row items-center gap-1">
+                        <Text variant="caption" className="text-muted-foreground">
+                          {local.time}
+                        </Text>
+                        <Icon as={ChevronRight} size={16} className="text-muted-foreground" />
+                      </View>
+                    </View>
+                    <Text variant="caption" className="text-muted-foreground">
+                      {local.date} ({item.timezone})
                     </Text>
-                    <Text variant="muted">
-                      {item.source === 'manual' ? 'Catatan manual' : 'Konfirmasi dari foto'} ·{' '}
-                      {attention}
-                    </Text>
-                    {item.source === 'photo_confirmation' && !item.photoAvailable ? (
-                      <Text variant="muted">Foto sumber telah dihapus</Text>
-                    ) : null}
+                    <View className="flex-row flex-wrap items-center gap-1.5 pt-0.5">
+                      <View className="rounded-full bg-carin-olive-soft px-2.5 py-0.5">
+                        <Text className="text-xs font-semibold text-foreground">
+                          {item.source === 'manual' ? 'Catatan manual' : 'Konfirmasi dari foto'}
+                        </Text>
+                      </View>
+                      {attention ? (
+                        <View className="rounded-full bg-muted/80 px-2.5 py-0.5">
+                          <Text className="text-xs text-muted-foreground">{attention}</Text>
+                        </View>
+                      ) : null}
+                      {item.source === 'photo_confirmation' && !item.photoAvailable ? (
+                        <View className="rounded-full bg-destructive/10 px-2.5 py-0.5">
+                          <Text className="text-xs text-destructive">Foto sumber dihapus</Text>
+                        </View>
+                      ) : null}
+                    </View>
                   </Pressable>
                 );
               })
@@ -198,11 +255,32 @@ export default function History() {
                 onRetry={() => void consumptionQuery.refetch()}
               />
             ) : (
-              <View className="gap-2 rounded-xl border border-dashed border-border p-4">
-                <Text variant="large">Belum ada konsumsi tercatat</Text>
-                <Text variant="muted">
-                  Hasil analisis foto tidak otomatis menjadi catatan makan.
+              <View className="items-center gap-3 rounded-summary border border-border/60 bg-card p-6 py-8">
+                <View
+                  className="items-center justify-center bg-carin-butter"
+                  style={{
+                    borderTopLeftRadius: 25,
+                    borderTopRightRadius: 31,
+                    borderBottomRightRadius: 23,
+                    borderBottomLeftRadius: 29,
+                    width: 68,
+                    height: 68,
+                  }}>
+                  <Icon as={Utensils} className="text-primary" size={26} />
+                </View>
+                <Text variant="h3" className="text-center font-bold">
+                  Belum ada konsumsi tercatat
                 </Text>
+                <Text className="text-center text-muted-foreground">
+                  Hasil analisis foto tidak otomatis menjadi catatan makan. Catat makanan setelah
+                  kamu memakannya.
+                </Text>
+                <Button
+                  tactile
+                  className="mt-2 min-h-12"
+                  onPress={() => router.push('/consumptions/new' as Href)}>
+                  <Text>Catat makanan manual</Text>
+                </Button>
               </View>
             )}
             {consumptions.length && consumptionQuery.error ? (
@@ -238,19 +316,38 @@ export default function History() {
                 const jobQuery = jobQueries[index];
                 const presentation = getScanHistoryPresentation(scan, jobQuery?.data?.data ?? null);
                 return (
-                  <View key={scan.id} className="gap-2 rounded-xl border border-border bg-card p-4">
-                    <Text variant="large">
-                      Analisis foto · {new Date(scan.createdAt).toLocaleDateString('id-ID')}
-                    </Text>
-                    <Text variant="muted">
-                      {jobQuery?.isPending ? 'Memuat status analisis…' : presentation.statusLabel}
-                    </Text>
+                  <View
+                    key={scan.id}
+                    className="gap-3 rounded-summary border border-border/60 bg-card p-4">
+                    <View className="flex-row items-start justify-between gap-2">
+                      <View className="flex-1 gap-0.5">
+                        <Text variant="h4" className="font-bold text-foreground">
+                          Analisis foto
+                        </Text>
+                        <Text variant="caption" className="text-muted-foreground">
+                          {new Date(scan.createdAt).toLocaleDateString('id-ID', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                          })}
+                        </Text>
+                      </View>
+                      <View className="rounded-full bg-carin-olive-soft px-2.5 py-0.5">
+                        <Text className="text-xs font-semibold text-foreground">
+                          {jobQuery?.isPending ? 'Memuat status…' : presentation.statusLabel}
+                        </Text>
+                      </View>
+                    </View>
                     {jobQuery?.data?.data.status === 'failed' && jobQuery.data.data.error ? (
-                      <Text variant="muted">{jobQuery.data.data.error.message}</Text>
+                      <Text variant="caption" className="text-destructive">
+                        {jobQuery.data.data.error.message}
+                      </Text>
                     ) : null}
                     <Text variant="muted">{presentation.consumptionLabel}</Text>
                     {scan.photoId === null ? (
-                      <Text variant="muted">Foto sumber telah dihapus</Text>
+                      <Text variant="caption" className="text-muted-foreground">
+                        Foto sumber telah dihapus
+                      </Text>
                     ) : null}
                     {jobQuery?.error ? (
                       <ServiceError
@@ -258,40 +355,42 @@ export default function History() {
                         onRetry={() => void jobQuery.refetch()}
                       />
                     ) : null}
-                    <Button
-                      variant="outline"
-                      className="min-h-12"
-                      disabled={!!jobQuery?.error}
-                      onPress={() =>
-                        router.push({
-                          pathname: '/food/analysis/[id]',
-                          params: { id: scan.latestJobId },
-                        } as Href)
-                      }>
-                      <Text>
-                        {jobQuery?.data?.data.status === 'failed'
-                          ? 'Buka analisis dan coba lagi'
-                          : 'Buka analisis'}
-                      </Text>
-                    </Button>
-                    {scan.defaultConsumptionId ? (
+                    <View className="gap-2 pt-1">
                       <Button
                         variant="outline"
                         className="min-h-12"
+                        disabled={!!jobQuery?.error}
                         onPress={() =>
                           router.push({
-                            pathname: '/consumptions/[id]',
-                            params: { id: scan.defaultConsumptionId! },
+                            pathname: '/food/analysis/[id]',
+                            params: { id: scan.latestJobId },
                           } as Href)
                         }>
-                        <Text>Buka catatan konsumsi</Text>
+                        <Text>
+                          {jobQuery?.data?.data.status === 'failed'
+                            ? 'Buka analisis dan coba lagi'
+                            : 'Buka analisis'}
+                        </Text>
                       </Button>
-                    ) : null}
-                    <ScanDeletionControl
-                      scanId={scan.id}
-                      jobId={scan.latestJobId}
-                      photoId={scan.photoId}
-                    />
+                      {scan.defaultConsumptionId ? (
+                        <Button
+                          variant="outline"
+                          className="min-h-12"
+                          onPress={() =>
+                            router.push({
+                              pathname: '/consumptions/[id]',
+                              params: { id: scan.defaultConsumptionId! },
+                            } as Href)
+                          }>
+                          <Text>Buka catatan konsumsi</Text>
+                        </Button>
+                      ) : null}
+                      <ScanDeletionControl
+                        scanId={scan.id}
+                        jobId={scan.latestJobId}
+                        photoId={scan.photoId}
+                      />
+                    </View>
                   </View>
                 );
               })
@@ -300,9 +399,31 @@ export default function History() {
             ) : scanQuery.error ? (
               <ServiceError error={scanQuery.error} onRetry={() => void scanQuery.refetch()} />
             ) : (
-              <View className="gap-2 rounded-xl border border-dashed border-border p-4">
-                <Text variant="large">Belum ada analisis foto</Text>
-                <Text variant="muted">Analisis makanan baru akan tampil di sini.</Text>
+              <View className="items-center gap-3 rounded-summary border border-border/60 bg-card p-6 py-8">
+                <View
+                  className="items-center justify-center bg-carin-butter"
+                  style={{
+                    borderTopLeftRadius: 25,
+                    borderTopRightRadius: 31,
+                    borderBottomRightRadius: 23,
+                    borderBottomLeftRadius: 29,
+                    width: 68,
+                    height: 68,
+                  }}>
+                  <Icon as={Camera} className="text-primary" size={26} />
+                </View>
+                <Text variant="h3" className="text-center font-bold">
+                  Belum ada analisis foto
+                </Text>
+                <Text className="text-center text-muted-foreground">
+                  Ambil foto makanan sebelum makan untuk memeriksa perkiraan komponen gizinya.
+                </Text>
+                <Button
+                  tactile
+                  className="mt-2 min-h-12"
+                  onPress={() => router.push('/food/capture' as Href)}>
+                  <Text>Ambil foto makanan</Text>
+                </Button>
               </View>
             )}
             {scans.length && scanQuery.error ? (

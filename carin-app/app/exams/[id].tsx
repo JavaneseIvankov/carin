@@ -67,8 +67,8 @@ export default function ExaminationDetail() {
   return (
     <ScrollView className="flex-1 bg-background" contentContainerClassName="gap-5 p-5 pb-10">
       <Link href="/(tabs)/exams" asChild>
-        <Pressable accessibilityRole="button" className="min-h-11 justify-center self-start px-2">
-          <Text className="text-primary">‹ Kembali ke pemeriksaan</Text>
+        <Pressable accessibilityRole="button" className="min-h-11 justify-center self-start px-0">
+          <Text className="font-medium text-primary">‹ Kembali ke pemeriksaan</Text>
         </Pressable>
       </Link>
       {examination.data && (
@@ -81,12 +81,25 @@ export default function ExaminationDetail() {
       {examination.error && (
         <ServiceError error={examination.error} onRetry={() => void examination.refetch()} />
       )}
-      <View className="gap-3 rounded-xl border border-border bg-card p-5">
-        <Text variant="h3">{recordTitle(record)}</Text>
-        <Text variant="h2">{value}</Text>
-        <Text>Diukur {formatMeasuredAt(record)}</Text>
-        <Text variant="muted">Zona waktu pencatatan: {record.timezone}</Text>
-        {!!record.note && <Text>{record.note}</Text>}
+      <View className="gap-3 rounded-summary border border-border bg-card p-5">
+        <View className="flex-row items-center justify-between">
+          <Text variant="h3">{recordTitle(record)}</Text>
+          <View className="rounded-full bg-carin-olive-soft px-3 py-1">
+            <Text variant="caption" className="font-semibold text-foreground">
+              {record.unit}
+            </Text>
+          </View>
+        </View>
+        <Text variant="metric" className="text-primary">{value}</Text>
+        <View className="gap-1 border-t border-border pt-3">
+          <Text variant="body" className="text-foreground">Diukur {formatMeasuredAt(record)}</Text>
+          <Text variant="caption" className="text-muted-foreground">Zona waktu pencatatan: {record.timezone}</Text>
+          {!!record.note && (
+            <View className="mt-2 rounded-control bg-muted/40 p-3">
+              <Text variant="body" className="text-foreground">{record.note}</Text>
+            </View>
+          )}
+        </View>
       </View>
 
       {series.isPending ? (
@@ -101,7 +114,7 @@ export default function ExaminationDetail() {
         <Button
           variant="outline"
           onPress={() => router.push({ pathname: '/exams/[id]/edit', params: { id } })}>
-          <Text>Edit</Text>
+          <Text>Edit catatan</Text>
         </Button>
         <Button
           variant="destructive"
@@ -113,14 +126,14 @@ export default function ExaminationDetail() {
 
       {confirmDelete && (
         <View
-          className="gap-3 rounded-xl border border-destructive/40 bg-card p-4"
+          className="gap-3 rounded-summary border border-destructive/40 bg-card p-5"
           accessibilityRole="alert">
-          <Text className="font-semibold">Hapus catatan pemeriksaan ini?</Text>
+          <Text className="font-semibold text-foreground">Hapus catatan pemeriksaan ini?</Text>
           <Text variant="muted">
             Catatan ini akan dikeluarkan dari daftar dan ringkasan pemeriksaan.
           </Text>
           {remove.error && <ServiceError error={remove.error} />}
-          <View className="flex-row flex-wrap gap-2">
+          <View className="flex-row flex-wrap gap-2 pt-1">
             <Button
               variant="outline"
               disabled={remove.isPending}

@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { FormField } from '@/components/app/form-field';
+import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import { ApiError } from '@/lib/api/repository';
 import { useAppRepository } from '@/lib/api/query';
@@ -7,9 +8,15 @@ import { createDeletionActionState, createDeletionActions } from '@/lib/deletion
 import { useAuth } from '@/lib/auth/provider';
 import { useRouter, type Href } from 'expo-router';
 import * as React from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
+import { AlertTriangle, ChevronLeft } from 'lucide-react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 
-const CONFIRMATION = 'DELETE_MY_ACCOUNT';
+const CONFIRMATION_TEXT = 'HAPUS AKUN';
+
+const isConfirmed = (text: string) => {
+  const norm = text.trim().toUpperCase();
+  return norm === 'HAPUS AKUN' || norm === 'HAPUS AKUN SAYA' || norm === 'DELETE_MY_ACCOUNT';
+};
 
 export default function DeleteAccountScreen() {
   const router = useRouter();
@@ -22,7 +29,7 @@ export default function DeleteAccountScreen() {
   const [error, setError] = React.useState<string | null>(null);
 
   const submit = async () => {
-    if (!repository || submitting || !password || confirmation !== CONFIRMATION) return;
+    if (!repository || submitting || !password || !isConfirmed(confirmation)) return;
     setSubmitting(true);
     setError(null);
     const actions = createDeletionActions(
@@ -52,52 +59,88 @@ export default function DeleteAccountScreen() {
       className="flex-1 bg-background"
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerClassName="gap-5 px-5 pb-10 pt-7">
-        <Button variant="ghost" className="min-h-12 self-start" onPress={() => router.back()}>
+        <Button
+          variant="ghost"
+          className="min-h-11 self-start -ml-2 flex-row items-center gap-1"
+          onPress={() => router.back()}>
+          <Icon as={ChevronLeft} size={18} className="text-foreground" />
           <Text>Kembali</Text>
         </Button>
+
         <View className="gap-2">
-          <Text variant="h2">Hapus akun Carin</Text>
-          <Text>
+          <Text variant="h1">Hapus akun Carin</Text>
+          <Text variant="muted">
+            Permintaan penghapusan akun akan mengantrekan penghapusan seluruh data Anda.
+          </Text>
+        </View>
+
+        <View className="gap-3 rounded-summary border border-destructive/30 bg-destructive/5 p-5">
+          <View className="flex-row items-center gap-2.5">
+            <View className="h-9 w-9 items-center justify-center rounded-full bg-destructive/15">
+              <Icon as={AlertTriangle} size={18} className="text-destructive" />
+            </View>
+            <Text variant="h3" className="font-bold text-destructive">
+              Tindakan Permanen
+            </Text>
+          </View>
+          <Text className="text-sm leading-5 text-foreground">
             Tindakan ini langsung mencabut akses semua sesi dan mengantrekan penghapusan data serta
             foto. Proses penghapusan di server mungkin masih berlangsung setelah permintaan
             diterima.
           </Text>
-          <Text variant="muted">
-            Setelah diterima, aplikasi menghapus sesi, cache, draft, dan preview lokal.
+          <Text variant="caption" className="text-muted-foreground">
+            Setelah diterima, aplikasi menghapus sesi, cache, draft, dan preview lokal secara menyeluruh.
           </Text>
         </View>
-        <FormField
-          label="Kata sandi saat ini"
-          value={password}
-          onChangeText={setPassword}
-          autoCapitalize="none"
-          autoCorrect={false}
-          secureTextEntry
-          textContentType="password"
-          returnKeyType="next"
-        />
-        <FormField
-          label={`Ketik ${CONFIRMATION} untuk mengonfirmasi`}
-          value={confirmation}
-          onChangeText={setConfirmation}
-          autoCapitalize="characters"
-          autoCorrect={false}
-          accessibilityHint={`Ketik persis ${CONFIRMATION}`}
-          returnKeyType="done"
-          onSubmitEditing={() => void submit()}
-        />
-        {error ? (
-          <Text accessibilityRole="alert" className="text-sm text-destructive">
-            {error}
-          </Text>
-        ) : null}
-        <Button
-          variant="destructive"
-          className="min-h-12"
-          disabled={submitting || !password || confirmation !== CONFIRMATION || !repository}
-          onPress={() => void submit()}>
-          {submitting ? <ActivityIndicator color="white" /> : <Text>Hapus akun</Text>}
-        </Button>
+
+        <View className="gap-4 rounded-summary border border-border/60 bg-card p-5">
+          <Text variant="h3">Konfirmasi Penghapusan</Text>
+          <FormField
+            label="Kata sandi saat ini"
+            value={password}
+            onChangeText={setPassword}
+            autoCapitalize="none"
+            autoCorrect={false}
+            secureTextEntry
+            textContentType="password"
+            returnKeyType="next"
+          />
+          <View className="gap-2">
+            <FormField
+              label={`Ketik ${CONFIRMATION_TEXT} untuk mengonfirmasi`}
+              placeholder={CONFIRMATION_TEXT}
+              value={confirmation}
+              onChangeText={setConfirmation}
+              autoCapitalize="characters"
+              autoCorrect={false}
+              accessibilityHint={`Ketik persis ${CONFIRMATION_TEXT}`}
+              returnKeyType="done"
+              onSubmitEditing={() => void submit()}
+            />
+            <Pressable
+              onPress={() => setConfirmation(CONFIRMATION_TEXT)}
+              accessibilityRole="button"
+              accessibilityLabel="Isi otomatis frasa konfirmasi"
+              className="self-start rounded-full border border-border/70 bg-muted/20 px-3 py-1 active:bg-muted/40">
+              <Text variant="caption" className="font-medium text-foreground">
+                Sentuh untuk mengisi: {CONFIRMATION_TEXT}
+              </Text>
+            </Pressable>
+          </View>
+          {error ? (
+            <Text accessibilityRole="alert" className="text-sm text-destructive">
+              {error}
+            </Text>
+          ) : null}
+          <Button
+            variant="destructive"
+            className="min-h-12 mt-1"
+            disabled={submitting || !password || !isConfirmed(confirmation) || !repository}
+            onPress={() => void submit()}>
+            {submitting ? <ActivityIndicator color="white" /> : <Text>Hapus akun</Text>}
+          </Button>
+        </View>
+
         <Button
           variant="outline"
           className="min-h-12"

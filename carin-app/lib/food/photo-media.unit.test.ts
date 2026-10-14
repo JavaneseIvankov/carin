@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { resolvePhotoMimeType } from './photo-media';
+import {
+  cachePhotoUri,
+  clearPhotoUriCache,
+  getCachedPhotoUri,
+  resolvePhotoMimeType,
+} from './photo-media';
 
 describe('photo MIME type resolution', () => {
   it('infers a supported image type from the selected asset extension when MIME is null', () => {
@@ -16,5 +21,18 @@ describe('photo MIME type resolution', () => {
     expect(resolvePhotoMimeType(';foo', 'content://media/123', 'meal.jpg')).toBeNull();
     expect(resolvePhotoMimeType('image/jpeg;not-a-parameter', 'content://media/123', 'meal.png')).toBeNull();
     expect(resolvePhotoMimeType('image/png;=', 'content://media/123', 'meal.jpg')).toBeNull();
+  });
+});
+
+describe('photo URI cache', () => {
+  it('stores and retrieves photo URIs by key', () => {
+    clearPhotoUriCache();
+    expect(getCachedPhotoUri('job-123')).toBeUndefined();
+    cachePhotoUri('job-123', 'file:///photos/meal.jpg');
+    expect(getCachedPhotoUri('job-123')).toBe('file:///photos/meal.jpg');
+  });
+
+  it('handles empty keys safely', () => {
+    expect(getCachedPhotoUri('')).toBeUndefined();
   });
 });

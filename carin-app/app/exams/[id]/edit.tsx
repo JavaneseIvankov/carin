@@ -134,11 +134,11 @@ export default function EditExamination() {
       <View className="gap-3 px-5 pt-5">
         <Button
           variant="ghost"
-          className="self-start"
+          className="self-start px-0"
           onPress={() => router.replace({ pathname: '/exams/[id]', params: { id } })}>
-          <Text>‹ Kembali ke detail</Text>
+          <Text className="font-medium text-primary">‹ Kembali ke detail</Text>
         </Button>
-        <Text variant="h3">Edit pemeriksaan</Text>
+        <Text variant="h2">Edit pemeriksaan</Text>
       </View>
       <View className="mx-5 mt-4 gap-4">
         {timezoneRead.status === 'error' && (
@@ -146,7 +146,7 @@ export default function EditExamination() {
         )}
         {sessionSnapshot.revisionConflict && (
           <View
-            className="gap-3 rounded-xl border border-destructive/40 bg-card p-4"
+            className="gap-3 rounded-summary border border-destructive/40 bg-card p-5"
             accessibilityRole="alert">
             <Text variant="large">Pemeriksaan berubah</Text>
             <Text variant="muted">

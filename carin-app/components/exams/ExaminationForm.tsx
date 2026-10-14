@@ -1,17 +1,17 @@
-import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import {
   buildExaminationInput,
-  dateAtTimezoneCalendarNoon,
-  formatCalendarDateInTimezone,
   type ExaminationFormValues,
   type ExaminationInput,
 } from '@/lib/exams/form-model';
 import { formatMeasuredAt, formatMeasurement, recordTitle } from '@/lib/exams/model';
 import * as React from 'react';
-import { Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
+import { DatePickerField } from '@/components/app/date-picker-field';
 import { FormField } from '@/components/app/form-field';
+import { TimePickerField } from '@/components/app/time-picker-field';
+import { cn } from '@/lib/utils';
 
 type GlucoseContext = Extract<ExaminationInput, { type: 'glucose' }>['context'];
 type CholesterolSubtype = Extract<ExaminationInput, { type: 'cholesterol' }>['subtype'];
@@ -23,7 +23,7 @@ const labels: Record<ExaminationInput['type'], string> = {
 };
 const contextLabels: Record<GlucoseContext, string> = {
   fasting: 'Puasa',
-  random: 'Acak',
+  random: 'Sewaktu',
   post_meal: 'Setelah makan',
   unknown: 'Tidak diketahui',
 };
@@ -60,7 +60,7 @@ function ChoiceGroup<T extends string>({
 }) {
   return (
     <View className="gap-2">
-      <Text className="font-medium">{label}</Text>
+      <Text className="font-medium text-foreground">{label}</Text>
       <View
         className="flex-row flex-wrap gap-2"
         accessibilityRole="radiogroup"
@@ -74,8 +74,12 @@ function ChoiceGroup<T extends string>({
               accessibilityState={{ selected }}
               accessibilityLabel={option.label}
               onPress={() => onChange(option.value)}
-              className={`min-h-12 justify-center rounded-full border px-4 ${selected ? 'border-primary bg-accent' : 'border-border bg-background'}`}>
-              <Text className={selected ? 'font-semibold text-accent-foreground' : ''}>
+              className={`min-h-11 justify-center rounded-full border px-4 py-2 ${
+                selected
+                  ? 'border-primary bg-carin-olive-soft'
+                  : 'border-border bg-card'
+              }`}>
+              <Text className={selected ? 'font-semibold text-foreground' : 'text-foreground'}>
                 {option.label}
               </Text>
             </Pressable>
@@ -110,7 +114,6 @@ export function ExaminationForm({
     {}
   );
   const [preview, setPreview] = React.useState<ExaminationInput | null>(null);
-  const [showDatePicker, setShowDatePicker] = React.useState(false);
 
   const update = <K extends keyof ExaminationFormValues>(
     key: K,
@@ -129,15 +132,6 @@ export function ExaminationForm({
     if (result.record) setPreview(result.record);
   };
 
-  const pickerDate = values.measuredOn || formatCalendarDateInTimezone(new Date(), timezone);
-  const pickerValue = dateAtTimezoneCalendarNoon(pickerDate, timezone);
-  const onPickerChange = (event: DateTimePickerEvent, selected?: Date) => {
-    setShowDatePicker(false);
-    if (event.type === 'set' && selected) {
-      update('measuredOn', formatCalendarDateInTimezone(selected, timezone));
-    }
-  };
-
   return (
     <ScrollView
       className="flex-1 bg-background"
@@ -154,33 +148,53 @@ export function ExaminationForm({
       />
 
       {values.type === 'pressure' ? (
-        <View className="gap-4 rounded-xl border border-border bg-card p-4">
-          <Text variant="large">Tekanan darah</Text>
-          <Text variant="muted">Catat angka seperti yang tertulis pada alat.</Text>
-          <FormField
-            label="Sistolik"
-            unit="mmHg"
-            value={values.systolic}
-            onChangeText={(value) => update('systolic', value)}
-            keyboardType="decimal-pad"
-            inputMode="decimal"
-            error={errors.systolic}
-            placeholder="Contoh: 120"
-          />
-          <FormField
-            label="Diastolik"
-            unit="mmHg"
-            value={values.diastolic}
-            onChangeText={(value) => update('diastolic', value)}
-            keyboardType="decimal-pad"
-            inputMode="decimal"
-            error={errors.diastolic}
-            placeholder="Contoh: 80"
-          />
+        <View className="gap-4 rounded-summary border border-border bg-card p-4">
+          <View className="flex-row items-center justify-between">
+            <View className="gap-0.5">
+              <Text variant="large">Tekanan darah</Text>
+              <Text variant="muted">Catat angka sistolik dan diastolik</Text>
+            </View>
+            <View className="rounded-full bg-carin-olive-soft px-3 py-1">
+              <Text variant="caption" className="font-semibold text-foreground">
+                mmHg
+              </Text>
+            </View>
+          </View>
+
+          <View className="flex-row items-start gap-3">
+            <View className="flex-1">
+              <FormField
+                label="Sistolik (atas)"
+                value={values.systolic}
+                onChangeText={(value) => update('systolic', value)}
+                keyboardType="number-pad"
+                inputMode="numeric"
+                error={errors.systolic}
+                placeholder="120"
+              />
+            </View>
+            <View className="pt-9 items-center justify-center">
+              <Text className="text-2xl font-bold text-muted-foreground">/</Text>
+            </View>
+            <View className="flex-1">
+              <FormField
+                label="Diastolik (bawah)"
+                value={values.diastolic}
+                onChangeText={(value) => update('diastolic', value)}
+                keyboardType="number-pad"
+                inputMode="numeric"
+                error={errors.diastolic}
+                placeholder="80"
+              />
+            </View>
+          </View>
         </View>
       ) : (
-        <View className="gap-4 rounded-xl border border-border bg-card p-4">
-          <Text variant="large">{labels[values.type]}</Text>
+        <View className="gap-4 rounded-summary border border-border bg-card p-4">
+          <View className="gap-1">
+            <Text variant="large">{labels[values.type]}</Text>
+            <Text variant="muted">Catat angka seperti yang tertulis pada alat.</Text>
+          </View>
           {values.type === 'glucose' ? (
             <ChoiceGroup
               label="Konteks pengukuran"
@@ -205,6 +219,7 @@ export function ExaminationForm({
           <FormField
             label={values.type === 'glucose' ? 'Hasil gula darah' : 'Hasil kolesterol'}
             unit="mg/dL"
+            unitBadge
             value={values.value}
             onChangeText={(value) => update('value', value)}
             keyboardType="decimal-pad"
@@ -215,36 +230,51 @@ export function ExaminationForm({
         </View>
       )}
 
-      <View className="gap-3 rounded-xl border border-border bg-card p-4">
-        <Text variant="large">Waktu pengukuran</Text>
-        <Text variant="muted">Tanggal wajib. Waktu hanya dicatat jika Anda mengetahuinya.</Text>
-        {Platform.OS === 'web' ? (
-          <View className="gap-2">
-            <Text className="font-medium">Tanggal pengukuran</Text>
-            <TextInput
-              accessibilityLabel="Tanggal pengukuran"
-              accessibilityHint="Wajib diisi. Format tahun, bulan, tanggal."
-              value={values.measuredOn}
-              onChangeText={(value) => update('measuredOn', value)}
-              placeholder="YYYY-MM-DD"
-              className="min-h-12 rounded-lg border border-input bg-background px-3 text-base text-foreground"
-              {...({ type: 'date' } as React.ComponentProps<typeof TextInput>)}
-            />
-          </View>
-        ) : (
-          <View className="gap-1">
-            <Text className="font-medium">Tanggal pengukuran</Text>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={
-                values.measuredOn ? `Tanggal ${values.measuredOn}` : 'Pilih tanggal pengukuran'
-              }
-              onPress={() => setShowDatePicker(true)}
-              className="min-h-12 justify-center rounded-lg border border-input bg-background px-3">
-              <Text>{values.measuredOn || 'Pilih tanggal'}</Text>
-            </Pressable>
-          </View>
-        )}
+      <View className="gap-3 rounded-summary border border-border bg-card p-4">
+        <View className="gap-1">
+          <Text variant="large">Waktu pengukuran</Text>
+          <Text variant="muted">Tanggal wajib. Waktu hanya dicatat jika Anda mengetahuinya.</Text>
+        </View>
+        <DatePickerField
+          label="Tanggal pengukuran"
+          hint="Wajib diisi · format tahun, bulan, tanggal"
+          value={values.measuredOn}
+          onChange={(value) => update('measuredOn', value)}
+          error={errors.measuredOn}
+        />
+        <View className="flex-row items-center gap-2 pt-0.5">
+          <Pressable
+            onPress={() => {
+              const today = new Date().toISOString().slice(0, 10);
+              update('measuredOn', today);
+            }}
+            className={cn(
+              'rounded-full border border-border/80 bg-muted/20 px-3 py-1 active:bg-muted/40',
+              values.measuredOn === new Date().toISOString().slice(0, 10) &&
+                'border-primary/40 bg-carin-olive-soft'
+            )}>
+            <Text
+              variant="caption"
+              className={cn(
+                'font-medium text-foreground',
+                values.measuredOn === new Date().toISOString().slice(0, 10) &&
+                  'font-semibold text-primary'
+              )}>
+              Hari ini
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              const d = new Date();
+              d.setDate(d.getDate() - 1);
+              update('measuredOn', d.toISOString().slice(0, 10));
+            }}
+            className="rounded-full border border-border/80 bg-muted/20 px-3 py-1 active:bg-muted/40">
+            <Text variant="caption" className="font-medium text-foreground">
+              Kemarin
+            </Text>
+          </Pressable>
+        </View>
         {errors.measuredOn && (
           <Text className="text-sm text-destructive" accessibilityRole="alert">
             {errors.measuredOn}
@@ -253,29 +283,68 @@ export function ExaminationForm({
         {values.measuredTime === null ? (
           <Pressable
             accessibilityRole="button"
-            onPress={() => update('measuredTime', '')}
-            className="min-h-12 justify-center rounded-lg border border-dashed border-border px-3">
-            <Text className="text-primary">+ Tambah waktu pengukuran</Text>
+            onPress={() => {
+              const now = new Date();
+              const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+              update('measuredTime', time);
+            }}
+            className="h-12 justify-center rounded-control border border-dashed border-border bg-card px-3">
+            <Text className="font-medium text-primary">+ Tambah waktu pengukuran</Text>
           </Pressable>
         ) : (
-          <View className="flex-row items-center gap-3">
-            <FormField
+          <View className="gap-2">
+            <TimePickerField
               label="Waktu pengukuran"
               hint={`Opsional · ${timezone}`}
               value={values.measuredTime}
-              onChangeText={(value) => update('measuredTime', value)}
-              placeholder="HH:mm"
-              keyboardType="numbers-and-punctuation"
+              onChange={(value) => update('measuredTime', value)}
               error={errors.measuredTime}
-              className="min-h-12 flex-1"
+              allowClear
+              disabled={pending}
             />
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Hapus waktu pengukuran"
-              onPress={() => update('measuredTime', null)}
-              className="min-h-12 justify-center px-3">
-              <Text variant="muted">Hapus</Text>
-            </Pressable>
+            <View className="flex-row flex-wrap items-center gap-2">
+              <Pressable
+                onPress={() => {
+                  const now = new Date();
+                  const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+                  update('measuredTime', time);
+                }}
+                className="rounded-full border border-border/80 bg-muted/20 px-3 py-1 active:bg-muted/40">
+                <Text variant="caption" className="font-medium text-foreground">
+                  Sekarang
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={() => update('measuredTime', '08:00')}
+                className={cn(
+                  'rounded-full border border-border/80 bg-muted/20 px-3 py-1 active:bg-muted/40',
+                  values.measuredTime === '08:00' && 'border-primary/40 bg-carin-olive-soft'
+                )}>
+                <Text
+                  variant="caption"
+                  className={cn(
+                    'font-medium text-foreground',
+                    values.measuredTime === '08:00' && 'font-semibold text-primary'
+                  )}>
+                  Pagi (08:00)
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={() => update('measuredTime', '12:00')}
+                className={cn(
+                  'rounded-full border border-border/80 bg-muted/20 px-3 py-1 active:bg-muted/40',
+                  values.measuredTime === '12:00' && 'border-primary/40 bg-carin-olive-soft'
+                )}>
+                <Text
+                  variant="caption"
+                  className={cn(
+                    'font-medium text-foreground',
+                    values.measuredTime === '12:00' && 'font-semibold text-primary'
+                  )}>
+                  Siang (12:00)
+                </Text>
+              </Pressable>
+            </View>
           </View>
         )}
         {errors.measuredTime && (
@@ -301,40 +370,38 @@ export function ExaminationForm({
         className="min-h-24"
       />
 
-      {showDatePicker && Platform.OS !== 'web' && (
-        <DateTimePicker
-          value={pickerValue}
-          mode="date"
-          timeZoneName={timezone}
-          onChange={onPickerChange}
-        />
-      )}
-
       {preview ? (
         <View
-          className="gap-3 rounded-xl border border-primary/40 bg-accent p-4"
+          className="gap-3 rounded-summary border border-primary/40 bg-card p-5"
           accessibilityRole="summary">
           <Text variant="large">Periksa sebelum menyimpan</Text>
-          <Text>{recordTitle(preview)}</Text>
+          <Text className="text-base font-semibold text-foreground">{recordTitle(preview)}</Text>
           {preview.type === 'pressure' ? (
-            <Text>
+            <Text variant="h2" className="text-primary">
               {formatMeasurement(preview.systolic)} / {formatMeasurement(preview.diastolic)} mmHg
             </Text>
           ) : (
-            <Text>
+            <Text variant="h2" className="text-primary">
               {formatMeasurement(preview.value)} {preview.unit}
             </Text>
           )}
-          <Text>{formatMeasuredAt(preview)}</Text>
-          <Text>Zona waktu: {preview.timezone}</Text>
-          <Text variant="muted">
-            Angka ditampilkan sebagai catatan pengukuran, tanpa penilaian klinis.
+          <Text variant="body" className="text-foreground">
+            Diukur {formatMeasuredAt(preview)}
           </Text>
-          <View className="flex-row flex-wrap gap-2">
+          <Text variant="caption" className="text-muted-foreground">
+            Zona waktu: {preview.timezone}
+          </Text>
+          <View className="rounded-control bg-carin-olive-soft/40 p-3">
+            <Text variant="caption" className="text-foreground">
+              Angka ditampilkan sebagai catatan pengukuran, tanpa penilaian klinis.
+            </Text>
+          </View>
+          <View className="flex-row flex-wrap gap-2 pt-2">
             <Button variant="outline" disabled={pending} onPress={() => setPreview(null)}>
               <Text>Ubah catatan</Text>
             </Button>
             <Button
+              variant="tactile"
               disabled={pending || submissionDisabled || !timezone}
               onPress={() => void onSubmit(preview)}>
               <Text>{pending ? 'Menyimpan…' : 'Konfirmasi dan simpan'}</Text>
@@ -347,7 +414,10 @@ export function ExaminationForm({
           )}
         </View>
       ) : (
-        <Button onPress={showPreview} disabled={pending || submissionDisabled || !timezone}>
+        <Button
+          variant="tactile"
+          onPress={showPreview}
+          disabled={pending || submissionDisabled || !timezone}>
           <Text>{submitLabel}</Text>
         </Button>
       )}
