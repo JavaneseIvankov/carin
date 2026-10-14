@@ -16,9 +16,10 @@ the imported allowlist. Rule claims require an exact imported rule/condition/sou
 the condition must be present in the frozen profile, and its declared profile
 fields, nutrient coverage, and age range must be satisfied. `overallAttention` is
 rejected when it conflicts with critical limitations, unrecognized support, profile
-gaps, or an empty snapshot; when no insufficiency reason exists, valid attention
-claims require `needs_attention` (a complete supported fixture cannot claim
-`insufficient_information`). Scan creation checks current manifest availability
+gaps, or an empty snapshot; `insufficient_information` is accepted exactly when
+such a reason exists. With no insufficiency reason, a complete supported result
+without claims cannot claim `insufficient_information`, while valid attention claims
+require `needs_attention`. Scan creation checks current manifest availability
 before persisting snapshot, scan, or job state and returns
 `CATALOG_VERSION_UNAVAILABLE` without side effects if authority is absent. Missing
 or version-mismatched capability authority also fails closed during worker
@@ -33,7 +34,7 @@ Verification (run from `carin-api/` unless stated otherwise):
 
 - `pnpm run typecheck` passed.
 - `pnpm run lint` passed.
-- `pnpm run test:unit` passed: 22 files, 181 tests.
+- `pnpm run test:unit` passed: 22 files, 182 tests.
 - `pnpm run test:integration` passed: 14 files, 179 tests, using disposable
   PostgreSQL containers through Docker.
 - `pnpm run build` passed.
@@ -42,10 +43,10 @@ Verification (run from `carin-api/` unless stated otherwise):
 - From the worktree root, `/home/arundaya/Documents/Workspace/Code_Stuff/igs-joints-hackathon/carin/.venv/bin/python
   specs/validate-contracts.py` passed: 2 OpenAPI documents, 38 operations,
   410 local refs, and 5 fixtures.
-- After the final status-consistency regression, `pnpm run test:unit` passed: 22
-  files, 181 tests. The focused C18 command
+- After the final status-consistency regressions, `pnpm run test:unit` passed: 22
+  files, 182 tests. The focused C18 command
   `pnpm exec vitest run src/modules/analyses/result-validation.unit.test.ts tests/integration/analysis-scan.integration.test.ts`
-  passed: 2 files, 43 tests. `pnpm run typecheck` and `pnpm run lint` also passed
+  passed: 2 files, 44 tests. `pnpm run typecheck` and `pnpm run lint` also passed
   after this follow-up.
 - `git diff --check` passed.
 

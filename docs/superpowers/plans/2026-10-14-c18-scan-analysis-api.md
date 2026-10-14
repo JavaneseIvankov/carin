@@ -68,13 +68,13 @@
 ## Quality-review follow-up: condition eligibility, attention status, and catalog readiness
 
 - [x] Preserve full imported condition authority (`requiredProfileFields`, `requiredNutrients`, and supported age bounds) through the worker context; reject claims unless the frozen profile and result satisfy every declared requirement.
-- [x] Reconcile `overallAttention` with critical limitations, unrecognized support, unsupported/missing profile conditions, requirement gaps, and empty profiles. Any insufficiency reason requires `insufficient_information`; otherwise a valid nonempty attention set requires `needs_attention`.
+- [x] Reconcile `overallAttention` with critical limitations, unrecognized support, unsupported/missing profile conditions, requirement gaps, and empty profiles. `insufficient_information` is required exactly when an insufficiency reason exists; otherwise it is rejected, and a valid nonempty attention set requires `needs_attention`.
 - [x] Check the current immutable capability manifest in the scan-creation transaction before inserting the profile snapshot, scan, or job. Return `409 CATALOG_VERSION_UNAVAILABLE` and leave photo/idempotency/resources unchanged if authority is missing or inconsistent.
 - [x] Add test-first unit and PostgreSQL regressions for missing profile fields/nutrients/age, valid eligible claims, critical and empty-profile status mismatches, unrecognized-support positives, and manifest-less current catalogs.
 - [x] Re-run all documented API and contract checks; retain C21 confirmation seam and C31 live AI/source gate in the handoff.
 
 ## Final status-consistency review follow-up
 
-- [x] Add a regression using the complete supported fixture, its source-backed attention, no critical limitations, and an eligible frozen profile; reject `insufficient_information` when no insufficiency reason exists.
-- [x] Require `needs_attention` for that valid attention case while retaining `insufficient_information` for critical/support/profile gaps and preserving the no-attention status paths.
-- [x] Run the focused validator and scan integration tests, API typecheck and lint; commit locally and keep TSK 18 started.
+- [x] Add regressions using the complete supported fixture with and without its source-backed attention, no critical limitations, and an eligible frozen profile; reject `insufficient_information` in both cases when no insufficiency reason exists.
+- [x] Require `needs_attention` for a valid nonempty attention set; allow `insufficient_information` exactly when critical/support/profile gaps provide an insufficiency reason.
+- [x] Run the focused validator and scan integration tests, full API unit suite, typecheck and lint; commit locally and keep TSK 18 started.
