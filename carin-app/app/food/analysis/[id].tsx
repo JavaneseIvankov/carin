@@ -5,6 +5,7 @@ import type { components } from '@/lib/api/generated/app-api';
 import { useAppData } from '@/lib/data/provider';
 import { canConfirmSelectedScanResult, isCurrentScanResult } from '@/lib/food/correction';
 import { getResultScreenActions } from '@/lib/food/correction-screen';
+import { getPhotoConfirmationActions } from '@/lib/food/photo-confirmation-actions';
 import {
   createLatestAnalysisSnapshotRefreshCoordinator,
   getActiveCorrectionStatus,
@@ -19,7 +20,7 @@ import {
 } from '@/lib/food/analysis-presentation';
 import { startAnalysisPolling } from '@/lib/food/analysis-polling';
 import { createScanActionState, createScanActions } from '@/lib/food/scan-actions';
-import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import * as Linking from 'expo-linking';
 import * as React from 'react';
 import { ActivityIndicator, AppState, ScrollView, View } from 'react-native';
@@ -104,6 +105,21 @@ export default function AnalysisResultScreen() {
   }, [id, repository, snapshotRefreshCoordinator]);
   const actionScan = actionSnapshot?.scan;
   const actionLatestJob = actionSnapshot?.latestJob;
+  const latestResultQuery = useAppRead(
+    'getAnalysisResult',
+    { path: { id: actionScan?.latestResultId ?? '' } },
+    { enabled: !!actionScan?.latestResultId }
+  );
+  const latestResult = latestResultQuery.data?.data;
+  const consumptionActions =
+    actionScan && actionLatestJob
+      ? getPhotoConfirmationActions({
+          scan: actionScan,
+          latestJob: actionLatestJob,
+          resultId: latestResult ? (actionScan.latestResultId ?? undefined) : undefined,
+          result: latestResultQuery.data?.stale ? undefined : latestResult,
+        })
+      : null;
   const activeCorrectionStatus = getCorrectionPollingStatus(
     actionSnapshot,
     retainedCorrectionStatus
@@ -427,45 +443,42 @@ export default function AnalysisResultScreen() {
           </Text>
         ) : null}
 
-        {result && job.scanId ? (
+        {job.scanId ? (
           <View className="gap-3 rounded-xl border border-border p-4">
             <Text variant="h3">Tindakan hasil</Text>
-            <Button
-              variant="outline"
-              className="min-h-12"
-              disabled={screenActions.correctionDisabled}
-              onPress={() =>
-                router.push({
-                  pathname: '/food/correction/[id]',
-                  params: { id: job.scanId!, sourceJobId: job.id },
-                })
-              }>
-              <Text>
-                {correctionIsActive ? 'Koreksi sedang berjalan' : 'Koreksi komponen atau porsi'}
-              </Text>
-            </Button>
-            <Button
-              className="min-h-12"
-              disabled={screenActions.consumptionDisabled}
-              onPress={() =>
-                router.push({
-                  pathname: '/consumptions/new',
-                  params: {
-                    scanId: actionScan?.id ?? '',
-                    sourceAnalysisResultId: actionScan?.latestResultId ?? '',
-                  },
-                })
-              }>
-              <Text>
-                {correctionIsActive
-                  ? 'Tunggu koreksi sebelum mencatat konsumsi'
-                  : 'Sudah dikonsumsi'}
-              </Text>
-            </Button>
-            {!canConfirm && !correctionIsActive ? (
-              <Text variant="muted">
-                Konfirmasi tersedia hanya untuk hasil terbaru yang berhasil.
-              </Text>
+            {result ? (
+              <Button
+                variant="outline"
+                className="min-h-12"
+                disabled={screenActions.correctionDisabled}
+                onPress={() =>
+                  router.push({
+                    pathname: '/food/correction/[id]',
+                    params: { id: job.scanId!, sourceJobId: job.id },
+                  })
+                }>
+                <Text>
+                  {correctionIsActive ? 'Koreksi sedang berjalan' : 'Koreksi komponen atau porsi'}
+                </Text>
+              </Button>
+            ) : null}
+            {consumptionActions?.primary ? (
+              <Button
+                className="min-h-12"
+                onPress={() => router.push(consumptionActions.primary as Href)}>
+                <Text>{consumptionActions.primary.label}</Text>
+              </Button>
+            ) : null}
+            {consumptionActions?.secondary ? (
+              <Button
+                variant="outline"
+                className="min-h-12"
+                onPress={() => router.push(consumptionActions.secondary as Href)}>
+                <Text>{consumptionActions.secondary.label}</Text>
+              </Button>
+            ) : null}
+            {consumptionActions?.message ? (
+              <Text variant="muted">{consumptionActions.message}</Text>
             ) : null}
           </View>
         ) : null}
