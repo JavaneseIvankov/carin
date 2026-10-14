@@ -222,7 +222,7 @@ def sources(root):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--root', type=Path, default=Path(__file__).parent/'data/omnifood')
+    parser.add_argument('--root', type=Path, default=Path(__file__).resolve().parent.parent / 'data/omnifood')
     parser.add_argument('--depth-output', type=Path)
     args = parser.parse_args()
     sources(args.root)

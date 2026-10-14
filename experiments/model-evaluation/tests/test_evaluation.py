@@ -1,10 +1,13 @@
 import hashlib
 import io
+from pathlib import Path
+import sys
 import tempfile
 import unittest
-from pathlib import Path
 from unittest.mock import patch
 import zipfile
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
 from download_datasets import (
     METRICS, balanced_sample, get_image, lefood_records, parse_nutrition_csv,

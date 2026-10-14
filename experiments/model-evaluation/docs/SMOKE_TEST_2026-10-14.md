@@ -100,7 +100,7 @@ dataset. Hasil/API credentials tetap Git-ignored; laporan ini dapat di-version.
 Perintah yang telah dijalankan dari root repository (exit 0):
 
 ```sh
-python3 experiments/model-evaluation/run_evaluation.py --total-limit 5 \
+python3 experiments/model-evaluation/scripts/run_evaluation.py --total-limit 5 \
   --run-dir experiments/model-evaluation/results/smoke-5-2026-10-14
 ```
 

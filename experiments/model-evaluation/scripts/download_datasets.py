@@ -16,7 +16,7 @@ import urllib.request
 import xml.etree.ElementTree as ET
 import zipfile
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent.parent
 GCS = "https://storage.googleapis.com/nutrition5k_dataset/nutrition5k_dataset/"
 LEFOOD_API = "https://data.mendeley.com/public-api/datasets/cchsk79jkt"
 METRICS = ("mass_g", "energy_kcal", "protein_g", "carbohydrate_g", "fat_g")

@@ -1,8 +1,10 @@
 # Carin — model evaluation experiment
 
 Evaluation-only subsets: **50 Nutrition5k images + 50 LeFood-Set images**.
-Scripts require Python 3.10+ and use only its standard library. No model, GPU
-runtime, or full dataset archive is downloaded by these commands.
+Dataset preparation and Alibaba evaluation scripts require Python 3.10+ and use
+only its standard library. The optional HF runner installs a small SDK through
+`uv`; see [HF food-analysis smoke test](docs/HF_FOOD_ANALYSIS.md). It downloads no model
+weights or GPU runtime.
 
 This preparation is on `feat/t32-real-ai-service`, as requested. The supplied
 T32/C32 issue assigns held-out evaluation to C33. These experimental references
@@ -10,12 +12,24 @@ are not approved T31 food/rule artifacts and do not implement the internal REST
 service or establish T32 acceptance. Production food values and attention still
 follow `specs/04-ai-data-and-policy.md` and contract 1.0.0.
 
+## Documentation and Reports
+
+All experiment reports and operational notes are kept under [`docs/`](docs/):
+
+| Document | Description |
+| --- | --- |
+| [docs/SMOKE_TEST_2026-10-14.md](docs/SMOKE_TEST_2026-10-14.md) | Initial Alibaba 5-sample live smoke test report (Qwen 3.7 Flash) |
+| [docs/QWEN38_MAX_COMPARISON_2026-10-14.md](docs/QWEN38_MAX_COMPARISON_2026-10-14.md) | Paired smoke test comparison of Qwen 3.8 Max vs Qwen 3.7 Flash |
+| [docs/OMNIFOOD_3050_SMOKE_TEST_2026-10-14.md](docs/OMNIFOOD_3050_SMOKE_TEST_2026-10-14.md) | Local OmniFood8K (FP32 & INT8) evaluation on RTX 3050 Laptop GPU |
+| [docs/HF_FOOD_ANALYSIS.md](docs/HF_FOOD_ANALYSIS.md) | Ateeqq/food-analysis hosted model preflight and smoke runner |
+| [docs/HANDOFF.md](docs/HANDOFF.md) | Experiment handoff notes, data integrity audit, and dataset limitations |
+
 ## Download and reproduce
 
 Run from the **repository root**:
 
 ```sh
-python3 experiments/model-evaluation/download_datasets.py
+python3 experiments/model-evaluation/scripts/download_datasets.py
 ```
 
 Defaults: 50 images **per dataset**, seed `32`, four download workers. Existing
@@ -24,7 +38,7 @@ files instead of selecting a new test set. A different seed requires a separate
 output directory. The selected source images are saved byte-for-byte.
 
 ```sh
-python3 experiments/model-evaluation/download_datasets.py \
+python3 experiments/model-evaluation/scripts/download_datasets.py \
   --count 50 --seed 32 --output /path/to/a/separate/experiment
 ```
 
@@ -32,17 +46,33 @@ Layout:
 
 ```text
 experiments/model-evaluation/
-  download_datasets.py
-  evaluate_predictions.py
-  run_evaluation.py
-  .env.example
-  prompts/food-estimation-v1.txt
-  test_evaluation.py
-  test_runner.py
+  README.md                     # Main guide and navigation index
+  .env.example                  # Environment variable template
+  docs/                         # Experiment reports and operational notes
+    HANDOFF.md
+    HF_FOOD_ANALYSIS.md
+    OMNIFOOD_3050_SMOKE_TEST_2026-10-14.md
+    QWEN38_MAX_COMPARISON_2026-10-14.md
+    SMOKE_TEST_2026-10-14.md
+  scripts/                      # Pipeline, downloader, and runner scripts
+    download_datasets.py
+    evaluate_predictions.py
+    prepare_omnifood.py
+    run_evaluation.py
+    run_hf_food_analysis.py
+    run_omnifood.py
+  tests/                        # Unit test suite
+    test_evaluation.py
+    test_hf_food_analysis.py
+    test_runner.py
   manifests/
     nutrition5k-50.jsonl
     lefood-set-50.jsonl
     lefood-set-source-audit.json # excluded workbook rows and source checksum
+    dataset-verification.json
+  prompts/
+    food-estimation-v1.txt
+    food-analysis-hf-v1.txt
   data/                         # local, Git-ignored
     nutrition5k/
       images/                   # 50 RGB PNGs; no depth maps/videos
@@ -50,6 +80,7 @@ experiments/model-evaluation/
     lefood-set/
       images/                   # 50 before-meal JPEGs
       source/                   # original XLSX and dataset metadata
+    omnifood/                   # local checkpoints and sources
   results/                      # local, Git-ignored model outputs/reports
 ```
 
@@ -104,7 +135,7 @@ links and selection manifests are versioned for reproducibility.
 ## Alibaba Cloud evaluation pipeline
 
 The runner uses Alibaba Model Studio's **OpenAI-compatible HTTP endpoint**,
-original images encoded as base64, and non-thinking JSON mode. No SDK/package
+original images encoded as base64, and configurable thinking/JSON mode. No SDK/package
 installation is needed. Provider protocol references:
 [image inputs](https://www.alibabacloud.com/help/en/model-studio/vision) and
 [JSON output](https://www.alibabacloud.com/help/en/model-studio/qwen-structured-output).
@@ -131,6 +162,8 @@ Edit the ignored `.env` and provide these values:
 | `VLM_BASE_URL` | The actual compatible-mode `/v1` base URL shown for your workspace/region |
 | `VLM_MODEL` | Primary snapshot: `qwen3.7-flash-2026-07-15` |
 | `VLM_FALLBACK_MODEL` | User-selected image fallback: `qwen3.7-flash`; blank disables fallback |
+| `VLM_THINKING_BUDGET` | Optional positive reasoning-token budget; requires thinking enabled |
+| `VLM_HIGH_RESOLUTION_IMAGES` | Optional high-resolution input policy; defaults to false |
 
 The Singapore workspace URL in the example is a **placeholder**. Replace
 `YOUR_WORKSPACE_ID` or use the exact endpoint from your console. API keys are
@@ -149,8 +182,15 @@ Defaults: JSON mode enabled, thinking disabled, temperature 0, maximum 1,024
 output tokens, 120-second request timeout, at most two retries on transient
 network/429/500/502/503/504 errors. `.env.example` lists the override variables.
 For vision models that do not support JSON mode, set `VLM_JSON_MODE=false`; the
-response still must satisfy the same local JSON schema. Thinking mode requires
-JSON mode disabled. Changing generation settings requires a new run directory.
+response still must satisfy the same local JSON schema. Current Alibaba docs
+support JSON with thinking for Qwen3.7/3.8; the runner allows that combination
+for those families. For older/unknown models, disable JSON mode when enabling
+thinking. `VLM_THINKING_BUDGET` limits reasoning length; `max_tokens` limits the
+answer for Qwen. Reported completion tokens can include both reasoning and answer.
+Changing generation settings requires a new run directory. `--prompt /path/to/file`
+selects a different versioned prompt, and its content/hash become part of the run
+identity. `VLM_HIGH_RESOLUTION_IMAGES=true` raises the provider's pixel cap; it
+does not recover details absent from a low-resolution source photo.
 Environment variables already exported by your shell take precedence over `.env`.
 The env file is parsed as literal data; shell code/interpolation is not executed.
 
@@ -160,14 +200,14 @@ Dry-run needs **no API key** and makes **zero network requests**. It checks all
 100 selected image files, hashes and references, and writes a plan only:
 
 ```sh
-python3 experiments/model-evaluation/run_evaluation.py --dry-run
+python3 experiments/model-evaluation/scripts/run_evaluation.py --dry-run
 ```
 
 Once configured, test **five images total** (three Nutrition5k and two LeFood,
 five initial API calls) in a new directory:
 
 ```sh
-python3 experiments/model-evaluation/run_evaluation.py --total-limit 5 \
+python3 experiments/model-evaluation/scripts/run_evaluation.py --total-limit 5 \
   --run-dir experiments/model-evaluation/results/alibaba-smoke
 ```
 
@@ -175,13 +215,13 @@ python3 experiments/model-evaluation/run_evaluation.py --total-limit 5 \
 using manifest order. It must cover every selected dataset. `--limit N` instead
 selects N images **per dataset**; the two options are mutually exclusive.
 The completed live five-image run and manual review are recorded in
-[SMOKE_TEST_2026-10-14.md](SMOKE_TEST_2026-10-14.md).
+[docs/SMOKE_TEST_2026-10-14.md](docs/SMOKE_TEST_2026-10-14.md).
 
 Then process **50 images per dataset**, score automatically, and retain both
 datasets' reports separately:
 
 ```sh
-python3 experiments/model-evaluation/run_evaluation.py \
+python3 experiments/model-evaluation/scripts/run_evaluation.py \
   --run-dir experiments/model-evaluation/results/alibaba-baseline
 ```
 
@@ -197,7 +237,7 @@ Progress is checkpointed atomically after each sample. Existing successes and
 errors are skipped by default, so an ordinary resume does not repeat paid calls:
 
 ```sh
-python3 experiments/model-evaluation/run_evaluation.py --resume \
+python3 experiments/model-evaluation/scripts/run_evaluation.py --resume \
   --run-dir experiments/model-evaluation/results/alibaba-baseline
 ```
 
@@ -292,7 +332,7 @@ alongside the prediction files before comparing runs.
 Run once **per model and per dataset**, from the repository root:
 
 ```sh
-python3 experiments/model-evaluation/evaluate_predictions.py \
+python3 experiments/model-evaluation/scripts/evaluate_predictions.py \
   --manifest experiments/model-evaluation/manifests/nutrition5k-50.jsonl \
   --predictions experiments/model-evaluation/results/boba/nutrition5k.jsonl \
   --output experiments/model-evaluation/results/boba/nutrition5k-report.json
@@ -316,7 +356,8 @@ because data integrity or script unit tests pass.
 From the repository root:
 
 ```sh
-python3 -m unittest discover -s experiments/model-evaluation -p 'test_*.py' -v
+uv run --with huggingface-hub==1.33.0 python -m unittest discover \
+  -s experiments/model-evaluation/tests -p 'test_*.py' -v
 ```
 
 Tests cover the real CSV field layout, before/after weight selection, preserved
@@ -326,3 +367,6 @@ and never exported as real predictions or production artifacts.
 Runner tests additionally cover blinded requests, HTTP/auth/rate-limit/timeout
 handling, strict response validation, credential redaction, dry-run, resume,
 explicit retries, changed-run rejection and a complete mocked scoring workflow.
+HF runner tests additionally cover the required provider/client configuration,
+unserved-model blocking, native JSON conversion, incomplete portions, truncated
+output, and auth failures. They do not call a live inference provider.

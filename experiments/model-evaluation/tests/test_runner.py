@@ -6,10 +6,13 @@ import io
 import json
 import os
 from pathlib import Path
+import sys
 import tempfile
 import unittest
 from unittest.mock import MagicMock, patch
 import urllib.error
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
 from download_datasets import METRICS
 from run_evaluation import (
@@ -49,6 +52,45 @@ class AdapterTests(unittest.TestCase):
         self.assertEqual(set(payload), {"model", "messages", "temperature", "max_tokens", "stream",
                                        "enable_thinking", "response_format"})
         self.assertNotIn("response_format", make_payload("v", IMAGE, "JSON", 512, False, False))
+
+    def test_thinking_budget_high_resolution_and_json_coexist(self):
+        payload = make_payload("qwen3.8-max", IMAGE, "fixed JSON task", 1024, True, True,
+                               thinking_budget=4096, high_resolution_images=True)
+        self.assertTrue(payload["enable_thinking"])
+        self.assertEqual(payload["thinking_budget"], 4096)
+        self.assertTrue(payload["vl_high_resolution_images"])
+        self.assertEqual(payload["response_format"], {"type": "json_object"})
+
+    def test_cli_records_custom_prompt_and_thinking_settings(self):
+        with tempfile.TemporaryDirectory() as directory:
+            prompt = Path(directory) / "prompt.txt"
+            prompt.write_text("custom fixed JSON task")
+            environment = {"DASHSCOPE_API_KEY": "fake-key", "VLM_BASE_URL": "https://test.invalid/v1",
+                           "VLM_MODEL": "qwen3.8-max", "VLM_ENABLE_THINKING": "true",
+                           "VLM_JSON_MODE": "true", "VLM_THINKING_BUDGET": "4096",
+                           "VLM_HIGH_RESOLUTION_IMAGES": "true"}
+            with patch.dict(os.environ, environment, clear=True), \
+                    patch("run_evaluation.validate_samples", return_value=[{"sample_id": "test"}]), \
+                    patch("run_evaluation.run_pipeline", return_value={}) as pipeline, \
+                    redirect_stdout(io.StringIO()):
+                result = main(["--env-file", str(Path(directory) / "absent.env"),
+                               "--dataset", "lefood-set", "--limit", "1", "--prompt", str(prompt)])
+            self.assertEqual(result, 0)
+            config = pipeline.call_args.args[3]
+            self.assertTrue(config["enable_thinking"])
+            self.assertTrue(config["json_mode"])
+            self.assertEqual(config["thinking_budget"], 4096)
+            self.assertTrue(config["high_resolution_images"])
+            self.assertEqual(pipeline.call_args.args[4], prompt.read_text())
+
+    def test_disabled_thinking_rejects_budget_before_request(self):
+        environment = {"DASHSCOPE_API_KEY": "fake-key", "VLM_BASE_URL": "https://test.invalid/v1",
+                       "VLM_MODEL": "qwen3.8-max", "VLM_THINKING_BUDGET": "4096"}
+        with patch.dict(os.environ, environment, clear=True), \
+                patch("run_evaluation.provider_call") as call, \
+                patch("sys.stderr", new_callable=io.StringIO):
+            self.assertEqual(main(["--env-file", "/nonexistent/test.env"]), 2)
+        call.assert_not_called()
 
     def test_parser_preserves_zero_and_unknowns(self):
         response = envelope()

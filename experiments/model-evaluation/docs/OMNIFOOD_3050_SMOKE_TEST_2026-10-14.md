@@ -80,8 +80,8 @@ cause of the earlier kill.
 
 ## Artifacts
 
-- `run_omnifood.py`: local inference and scoring runner.
-- `prepare_omnifood.py`: resumable range extraction, tensor conversion and
+- `scripts/run_omnifood.py`: local inference and scoring runner.
+- `scripts/prepare_omnifood.py`: resumable range extraction, tensor conversion and
   source preparation.
 - `results/omnifood-3050-mobile-2026-10-14/summary.json`: full metrics,
   per-image predictions, per-stage timings and VRAM measurements.

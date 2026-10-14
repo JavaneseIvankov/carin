@@ -13,7 +13,7 @@ import torch
 from safetensors.torch import load_file
 from torchao.quantization import Int8WeightOnlyConfig, quantize_
 
-HERE = Path(__file__).parent
+HERE = Path(__file__).resolve().parent.parent
 ROOT = HERE/'data/omnifood'
 sys.path.insert(0, str(ROOT/'source'))
 from model.myswinb import SwinTransformer

@@ -128,7 +128,8 @@ def limit_total_samples(references, total):
     return {dataset: rows[:counts[dataset]] for dataset, rows in references.items()}
 
 
-def make_payload(model, image, prompt, max_tokens, json_mode, thinking):
+def make_payload(model, image, prompt, max_tokens, json_mode, thinking, *,
+                 thinking_budget=None, high_resolution_images=False):
     # Reference labels, names, IDs, dataset identity and image filenames are
     # deliberately absent from the provider request.
     image_url = f"data:{image_mime(image)};base64," + base64.b64encode(image).decode("ascii")
@@ -143,6 +144,10 @@ def make_payload(model, image, prompt, max_tokens, json_mode, thinking):
     }
     if json_mode:
         payload["response_format"] = {"type": "json_object"}
+    if thinking_budget is not None:
+        payload["thinking_budget"] = thinking_budget
+    if high_resolution_images:
+        payload["vl_high_resolution_images"] = True
     return payload
 
 
@@ -250,7 +255,9 @@ def infer_sample(run_dir, dataset, row, config, prompt, key, call):
         recorded.update(model_route=route, requested_model=model, fallback_used=route == "fallback")
         try:
             payload = make_payload(model, image, prompt, config["max_tokens"],
-                                   config["json_mode"], config["enable_thinking"])
+                                   config["json_mode"], config["enable_thinking"],
+                                   thinking_budget=config.get("thinking_budget"),
+                                   high_resolution_images=config.get("high_resolution_images", False))
             envelope, tries = call(config["base_url"], key, payload,
                                    config["timeout_seconds"], config["max_retries"])
             attempt["attempts"] = tries
@@ -264,6 +271,10 @@ def infer_sample(run_dir, dataset, row, config, prompt, key, call):
                 metadata["usage"] = {name: value for name, value in usage.items()
                                      if name in ("prompt_tokens", "completion_tokens", "total_tokens")
                                      and isinstance(value, int) and not isinstance(value, bool) and value >= 0}
+                details = usage.get("completion_tokens_details")
+                reasoning_tokens = details.get("reasoning_tokens") if isinstance(details, dict) else None
+                if isinstance(reasoning_tokens, int) and not isinstance(reasoning_tokens, bool) and reasoning_tokens >= 0:
+                    metadata["usage"]["reasoning_tokens"] = reasoning_tokens
             attempt.update(metadata)
             result = parse_model_response(envelope)
             attempt["status"] = "ok"
@@ -417,6 +428,8 @@ def main(argv=None):
     limits.add_argument("--limit", type=int, help="Smoke-test samples per dataset; omit for all 50")
     limits.add_argument("--total-limit", type=int, help="Total samples across datasets, allocated round-robin")
     parser.add_argument("--run-dir", type=Path)
+    parser.add_argument("--prompt", type=Path, default=PROMPT_PATH,
+                        help="Versioned prompt file; changing it requires a new run")
     parser.add_argument("--dry-run", action="store_true", help="Validate local inputs; do not call API or create scores")
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--retry-errors", action="store_true", help="With --resume, retry previously failed samples")
@@ -438,8 +451,12 @@ def main(argv=None):
             base_url = validate_base_url(base_url)
         thinking = env_bool("VLM_ENABLE_THINKING", False)
         json_mode = env_bool("VLM_JSON_MODE", True)
-        if thinking and json_mode:
-            raise ValueError("JSON mode requires VLM_ENABLE_THINKING=false; select a non-thinking model")
+        # Current Alibaba docs explicitly support JSON with thinking for these
+        # newer families. Keep conservative validation for older/unknown models.
+        if thinking and json_mode and any(
+            not item.startswith(("qwen3.8-", "qwen3.7-")) for item in (model, fallback_model) if item
+        ):
+            raise ValueError("Thinking with JSON mode is only verified here for Qwen3.7/3.8")
         config = {"base_url": base_url or None, "model": model or None, "fallback_model": fallback_model,
                   "enable_thinking": thinking, "json_mode": json_mode,
                   "timeout_seconds": float(os.environ.get("VLM_TIMEOUT_SECONDS", "120")),
@@ -448,6 +465,13 @@ def main(argv=None):
         if (not math.isfinite(config["timeout_seconds"]) or config["timeout_seconds"] <= 0
                 or not 0 <= config["max_retries"] <= 5 or config["max_tokens"] < 1):
             raise ValueError("Invalid timeout/retry/token configuration")
+        budget = os.environ.get("VLM_THINKING_BUDGET", "").strip()
+        if budget:
+            config["thinking_budget"] = int(budget)
+            if not thinking or not 1 <= config["thinking_budget"] <= 262144:
+                raise ValueError("Thinking budget requires enabled thinking and a value from 1 to 262144")
+        if env_bool("VLM_HIGH_RESOLUTION_IMAGES", False):
+            config["high_resolution_images"] = True
         if args.retry_errors and not args.resume or args.dry_run and args.resume:
             raise ValueError("--retry-errors requires --resume; --dry-run cannot resume a live run")
         if args.resume and args.run_dir is None:
@@ -458,7 +482,7 @@ def main(argv=None):
         if args.total_limit is not None:
             references = limit_total_samples(references, args.total_limit)
         run_dir = args.run_dir or ROOT / "results" / datetime.now(timezone.utc).strftime("run-%Y%m%dT%H%M%S%fZ")
-        reports = run_pipeline(ROOT, run_dir.resolve(), references, config, PROMPT_PATH.read_text(), key,
+        reports = run_pipeline(ROOT, run_dir.resolve(), references, config, args.prompt.read_text(), key,
                                dry_run=args.dry_run, resume=args.resume, retry_errors=args.retry_errors)
         print(f"Run saved: {run_dir.resolve()}")
         if any(report["error_response_count"] or report["missing_response_count"] for report in reports.values()):

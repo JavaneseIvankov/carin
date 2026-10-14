@@ -72,9 +72,10 @@ substantially overestimated the mixed dish and did not fix bubur recognition.
 ### Token usage per inference
 
 Each cell is **input + output = total**. API input counts include the image,
-text prompt, and request framing; the retained usage does not separate image
-tokens from text tokens. These are actual provider-reported counts for each
-single-image request, not estimates of image-only token use.
+text prompt, and request framing. The normalized prediction rows originally kept
+combined counts, but the raw responses also expose `prompt_tokens_details` with
+`image_tokens` and `text_tokens`. These are actual provider-reported counts for
+each single-image request, not estimates of image-only token use.
 
 | Image | Qwen 3.7 Flash | Qwen 3.8 Max |
 | --- | ---: | ---: |
@@ -89,6 +90,12 @@ single-image request, not estimates of image-only token use.
 Relative to Qwen 3.7, Qwen 3.8 used 1.9% more input tokens, 9.2% more output
 tokens, and 3.6% more total tokens on these five requests. Token rates for each
 model and direction must be applied separately to calculate monetary cost.
+
+Correction after inspecting the raw response details: image-only counts are
+302 for each Nutrition5k photo, 317 for Bubur, and 354 for Nasi, for **both**
+models. Input text counts are 318 per request for Qwen 3.7 and 330 for Qwen 3.8.
+Thus the 12-token input difference per request came from the provider's reported
+text counts, not more visual tokens. Total image tokens are 1,577 in each run.
 
 ## Interpretation and limits
 
