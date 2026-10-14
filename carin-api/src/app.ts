@@ -41,6 +41,7 @@ export type AppDependencies = {
   dashboard?: DashboardRouteDependencies;
   auth?: { handler: (request: Request) => Promise<Response> };
   appLinkScheme?: string;
+  trustedWebOrigins?: string[];
   analysisJobs?: AnalysisJobRouteDependencies;
   analyses?: AnalysisRouteDependencies;
   scans?: ScanRouteDependencies;
@@ -62,6 +63,7 @@ export function createApp({
   examinations,
   auth,
   appLinkScheme,
+  trustedWebOrigins = [],
   analysisJobs,
   analyses,
   scans,
@@ -108,6 +110,14 @@ export function createApp({
       durationMs: Math.round(performance.now() - started),
     });
   });
+
+  app.use('/api/*', cors({
+    origin: (origin) => trustedWebOrigins.includes(origin) ? origin : '',
+    credentials: true,
+    allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Idempotency-Key', 'X-Request-ID'],
+    exposeHeaders: ['X-Request-ID'],
+  }));
 
   registerHealthRoutes(app, readiness);
   registerLegalRegistryRoute(app);

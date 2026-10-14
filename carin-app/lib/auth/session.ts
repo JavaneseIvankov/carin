@@ -23,15 +23,19 @@ type Dependencies = {
   setSessionUser: (userId: string | null) => Promise<void>;
   clearSession: () => Promise<void>;
   onState: (state: AuthLifecycleState) => void;
+  restorationTimeoutMs?: number;
 };
 
 const RESTORATION_TIMEOUT_MS = 15_000;
 
-function getSessionWithTimeout(getSession: Dependencies['getSession']): Promise<AuthSession> {
+function getSessionWithTimeout(
+  getSession: Dependencies['getSession'],
+  timeoutMs = RESTORATION_TIMEOUT_MS
+): Promise<AuthSession> {
   return new Promise((resolve, reject) => {
     const timeout = setTimeout(
-      () => reject(new Error('Pemeriksaan sesi melewati batas waktu.')),
-      RESTORATION_TIMEOUT_MS
+      () => reject(new Error('Pemeriksaan sesi terlalu lama. Silakan coba lagi.')),
+      timeoutMs
     );
 
     void Promise.resolve()
@@ -55,7 +59,10 @@ export function createAuthSessionLifecycle(deps: Dependencies) {
     const generation = ++requestGeneration;
     publish({ status: 'loading', user: state.user });
     try {
-      const response = await getSessionWithTimeout(deps.getSession);
+      const response = await getSessionWithTimeout(
+        deps.getSession,
+        deps.restorationTimeoutMs ?? RESTORATION_TIMEOUT_MS
+      );
       if (generation !== requestGeneration) return;
       if (response.error) throw response.error;
 

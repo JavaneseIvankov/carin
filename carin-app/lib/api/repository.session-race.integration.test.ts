@@ -26,6 +26,29 @@ const alice: DataScope = { environment: 'dev', userId: 'alice' };
 const bob: DataScope = { environment: 'dev', userId: 'bob' };
 
 describe('repository auth scope races', () => {
+  it('uses browser credentials for web requests without reading native cookie storage', async () => {
+    const fetcher = vi.fn<typeof fetch>(async () => new Response(null, { status: 204 }));
+    const repository = createAppRepository({
+      scope: alice,
+      storage: memoryStorage(),
+      connectivity: () => 'online',
+      onUnauthorized: async () => {},
+      credentials: 'include',
+      fetcher: fetcher as unknown as typeof fetch,
+      baseUrl: 'https://api.test',
+    });
+    await repository.write('deleteConsumption', {
+      path: { id: 'entry-1' },
+      headers: { 'Idempotency-Key': 'delete-1' },
+    });
+    expect(fetcher).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ credentials: 'include' })
+    );
+    const headers = new Headers(fetcher.mock.calls[0]?.[1]?.headers);
+    expect(headers.has('Cookie')).toBe(false);
+  });
+
   it('does not dispatch an old write with the next account cookie', async () => {
     const storage = memoryStorage();
     const queryClient = new QueryClient();

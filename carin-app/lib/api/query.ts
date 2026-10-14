@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as React from 'react';
+import { Platform } from 'react-native';
 import { useAppData } from '@/lib/data/provider';
 import { authClient } from '@/lib/auth/client';
 import { useAuth } from '@/lib/auth/provider';
@@ -20,7 +21,8 @@ export function useAppRepository() {
             storage: AsyncStorage,
             connectivity: () => connectivity,
             onUnauthorized: invalidateSession,
-            getCookie: () => authClient.getCookie(),
+            getCookie: Platform.OS === 'web' ? undefined : () => authClient.getCookie(),
+            credentials: Platform.OS === 'web' ? 'include' : 'omit',
             isCurrentScope: (() => {
               const generation = scopeGeneration(AsyncStorage, scope);
               return () =>

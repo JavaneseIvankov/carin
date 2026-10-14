@@ -39,6 +39,7 @@ const app = createVerifiedApp({
   resolveSession: authRuntime.resolveSession,
   accountDeletion: { verifyPassword: authRuntime.verifyPassword, deletionSecret: authSecret },
   appLinkScheme: config.appLinkScheme,
+  trustedWebOrigins: (config.authTrustedOrigins ?? []).filter((origin) => /^https?:\/\//.test(origin)),
   media: { ...mediaOptions, resolveSession: authRuntime.resolveSession },
   examinations: { db, resolveSession: authRuntime.resolveSession, cursorSecret: authSecret },
   corsOrigins: config.authTrustedOrigins,

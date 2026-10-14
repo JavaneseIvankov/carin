@@ -1,32 +1,15 @@
-function getExpoDevHost(): string | null {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const Constants = require('expo-constants');
-    const config = Constants?.default ?? Constants;
-    const hostUri =
-      config?.expoConfig?.hostUri ??
-      config?.manifest2?.extra?.expoClient?.hostUri;
-    if (hostUri && typeof hostUri === 'string') {
-      return hostUri.split(':')[0] || null;
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
+import { resolveDevelopmentApiUrl } from './api-url';
 
-export function resolveApiUrl(rawUrl: string, overrideDevHost?: string | null): string {
-  const url = rawUrl.replace(/\/+$/, '');
-  const devHost = overrideDevHost !== undefined ? overrideDevHost : getExpoDevHost();
-  if (process.env.NODE_ENV !== 'production' && url.includes('localhost') && devHost) {
-    return url.replace('localhost', devHost);
-  }
-  return url;
-}
+const environment = process.env.EXPO_PUBLIC_ENV ?? 'development';
+const configuredUrl = process.env.EXPO_PUBLIC_API_URL?.replace(/\/+$/, '') ?? '';
+const developmentHost = typeof window !== 'undefined' ? window.location.host : null;
 
 export const apiEnvironment = {
-  name: process.env.EXPO_PUBLIC_ENV ?? 'development',
-  baseUrl: resolveApiUrl(process.env.EXPO_PUBLIC_API_URL ?? ''),
+  name: environment,
+  baseUrl:
+    environment === 'development'
+      ? resolveDevelopmentApiUrl(configuredUrl, developmentHost)
+      : configuredUrl,
 };
 
 export function requireApiUrl() {

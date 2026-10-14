@@ -54,6 +54,19 @@ credential only in its own container. Its profile is separate from the analysis
 inbox check requires a verified sender domain, active API key, recipient mailbox,
 and a reachable `BETTER_AUTH_URL`.
 
+For development verification and password-reset email, use a reachable HTTPS
+API URL in both `BETTER_AUTH_URL` and `EXPO_PUBLIC_API_URL`; an HTTP LAN URL can
+run ordinary app requests but the app blocks email callbacks on HTTP. A
+development HTTPS tunnel can provide this URL. Add its exact origin and the web
+app origin to `AUTH_TRUSTED_ORIGINS`, restart the API and Expo after changing
+their environment, and run the email worker. For web, serving the app and API
+through the same HTTPS origin avoids cross-site cookie restrictions. Keep real
+Resend credentials in ignored `infra/.env`, rather than `.env.example`.
+
+An accepted registration or resend request queues email; it does not prove the
+email worker delivered it. The worker must be running with a verified sender
+and a working Resend key. Check delivery and the recipient inbox separately.
+
 Compose waits for PostgreSQL health, runs `node dist/db/migrate.js` once, and
 starts the API only after that migration service exits successfully. PostgreSQL
 and MinIO data live in named volumes and survive `down`/`up`. `docker compose
