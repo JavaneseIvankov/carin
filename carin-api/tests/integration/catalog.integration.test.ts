@@ -69,6 +69,12 @@ function ai(version: string, foods: CatalogFood[], supported = false): Pick<AiCl
   };
 }
 
+function deferred() {
+  let resolve!: () => void;
+  const promise = new Promise<void>((done) => { resolve = done; });
+  return { promise, resolve };
+}
+
 const versionOne = 'synthetic-catalog-test-1';
 const versionOneFoods = [
   food(versionOne, 'food-ayam-goreng', 'Ayam', 'Goreng', 'ayam goreng', 100),
@@ -153,6 +159,8 @@ describe('versioned catalog persistence and search', () => {
       .rejects.toMatchObject({ code: '23514' });
     await expect(pool.query('DELETE FROM catalog_version WHERE version=$1', [versionOne]))
       .rejects.toMatchObject({ code: '23514' });
+    await expect(pool.query('UPDATE catalog_version SET activation_generation=99 WHERE version=$1', [versionOne]))
+      .rejects.toMatchObject({ code: '23514' });
     await expect(pool.query('UPDATE catalog_condition SET display_name=$2 WHERE catalog_version=$1', [versionOne, 'Changed candidate']))
       .rejects.toMatchObject({ code: '23514' });
     await expect(pool.query('DELETE FROM catalog_condition WHERE catalog_version=$1', [versionOne]))
@@ -223,12 +231,48 @@ describe('versioned catalog persistence and search', () => {
     expect(cursorResult.items[0]?.id).toBe('food-ayam-rebus');
     const oldResponse = await app.request(`/api/v1/catalog/foods?version=${versionOne}&q=ayam`, { headers: { 'x-test-session': 'allowed' } });
     expect((await oldResponse.json() as Schemas['CatalogPage']).items.map((item) => item.id)).toEqual(['food-ayam-goreng', 'food-ayam-rebus']);
+    await expect(pool.query('UPDATE catalog_version SET is_current=true WHERE version=$1', [versionOne]))
+      .rejects.toMatchObject({ code: '23514' });
     const missing = await app.request('/api/v1/catalog/foods?version=synthetic-catalog-missing', { headers: { 'x-test-session': 'allowed' } });
     expect(missing.status).toBe(409);
     expect(await missing.json()).toMatchObject({ error: { code: 'CATALOG_VERSION_UNAVAILABLE' } });
     const versions = await createDatabase(pool).select().from(catalogVersion);
     expect(versions).toHaveLength(2);
     expect(versions.filter((version) => version.isCurrent).map((version) => version.version)).toEqual([versionTwo]);
+    expect(Object.fromEntries(versions.map((version) => [version.version, version.activationGeneration]))).toEqual({
+      [versionOne]: 1,
+      [versionTwo]: 2,
+    });
+  });
+
+  it('does not let an older overlapping sync replace a catalog activated while it was fetching', async () => {
+    const stalePageStarted = deferred();
+    const releaseStalePage = deferred();
+    const staleAi = ai(versionOne, versionOneFoods);
+    const delayedStaleAi: Pick<AiClient, 'getCapabilities' | 'getCatalog'> = {
+      getCapabilities: staleAi.getCapabilities,
+      getCatalog: async (input) => {
+        if (!input.cursor) {
+          stalePageStarted.resolve();
+          await releaseStalePage.promise;
+        }
+        return staleAi.getCatalog(input);
+      },
+    };
+    const staleImport = importCatalog(createDatabase(pool), delayedStaleAi);
+    await stalePageStarted.promise;
+
+    const newerVersion = 'synthetic-catalog-test-3';
+    await importCatalog(createDatabase(pool), ai(newerVersion, [
+      food(newerVersion, 'food-ayam-tumis', 'Ayam', 'Tumis', 'ayam tumis', 110),
+    ]));
+
+    releaseStalePage.resolve();
+    await expect(staleImport).rejects.toMatchObject({ code: 'CATALOG_ACTIVATION_CONFLICT' });
+    const current = await pool.query('SELECT version FROM catalog_version WHERE is_current=true');
+    expect(current.rows).toEqual([{ version: newerVersion }]);
+    const staleVersion = await pool.query('SELECT activation_generation FROM catalog_version WHERE version=$1', [versionOne]);
+    expect(staleVersion.rows).toEqual([{ activation_generation: 1 }]);
   });
 
   it('rejects a bad import without changing the active snapshot', async () => {
@@ -236,7 +280,7 @@ describe('versioned catalog persistence and search', () => {
     invalid.servings[0]!.sourceId = 'absent-source';
     await expect(importCatalog(createDatabase(pool), ai('synthetic-catalog-invalid', [invalid]))).rejects.toMatchObject({ code: 'INVALID_CATALOG' });
     const current = await pool.query('SELECT version FROM catalog_version WHERE is_current=true');
-    expect(current.rows).toEqual([{ version: 'synthetic-catalog-test-2' }]);
+    expect(current.rows).toEqual([{ version: 'synthetic-catalog-test-3' }]);
   });
 
   it('does not replace rows when an imported version is replayed with different contents', async () => {
