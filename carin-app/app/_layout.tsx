@@ -12,13 +12,27 @@ import { useColorScheme } from 'nativewind';
 import { AppDataProvider } from '@/lib/data/provider';
 import { AuthProvider } from '@/lib/auth/provider';
 import { AuthGate } from '@/components/auth/auth-gate';
+import type { ErrorBoundaryProps } from 'expo-router';
+import { Button } from '@/components/ui/button';
+import { Text } from '@/components/ui/text';
+import { errorLogDetails, logAppEvent } from '@/lib/logging';
 
 void SplashScreen.preventAutoHideAsync().catch(() => {});
 
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from 'expo-router';
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  React.useEffect(() => {
+    logAppEvent('error', 'ui.root_error.displayed', errorLogDetails(error));
+  }, [error]);
+
+  return (
+    <View className="flex-1 items-center justify-center gap-4 bg-background p-6">
+      <Text className="text-center">Terjadi kendala saat membuka aplikasi.</Text>
+      <Button onPress={() => void retry()} accessibilityLabel="Coba lagi">
+        <Text>Coba lagi</Text>
+      </Button>
+    </View>
+  );
+}
 
 export default function RootLayout() {
   const { colorScheme } = useColorScheme();

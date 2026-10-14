@@ -24,10 +24,14 @@ import { registerDashboardRoutes, type DashboardRouteDependencies } from './modu
 import { isInternalHost, type AppConfig } from './config.js';
 
 export type RequestLog = {
+  event: 'http.request.completed' | 'http.request.failed';
   requestId: string;
   method: string;
+  route: string;
   status: number;
   durationMs: number;
+  errorCode?: string;
+  errorType?: string;
 };
 
 export type AppDependencies = {
@@ -52,6 +56,7 @@ export type AppDependencies = {
 };
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const requestStartTimes = new WeakMap<object, number>();
 
 export function createApp({
   readiness,
@@ -102,13 +107,34 @@ export function createApp({
     c.set("requestId", requestId);
     c.header("x-request-id", requestId);
     const started = performance.now();
-    await next();
-    log?.({
-      requestId,
-      method: c.req.method,
-      status: c.res.status,
-      durationMs: Math.round(performance.now() - started),
-    });
+    requestStartTimes.set(c, started);
+    try {
+      await next();
+    } finally {
+      let errorCode: string | undefined;
+      if (c.res.status >= 400 && c.res.headers.get('content-type')?.includes('application/json')) {
+        try {
+          const body: unknown = await c.res.clone().json();
+          if (body && typeof body === 'object' && 'error' in body) {
+            const error = body.error;
+            if (error && typeof error === 'object' && 'code' in error && typeof error.code === 'string') {
+              errorCode = error.code;
+            }
+          }
+        } catch {
+          // Keep the access log useful when an upstream or streaming response is not JSON.
+        }
+      }
+      log?.({
+        event: 'http.request.completed',
+        requestId,
+        method: c.req.method,
+        route: c.req.routePath || 'unmatched',
+        status: c.res.status,
+        durationMs: Math.round(performance.now() - started),
+        ...(errorCode ? { errorCode } : {}),
+      });
+    }
   });
 
   app.use('/api/*', cors({
@@ -145,14 +171,22 @@ export function createApp({
       new ApiError(404, "RESOURCE_NOT_FOUND", "Resource not found"),
     ),
   );
-  app.onError((error, c) =>
-    errorResponse(
-      c,
-      error instanceof ApiError
-        ? error
-        : new ApiError(500, "INTERNAL_ERROR", "Internal server error"),
-    ),
-  );
+  app.onError((error, c) => {
+    const mapped = error instanceof ApiError
+      ? error
+      : new ApiError(500, "INTERNAL_ERROR", "Internal server error");
+    log?.({
+      event: 'http.request.failed',
+      requestId: c.get('requestId'),
+      method: c.req.method,
+      route: c.req.routePath || 'unmatched',
+      status: mapped.status,
+      durationMs: Math.round(performance.now() - (requestStartTimes.get(c) ?? performance.now())),
+      errorCode: mapped.code,
+      ...(!(error instanceof ApiError) ? { errorType: error instanceof Error ? error.name : 'UnknownError' } : {}),
+    });
+    return errorResponse(c, mapped);
+  });
   return app;
 }
 

@@ -13,6 +13,7 @@ import {
   type JobFailure,
 } from './repository.js';
 import { AI_CALL_TIMEOUT_MS } from './policy.js';
+import { errorLogDetails, logEvent } from '../logging.js';
 
 type AnalysisResult = components['schemas']['AnalysisResult'];
 
@@ -132,18 +133,29 @@ export async function runAnalysisWorkerOnce(
 ): Promise<RunWorkerOnceResult> {
   const job = await claimNextJob(db);
   if (!job) return 'idle';
+  logEvent('info', 'worker.analysis.started', { jobId: job.id, kind: job.kind, operationId: job.operationId });
 
   let result: AnalysisResult;
   try {
     result = await invokeWithHeartbeat(db, ai, job, options.heartbeatMs ?? 40_000, options.photoUrlForJob);
   } catch (error) {
+    logEvent('error', 'worker.analysis.provider_failed', {
+      jobId: job.id,
+      kind: job.kind,
+      operationId: job.operationId,
+      ...errorLogDetails(error),
+    });
     const outcome = await recordJobFailure(db, {
       jobId: job.id,
       userId: job.userId,
       leaseToken: job.leaseToken,
       error: failureFor(error),
     });
-    return outcome === 'stale' ? 'stale' : 'failed';
+    const result = outcome === 'stale' ? 'stale' : 'failed';
+    logEvent(result === 'failed' ? 'warn' : 'info', 'worker.analysis.finished', {
+      jobId: job.id, kind: job.kind, operationId: job.operationId, result,
+    });
+    return result;
   }
 
   try {
@@ -165,12 +177,17 @@ export async function runAnalysisWorkerOnce(
       const context = await loadAnalysisValidationContext(db, correctionJob, validationResult);
       validateAnalysisResult(validationResult, context.expectation, context.catalog);
     }
-    return await publishJobResult(db, {
+    const wasPublished = await publishJobResult(db, {
       jobId: job.id,
       userId: job.userId,
       leaseToken: job.leaseToken,
       result,
-    }) ? 'completed' : 'stale';
+    });
+    const outcome = wasPublished ? 'completed' : 'stale';
+    logEvent('info', 'worker.analysis.finished', {
+      jobId: job.id, kind: job.kind, operationId: job.operationId, result: outcome,
+    });
+    return outcome;
   } catch (error) {
     if (!(error instanceof ContractValidationError) && !(error instanceof InvalidAnalysisResult) &&
         !(error instanceof AnalysisCatalogUnavailableError)) throw error;
@@ -180,7 +197,11 @@ export async function runAnalysisWorkerOnce(
       leaseToken: job.leaseToken,
       error: { code: 'INVALID_RESPONSE', message: 'AI result failed contract validation.', retryable: false },
     });
-    return outcome === 'stale' ? 'stale' : 'failed';
+    const result = outcome === 'stale' ? 'stale' : 'failed';
+    logEvent('error', 'worker.analysis.result_rejected', {
+      jobId: job.id, kind: job.kind, operationId: job.operationId, result, ...errorLogDetails(error),
+    });
+    return result;
   }
 }
 
@@ -191,7 +212,7 @@ export async function runAnalysisWorker(
     concurrency?: number;
     pollIntervalMs?: number;
     signal?: AbortSignal;
-    onError?: () => void;
+    onError?: (error: unknown) => void;
     photoUrlForJob?: (userId: string, photoId: string) => Promise<string>;
   } = {},
 ): Promise<void> {
@@ -209,8 +230,8 @@ export async function runAnalysisWorker(
       try {
         const result = await runAnalysisWorkerOnce(db, ai, { photoUrlForJob: options.photoUrlForJob });
         if (result === 'idle') await delay(pollIntervalMs);
-      } catch {
-        options.onError?.();
+      } catch (error) {
+        options.onError?.(error);
         await delay(pollIntervalMs);
       }
     }

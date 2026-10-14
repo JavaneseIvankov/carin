@@ -6,10 +6,11 @@ import { runAnalysisWorker } from './jobs/worker.js';
 import { createMediaService } from './modules/media/service.js';
 import { createMediaRuntimeOptions } from './modules/media/runtime.js';
 import { runPhotoCleanupWorker } from './modules/media/cleanup.js';
+import { errorLogDetails, logEvent } from './logging.js';
 
 const config = loadConfig(process.env);
 const pool = createPostgresPool(config.databaseUrl, (entry) => {
-  process.stderr.write(`${JSON.stringify(entry)}\n`);
+  logEvent('error', 'database.pool.error', { errorCode: entry.code });
 });
 const concurrencyValue = process.env.WORKER_CONCURRENCY ?? '2';
 const concurrency = Number(concurrencyValue);
@@ -30,11 +31,11 @@ try {
       concurrency,
       signal: shutdown.signal,
       photoUrlForJob: media.createAiPhotoUrl,
-      onError: () => process.stderr.write('{"code":"ANALYSIS_WORKER_FAILURE"}\n'),
+      onError: (error) => logEvent('error', 'worker.analysis.loop_failed', errorLogDetails(error)),
     }),
     runPhotoCleanupWorker(db, mediaOptions.store, {
       signal: shutdown.signal,
-      onError: () => process.stderr.write('{"code":"PHOTO_CLEANUP_WORKER_FAILURE"}\n'),
+      onError: (error) => logEvent('error', 'worker.photo_cleanup.loop_failed', errorLogDetails(error)),
     }),
   ]);
 } finally {

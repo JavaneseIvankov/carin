@@ -1,8 +1,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
-import { QueryClient, QueryClientProvider, onlineManager } from '@tanstack/react-query';
+import {
+  MutationCache,
+  QueryCache,
+  QueryClient,
+  QueryClientProvider,
+  onlineManager,
+} from '@tanstack/react-query';
 import * as React from 'react';
 import { apiEnvironment } from '@/lib/config';
+import { errorLogDetails, logAppEvent } from '@/lib/logging';
 import { clearScopedData, sameScope, type DataScope } from './scope';
 import type { Connectivity } from './network';
 
@@ -16,6 +23,23 @@ type DataContextValue = {
 
 const DataContext = React.createContext<DataContextValue | null>(null);
 const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: (error, query) =>
+      logAppEvent('error', 'data.query.failed', {
+        operation: typeof query.queryKey[3] === 'string' ? query.queryKey[3] : 'unknown',
+        ...errorLogDetails(error),
+      }),
+  }),
+  mutationCache: new MutationCache({
+    onError: (error, _variables, _context, mutation) =>
+      logAppEvent('error', 'data.mutation.failed', {
+        operation:
+          typeof mutation.options.mutationKey?.[3] === 'string'
+            ? mutation.options.mutationKey[3]
+            : 'unknown',
+        ...errorLogDetails(error),
+      }),
+  }),
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
 });
 

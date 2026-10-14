@@ -1,5 +1,6 @@
 import type { Pool } from 'pg';
 import type { AuthEmailInput } from './templates.js';
+import { errorLogDetails, logEvent } from '../../logging.js';
 
 export type AuthEmailSender = {
   send: (input: AuthEmailInput, idempotencyKey: string) => Promise<void>;
@@ -82,6 +83,7 @@ export async function processNextEmailTask(
 ): Promise<EmailWorkResult> {
   const task = await claimTask(pool, now);
   if (!task) return 'idle';
+  logEvent('info', 'worker.email.started', { taskId: task.id, kind: task.kind, attempt: task.attempts });
   const mail = parsePayload(task.kind, task.payload);
   if (!mail) {
     await pool.query(
@@ -89,6 +91,7 @@ export async function processNextEmailTask(
        WHERE id=$1 AND lease_token=$2`,
       [task.id, task.lease_token],
     );
+    logEvent('error', 'worker.email.invalid_task', { taskId: task.id, kind: task.kind });
     return 'failed';
   }
 
@@ -98,7 +101,11 @@ export async function processNextEmailTask(
       'DELETE FROM email_task WHERE id=$1 AND lease_token=$2',
       [task.id, task.lease_token],
     );
-    return deleted.rowCount ? 'delivered' : 'lease-lost';
+    const outcome = deleted.rowCount ? 'delivered' : 'lease-lost';
+    logEvent(outcome === 'delivered' ? 'info' : 'warn', 'worker.email.finished', {
+      taskId: task.id, kind: task.kind, attempt: task.attempts, result: outcome,
+    });
+    return outcome;
   } catch (error) {
     const status = providerStatus(error);
     const permanent = status !== undefined && status >= 400 && status < 500 && ![408, 409, 429].includes(status);
@@ -118,6 +125,12 @@ export async function processNextEmailTask(
         new Date(now.getTime() + (failed ? 0 : retryDelaySeconds(task.attempts) * 1000)),
       ],
     );
-    return failed ? 'failed' : 'retry';
+    const outcome = failed ? 'failed' : 'retry';
+    logEvent(failed ? 'error' : 'warn', 'worker.email.delivery_failed', {
+      taskId: task.id, kind: task.kind, attempt: task.attempts, result: outcome,
+      ...(status !== undefined ? { upstreamStatus: status } : {}),
+      ...errorLogDetails(error),
+    });
+    return outcome;
   }
 }

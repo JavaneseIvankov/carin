@@ -14,6 +14,7 @@ import {
 import type { Database } from '../../db/client.js';
 import { deletionTask, photo, photoUploadOperation, user } from '../../db/schema/index.js';
 import type { MediaObjectStore } from './storage.js';
+import { logEvent } from '../../logging.js';
 
 export const ORPHAN_PHOTO_RETENTION_MS = 60 * 60 * 1000;
 const PHOTO_KEY_PATTERN = /^photos\/[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -355,16 +356,19 @@ export async function runPhotoCleanupBatch(
 export async function runPhotoCleanupWorker(
   db: Database,
   store: Pick<MediaObjectStore, 'removeObject'>,
-  options: { signal?: AbortSignal; pollIntervalMs?: number; onError?: () => void } = {},
+  options: { signal?: AbortSignal; pollIntervalMs?: number; onError?: (error: unknown) => void } = {},
 ): Promise<void> {
   const pollIntervalMs = options.pollIntervalMs ?? 1_000;
   if (!Number.isInteger(pollIntervalMs) || pollIntervalMs < 50)
     throw new RangeError('Cleanup worker poll interval must be at least 50 milliseconds');
   while (!options.signal?.aborted) {
     try {
-      await runPhotoCleanupBatch(db, store);
-    } catch {
-      options.onError?.();
+      const result = await runPhotoCleanupBatch(db, store);
+      if (result.scheduled || result.removed || result.failed || result.accountsPurged || result.deferred) {
+        logEvent(result.failed ? 'warn' : 'info', 'worker.photo_cleanup.batch_finished', result);
+      }
+    } catch (error) {
+      options.onError?.(error);
     }
     if (options.signal?.aborted) break;
     await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));

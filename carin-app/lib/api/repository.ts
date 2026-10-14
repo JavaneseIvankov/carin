@@ -1,4 +1,5 @@
 import type { operations } from './generated/app-api';
+import * as Crypto from 'expo-crypto';
 import { appOperations } from './generated/operations';
 import { prepareAppRequest, type AppOperation, type AppRequestInput } from './contracts';
 import { requireApiUrl } from '@/lib/config';
@@ -11,6 +12,7 @@ import {
   type DataScope,
   type StorageAdapter,
 } from '@/lib/data/scope';
+import { errorLogDetails, logAppEvent } from '@/lib/logging';
 
 type ResponseFor<O extends AppOperation> = operations[O]['responses'];
 export type AppResponse<O extends AppOperation> = {
@@ -57,21 +59,38 @@ export function createAppRepository(deps: Dependencies) {
     assertCurrentScope(deps.storage, deps.scope, generation, deps.isCurrentScope);
   async function send<O extends AppOperation>(name: O, input: AppRequestInput<O>) {
     const request = prepareAppRequest(name, input);
+    const requestId = Crypto.randomUUID();
+    request.headers['x-request-id'] = requestId;
     if (request.method !== 'GET') requireOnline(deps.connectivity());
     const cookie = await deps.getCookie?.();
     assertCurrent();
-    const response = await fetcher(`${deps.baseUrl ?? requireApiUrl()}${request.path}`, {
+    const startedAt = Date.now();
+    logAppEvent('info', 'api.request.started', {
+      requestId,
+      operation: name,
       method: request.method,
-      headers: cookie ? { ...request.headers, Cookie: cookie } : request.headers,
-      body: request.body,
-      credentials: deps.credentials ?? 'omit',
     });
-    if (response.status === 401) {
-      if (deps.isCurrentScope?.() ?? true) await deps.onUnauthorized();
-      throw new ApiError(401, 'Sesi berakhir. Silakan masuk kembali.');
+    let response: Response;
+    try {
+      response = await fetcher(`${deps.baseUrl ?? requireApiUrl()}${request.path}`, {
+        method: request.method,
+        headers: cookie ? { ...request.headers, Cookie: cookie } : request.headers,
+        body: request.body,
+        credentials: deps.credentials ?? 'omit',
+      });
+    } catch (error) {
+      logAppEvent('error', 'api.request.failed', {
+        requestId,
+        operation: name,
+        method: request.method,
+        durationMs: Date.now() - startedAt,
+        ...errorLogDetails(error),
+      });
+      throw error;
     }
+    const responseRequestId = response.headers.get('x-request-id') ?? requestId;
+    let responseErrorCode: string | undefined;
     if (!response.ok) {
-      let code: string | undefined;
       try {
         const payload: unknown = await response.clone().json();
         if (
@@ -83,15 +102,29 @@ export function createAppRepository(deps: Dependencies) {
           'code' in payload.error &&
           typeof payload.error.code === 'string'
         ) {
-          code = payload.error.code;
+          responseErrorCode = payload.error.code;
         }
       } catch {
-        // Preserve the status error even when a proxy returns a non-JSON body.
+        // The status remains useful when a proxy returns a non-JSON body.
       }
+    }
+    logAppEvent(response.ok ? 'info' : 'warn', 'api.response.received', {
+      requestId: responseRequestId,
+      operation: name,
+      method: request.method,
+      status: response.status,
+      durationMs: Date.now() - startedAt,
+      ...(responseErrorCode ? { errorCode: responseErrorCode } : {}),
+    });
+    if (response.status === 401) {
+      if (deps.isCurrentScope?.() ?? true) await deps.onUnauthorized();
+      throw new ApiError(401, 'Sesi berakhir. Silakan masuk kembali.');
+    }
+    if (!response.ok) {
       throw new ApiError(
         response.status,
         `Permintaan gagal (${response.status}). Coba lagi.`,
-        code
+        responseErrorCode
       );
     }
     if (response.status === 204) return undefined as AppResponse<O>;

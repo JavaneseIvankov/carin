@@ -9,6 +9,7 @@ import {
   validateResponse,
   validateSchema,
 } from '../../contracts/validation.js';
+import { errorLogDetails, logEvent } from '../../logging.js';
 
 type Schemas = components['schemas'];
 export type AiClient = {
@@ -342,6 +343,8 @@ export function createHttpAiClient(options: {
     for (const [key, value] of Object.entries(query ?? {})) url.searchParams.set(key, String(value));
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const startedAt = Date.now();
+    logEvent('info', 'integration.ai.request.started', { operation: operationId, method: operation.method.toUpperCase() });
     let response: Response;
     let responseText: string;
     try {
@@ -358,6 +361,12 @@ export function createHttpAiClient(options: {
       });
       responseText = await response.text();
     } catch (error) {
+      logEvent('error', 'integration.ai.request.failed', {
+        operation: operationId,
+        method: operation.method.toUpperCase(),
+        durationMs: Date.now() - startedAt,
+        ...errorLogDetails(error),
+      });
       if (controller.signal.aborted || (error instanceof DOMException && error.name === 'AbortError')) {
         throw new AiAdapterError('TIMEOUT', 'AI service request timed out.', true);
       }
@@ -365,6 +374,12 @@ export function createHttpAiClient(options: {
     } finally {
       clearTimeout(timer);
     }
+    logEvent(response.ok ? 'info' : 'warn', 'integration.ai.response.received', {
+      operation: operationId,
+      method: operation.method.toUpperCase(),
+      status: response.status,
+      durationMs: Date.now() - startedAt,
+    });
     let decoded: unknown;
     try {
       decoded = JSON.parse(responseText);

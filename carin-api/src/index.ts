@@ -8,6 +8,7 @@ import { createDatabase } from './db/client.js';
 import { createAuthRuntime } from './auth/runtime.js';
 import { enqueueAuthMail } from './modules/email/outbox.js';
 import { createMediaRuntimeOptions } from './modules/media/runtime.js';
+import { logEvent } from './logging.js';
 
 const config = loadConfig(process.env);
 const authSecret = config.betterAuthSecret;
@@ -15,7 +16,7 @@ const authURL = config.betterAuthUrl;
 if (!authSecret?.trim()) throw new Error('BETTER_AUTH_SECRET is required');
 if (!authURL?.trim()) throw new Error('BETTER_AUTH_URL is required');
 const pool = createPostgresPool(config.databaseUrl, (entry) => {
-  process.stdout.write(`${JSON.stringify(entry)}\n`);
+  logEvent('error', 'database.pool.error', { errorCode: entry.code });
 });
 const db = createDatabase(pool);
 const authRuntime = createAuthRuntime({
@@ -33,7 +34,7 @@ const authRuntime = createAuthRuntime({
 const mediaOptions = createMediaRuntimeOptions(db, config);
 const app = createVerifiedApp({
   readiness: createReadinessService(postgresReadinessRepository(pool)),
-  log: (entry) => { process.stdout.write(`${JSON.stringify(entry)}\n`); },
+  log: (entry) => logEvent(entry.event === 'http.request.failed' ? 'error' : 'info', entry.event, entry),
   auth: authRuntime.auth,
   db,
   resolveSession: authRuntime.resolveSession,
