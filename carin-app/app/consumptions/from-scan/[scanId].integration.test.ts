@@ -584,6 +584,137 @@ describe('photo confirmation conflict codes', () => {
 });
 
 describe('photo confirmation route identity', () => {
+  it('does not let a blurred restart replace the refocused draft', async () => {
+    const harness = createHarness({ occurrence: 'new_occurrence' });
+    const original = await harness.flow.load();
+    let releaseOld!: () => void;
+    const oldScan = new Promise<ReturnType<typeof read<Scan>>>((resolve) => {
+      releaseOld = () =>
+        resolve(read(makeScan({ latestJobId: 'job-2', latestResultId: 'result-2' })));
+    });
+    harness.remote.jobs.set('job-2', makeJob({ id: 'job-2', resultId: 'result-2' }));
+    harness.remote.results.set('result-2', makeResult());
+    harness.api.getScan.mockImplementationOnce(() => oldScan);
+
+    const restart = harness.flow.restartFromLatestResult();
+    harness.flow.invalidate();
+    const refocused = await harness.flow.load();
+    releaseOld();
+    await restart;
+
+    expect(harness.flow.getSnapshot()).toEqual(refocused);
+    expect(
+      await createDraftStore(harness.storage).load(
+        scope,
+        photoConfirmationDraftName('scan-1', 'new_occurrence')
+      )
+    ).toEqual(original.record);
+  });
+
+  it('restores the previous draft when a restart save was already running at blur', async () => {
+    let releaseRestartSave!: () => void;
+    let markRestartSaveStarted!: () => void;
+    const restartSaveStarted = new Promise<void>((resolve) => {
+      markRestartSaveStarted = resolve;
+    });
+    const storage = new (class extends MemoryStorage {
+      private writes = 0;
+      override async setItem(key: string, value: string) {
+        this.writes += 1;
+        if (this.writes === 2) {
+          markRestartSaveStarted();
+          await new Promise<void>((resolve) => {
+            releaseRestartSave = resolve;
+          });
+        }
+        await super.setItem(key, value);
+      }
+    })();
+    const harness = createHarness({ occurrence: 'new_occurrence', storage });
+    const original = await harness.flow.load();
+    harness.remote.scan = makeScan({ latestJobId: 'job-2', latestResultId: 'result-2' });
+    harness.remote.jobs.set('job-2', makeJob({ id: 'job-2', resultId: 'result-2' }));
+    harness.remote.results.set('result-2', makeResult());
+
+    const restart = harness.flow.restartFromLatestResult();
+    await restartSaveStarted;
+    harness.flow.invalidate();
+    const refocusedLoad = harness.flow.load();
+    releaseRestartSave();
+    await restart;
+    const refocused = await refocusedLoad;
+
+    expect(refocused.record).toEqual(original.record);
+    expect(
+      await createDraftStore(storage).load(
+        scope,
+        photoConfirmationDraftName('scan-1', 'new_occurrence')
+      )
+    ).toEqual(original.record);
+  });
+
+  it('does not let an old conflict refresh replace a refocused snapshot', async () => {
+    const harness = createHarness({
+      occurrence: 'new_occurrence',
+      onCreate: async () => {
+        throw errorWithCode('SOURCE_REVISION_CONFLICT');
+      },
+    });
+    const loaded = await harness.flow.load();
+    let releaseRefresh!: () => void;
+    const refreshScan = new Promise<ReturnType<typeof read<Scan>>>((resolve) => {
+      releaseRefresh = () => resolve(read(makeScan({ latestResultId: null })));
+    });
+    harness.api.getScan.mockImplementationOnce(async () => read(harness.remote.scan));
+    harness.api.getScan.mockImplementationOnce(() => refreshScan);
+
+    const submit = harness.flow.submit(loaded.record!.form);
+    await vi.waitFor(() => expect(harness.api.getScan).toHaveBeenCalledTimes(3));
+    harness.flow.invalidate();
+    const refocused = await harness.flow.load();
+    releaseRefresh();
+    await submit;
+
+    expect(harness.flow.getSnapshot()).toEqual(refocused);
+  });
+
+  it('keeps persisted draft aligned with a refocused load after an old save finishes late', async () => {
+    let releaseOldSave!: () => void;
+    let markOldSaveStarted!: () => void;
+    const oldSaveStarted = new Promise<void>((resolve) => {
+      markOldSaveStarted = resolve;
+    });
+    const storage = new (class extends MemoryStorage {
+      private writes = 0;
+      override async setItem(key: string, value: string) {
+        this.writes += 1;
+        if (this.writes === 1) {
+          markOldSaveStarted();
+          await new Promise<void>((resolve) => {
+            releaseOldSave = resolve;
+          });
+        }
+        await super.setItem(key, value);
+      }
+    })();
+    const harness = createHarness({ occurrence: 'new_occurrence', storage });
+    const oldLoad = harness.flow.load();
+    await oldSaveStarted;
+    harness.flow.invalidate();
+    const refocusedLoad = harness.flow.load();
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    releaseOldSave();
+    await oldLoad;
+    const refocused = await refocusedLoad;
+
+    expect(
+      await createDraftStore(storage).load(
+        scope,
+        photoConfirmationDraftName('scan-1', 'new_occurrence')
+      )
+    ).toEqual(refocused.record);
+  });
+
   it('keeps the refocused load as the flow snapshot when an older load finishes last', async () => {
     const harness = createHarness({ occurrence: 'new_occurrence' });
     const guard = createPhotoConfirmationRouteGuard();
@@ -667,6 +798,40 @@ describe('photo confirmation route identity', () => {
     expect(harness.makeKey).toHaveBeenCalledOnce();
     expect(harness.create).toHaveBeenCalledTimes(2);
     expect(harness.create.mock.calls[0]).toEqual(harness.create.mock.calls[1]);
+  });
+
+  it('retains the draft and request key if blur interrupts post-ack cleanup', async () => {
+    let releaseRemoval!: () => void;
+    let markRemovalStarted!: () => void;
+    const removalStarted = new Promise<void>((resolve) => {
+      markRemovalStarted = resolve;
+    });
+    const storage = new (class extends MemoryStorage {
+      override async removeItem(key: string) {
+        if (key.includes('photo-consumption%3Acreate')) {
+          markRemovalStarted();
+          await new Promise<void>((resolve) => {
+            releaseRemoval = resolve;
+          });
+        }
+        await super.removeItem(key);
+      }
+    })();
+    const harness = createHarness({ occurrence: 'new_occurrence', storage });
+    const loaded = await harness.flow.load();
+    const submit = harness.flow.submit(loaded.record!.form);
+    await removalStarted;
+
+    harness.flow.invalidate();
+    const refocusedLoad = harness.flow.load();
+    releaseRemoval();
+    await submit;
+    const refocused = await refocusedLoad;
+
+    expect(refocused.record).toEqual(loaded.record);
+    expect(
+      await createDraftStore(storage).load(scope, `manual-request:create:${loaded.record!.draftId}`)
+    ).not.toBeNull();
   });
 
   it('ignores deferred load and submit completions after the route blurs', async () => {

@@ -46,7 +46,6 @@ type PhotoConfirmationActions = {
     draftId: string,
     body: components['schemas']['ConsumptionCreate']
   ) => Promise<Consumption>;
-  clearCreate: (draftId: string) => Promise<void>;
 };
 
 const FALLBACK_TIME_ZONE = 'Asia/Jakarta';
@@ -108,6 +107,19 @@ export function createPhotoConfirmationFlow(options: {
   let persistQueue = Promise.resolve();
   let lifecycleGeneration = 0;
   let loadGeneration = 0;
+
+  const queueDraftWrite = (write: () => Promise<void>) => {
+    persistQueue = persistQueue.catch(() => {}).then(write);
+    return persistQueue;
+  };
+  const saveDraft = (record: SavedPhotoDraft, isCurrent?: () => boolean) =>
+    queueDraftWrite(() =>
+      isCurrent?.() === false ? Promise.resolve() : store.save(options.scope, draftName, record)
+    );
+  const loadDraft = async () => {
+    await persistQueue.catch(() => {});
+    return store.load<SavedPhotoDraft>(options.scope, draftName);
+  };
 
   const setSnapshot = (next: PhotoConfirmationSnapshot) => {
     snapshot = next;
@@ -178,9 +190,10 @@ export function createPhotoConfirmationFlow(options: {
     }
   }
 
-  async function refreshSources(message?: string) {
+  async function refreshSources(message?: string, routeGeneration = lifecycleGeneration) {
     try {
       const sources = await loadCurrentSources();
+      if (routeGeneration !== lifecycleGeneration) return snapshot;
       const currentAvailability = availabilityFor(sources);
       const staleDraft =
         currentAvailability === 'confirm' &&
@@ -196,6 +209,7 @@ export function createPhotoConfirmationFlow(options: {
         loadError: undefined,
       });
     } catch (error) {
+      if (routeGeneration !== lifecycleGeneration) return snapshot;
       return setSnapshot({
         ...snapshot,
         availability: 'unavailable',
@@ -215,7 +229,7 @@ export function createPhotoConfirmationFlow(options: {
       const [timeZoneRead, sources, persistedRecord] = await Promise.all([
         readTimeZone(),
         loadCurrentSources(),
-        store.load<SavedPhotoDraft>(options.scope, draftName),
+        loadDraft(),
       ]);
       if (!isCurrent()) return snapshot;
       let record = persistedRecord;
@@ -251,7 +265,7 @@ export function createPhotoConfirmationFlow(options: {
               });
             }
             record = { ...record, timeZone: timeZoneRead.value };
-            await store.save(options.scope, draftName, record);
+            await saveDraft(record, isCurrent);
             if (!isCurrent()) return snapshot;
           }
           return setSnapshot({
@@ -277,7 +291,7 @@ export function createPhotoConfirmationFlow(options: {
             timeZone: timeZoneRead.value,
             form: createPhotoConfirmationDraft(sources.result, now(), timeZoneRead.value),
           };
-          await store.save(options.scope, draftName, record);
+          await saveDraft(record, isCurrent);
           if (!isCurrent()) return snapshot;
         }
       }
@@ -298,17 +312,17 @@ export function createPhotoConfirmationFlow(options: {
     if (!snapshot.record) return Promise.resolve(snapshot);
     const nextRecord = { ...snapshot.record, form };
     setSnapshot({ ...snapshot, record: nextRecord });
-    persistQueue = persistQueue
-      .catch(() => {})
-      .then(() => store.save(options.scope, draftName, nextRecord));
-    return persistQueue.then(() => snapshot);
+    return saveDraft(nextRecord).then(() => snapshot);
   }
 
   async function restartFromLatestResult() {
+    const routeGeneration = lifecycleGeneration;
+    const isCurrent = () => routeGeneration === lifecycleGeneration;
     const previous = snapshot.record;
     if (!previous) return load();
     try {
       const sources = await loadCurrentSources();
+      if (!isCurrent()) return snapshot;
       const availability = availabilityFor(sources);
       if (availability !== 'confirm' || !sources.result || !sources.resultId) {
         return setSnapshot({
@@ -334,7 +348,12 @@ export function createPhotoConfirmationFlow(options: {
           consumedTime: previous.form.consumedTime,
         },
       };
-      await store.save(options.scope, draftName, nextRecord);
+      await queueDraftWrite(async () => {
+        if (!isCurrent()) return;
+        await store.save(options.scope, draftName, nextRecord);
+        if (!isCurrent()) await store.save(options.scope, draftName, previous);
+      });
+      if (!isCurrent()) return snapshot;
       return setSnapshot({
         availability: 'confirm',
         scan: sources.scan,
@@ -342,6 +361,7 @@ export function createPhotoConfirmationFlow(options: {
         record: nextRecord,
       });
     } catch (error) {
+      if (!isCurrent()) return snapshot;
       return setSnapshot({
         ...snapshot,
         submitMessage: 'Draft lama tetap tersimpan. Hasil terbaru belum dapat dimuat.',
@@ -371,8 +391,7 @@ export function createPhotoConfirmationFlow(options: {
       conflict: undefined,
     });
     try {
-      await persistQueue.catch(() => {});
-      await store.save(options.scope, draftName, currentRecord);
+      await saveDraft(currentRecord);
       if (!isCurrent()) return snapshot;
 
       // Re-read all server-owned source state immediately before building the write.
@@ -412,11 +431,15 @@ export function createPhotoConfirmationFlow(options: {
       const saved = await options.actions.create(currentRecord.draftId, payload.value);
       if (!isCurrent()) return snapshot;
       try {
-        await store.remove(options.scope, draftName);
-        await options.actions.clearCreate(currentRecord.draftId);
+        await queueDraftWrite(async () => {
+          if (!isCurrent()) return;
+          await store.remove(options.scope, draftName);
+          if (!isCurrent()) await store.save(options.scope, draftName, currentRecord);
+        });
       } catch {
         // The server acknowledged the save; retaining the request key makes replay safe.
       }
+      if (!isCurrent()) return snapshot;
       return setSnapshot({
         ...snapshot,
         availability: 'unavailable',
@@ -442,6 +465,7 @@ export function createPhotoConfirmationFlow(options: {
         const refreshed = await refreshSources(
           'Catatan default sudah tersimpan. Anda dapat membukanya atau mencatat konsumsi baru.'
         );
+        if (!isCurrent()) return snapshot;
         if (refreshed.scan?.defaultConsumptionId) {
           return setSnapshot({
             ...refreshed,
