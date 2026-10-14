@@ -13,21 +13,29 @@ follow-up adds the optional `supportedRules` AI capability contract and generate
 consumers, persists the exact imported capability manifest in append-only migration
 `carin-api/drizzle/0007_rare_ben_parker.sql`, and rejects photo-food matches outside
 the imported allowlist. Rule claims require an exact imported rule/condition/source,
-the condition must be present in the frozen profile, and profile-version-zero or
-empty-condition snapshots cannot publish attention claims. Missing or version-
-mismatched capability authority fails closed. Synthetic fixtures declare explicit
-supported food IDs, rules, conditions, and sources; no real source/rule data was
-invented. Tests cover missing authority, unsupported photo foods, unbacked or
-mismatched citations, absent profile conditions, and existing correction/fencing
-paths. The updated implementation plan is
+the condition must be present in the frozen profile, and its declared profile
+fields, nutrient coverage, and age range must be satisfied. `overallAttention` is
+rejected when it conflicts with critical limitations, unrecognized support, profile
+gaps, or an empty snapshot; `insufficient_information` is accepted exactly when
+such a reason exists. With no insufficiency reason, a complete supported result
+without claims cannot claim `insufficient_information`, while valid attention claims
+require `needs_attention`. Scan creation checks current manifest availability
+before persisting snapshot, scan, or job state and returns
+`CATALOG_VERSION_UNAVAILABLE` without side effects if authority is absent. Missing
+or version-mismatched capability authority also fails closed during worker
+validation. Synthetic fixtures declare explicit supported food IDs, rules,
+conditions, and sources; no real source/rule data was invented. Tests cover
+unsupported photo foods, unbacked or mismatched citations, missing profile
+requirements and conditions, attention-status conflicts, manifest-less catalog
+creation, and existing correction/fencing paths. The updated implementation plan is
 `docs/superpowers/plans/2026-10-14-c18-scan-analysis-api.md`.
 
 Verification (run from `carin-api/` unless stated otherwise):
 
 - `pnpm run typecheck` passed.
 - `pnpm run lint` passed.
-- `pnpm run test:unit` passed: 22 files, 171 tests.
-- `pnpm run test:integration` passed: 14 files, 178 tests, using disposable
+- `pnpm run test:unit` passed: 22 files, 182 tests.
+- `pnpm run test:integration` passed: 14 files, 179 tests, using disposable
   PostgreSQL containers through Docker.
 - `pnpm run build` passed.
 - `pnpm run db:generate` reported no schema changes after migration `0007`.
@@ -35,6 +43,11 @@ Verification (run from `carin-api/` unless stated otherwise):
 - From the worktree root, `/home/arundaya/Documents/Workspace/Code_Stuff/igs-joints-hackathon/carin/.venv/bin/python
   specs/validate-contracts.py` passed: 2 OpenAPI documents, 38 operations,
   410 local refs, and 5 fixtures.
+- After the final status-consistency regressions, `pnpm run test:unit` passed: 22
+  files, 182 tests. The focused C18 command
+  `pnpm exec vitest run src/modules/analyses/result-validation.unit.test.ts tests/integration/analysis-scan.integration.test.ts`
+  passed: 2 files, 44 tests. `pnpm run typecheck` and `pnpm run lint` also passed
+  after this follow-up.
 - `git diff --check` passed.
 
 Unverified work / blockers: Live AI validation and real citation authority remain

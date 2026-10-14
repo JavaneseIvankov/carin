@@ -155,6 +155,22 @@ export async function createPhotoAnalysisJob(
 
     const [currentCatalog] = await tx.select().from(catalogVersion).where(eq(catalogVersion.isCurrent, true)).limit(1);
     if (!currentCatalog) throw new CreateAnalysisError('catalog_unavailable');
+    const [currentAuthority] = await tx.select({ manifest: catalogCapabilityManifest.manifest })
+      .from(catalogCapabilityManifest)
+      .where(eq(catalogCapabilityManifest.catalogVersion, currentCatalog.version)).limit(1);
+    if (!currentAuthority) throw new CreateAnalysisError('catalog_unavailable');
+    try {
+      validateSchema('ai.CapabilityManifest', currentAuthority.manifest);
+    } catch {
+      throw new CreateAnalysisError('catalog_unavailable');
+    }
+    const capabilityManifest = currentAuthority.manifest as components['schemas']['CapabilityManifest'];
+    if (capabilityManifest.catalogVersion !== currentCatalog.version ||
+        capabilityManifest.nutritionDatasetVersion !== currentCatalog.nutritionDatasetVersion ||
+        capabilityManifest.ruleSetVersion !== currentCatalog.ruleSetVersion ||
+        capabilityManifest.dataMode !== currentCatalog.dataMode) {
+      throw new CreateAnalysisError('catalog_unavailable');
+    }
     const [currentProfile] = await tx.select().from(healthProfile).where(eq(healthProfile.userId, input.userId)).limit(1);
     const profile = buildProfileContext(account, currentProfile ?? null, now);
     const profileSnapshotId = randomUUID();
@@ -324,7 +340,7 @@ export async function loadAnalysisValidationContext(
     ruleSetVersion: version.ruleSetVersion,
     dataMode: version.dataMode as ValidationCatalog['dataMode'],
     supportedPhotoFoodIds: manifest.supportedPhotoFoodIds,
-    conditions: manifest.conditions.map(({ id, personalizationSupported }) => ({ id, personalizationSupported })),
+    conditions: manifest.conditions,
     supportedRules: manifest.supportedRules ?? [],
     foods: foods.map((food) => ({
       id: food.id,

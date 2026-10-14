@@ -64,3 +64,17 @@
 - [x] Add unit and PostgreSQL integration coverage for unsupported photo matches, unbacked/mismatched rule citations, unsupported profile conditions, empty profiles, and missing manifests. Synthetic provider fixtures explicitly declare their supported food/rule/source authority.
 - [x] Preserve `lockScanForConfirmation` as the transaction seam. C21 must call it in the transaction that persists consumption confirmation; no C18 confirmation route exists to call it here.
 - [x] Re-run API typecheck, lint, unit and integration suites, build, Drizzle no-drift, app contract generation check, root OpenAPI validation, and diff check. Live AI/source validation remains gated by C31 and is unverified.
+
+## Quality-review follow-up: condition eligibility, attention status, and catalog readiness
+
+- [x] Preserve full imported condition authority (`requiredProfileFields`, `requiredNutrients`, and supported age bounds) through the worker context; reject claims unless the frozen profile and result satisfy every declared requirement.
+- [x] Reconcile `overallAttention` with critical limitations, unrecognized support, unsupported/missing profile conditions, requirement gaps, and empty profiles. `insufficient_information` is required exactly when an insufficiency reason exists; otherwise it is rejected, and a valid nonempty attention set requires `needs_attention`.
+- [x] Check the current immutable capability manifest in the scan-creation transaction before inserting the profile snapshot, scan, or job. Return `409 CATALOG_VERSION_UNAVAILABLE` and leave photo/idempotency/resources unchanged if authority is missing or inconsistent.
+- [x] Add test-first unit and PostgreSQL regressions for missing profile fields/nutrients/age, valid eligible claims, critical and empty-profile status mismatches, unrecognized-support positives, and manifest-less current catalogs.
+- [x] Re-run all documented API and contract checks; retain C21 confirmation seam and C31 live AI/source gate in the handoff.
+
+## Final status-consistency review follow-up
+
+- [x] Add regressions using the complete supported fixture with and without its source-backed attention, no critical limitations, and an eligible frozen profile; reject `insufficient_information` in both cases when no insufficiency reason exists.
+- [x] Require `needs_attention` for a valid nonempty attention set; allow `insufficient_information` exactly when critical/support/profile gaps provide an insufficiency reason.
+- [x] Run the focused validator and scan integration tests, full API unit suite, typecheck and lint; commit locally and keep TSK 18 started.

@@ -133,6 +133,21 @@ function bindRequestedProvenance(
   result.sources = result.sources.filter((source) =>
     !(source.kind === 'synthetic' && source.datasetVersion === result.ruleSetVersion && !citedRuleSources.has(source.id)),
   );
+  const profile = request.profile;
+  const fixtureRuleEligible = profile.profileVersion > 0 && profile.conditionIds.includes('fixture-condition') &&
+    profile.weightKg !== null && profile.ageYears !== null && profile.ageYears >= 18 && profile.ageYears <= 80 &&
+    result.components.length > 0 && result.components.every(({ nutrients }) => nutrients.energyKcal !== null);
+  const hasProfileFacts = profile.heightCm !== null || profile.weightKg !== null || profile.sexForReference !== null ||
+    profile.diagnosisState !== 'not_provided' || profile.conditionIds.length > 0 ||
+    profile.unsupportedConditionLabels.length > 0 || profile.allergyState !== 'not_provided' ||
+    profile.allergies.length > 0 || profile.activity !== null || profile.smoking !== null;
+  const hasUnsupportedConditions = profile.unsupportedConditionLabels.length > 0 ||
+    profile.conditionIds.some((conditionId) => conditionId !== 'fixture-condition' || !fixtureRuleEligible);
+  if (profile.profileVersion === 0 || !hasProfileFacts || hasUnsupportedConditions) {
+    result.overallAttention = 'insufficient_information';
+  } else if (result.attentions.length === 0 && result.overallAttention === 'needs_attention') {
+    result.overallAttention = 'considerable';
+  }
   if ('components' in request) {
     if (result.components.length !== request.components.length) {
       throw new AiAdapterError('INVALID_REQUEST', 'Fixture scenario does not match component count.', false);
@@ -229,10 +244,10 @@ function createFixtureAiClient(options: {
           id: 'fixture-condition',
           displayName: 'Synthetic fixture condition',
           personalizationSupported: true,
-          requiredProfileFields: [],
-          requiredNutrients: [],
-          supportedAgeMinimum: null,
-          supportedAgeMaximum: null,
+          requiredProfileFields: ['weightKg'],
+          requiredNutrients: ['energyKcal'],
+          supportedAgeMinimum: 18,
+          supportedAgeMaximum: 80,
         }],
         supportedPhotoFoodIds: ['fixture-food-001'],
         supportedRules: [{

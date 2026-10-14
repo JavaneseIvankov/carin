@@ -65,10 +65,10 @@ async function seedCatalog(): Promise<void> {
       id: 'fixture-condition',
       displayName: 'Synthetic fixture condition',
       personalizationSupported: true,
-      requiredProfileFields: [],
-      requiredNutrients: [],
-      supportedAgeMinimum: null,
-      supportedAgeMaximum: null,
+      requiredProfileFields: ['weightKg'],
+      requiredNutrients: ['energyKcal'],
+      supportedAgeMinimum: 18,
+      supportedAgeMaximum: 80,
     }],
     supportedPhotoFoodIds: ['fixture-food-001'],
     supportedRules: [{
@@ -112,7 +112,7 @@ function fixture(name: keyof typeof aiFixtures): components['schemas']['Analysis
   return JSON.parse(readFileSync(new URL(`../../fixtures/ai/${aiFixtures[name]}`, import.meta.url), 'utf8')) as components['schemas']['AnalysisResult'];
 }
 
-async function createOwner(profile?: { version: number; heightCm: number; weightKg: number; conditionIds?: string[] }): Promise<Owner> {
+async function createOwner(profile?: { version: number; heightCm: number | null; weightKg: number | null; conditionIds?: string[] }): Promise<Owner> {
   const userId = randomUUID();
   const sessionId = randomUUID();
   const legal = getLegalRegistry();
@@ -135,7 +135,9 @@ async function createOwner(profile?: { version: number; heightCm: number; weight
     await pool.query(
       `INSERT INTO health_profile (user_id,version,height_cm,weight_kg,diagnosis_state,conditions,family_history_state,family_history,allergy_state,allergies)
        VALUES ($1,$2,$3,$4,$5,$6,'not_provided','[]','not_provided','[]')`,
-      [userId, profile.version, String(profile.heightCm), String(profile.weightKg),
+      [userId, profile.version,
+        profile.heightCm === null ? null : String(profile.heightCm),
+        profile.weightKg === null ? null : String(profile.weightKg),
         conditionIds.length > 0 ? 'reported' : 'not_provided',
         JSON.stringify(conditionIds.map((conditionId) => ({ conditionId })))],
     );
@@ -315,6 +317,16 @@ describe('C18 scan and analysis API', () => {
     expect(current.rows[0]).toMatchObject({ revision: 1, current_result_id: null });
   });
 
+  it('rejects attention when a persisted condition requirement is absent from the frozen profile', async () => {
+    const owner = await createOwner({ version: 1, heightCm: 170, weightKg: null, conditionIds: ['fixture-condition'] });
+    const created = await createScan(owner, await createPhoto(owner));
+    const job = await created.json() as { scanId: string };
+
+    expect(await analyzeMutatedResult(() => {})).toBe('failed');
+    const current = await pool.query('SELECT revision,current_result_id FROM scan WHERE id=$1', [job.scanId]);
+    expect(current.rows[0]).toMatchObject({ revision: 1, current_result_id: null });
+  });
+
   it('rejects attention output when the immutable profile snapshot has no eligible condition', async () => {
     const owner = await createOwner();
     const created = await createScan(owner, await createPhoto(owner));
@@ -325,7 +337,7 @@ describe('C18 scan and analysis API', () => {
     expect(current.rows[0]).toMatchObject({ revision: 1, current_result_id: null });
   });
 
-  it('fails closed when the frozen catalog version has no imported capability manifest', async () => {
+  it('rejects scan creation without a current capability manifest before persisting resources', async () => {
     const missingAuthorityVersion = 'fixture-catalog-without-authority';
     await pool.query('UPDATE catalog_version SET is_current=false WHERE version=$1', [catalogVersion]);
     await pool.query(
@@ -335,14 +347,22 @@ describe('C18 scan and analysis API', () => {
     );
     try {
       const owner = await createOwner();
-      const created = await createScan(owner, await createPhoto(owner));
-      const job = await created.json() as { id: string; scanId: string };
-      expect(await analyzeMutatedResult(() => {})).toBe('failed');
-      const current = await pool.query('SELECT revision,current_result_id FROM scan WHERE id=$1', [job.scanId]);
-      expect(current.rows[0]).toMatchObject({ revision: 1, current_result_id: null });
-      const storedJob = await pool.query('SELECT status,error FROM analysis_job WHERE id=$1', [job.id]);
-      expect(storedJob.rows[0].status).toBe('failed');
-      expect(storedJob.rows[0].error.code).toBe('INVALID_RESPONSE');
+      const photoId = await createPhoto(owner);
+      const created = await createScan(owner, photoId);
+      expect(created.status).toBe(409);
+      expect(await created.json()).toMatchObject({ error: { code: 'CATALOG_VERSION_UNAVAILABLE' } });
+      const state = await pool.query(
+        `SELECT p.lifecycle,
+          (SELECT count(*)::int FROM scan WHERE user_id=$1) AS scans,
+          (SELECT count(*)::int FROM analysis_job WHERE user_id=$1) AS jobs,
+          (SELECT count(*)::int FROM profile_snapshot WHERE user_id=$1) AS snapshots,
+          (SELECT count(*)::int FROM idempotency_record WHERE user_id=$1) AS idempotency
+         FROM photo p WHERE p.id=$2 AND p.user_id=$1`,
+        [owner.userId, photoId],
+      );
+      expect(state.rows[0]).toMatchObject({
+        lifecycle: 'uploaded', scans: 0, jobs: 0, snapshots: 0, idempotency: 0,
+      });
     } finally {
       await pool.query('UPDATE catalog_version SET is_current=false WHERE version=$1', [missingAuthorityVersion]);
       await pool.query('UPDATE catalog_version SET is_current=true WHERE version=$1', [catalogVersion]);
