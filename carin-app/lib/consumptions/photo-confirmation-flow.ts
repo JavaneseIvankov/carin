@@ -502,12 +502,27 @@ export function createPhotoConfirmationFlow(options: {
     try {
       await queueDraftWrite(async () => {
         if (!isCurrent()) return;
-        await store.remove(options.scope, draftName);
-        if (!isCurrent()) await store.save(options.scope, draftName, pending.record);
+        const requestName = `manual-request:create:${pending.record.draftId}`;
+        const request = await store.load<{ payload: string; key: string }>(
+          options.scope,
+          requestName
+        );
+        if (!isCurrent() || !request) return;
+        let completed = false;
+        try {
+          await store.remove(options.scope, draftName);
+          if (!isCurrent()) return;
+          await options.actions.clearCreate(pending.record.draftId);
+          if (!isCurrent()) return;
+          completed = true;
+          acknowledged = null;
+        } finally {
+          if (!completed) {
+            await store.save(options.scope, draftName, pending.record);
+            await store.save(options.scope, requestName, request);
+          }
+        }
       });
-      if (!isCurrent()) return;
-      await options.actions.clearCreate(pending.record.draftId);
-      if (isCurrent()) acknowledged = null;
     } catch {
       // Cleanup failure does not change the server's acknowledged result.
     }
