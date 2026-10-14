@@ -3,8 +3,6 @@ import '@/global.css';
 import * as React from 'react';
 import { View } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
-import { NAV_THEME } from '@/lib/theme';
-import { ThemeProvider } from 'expo-router/react-navigation';
 import { PortalHost } from '@rn-primitives/portal';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -16,6 +14,7 @@ import type { ErrorBoundaryProps } from 'expo-router';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { errorLogDetails, logAppEvent } from '@/lib/logging';
+import { CarinThemeProvider } from '@/lib/theme';
 
 void SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -44,7 +43,7 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <ThemeProvider value={NAV_THEME[colorScheme ?? 'light']}>
+    <CarinThemeProvider>
       <View style={{ flex: 1 }} onLayout={hideSplashAfterLayout}>
         <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
         <AppDataProvider>
@@ -55,6 +54,6 @@ export default function RootLayout() {
           </AuthProvider>
         </AppDataProvider>
       </View>
-    </ThemeProvider>
+    </CarinThemeProvider>
   );
 }

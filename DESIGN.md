@@ -134,6 +134,7 @@ Carin feels like a friendly food journal with the steady clarity of a trusted co
 This is a product interface, so familiar controls and predictable navigation take priority over novelty. Personality belongs in a thoughtful greeting, purposeful illustration, warm surfaces, and clear micro-feedback. The system rejects unsupported goal dashboards, judgmental copy, generic nested-card stacks, and decorative mascot repetition.
 
 **Key Characteristics:**
+
 - Warm, tactile interactions with legible, predictable controls.
 - Playful cues used at useful moments, not on every component.
 - Data-first summaries that state coverage and missing information.
@@ -148,14 +149,17 @@ The palette grows from oat-like cream and paper, anchored by a deep garden olive
 **Color Strategy: Full Palette.** Olive carries interaction and selection. Butter, peach, and olive mist are limited to grouped or contextual surfaces, with ink chosen for contrast.
 
 ### Primary
+
 - **Deep garden olive:** Main actions, selected navigation, and important links. Use ivory action text on the olive action surface.
 
 ### Secondary
+
 - **Soft peach:** Secondary food-entry action and warm informational grouping. Use primary ink for labels and descriptions.
 - **Quiet butter:** A small highlight surface for a helpful detail or recurring-attention item, never a success/healthy status.
 - **Olive mist:** Low-emphasis selection or grouped supporting details. Do not use it as the only status signal.
 
 ### Neutral
+
 - **Warm oat:** Main page background.
 - **Paper:** Content surface for the primary summary and focused groups.
 - **Forest ink:** Main text and high-emphasis icons.
@@ -178,6 +182,7 @@ The proposed readable olive-gray measures 6.67:1 on warm oat, 6.08:1 on olive mi
 **Character:** Friendly and clear, with a compact mobile hierarchy. Weight and size distinguish section structure; decorative type does not compete with food or measurement values.
 
 ### Hierarchy
+
 - **Display:** Extra-bold page greeting or a rare first-run moment. Do not use for repeated metrics.
 - **Headline:** Bold screen title and the page's only level-one heading.
 - **Title:** Bold section heading, exposed as a level-two heading.
@@ -199,6 +204,7 @@ Carin uses tonal layering rather than a shadow stack. Page background, paper sur
 Interactive elements feel warm and tactile through shape, clear pressed feedback, and adequate touch areas. They retain standard platform behavior and semantic names.
 
 ### Buttons
+
 - **Primary:** Deep olive with ivory text. Use for the main action in a decision area.
 - **Secondary:** Warm peach with forest-ink text. Use for a distinct secondary intent, not as a competing primary.
 - **Outline / Ghost / Link:** Use for lower-priority actions and navigation; retain clear focus and pressed feedback.
@@ -207,30 +213,37 @@ Interactive elements feel warm and tactile through shape, clear pressed feedback
 - **States:** Default, pressed, focus-visible on web, disabled, and loading. Loading must keep an accessible name.
 
 ### Text and icons
+
 - Use the text hierarchy above through the shared RNR `Text` variants. Variants must not add screen-specific margins.
 - Use the existing Lucide-based RNR `Icon` wrapper at consistent 16, 20, or 24 dp sizes. Icon-only actions need a 44 dp hit area and an accessible label.
 - Pair icons with labels when meaning or status would otherwise be ambiguous.
 
 ### Cards and surfaces
-- Keep three treatments: plain section, compact tonal group, and primary summary surface. Use the summary treatment once per screen at most.
-- Use section headings and dividers before adding another outer container. Nested cards and identical card grids are prohibited.
+
+- Keep three treatments: plain section, compact tonal group, and summary surface. A dashboard may use the summary surface for its intake, attention-window, and examination summaries so these distinct data groups share a clear, consistent container.
+- Use section headings and dividers before adding another outer container. Do not nest cards inside a summary surface or turn supporting sections into a repeated card grid.
+- Empty summary states may reuse one centered pattern: a 64 dp butter icon circle, a 14 px semibold label (matching the intake empty-state title's weight), and concise centered supporting copy. Keep the icon relevant to the section.
 - Empty sections use concise copy and a next action only where one exists. Use the mascot only when it explains a next step or provides relevant reassurance.
 
 ### Inputs and fields
+
 - Use the RNR Input foundation when adopted in implementation. Keep a warm neutral field surface, a visible semantic border, and the shared control radius.
 - Provide default, focused, invalid, and disabled treatments. Associate errors with text and preserve native keyboard, autofill, and accessibility behavior.
 
 ### Navigation
+
 - Keep four labeled tabs: Beranda, Riwayat, Pemeriksaan, and Profil. The central add control opens the two supported food-entry actions and is not itself a fifth tab.
 - Selected tabs use both an icon treatment and a readable label. Each tab and the center add control meet the minimum target size.
 
 ### Nutrition summary
+
 - Show recorded values and coverage, with units and missing values explicit. Do not add target rings, remaining/burned calories, adequacy claims, or scores.
 - Supporting nutrients use compact rows with dividers. Accent color groups information; it does not imply a health judgment.
 
 ## 6. Do's and Don'ts
 
 ### Do:
+
 - **Do** use the warm page, paper surface, and olive action tokens consistently in light and dark themes.
 - **Do** use secondary-text tokens for supporting information and verify their contrast on every tinted surface.
 - **Do** keep the two food-entry intents explicit: photo analysis before eating and manual entry after eating.
@@ -240,6 +253,7 @@ Interactive elements feel warm and tactile through shape, clear pressed feedback
 - **Do** preserve system text scaling, semantic headings, focus states, and at least 44 dp touch targets.
 
 ### Don't:
+
 - **Don't** add unsupported calorie targets, adequacy rings, scores, streaks, disease-risk interpretations, or invented meal rows.
 - **Don't** let missing data appear as zero, normal, or completed.
 - **Don't** stack repeated rounded cards or nest cards inside cards.
