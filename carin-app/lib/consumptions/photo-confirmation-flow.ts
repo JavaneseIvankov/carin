@@ -116,12 +116,12 @@ export function createPhotoConfirmationFlow(options: {
     });
   }
 
-  async function readTimeZone() {
+  async function readTimeZone(): Promise<{ value: string } | { error: unknown }> {
     try {
       const me = await options.api.getMe();
-      return me.data.timezone?.trim() || FALLBACK_TIME_ZONE;
-    } catch {
-      return FALLBACK_TIME_ZONE;
+      return { value: me.data.timezone?.trim() || FALLBACK_TIME_ZONE };
+    } catch (error) {
+      return { error };
     }
   }
 
@@ -150,9 +150,17 @@ export function createPhotoConfirmationFlow(options: {
   async function load() {
     setSnapshot({ availability: 'loading' });
     try {
-      const [timeZone, sources] = await Promise.all([readTimeZone(), loadCurrentSources()]);
+      const [timeZoneRead, sources, persistedRecord] = await Promise.all([
+        readTimeZone(),
+        loadCurrentSources(),
+        store.load<SavedPhotoDraft>(options.scope, draftName),
+      ]);
+      let record = persistedRecord;
       let availability = availabilityFor(sources);
-      let record = await store.load<SavedPhotoDraft>(options.scope, draftName);
+
+      if (availability === 'open_existing') {
+        return setSnapshot({ availability, scan: sources.scan, ...(record ? { record } : {}) });
+      }
 
       if (availability === 'confirm' && sources.result && sources.resultId) {
         if (record && record.sourceResultId !== sources.resultId) {
@@ -165,12 +173,39 @@ export function createPhotoConfirmationFlow(options: {
             submitMessage: 'Hasil analisis berubah. Draft lama tetap tersimpan; mulai ulang dari hasil terbaru untuk melanjutkan.',
           });
         }
+        if (record) {
+          if (!record.timeZone.trim()) {
+            if ('error' in timeZoneRead) {
+              const message = 'Zona waktu akun belum dapat dimuat. Periksa koneksi lalu coba lagi.';
+              return setSnapshot({
+                availability: 'unavailable',
+                scan: sources.scan,
+                latestJob: sources.latestJob,
+                record,
+                loadError: timeZoneRead.error,
+                submitMessage: message,
+              });
+            }
+            record = { ...record, timeZone: timeZoneRead.value };
+            await store.save(options.scope, draftName, record);
+          }
+          return setSnapshot({ availability, scan: sources.scan, latestJob: sources.latestJob, record });
+        }
+        if ('error' in timeZoneRead) {
+          return setSnapshot({
+            availability: 'unavailable',
+            scan: sources.scan,
+            latestJob: sources.latestJob,
+            loadError: timeZoneRead.error,
+            submitMessage: 'Zona waktu akun belum dapat dimuat. Periksa koneksi lalu coba lagi.',
+          });
+        }
         if (!record) {
           record = {
             draftId: createIdempotencyKey(),
             sourceResultId: sources.resultId,
-            timeZone,
-            form: createPhotoConfirmationDraft(sources.result, now(), timeZone),
+            timeZone: timeZoneRead.value,
+            form: createPhotoConfirmationDraft(sources.result, now(), timeZoneRead.value),
           };
           await store.save(options.scope, draftName, record);
         }

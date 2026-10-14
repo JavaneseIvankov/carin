@@ -4,6 +4,7 @@ import { createAppRepository, ApiError } from '@/lib/api/repository';
 import { createDraftStore } from '@/lib/data/drafts';
 import type { DataScope, StorageAdapter } from '@/lib/data/scope';
 import { createManualConsumptionActions } from '@/lib/consumptions/manual-actions';
+import { createPhotoConfirmationDraft } from '@/lib/consumptions/photo-confirmation';
 import {
   createPhotoConfirmationFlow,
   photoConfirmationDraftName,
@@ -198,6 +199,54 @@ describe('photo consumption route flow', () => {
       photoConfirmationDraftName('scan-1', 'new_occurrence')
     );
     expect(saved).toEqual(snapshot.record);
+  });
+
+  it('uses Asia/Jakarta when the account read succeeds without a timezone', async () => {
+    const harness = createHarness({ occurrence: 'new_occurrence' });
+    harness.remote.me.timezone = '   ';
+
+    const snapshot = await harness.flow.load();
+
+    expect(snapshot.availability).toBe('confirm');
+    expect(snapshot.record?.timeZone).toBe('Asia/Jakarta');
+  });
+
+  it('uses Asia/Jakarta when the successful account response omits timezone', async () => {
+    const harness = createHarness({ occurrence: 'new_occurrence' });
+    delete (harness.remote.me as Partial<{ timezone: string }>).timezone;
+
+    const snapshot = await harness.flow.load();
+
+    expect(snapshot.availability).toBe('confirm');
+    expect(snapshot.record?.timeZone).toBe('Asia/Jakarta');
+  });
+
+  it('does not create a draft or allow a save when the account timezone read fails', async () => {
+    const harness = createHarness({ occurrence: 'new_occurrence' });
+    harness.api.getMe.mockRejectedValueOnce(new Error('temporary /me timeout'));
+
+    const snapshot = await harness.flow.load();
+    const afterSubmit = await harness.flow.submit(
+      createPhotoConfirmationDraft(makeResult(), new Date('2026-10-14T05:30:00.000Z'), 'Asia/Jakarta')
+    );
+
+    expect(snapshot.availability).toBe('unavailable');
+    expect(snapshot.record).toBeUndefined();
+    expect(snapshot.loadError).toBeInstanceOf(Error);
+    expect(afterSubmit.record).toBeUndefined();
+    expect(harness.create).not.toHaveBeenCalled();
+  });
+
+  it('uses the timezone from a previously persisted photo draft if /me is temporarily unavailable', async () => {
+    const harness = createHarness({ occurrence: 'new_occurrence' });
+    harness.remote.me.timezone = 'Pacific/Auckland';
+    const initial = await harness.flow.load();
+    harness.api.getMe.mockRejectedValueOnce(new Error('temporary /me timeout'));
+
+    const restored = await harness.flow.load();
+
+    expect(restored.availability).toBe('confirm');
+    expect(restored.record?.timeZone).toBe(initial.record?.timeZone);
   });
 
   it('does not expose the form while a latest correction is pending or no result exists', async () => {
