@@ -6,6 +6,7 @@ import { Text } from '@/components/ui/text';
 import { useAppRepository, useAppWrite } from '@/lib/api/query';
 import { createManualConsumptionActions } from '@/lib/consumptions/manual-actions';
 import {
+  createPhotoConfirmationRouteGuard,
   createPhotoConfirmationFlow,
   type PhotoConfirmationSnapshot,
 } from '@/lib/consumptions/photo-confirmation-flow';
@@ -90,13 +91,32 @@ export default function PhotoConsumptionConfirmation() {
     });
   }, [scanId, scope, repository, actions, occurrence, useLastSuccessfulResult, connectivity]);
 
-  const [snapshot, setSnapshot] = React.useState<PhotoConfirmationSnapshot>({ availability: 'loading' });
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  type FlowInstance = ReturnType<typeof createPhotoConfirmationFlow>;
+  const routeGuard = React.useMemo(() => createPhotoConfirmationRouteGuard(), []);
+  React.useLayoutEffect(() => {
+    routeGuard.activate(flow);
+  }, [routeGuard, flow]);
+
+  const [screenState, setScreenState] = React.useState<{
+    owner: FlowInstance | null;
+    snapshot: PhotoConfirmationSnapshot;
+  }>({ owner: null, snapshot: { availability: 'loading' } });
+  const snapshot = screenState.owner === flow ? screenState.snapshot : { availability: 'loading' as const };
+  const [submittingOwner, setSubmittingOwner] = React.useState<FlowInstance | null>(null);
+  const isSubmitting = flow !== null && submittingOwner === flow;
+
+  const commitSnapshot = React.useCallback(
+    (owner: FlowInstance, next: PhotoConfirmationSnapshot) => {
+      if (routeGuard.isActive(owner)) setScreenState({ owner, snapshot: next });
+    },
+    [routeGuard]
+  );
 
   const load = React.useCallback(() => {
-    if (!flow) return;
-    void flow.load().then(setSnapshot);
-  }, [flow]);
+    const owner = flow;
+    if (!owner) return;
+    void routeGuard.run(owner, () => owner.load(), (next) => commitSnapshot(owner, next));
+  }, [flow, routeGuard, commitSnapshot]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -112,26 +132,30 @@ export default function PhotoConsumptionConfirmation() {
   }, [load]);
 
   const updateDraft = (form: NonNullable<typeof snapshot.record>['form']) => {
-    if (!flow) return;
-    void flow.updateDraft(form);
-    setSnapshot(flow.getSnapshot());
+    const owner = flow;
+    if (!owner || !routeGuard.isActive(owner) || screenState.owner !== owner) return;
+    void owner.updateDraft(form);
+    commitSnapshot(owner, owner.getSnapshot());
   };
 
   const submit = async (form: NonNullable<typeof snapshot.record>['form']) => {
-    if (!flow || isSubmitting) return;
-    setIsSubmitting(true);
+    const owner = flow;
+    if (!owner || !routeGuard.isActive(owner) || screenState.owner !== owner || isSubmitting) return;
+    setSubmittingOwner(owner);
     try {
-      const next = await flow.submit(form);
-      setSnapshot(next);
-      if (next.savedId) openConsumption(next.savedId);
+      await routeGuard.run(owner, () => owner.submit(form), (next) => {
+        commitSnapshot(owner, next);
+        if (next.savedId) openConsumption(next.savedId);
+      });
     } finally {
-      setIsSubmitting(false);
+      setSubmittingOwner((current) => (current === owner ? null : current));
     }
   };
 
   const restartFromLatestResult = async () => {
-    if (!flow) return;
-    setSnapshot(await flow.restartFromLatestResult());
+    const owner = flow;
+    if (!owner || !routeGuard.isActive(owner) || screenState.owner !== owner) return;
+    await routeGuard.run(owner, () => owner.restartFromLatestResult(), (next) => commitSnapshot(owner, next));
   };
 
   const openConsumption = (id: string) => {
@@ -202,9 +226,14 @@ export default function PhotoConsumptionConfirmation() {
               </Button>
             </>
           ) : snapshot.availability === 'correction_pending' ? (
-            <Text accessibilityRole="alert">
-              Perbaikan analisis masih berlangsung. Tunggu sampai selesai sebelum mengonfirmasi konsumsi.
-            </Text>
+            <>
+              <Text accessibilityRole="alert">
+                Perbaikan analisis masih berlangsung. Tunggu sampai selesai sebelum mengonfirmasi konsumsi.
+              </Text>
+              <Button variant="outline" className="min-h-12" onPress={load}>
+                <Text>Coba periksa lagi</Text>
+              </Button>
+            </>
           ) : (
             <>
               <Text accessibilityRole="alert">

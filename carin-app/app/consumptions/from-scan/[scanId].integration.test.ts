@@ -6,6 +6,7 @@ import type { DataScope, StorageAdapter } from '@/lib/data/scope';
 import { createManualConsumptionActions } from '@/lib/consumptions/manual-actions';
 import { createPhotoConfirmationDraft } from '@/lib/consumptions/photo-confirmation';
 import {
+  createPhotoConfirmationRouteGuard,
   createPhotoConfirmationFlow,
   photoConfirmationDraftName,
 } from '@/lib/consumptions/photo-confirmation-flow';
@@ -485,6 +486,31 @@ describe('photo consumption route flow', () => {
     expect(afterConflict.conflict).toBe('already_confirmed');
     expect(afterConflict.record).toEqual(loaded.record);
   });
+
+  it('keeps duplicate confirmation retryable when refreshing the existing record fails', async () => {
+    const harness = createHarness({
+      onCreate: async (_input, remote) => {
+        remote.scan = makeScan({ defaultConsumptionId: 'consumption-existing' });
+        throw errorWithCode('CONSUMPTION_ALREADY_CONFIRMED');
+      },
+    });
+    const loaded = await harness.flow.load();
+    const getScan = harness.api.getScan.getMockImplementation();
+    harness.api.getScan
+      .mockImplementationOnce(getScan!)
+      .mockRejectedValueOnce(new Error('temporary scan refresh failure'));
+
+    const afterConflict = await harness.flow.submit(loaded.record!.form);
+
+    expect(afterConflict.availability).toBe('unavailable');
+    expect(afterConflict.scan?.defaultConsumptionId).not.toBe('consumption-existing');
+    expect(afterConflict.conflict).toBe('already_confirmed');
+    expect(afterConflict.loadError).toBeInstanceOf(Error);
+
+    const retried = await harness.flow.refresh();
+    expect(retried.availability).toBe('open_existing');
+    expect(retried.scan?.defaultConsumptionId).toBe('consumption-existing');
+  });
 });
 
 describe('photo confirmation conflict codes', () => {
@@ -527,5 +553,37 @@ describe('photo confirmation conflict codes', () => {
         },
       })
     ).rejects.toMatchObject({ status: 409, code: 'ANALYSIS_PENDING' });
+  });
+});
+
+describe('photo confirmation route identity', () => {
+  it('ignores a deferred load and submit after the active route changes', async () => {
+    const guard = createPhotoConfirmationRouteGuard();
+    const oldRoute = {};
+    const activeRoute = {};
+    let resolveOldLoad!: (value: string) => void;
+    const oldLoadValue = new Promise<string>((resolve) => {
+      resolveOldLoad = resolve;
+    });
+    const committed: string[] = [];
+    guard.activate(oldRoute);
+
+    const oldLoad = guard.run(oldRoute, () => oldLoadValue, (value) => committed.push(value));
+    guard.activate(activeRoute);
+    const currentLoad = await guard.run(
+      activeRoute,
+      async () => 'active route result',
+      (value) => committed.push(value)
+    );
+    resolveOldLoad('old route result');
+    await oldLoad;
+
+    const staleSubmit = vi.fn(async () => 'old route submission');
+    const oldSubmission = await guard.run(oldRoute, staleSubmit, (value) => committed.push(value));
+
+    expect(currentLoad).toEqual({ status: 'current', value: 'active route result' });
+    expect(committed).toEqual(['active route result']);
+    expect(oldSubmission).toEqual({ status: 'stale' });
+    expect(staleSubmit).not.toHaveBeenCalled();
   });
 });

@@ -52,6 +52,32 @@ export function photoConfirmationDraftName(scanId: string, occurrence: PhotoConf
   return `photo-consumption:create:${scanId}:${occurrence}`;
 }
 
+export function createPhotoConfirmationRouteGuard() {
+  let activeRoute: object | null = null;
+  let generation = 0;
+
+  return {
+    activate(route: object | null) {
+      if (activeRoute === route) return;
+      activeRoute = route;
+      generation += 1;
+    },
+    isActive(route: object) {
+      return activeRoute === route;
+    },
+    async run<T>(route: object, operation: () => Promise<T>, commit: (value: T) => void) {
+      if (activeRoute !== route) return { status: 'stale' as const };
+      const requestGeneration = generation;
+      const value = await operation();
+      if (activeRoute !== route || generation !== requestGeneration) {
+        return { status: 'stale' as const };
+      }
+      commit(value);
+      return { status: 'current' as const, value };
+    },
+  };
+}
+
 export function createPhotoConfirmationFlow(options: {
   scanId: string;
   occurrence: PhotoConfirmationOccurrence;
@@ -352,7 +378,17 @@ export function createPhotoConfirmationFlow(options: {
       }
       if (error instanceof ApiError && error.code === 'CONSUMPTION_ALREADY_CONFIRMED') {
         const refreshed = await refreshSources('Catatan default sudah tersimpan. Anda dapat membukanya atau mencatat konsumsi baru.');
-        return setSnapshot({ ...refreshed, availability: 'open_existing', conflict: 'already_confirmed' });
+        if (refreshed.scan?.defaultConsumptionId) {
+          return setSnapshot({ ...refreshed, availability: 'open_existing', conflict: 'already_confirmed' });
+        }
+        return setSnapshot({
+          ...refreshed,
+          availability: refreshed.availability === 'correction_pending' ? 'correction_pending' : 'unavailable',
+          conflict: 'already_confirmed',
+          submitMessage: refreshed.loadError
+            ? 'Catatan mungkin sudah tersimpan, tetapi belum dapat dimuat. Coba muat ulang.'
+            : 'Catatan sudah dilaporkan tersimpan, tetapi belum dapat ditemukan. Coba muat ulang.',
+        });
       }
       return setSnapshot({
         ...snapshot,
