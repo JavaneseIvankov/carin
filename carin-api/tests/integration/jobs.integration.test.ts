@@ -22,6 +22,20 @@ const containerName = `carin-c16-jobs-${randomUUID()}`;
 const userId = randomUUID();
 const sessionId = randomUUID();
 const profileSnapshotId = randomUUID();
+const testProfileContext = {
+  profileVersion: 1,
+  ageYears: null,
+  heightCm: null,
+  weightKg: null,
+  sexForReference: null,
+  diagnosisState: 'not_provided',
+  conditionIds: [],
+  unsupportedConditionLabels: [],
+  allergyState: 'not_provided',
+  allergies: [],
+  activity: null,
+  smoking: null,
+};
 let pool: Pool;
 let database: ReturnType<typeof createDatabase>;
 let containerStarted = false;
@@ -66,8 +80,35 @@ beforeAll(async () => {
     [sessionId, randomUUID(), userId],
   );
   await pool.query(
-    `INSERT INTO profile_snapshot (id,user_id,profile_version,context) VALUES ($1,$2,1,'{}')`,
-    [profileSnapshotId, userId],
+    `INSERT INTO profile_snapshot (id,user_id,profile_version,context) VALUES ($1,$2,1,$3)`,
+    [profileSnapshotId, userId, JSON.stringify(testProfileContext)],
+  );
+  const catalogSample = JSON.parse(readFileSync(
+    new URL('../../../specs/fixtures/ai/analysis-complete.json', import.meta.url),
+    'utf8',
+  )) as {
+    catalogVersion: string; nutritionDatasetVersion: string; ruleSetVersion: string;
+    components: Array<{ catalogFoodId: string | null; displayName: string; preparation: string | null; per100g: object; nutrientSourceIds: object; sourceIds: string[] }>;
+    sources: Array<{ id: string; kind: string; title: string; datasetVersion: string; itemRef: string; url: string | null }>;
+  };
+  const catalogFoodSample = catalogSample.components[0]!;
+  await pool.query(
+    `INSERT INTO catalog_version (version,nutrition_dataset_version,rule_set_version,data_mode,published_at,digest,is_current)
+     VALUES ($1,$2,$3,'synthetic',now(),'c16-worker-test',true)`,
+    [catalogSample.catalogVersion, catalogSample.nutritionDatasetVersion, catalogSample.ruleSetVersion],
+  );
+  await pool.query(
+    `INSERT INTO catalog_food
+      (id,version,display_name,preparation,energy_kcal,carbohydrate_g,protein_g,fat_g,fiber_g,sugars_g,sodium_mg,source_refs,nutrient_source_ids)
+     VALUES ($1,$2,$3,$4,200,30,10,5,3,2,100,$5,$6)`,
+    [catalogFoodSample.catalogFoodId, catalogSample.catalogVersion, catalogFoodSample.displayName, catalogFoodSample.preparation,
+      JSON.stringify(catalogSample.sources.filter(({ id }) => catalogFoodSample.sourceIds.includes(id))),
+      JSON.stringify(catalogFoodSample.nutrientSourceIds)],
+  );
+  await pool.query(
+    `INSERT INTO catalog_serving (id,catalog_version,food_id,label,grams,source_refs)
+     VALUES ('fixture-serving-100g',$1,$2,'100 gram sintetis',100,'{"sourceId":"synthetic-nutrition"}')`,
+    [catalogSample.catalogVersion, catalogFoodSample.catalogFoodId],
   );
   await pool.query(
     `INSERT INTO consent_event (user_id,kind,version,granted)
@@ -623,20 +664,7 @@ describe('durable analysis job leases and publication', () => {
         contractVersion: '1.0.0',
         catalogVersion: 'synthetic-catalog-1',
         ruleSetVersion: 'synthetic-rules-1',
-        profile: {
-          profileVersion: 1,
-          ageYears: null,
-          heightCm: null,
-          weightKg: null,
-          sexForReference: null,
-          diagnosisState: 'not_provided',
-          conditionIds: [],
-          unsupportedConditionLabels: [],
-          allergyState: 'not_provided',
-          allergies: [],
-          activity: null,
-          smoking: null,
-        },
+        profile: testProfileContext,
         image: {
           downloadUrl: 'http://minio.internal.invalid/test.jpg',
           mimeType: 'image/jpeg',

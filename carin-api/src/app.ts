@@ -15,6 +15,8 @@ import { registerEmailLandingRoutes } from './modules/email/landing.js';
 import { registerProfileRoutes } from './modules/profile/routes.js';
 import { registerAnalysisJobRoutes, type AnalysisJobRouteDependencies } from "./jobs/routes.js";
 import { registerMediaRoutes, type MediaRouteDependencies } from "./modules/media/routes.js";
+import { registerAnalysisRoutes, type AnalysisRouteDependencies } from './modules/analyses/routes.js';
+import { registerScanRoutes, type ScanRouteDependencies } from './modules/scans/routes.js';
 
 export type RequestLog = {
   requestId: string;
@@ -33,6 +35,8 @@ export type AppDependencies = {
   auth?: { handler: (request: Request) => Promise<Response> };
   appLinkScheme?: string;
   analysisJobs?: AnalysisJobRouteDependencies;
+  analyses?: AnalysisRouteDependencies;
+  scans?: ScanRouteDependencies;
   media?: MediaRouteDependencies;
 };
 
@@ -48,6 +52,8 @@ export function createApp({
   auth,
   appLinkScheme,
   analysisJobs,
+  analyses,
+  scans,
   media,
 }: AppDependencies): Hono<AppEnv> {
   const app = new Hono<AppEnv>();
@@ -77,6 +83,8 @@ export function createApp({
   if (appLinkScheme) registerEmailLandingRoutes(app, appLinkScheme);
   if (auth) app.all('/api/auth/*', (c) => auth.handler(c.req.raw));
   if (analysisJobs) registerAnalysisJobRoutes(app, analysisJobs);
+  if (analyses) registerAnalysisRoutes(app, analyses);
+  if (scans) registerScanRoutes(app, scans);
   if (media) registerMediaRoutes(app, media);
 
   registerRoutes?.(app);
@@ -113,5 +121,8 @@ export function createVerifiedApp({ db, resolveSession, ...dependencies }: Verif
     account: resources,
     legalConsent: resources,
     catalog: resources,
+    analysisJobs: dependencies.analysisJobs ?? resources,
+    analyses: dependencies.analyses ?? resources,
+    scans: dependencies.scans ?? resources,
   });
 }

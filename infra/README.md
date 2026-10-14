@@ -49,8 +49,8 @@ docker compose --profile email --env-file infra/.env -f infra/compose.yaml up --
 ```
 
 The email worker shares PostgreSQL and the API image but receives the Resend
-credential only in its own container. Its profile is separate from the general
-`worker` profile reserved for C16. The example sender is a placeholder; a real
+credential only in its own container. Its profile is separate from the analysis
+`worker` profile. The example sender is a placeholder; a real
 inbox check requires a verified sender domain, active API key, recipient mailbox,
 and a reachable `BETTER_AUTH_URL`.
 
@@ -76,9 +76,11 @@ exec postgres psql -U carin_dev -d carin_dev`. An S3 client pointed at
 MinIO is only reachable by services on the private network. No database,
 MinIO, AI, or worker port is published.
 
-The general `worker` service is a disabled Compose profile prepared for C16 and points
-at the planned `dist/worker.js` entrypoint. Do not enable `--profile worker`
-before C16 implements and verifies that entrypoint. Before enabling it, create
-a least-privilege Silo account for the bucket and replace `MINIO_ACCESS_KEY` and
-`MINIO_SECRET_KEY`; the example values are placeholders. It has no AI service
-in this stack; the AI URL and key are placeholders for later internal integration.
+The optional `worker` profile runs the durable C16/C18 analysis worker at
+`dist/worker.js`. Before enabling it, create a least-privilege Silo account for
+the bucket and replace `MINIO_ACCESS_KEY` and `MINIO_SECRET_KEY`; the example
+values are placeholders. The worker creates private, short-lived photo URLs for
+the configured internal AI service. This Compose stack does not run that service;
+`AI_SERVICE_URL`, `AI_SERVICE_KEY`, and `AI_MODE` must target a separately
+available service. The default fixture mode is for local development only and
+does not represent live AI analysis.
