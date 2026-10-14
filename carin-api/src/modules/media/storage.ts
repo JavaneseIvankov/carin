@@ -1,6 +1,9 @@
-import { Client as MinioClient } from 'minio';
+import { Client as MinioClient, type ClientOptions } from 'minio';
+import * as http from 'node:http';
+import * as https from 'node:https';
 import type { Readable } from 'node:stream';
 import { isInternalHost } from '../../config.js';
+import { STORAGE_PUT_TIMEOUT_MS } from './repository.js';
 
 export const AI_MEDIA_URL_TTL_SECONDS = 10 * 60;
 const MAX_OBJECT_BYTES = 10 * 1024 * 1024;
@@ -112,6 +115,28 @@ export function createMinioMediaObjectStore(config: MinioMediaConfig): MediaObje
   const endpoint = parseMinioEndpoint(config.endpoint);
   if (!config.bucket || !config.accessKey || !config.secretKey)
     throw new Error('MinIO bucket and credentials are required');
+  const baseTransport = endpoint.protocol === 'https:' ? https : http;
+  type RequestCallback = (response: http.IncomingMessage) => void;
+  function boundedRequest(options: string | URL | http.RequestOptions, callback?: RequestCallback): http.ClientRequest;
+  function boundedRequest(url: string | URL, options: http.RequestOptions, callback?: RequestCallback): http.ClientRequest;
+  function boundedRequest(
+    urlOrOptions: string | URL | http.RequestOptions,
+    optionsOrCallback?: http.RequestOptions | RequestCallback,
+    callback?: RequestCallback,
+  ): http.ClientRequest {
+    const request = typeof urlOrOptions === 'string' || urlOrOptions instanceof URL
+      ? typeof optionsOrCallback === 'function'
+        ? baseTransport.request(urlOrOptions, optionsOrCallback)
+        : optionsOrCallback
+          ? baseTransport.request(urlOrOptions, optionsOrCallback, callback)
+          : baseTransport.request(urlOrOptions, callback)
+      : baseTransport.request(urlOrOptions, callback);
+    const deadline = setTimeout(() => request.destroy(new Error('MinIO operation timed out')), STORAGE_PUT_TIMEOUT_MS);
+    deadline.unref();
+    request.once('close', () => clearTimeout(deadline));
+    return request;
+  }
+  const transport: NonNullable<ClientOptions['transport']> = { request: boundedRequest };
   const client = new MinioClient({
     endPoint: endpoint.hostname,
     port: endpoint.port,
@@ -119,6 +144,8 @@ export function createMinioMediaObjectStore(config: MinioMediaConfig): MediaObje
     accessKey: config.accessKey,
     secretKey: config.secretKey,
     pathStyle: true,
+    transport,
+    retryOptions: { disableRetry: true },
   });
 
   return {

@@ -658,6 +658,8 @@ export const deletionTask = pgTable(
     userId: owner(),
     kind: text('kind').notNull(),
     objectKeys: jsonb('object_keys').default([]).notNull(),
+    idempotencyKey: uuid('idempotency_key'),
+    requestHash: text('request_hash'),
     status: text('status').default('queued').notNull(),
     attempts: integer('attempts').default(0).notNull(),
     nextAttemptAt: timestamp('next_attempt_at', { withTimezone: true })
@@ -674,7 +676,28 @@ export const deletionTask = pgTable(
       sql`${t.status} IN ('queued','processing','failed')`,
     ),
     check('deletion_attempts', sql`${t.attempts} >= 0`),
+    check('deletion_request_hash', sql`${t.requestHash} IS NULL OR ${t.requestHash} ~ '^[a-f0-9]{64}$'`),
     index('deletion_queue').on(t.status, t.nextAttemptAt),
+  ],
+);
+
+/** Durable reservation for a MinIO PUT that must drain before account purge. */
+export const photoUploadOperation = pgTable(
+  'photo_upload_operation',
+  {
+    photoId: uuid('photo_id').primaryKey(),
+    userId: uuid('user_id').notNull(),
+    objectKey: text('object_key').notNull().unique(),
+    reservationToken: uuid('reservation_token').notNull(),
+    state: text('state').notNull(),
+    fenceUntil: timestamp('fence_until', { withTimezone: true }).notNull(),
+    createdAt: created(),
+  },
+  (t): PgTableExtraConfigValue[] => [
+    foreignKey({ columns: [t.userId, t.photoId], foreignColumns: [photo.userId, photo.id] })
+      .onDelete('cascade'),
+    check('photo_upload_operation_state', sql`${t.state} IN ('reserved','in_flight')`),
+    index('photo_upload_operation_drain').on(t.userId, t.state, t.fenceUntil),
   ],
 );
 

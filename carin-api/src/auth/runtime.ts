@@ -1,11 +1,13 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { betterAuth, type BetterAuthOptions } from 'better-auth';
+import { eq } from 'drizzle-orm';
 import type { AppConfig } from '../config.js';
 import type { Database } from '../db/client.js';
 import type { SessionResolver } from '../http/access.js';
 import type { Session } from '../http/types.js';
 import { authOptions } from './options.js';
 import { createAuthDatabaseAdapter } from './transaction.js';
+import { user } from '../db/schema/index.js';
 
 export type AuthMail = {
   kind: 'verification' | 'password-reset';
@@ -37,6 +39,7 @@ export type AuthRuntime = {
     options: Pick<BetterAuthOptions, 'advanced' | 'trustedOrigins'>;
   };
   resolveSession: SessionResolver;
+  verifyPassword: (request: Request, password: string) => Promise<boolean>;
 };
 
 export type AuthRuntimeOptions = {
@@ -150,6 +153,9 @@ export function createAuthRuntime({
       query: { disableCookieCache: true },
     });
     if (!result) return null;
+    const [account] = await db.select({ deletionStatus: user.deletionStatus })
+      .from(user).where(eq(user.id, result.user.id)).limit(1);
+    if (!account || account.deletionStatus !== 'active') return null;
     const session: Session = {
       userId: result.user.id,
       emailVerified: result.user.emailVerified,
@@ -158,5 +164,15 @@ export function createAuthRuntime({
     return session;
   };
 
-  return { auth: { handler, options: auth.options }, resolveSession };
+  const verifyPassword = async (request: Request, password: string): Promise<boolean> => {
+    try {
+      const result = await auth.api.verifyPassword({ headers: request.headers, body: { password } });
+      return result.status;
+    } catch (error) {
+      if (error && typeof error === 'object' && 'statusCode' in error && error.statusCode === 400) return false;
+      throw error;
+    }
+  };
+
+  return { auth: { handler, options: auth.options }, resolveSession, verifyPassword };
 }

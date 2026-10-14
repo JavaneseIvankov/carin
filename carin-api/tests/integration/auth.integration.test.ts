@@ -48,7 +48,12 @@ beforeAll(async () => {
   app = createApp({
     readiness: async () => true,
     auth: runtime.auth,
-    account: { db, resolveSession: runtime.resolveSession },
+    account: {
+      db,
+      resolveSession: runtime.resolveSession,
+      verifyPassword: runtime.verifyPassword,
+      deletionSecret: authSecret,
+    },
     legalConsent: { db, resolveSession: runtime.resolveSession },
     appLinkScheme: 'carin-dev',
   });
@@ -377,5 +382,61 @@ describe('Better Auth registration boundary', () => {
     const cookie = await verifyAndSignIn(email);
     await pool.query('UPDATE "user" SET email_verified=false WHERE email=$1', [email]);
     expect((await app.request('/api/v1/me', { headers: { cookie } })).status).toBe(403);
+  });
+
+  it('reauthenticates account deletion, scrubs identity immediately, and revokes every session', async () => {
+    const email = `${randomUUID()}@example.invalid`;
+    await register(email, '1976-10-14');
+    const cookie = await verifyAndSignIn(email);
+    const user = await pool.query('SELECT id FROM "user" WHERE email=$1', [email]);
+    const userId = user.rows[0].id as string;
+    const photoId = randomUUID();
+    const photoKey = `photos/${randomUUID()}`;
+    const pendingKey = `photos/${randomUUID()}`;
+    await pool.query(
+      'INSERT INTO photo (id,user_id,object_key,checksum,mime_type,size_bytes,lifecycle) VALUES ($1,$2,$3,$4,$5,$6,$7)',
+      [photoId, userId, photoKey, 'a'.repeat(64), 'image/jpeg', 100, 'uploaded'],
+    );
+    await pool.query(
+      'INSERT INTO deletion_task (user_id,kind,object_keys,status,attempts) VALUES ($1,$2,$3::jsonb,$4,0)',
+      [userId, 'photo', JSON.stringify([pendingKey]), 'failed'],
+    );
+    await pool.query(
+      'INSERT INTO session (id,expires_at,token,created_at,updated_at,user_id) VALUES ($1,now()+interval \'1 day\',$2,now(),now(),$3)',
+      [randomUUID(), randomUUID(), userId],
+    );
+
+    const wrongPassword = await app.request('/api/v1/account-deletion', {
+      method: 'POST',
+      headers: { cookie, 'content-type': 'application/json', 'Idempotency-Key': randomUUID() },
+      body: JSON.stringify({ password: 'incorrect-password', confirmation: 'DELETE_MY_ACCOUNT' }),
+    });
+    expect(wrongPassword.status).toBe(403);
+    expect(await wrongPassword.json()).toMatchObject({ error: { code: 'REAUTHENTICATION_REQUIRED' } });
+    expect((await pool.query('SELECT deletion_status,email,name FROM "user" WHERE id=$1', [userId])).rows[0])
+      .toEqual({ deletion_status: 'active', email, name: 'Existing User' });
+
+    const accepted = await app.request('/api/v1/account-deletion', {
+      method: 'POST',
+      headers: { cookie, 'content-type': 'application/json', 'Idempotency-Key': randomUUID() },
+      body: JSON.stringify({ password: 'password123', confirmation: 'DELETE_MY_ACCOUNT' }),
+    });
+    expect(accepted.status).toBe(202);
+    expect(await accepted.json()).toMatchObject({ status: 'deletion_pending', accessRevoked: true });
+    expect((await pool.query('SELECT deletion_status,email,name,birth_date,accepted_terms_version FROM "user" WHERE id=$1', [userId])).rows[0])
+      .toEqual({ deletion_status: 'deleting', email: `${userId}@deleted.invalid`, name: 'Deleted account', birth_date: '1900-01-01', accepted_terms_version: 'deleted' });
+    expect((await pool.query('SELECT id FROM session WHERE user_id=$1', [userId])).rows).toHaveLength(0);
+    expect((await pool.query('SELECT id FROM account WHERE user_id=$1', [userId])).rows).toHaveLength(0);
+    expect((await pool.query('SELECT lifecycle FROM photo WHERE id=$1', [photoId])).rows[0].lifecycle).toBe('deleting');
+    const task = (await pool.query('SELECT object_keys,request_hash FROM deletion_task WHERE user_id=$1 AND kind=$2', [userId, 'account'])).rows[0];
+    expect(task.object_keys).toEqual(expect.arrayContaining([photoKey, pendingKey]));
+    expect(task.request_hash).toMatch(/^[a-f0-9]{64}$/);
+    expect(task.request_hash).not.toBe('password123');
+    expect((await pool.query('SELECT id FROM deletion_task WHERE user_id=$1 AND kind=$2', [userId, 'photo'])).rows).toHaveLength(0);
+    expect((await app.request('/api/v1/me', { headers: { cookie } })).status).toBe(401);
+    await expect(pool.query(
+      'INSERT INTO session (id,expires_at,token,created_at,updated_at,user_id) VALUES ($1,now()+interval \'1 day\',$2,now(),now(),$3)',
+      [randomUUID(), randomUUID(), userId],
+    )).rejects.toThrow();
   });
 });

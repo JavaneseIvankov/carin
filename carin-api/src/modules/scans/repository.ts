@@ -11,7 +11,9 @@ import {
   catalogServing,
   catalogVersion,
   consumption,
+  deletionTask,
   idempotencyRecord,
+  photo,
   profileSnapshot,
   scan,
   session,
@@ -110,6 +112,120 @@ export async function getOwnedScan(db: Database, userId: string, scanId: string)
   )).limit(1);
   if (!row) return null;
   return viewScan(row, await defaultConsumptionFor(db, userId, scanId));
+}
+
+/** Removes a scan atomically while keeping confirmed consumption snapshots independent. */
+export async function deleteOwnedScan(
+  db: Database,
+  input: { userId: string; sessionId: string; scanId: string; idempotencyKey: string },
+): Promise<'deleted' | 'replay'> {
+  const actionScope = 'scan:delete';
+  const requestHash = hash({ scanId: input.scanId });
+  return db.transaction(async (tx) => {
+    const now = await databaseNow(tx);
+    const [account] = await tx.select({ deletionStatus: user.deletionStatus }).from(user)
+      .where(eq(user.id, input.userId)).for('update');
+    if (!account || account.deletionStatus !== 'active') throw new ScanCorrectionError('session_invalid');
+    const [activeSession] = await tx.select({ id: session.id }).from(session).where(and(
+      eq(session.id, input.sessionId), eq(session.userId, input.userId), gt(session.expiresAt, now),
+    )).for('update');
+    if (!activeSession) throw new ScanCorrectionError('session_invalid');
+
+    const scope = and(
+      eq(idempotencyRecord.userId, input.userId),
+      eq(idempotencyRecord.sessionId, input.sessionId),
+      eq(idempotencyRecord.actionScope, actionScope),
+      eq(idempotencyRecord.key, input.idempotencyKey),
+    );
+    const [observed] = await tx.select({ id: idempotencyRecord.id, expiresAt: idempotencyRecord.expiresAt })
+      .from(idempotencyRecord).where(scope).limit(1);
+
+    // Lock any surviving target and its photo before locking the idempotency row.
+    // After a successful delete, both are gone and the stored 204 remains replayable.
+    const [target] = await tx.select().from(scan).where(and(
+      eq(scan.id, input.scanId), eq(scan.userId, input.userId), eq(scan.lifecycle, 'active'),
+      sql`${scan.deletedAt} IS NULL`,
+    )).for('update');
+    const [photoRow] = target?.photoId
+      ? await tx.select({ id: photo.id, objectKey: photo.objectKey, lifecycle: photo.lifecycle }).from(photo)
+        .where(and(eq(photo.id, target.photoId), eq(photo.userId, input.userId))).for('update')
+      : [undefined];
+
+    if (observed && observed.expiresAt > now) {
+      const [prior] = await tx.select().from(idempotencyRecord).where(scope).for('update');
+      if (!prior || prior.requestHash !== requestHash || prior.responseStatus !== 204 ||
+          !prior.responseBody || typeof prior.responseBody !== 'object' || Array.isArray(prior.responseBody)) {
+        throw new IdempotencyConflict();
+      }
+      return 'replay';
+    }
+    if (!target) throw new ScanNotFoundError();
+
+    if (observed) {
+      await tx.delete(idempotencyRecord).where(and(eq(idempotencyRecord.id, observed.id), lt(idempotencyRecord.expiresAt, now)));
+    }
+    const [reservation] = await tx.insert(idempotencyRecord).values({
+      userId: input.userId,
+      sessionId: input.sessionId,
+      actionScope,
+      key: input.idempotencyKey,
+      requestHash,
+      createdAt: now,
+      expiresAt: new Date(now.getTime() + 24 * 60 * 60 * 1000),
+    }).onConflictDoNothing().returning({ id: idempotencyRecord.id });
+    if (!reservation) throw new IdempotencyConflict();
+
+    await tx.update(consumption).set({
+      scanId: null,
+      sourceAnalysisResultId: null,
+      photoAvailable: false,
+      generation: sql`${consumption.generation} + 1`,
+      updatedAt: now,
+    }).where(and(eq(consumption.userId, input.userId), eq(consumption.scanId, target.id)));
+
+    await tx.update(analysisJob).set({
+      status: 'cancelled',
+      leaseToken: null,
+      leaseExpiresAt: null,
+      finishedAt: now,
+      updatedAt: now,
+    }).where(and(
+      eq(analysisJob.userId, input.userId), eq(analysisJob.scanId, target.id),
+      inArray(analysisJob.status, ['queued', 'processing']),
+    ));
+
+    if (photoRow && photoRow.lifecycle !== 'deleted') {
+      await tx.update(photo).set({ lifecycle: 'deleting', deletedAt: now })
+        .where(and(eq(photo.id, photoRow.id), eq(photo.userId, input.userId)));
+      const [pending] = await tx.select({ id: deletionTask.id, status: deletionTask.status })
+        .from(deletionTask).where(and(
+          eq(deletionTask.userId, input.userId), eq(deletionTask.kind, 'photo'),
+          sql`${deletionTask.objectKeys} @> ${JSON.stringify([photoRow.objectKey])}::jsonb`,
+        )).for('update');
+      if (pending && pending.status !== 'processing') {
+        await tx.update(deletionTask).set({
+          status: 'queued', attempts: 0, nextAttemptAt: now, leaseToken: null, leaseExpiresAt: null,
+        }).where(eq(deletionTask.id, pending.id));
+      } else if (!pending) {
+        await tx.insert(deletionTask).values({
+          userId: input.userId,
+          kind: 'photo',
+          objectKeys: [photoRow.objectKey],
+          status: 'queued',
+          attempts: 0,
+          nextAttemptAt: now,
+          createdAt: now,
+        });
+      }
+    }
+
+    await tx.update(scan).set({ generation: sql`${scan.generation} + 1`, lifecycle: 'deleted', deletedAt: now, updatedAt: now })
+      .where(and(eq(scan.id, target.id), eq(scan.userId, input.userId)));
+    await tx.update(idempotencyRecord).set({ responseStatus: 204, responseBody: {}, resourceId: target.id })
+      .where(eq(idempotencyRecord.id, reservation.id));
+    await tx.delete(scan).where(and(eq(scan.id, target.id), eq(scan.userId, input.userId)));
+    return 'deleted';
+  });
 }
 
 type ScanCursor = { createdAt: Date; id: string };

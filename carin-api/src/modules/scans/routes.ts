@@ -8,6 +8,7 @@ import { IdempotencyConflict } from '../legal/consent-service.js';
 import { AnalysisCatalogUnavailableError } from '../analyses/repository.js';
 import {
   createScanCorrection,
+  deleteOwnedScan,
   getOwnedScan,
   listOwnedScans,
   ScanAnalysisPendingError,
@@ -99,6 +100,33 @@ export function registerScanRoutes(app: Hono<AppEnv>, dependencies: ScanRouteDep
     const result = await getOwnedScan(dependencies.db, c.get('session').userId, request.path.id as string);
     if (!result) throw new ApiError(404, 'RESOURCE_NOT_FOUND', 'Scan not found');
     return sendResponse(c, 'app.getScan', 200, result);
+  });
+
+  app.delete('/api/v1/scans/:id', requireSession(dependencies.resolveSession), async (c) => {
+    let request: ReturnType<typeof validateRequest>;
+    try {
+      request = validateRequest('app.deleteScan', {
+        path: { id: c.req.param('id') },
+        headers: c.req.header(),
+      });
+    } catch (error) {
+      if (error instanceof ContractValidationError) throw invalidRequest();
+      throw error;
+    }
+    const currentSession = c.get('session');
+    if (!currentSession.sessionId)
+      throw new ApiError(401, 'UNAUTHENTICATED', 'Authentication session is unavailable');
+    try {
+      await deleteOwnedScan(dependencies.db, {
+        userId: currentSession.userId,
+        sessionId: currentSession.sessionId,
+        scanId: request.path.id as string,
+        idempotencyKey: request.headers['idempotency-key'] as string,
+      });
+      return c.body(null, 204);
+    } catch (error) {
+      return mapCorrectionError(c, error);
+    }
   });
 
   app.post('/api/v1/scans/:id/corrections', requireSession(dependencies.resolveSession), async (c) => {

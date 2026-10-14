@@ -5,6 +5,7 @@ import { createAiClient } from './integrations/ai/index.js';
 import { runAnalysisWorker } from './jobs/worker.js';
 import { createMediaService } from './modules/media/service.js';
 import { createMediaRuntimeOptions } from './modules/media/runtime.js';
+import { runPhotoCleanupWorker } from './modules/media/cleanup.js';
 
 const config = loadConfig(process.env);
 const pool = createPostgresPool(config.databaseUrl, (entry) => {
@@ -22,13 +23,20 @@ process.once('SIGTERM', () => shutdown.abort());
 
 try {
   const db = createDatabase(pool);
-  const media = createMediaService(createMediaRuntimeOptions(db, config));
-  await runAnalysisWorker(db, createAiClient(config), {
-    concurrency,
-    signal: shutdown.signal,
-    photoUrlForJob: media.createAiPhotoUrl,
-    onError: () => process.stderr.write('{"code":"ANALYSIS_WORKER_FAILURE"}\n'),
-  });
+  const mediaOptions = createMediaRuntimeOptions(db, config);
+  const media = createMediaService(mediaOptions);
+  await Promise.all([
+    runAnalysisWorker(db, createAiClient(config), {
+      concurrency,
+      signal: shutdown.signal,
+      photoUrlForJob: media.createAiPhotoUrl,
+      onError: () => process.stderr.write('{"code":"ANALYSIS_WORKER_FAILURE"}\n'),
+    }),
+    runPhotoCleanupWorker(db, mediaOptions.store, {
+      signal: shutdown.signal,
+      onError: () => process.stderr.write('{"code":"PHOTO_CLEANUP_WORKER_FAILURE"}\n'),
+    }),
+  ]);
 } finally {
   await pool.end();
 }

@@ -165,6 +165,24 @@ export function createMediaService(options: MediaServiceOptions) {
       objectMayExist: true,
     };
 
+    let began: boolean;
+    try {
+      began = await options.repository.beginUpload({
+        userId: input.userId,
+        sessionId: input.sessionId,
+        photoId: reservation.photoId,
+        objectKey: reservation.objectKey,
+        reservationToken: reservation.reservationToken,
+        now: now(),
+      });
+    } catch {
+      throw new MediaServiceUnavailable();
+    }
+    if (!began) {
+      await discardFailedUpload({ ...cleanupInput, objectMayExist: false });
+      throw new MediaServiceUnavailable();
+    }
+
     try {
       await options.store.putObject({
         key: reservation.objectKey,
