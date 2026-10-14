@@ -61,10 +61,12 @@ export function getPhotoConfirmationAvailability(input: {
   resultId: string | undefined;
   result: components['schemas']['ai__AnalysisResult'] | undefined;
   explicitlyUseLastSuccessfulResult: boolean;
+  occurrence?: PhotoConfirmationOccurrence;
 }): 'loading' | 'unavailable' | 'correction_pending' | 'confirm' | 'open_existing';
 ```
 
 Implement the draft mapper by preserving result component UUID/name/catalog match/preparation; map `portion.quantity` with its supported unit and serving ID, and use unknown when the result has no editable quantity. Build request components with existing `mapManualComponent`, but set photo source fields, scan/result IDs, occurrence, result catalog version, and localized timestamp explicitly. `AnalysisResult.operationId` identifies the job, not the result row; availability compares the ID used to fetch the result with `scan.latestResultId`. A queued/processing scan-target job blocks confirmation. A failed scan-target job blocks until the explicit flag is true. If `defaultConsumptionId` exists, return `open_existing` for the default action while leaving the explicit new-occurrence path available.
+When omitted, `occurrence` selects the default action; that action opens an existing record before checking analysis state. An explicit `new_occurrence` continues through current-result and correction gates.
 - [ ] Run the focused test and require all tests to pass.
 - [ ] Commit only the helper and unit test as `feat: map scan results to consumption drafts`.
 

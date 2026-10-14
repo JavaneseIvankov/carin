@@ -103,8 +103,18 @@ export function getPhotoConfirmationAvailability(input: {
   resultId: string | undefined;
   result: AnalysisResult | undefined;
   explicitlyUseLastSuccessfulResult: boolean;
+  occurrence?: PhotoConfirmationOccurrence;
 }): 'loading' | 'unavailable' | 'correction_pending' | 'confirm' | 'open_existing' {
-  const { scan, latestJob, resultId, result, explicitlyUseLastSuccessfulResult } = input;
+  const {
+    scan,
+    latestJob,
+    resultId,
+    result,
+    explicitlyUseLastSuccessfulResult,
+    occurrence = 'default_confirmation',
+  } = input;
+
+  if (occurrence === 'default_confirmation' && scan.defaultConsumptionId) return 'open_existing';
 
   if (!scan.latestResultId) return 'unavailable';
   if (!latestJob) return 'loading';
@@ -129,7 +139,7 @@ export function getPhotoConfirmationAvailability(input: {
     if (!explicitlyUseLastSuccessfulResult) return 'unavailable';
     if (resultId && resultId !== scan.latestResultId) return 'unavailable';
     if (!resultId || !result) return 'loading';
-    return scan.defaultConsumptionId ? 'open_existing' : 'confirm';
+    return 'confirm';
   }
 
   if (latestJob.status !== 'completed' || latestJob.targetRevision !== scan.revision) {
@@ -140,5 +150,5 @@ export function getPhotoConfirmationAvailability(input: {
   if (!resultId || !result) return 'loading';
   if (latestJob.resultId !== resultId) return 'unavailable';
 
-  return scan.defaultConsumptionId ? 'open_existing' : 'confirm';
+  return 'confirm';
 }

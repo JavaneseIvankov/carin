@@ -497,6 +497,12 @@ describe('photo confirmation availability', () => {
       'open_existing'
     );
     expect(
+      availability({
+        scan: scan({ defaultConsumptionId: 'consumption-1' }),
+        occurrence: 'new_occurrence',
+      })
+    ).toBe('confirm');
+    expect(
       buildPhotoConsumptionInput(draft(), {
         scanId: 'scan-1',
         resultId: 'result-1',
@@ -504,5 +510,44 @@ describe('photo confirmation availability', () => {
         timeZone: 'Asia/Jakarta',
       })
     ).toHaveProperty('value');
+  });
+
+  it('opens the saved default during correction while gating a new occurrence', () => {
+    const input = {
+      scan: scan({ defaultConsumptionId: 'consumption-1' }),
+      latestJob: job({ status: 'processing', inputKind: 'correction', targetRevision: 3 }),
+    };
+
+    expect(availability(input)).toBe('open_existing');
+    expect(availability({ ...input, occurrence: 'new_occurrence' })).toBe('correction_pending');
+  });
+
+  it('opens the saved default after a failed correction while gating a new occurrence', () => {
+    const input = {
+      scan: scan({ defaultConsumptionId: 'consumption-1' }),
+      latestJob: job({
+        status: 'failed',
+        inputKind: 'correction',
+        resultId: null,
+        targetRevision: 3,
+      }),
+      resultId: undefined,
+      result: undefined,
+    };
+
+    expect(availability(input)).toBe('open_existing');
+    expect(availability({ ...input, occurrence: 'new_occurrence' })).toBe('unavailable');
+  });
+
+  it('opens the saved default with no latest result while keeping a new occurrence unavailable', () => {
+    const input = {
+      scan: scan({ defaultConsumptionId: 'consumption-1', latestResultId: null }),
+      latestJob: undefined,
+      resultId: undefined,
+      result: undefined,
+    };
+
+    expect(availability(input)).toBe('open_existing');
+    expect(availability({ ...input, occurrence: 'new_occurrence' })).toBe('unavailable');
   });
 });
