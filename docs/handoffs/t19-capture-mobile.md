@@ -2,7 +2,7 @@
 
 ## Focused plan
 
-1. Add tests for poll cadence/terminal states, permission denial fallbacks, analysis result rendering rules, and stable request keys.
+1. Add tests for poll cadence/terminal states including identical responses, permission denial fallbacks, analysis result rendering rules, and stable request keys.
 2. Implement capture with on-demand camera/gallery permission, preview, current AI consent, private upload, and job creation through generated operations.
 3. Implement job status/results with active polling, focus/app resume refresh, retry, and source/coverage/limitation presentation.
 4. Run documented app checks, record the unavailable native-device verification, and leave TSK 19 started for review.
@@ -19,6 +19,11 @@
   provider failures, null/partial/unrecognized values, synthetic labels, source
   attribution, photo replacement after failed job creation, and stable idempotency
   keys across repository recreation.
+- Fixed review findings: polling now reschedules after every settled refetch (including
+  structurally identical queued/processing responses); portion quantity, unit, basis,
+  source, and unknown-grams state are preserved; attention adjustments are displayed;
+  gallery MIME types are inferred only from supported MIME metadata or known file
+  extensions, with unknown formats rejected.
 - Added Expo SDK 56 `expo-camera` and `expo-image-picker` dependencies and
   permission copy/plugin settings. OpenAPI and generated files are unchanged.
 
@@ -29,7 +34,7 @@ Run from `carin-app/`:
 - `pnpm install --frozen-lockfile` — passed.
 - `pnpm run lint` — passed.
 - `pnpm run typecheck` — passed.
-- `pnpm run test` — passed: 13 unit files / 94 tests and 6 integration files / 30 tests.
+- `pnpm run test` — passed: 15 unit files / 101 tests and 6 integration files / 30 tests.
 - `pnpm run contracts:check` — passed; generated contracts match OpenAPI.
 - `pnpm exec expo install --check` — passed; dependencies are up to date.
 - `pnpm exec expo config --type public` — passed; camera/gallery config resolves.
@@ -48,5 +53,6 @@ Integrate C18, then exercise upload, job creation, resume, retry, and result ren
 on the agreed demo device. TSK 19 remains `started` pending review.
 
 Initial implementation commit: `fe1a4e84b6277f23ad60b8b3829a7e4060dc4bc8`.
-Photo identity fix: `c4fd72b349efdbe83a1957661c4f86f22ce836a0`. Both are on
-`feat/c19-capture-mobile`; worktree is clean. No push was made.
+Photo identity fix: `c4fd72b349efdbe83a1957661c4f86f22ce836a0`. Review fixes:
+`f6ddc79d7455cb46e8ef17760ca91835cd2a811c`. All commits are on
+`feat/c19-capture-mobile`; the worktree is clean and no push was made.

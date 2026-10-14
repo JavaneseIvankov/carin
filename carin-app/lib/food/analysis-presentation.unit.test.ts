@@ -215,4 +215,45 @@ describe('analysis presentation', () => {
     });
     expect(view.limitations).toEqual(['Nilai gizi belum tersedia untuk makanan ini.']);
   });
+
+  it('preserves a known serving and its provenance when grams are unavailable', () => {
+    const serving = result({
+      components: [
+        {
+          ...result().components[0],
+          portion: {
+            basis: '1 porsi sedang',
+            grams: null,
+            origin: 'user_reported',
+            quantity: 1,
+            servingId: 'serving-1',
+            sourceId: 'source-1',
+            unit: 'serving',
+          },
+        },
+      ],
+    });
+
+    expect(getAnalysisPresentation(serving).components[0]).toMatchObject({
+      portion: '1 porsi',
+      portionBasis: '1 porsi sedang',
+      portionSource: 'Data sintetis untuk demonstrasi',
+      grams: 'Berat dalam gram belum tersedia',
+    });
+  });
+
+  it('keeps attention adjustments with the reason, limitations, and sources', () => {
+    const adjusted = result({
+      attentions: [
+        {
+          ...result().attentions[0],
+          adjustments: ['Nilai dikurangi sesuai profil.'],
+        },
+      ],
+    });
+
+    expect(getAnalysisPresentation(adjusted).attentions[0].adjustments).toEqual([
+      'Nilai dikurangi sesuai profil.',
+    ]);
+  });
 });

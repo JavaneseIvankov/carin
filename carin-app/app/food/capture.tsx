@@ -9,6 +9,7 @@ import {
 } from '@/lib/profile/profile';
 import { createScanActionState, createScanActions } from '@/lib/food/scan-actions';
 import { getPhotoPermissionFallback } from '@/lib/food/permissions';
+import { resolvePhotoMimeType } from '@/lib/food/photo-media';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
@@ -85,12 +86,19 @@ export default function Capture() {
       quality: 0.9,
     });
     const asset = selection.canceled ? null : selection.assets[0];
-    if (asset)
+    if (asset) {
+      const mimeType = resolvePhotoMimeType(asset.mimeType, asset.uri, asset.fileName);
+      if (!mimeType) {
+        setPhoto(null);
+        setMessage('Format foto belum didukung. Pilih foto JPEG atau PNG.');
+        return;
+      }
       setPhoto({
         id: createIdempotencyKey(),
         uri: asset.uri,
-        mimeType: asset.mimeType ?? 'image/jpeg',
+        mimeType,
       });
+    }
   };
 
   const openCamera = async () => {

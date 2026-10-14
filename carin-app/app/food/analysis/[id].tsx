@@ -4,9 +4,9 @@ import { useAppRead, useAppRepository } from '@/lib/api/query';
 import { useAppData } from '@/lib/data/provider';
 import {
   getAnalysisFailurePresentation,
-  getAnalysisPollInterval,
   getAnalysisPresentation,
 } from '@/lib/food/analysis-presentation';
+import { startAnalysisPolling } from '@/lib/food/analysis-polling';
 import { createScanActionState, createScanActions } from '@/lib/food/scan-actions';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import * as Linking from 'expo-linking';
@@ -57,6 +57,7 @@ export default function AnalysisResultScreen() {
   const [retryError, setRetryError] = React.useState<string | null>(null);
   const pollStartedAt = React.useRef(0);
   const job = jobQuery.data?.data;
+  const jobStatus = job?.status;
   const refetchJob = jobQuery.refetch;
 
   useFocusEffect(
@@ -85,16 +86,17 @@ export default function AnalysisResultScreen() {
   }, [connectivity, focused, foreground, id, refetchJob]);
 
   React.useEffect(() => {
-    if (!job || !focused || !foreground) return;
-    const delay = getAnalysisPollInterval(
-      job.status,
-      pollStartedAt.current ? Date.now() - pollStartedAt.current : 0,
-      connectivity !== 'offline'
-    );
-    if (delay === false) return;
-    const timeout = setTimeout(() => void refetchJob(), delay);
-    return () => clearTimeout(timeout);
-  }, [job, focused, foreground, connectivity, refetchJob]);
+    if (!jobStatus || !focused || !foreground) return;
+    return startAnalysisPolling({
+      initialStatus: jobStatus,
+      getElapsedMs: () => (pollStartedAt.current ? Date.now() - pollStartedAt.current : 0),
+      shouldPoll: () => focused && foreground && connectivity !== 'offline',
+      refetch: async () => {
+        const response = await refetchJob();
+        return response.data?.data.status ?? null;
+      },
+    });
+  }, [jobStatus, focused, foreground, connectivity, refetchJob]);
 
   const retry = async () => {
     if (!job || !actions || retrying) return;
@@ -207,6 +209,13 @@ export default function AnalysisResultScreen() {
                   <View key={component.id} className="gap-1 border-b border-border pb-3">
                     <Text variant="large">{component.name}</Text>
                     <Text variant="muted">{component.portion}</Text>
+                    {component.portionBasis ? (
+                      <Text variant="muted">Dasar porsi: {component.portionBasis}</Text>
+                    ) : null}
+                    {component.grams ? <Text variant="muted">{component.grams}</Text> : null}
+                    {component.portionSource ? (
+                      <Text variant="muted">Sumber porsi: {component.portionSource}</Text>
+                    ) : null}
                     {component.matchStatus !== 'matched' ? (
                       <Text variant="muted">Kecocokan makanan belum terverifikasi.</Text>
                     ) : null}
@@ -237,6 +246,11 @@ export default function AnalysisResultScreen() {
                     </Text>
                   ) : null}
                   <Text>{attention.reason}</Text>
+                  {attention.adjustments.map((adjustment) => (
+                    <Text key={adjustment} variant="muted">
+                      Penyesuaian: {adjustment}
+                    </Text>
+                  ))}
                   {attention.limitations.map((limitation) => (
                     <Text key={limitation} variant="muted">
                       {limitation}

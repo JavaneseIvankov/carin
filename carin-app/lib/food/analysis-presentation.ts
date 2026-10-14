@@ -51,15 +51,32 @@ export function getAnalysisPresentation(
     supportLabel,
     dataLabel:
       result.dataMode === 'synthetic' ? 'Data sintetis untuk demonstrasi' : 'Estimasi analisis',
-    components: result.components.map((component) => ({
-      id: component.id,
-      name: component.displayName,
-      portion:
-        component.portion.grams === null
-          ? 'Porsi belum tersedia'
-          : `Perkiraan ${component.portion.grams} g`,
-      matchStatus: component.matchStatus,
-    })),
+    components: result.components.map((component) => {
+      const portion = component.portion;
+      const quantityLabel =
+        portion.quantity === null || portion.unit === null
+          ? null
+          : `${portion.quantity} ${portion.unit === 'serving' ? 'porsi' : 'g'}`;
+      const portionSource = portion.sourceId
+        ? (sourceNames.get(portion.sourceId) ?? 'Sumber porsi tidak tersedia')
+        : null;
+
+      return {
+        id: component.id,
+        name: component.displayName,
+        portion: quantityLabel ??
+          (portion.grams === null ? 'Porsi belum tersedia' : `Perkiraan ${portion.grams} g`),
+        portionBasis: portion.basis,
+        portionSource,
+        grams:
+          portion.grams === null
+            ? 'Berat dalam gram belum tersedia'
+            : quantityLabel
+              ? `Perkiraan ${portion.grams} g`
+              : null,
+        matchStatus: component.matchStatus,
+      };
+    }),
     nutrients: nutrientDefinitions.map(([key, label, unit, digits]) => {
       const amount = result.totals[key];
       const coverage = result.coverage[key];
@@ -85,6 +102,7 @@ export function getAnalysisPresentation(
       personalizationSupported:
         conditionIndex.get(attention.conditionId)?.personalizationSupported ?? null,
       reason: attention.reason,
+      adjustments: attention.adjustments,
       limitations: attention.limitations,
       sources: attention.sourceIds.map(
         (sourceId) => sourceNames.get(sourceId) ?? 'Sumber tidak tersedia'
