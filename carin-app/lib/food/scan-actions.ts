@@ -18,6 +18,7 @@ export function createScanActionState(makeKey?: () => string) {
     jobKeys: createStableActionKey(makeKey),
     retryKeys: createStableActionKey(makeKey),
     uploadedPhoto: null as AppResponse<'uploadPhoto'> | null,
+    photoIdentity: null as string | null,
   };
 }
 
@@ -29,7 +30,13 @@ export function createScanActions(
   state: ScanActionState = createScanActionState(makeKey)
 ) {
   return {
-    async start(photo: Blob, consentIsCurrent: boolean) {
+    async start(photo: Blob, photoIdentity: string, consentIsCurrent: boolean) {
+      if (state.photoIdentity !== photoIdentity) {
+        state.photoIdentity = photoIdentity;
+        state.uploadedPhoto = null;
+        state.uploadKeys.clear();
+        state.jobKeys.clear();
+      }
       if (!consentIsCurrent) throw new Error('Persetujuan pemrosesan AI versi terbaru diperlukan.');
       if (!state.uploadedPhoto) {
         const uploadKey = state.uploadKeys.forPayload({ action: 'upload-photo' });
@@ -48,6 +55,7 @@ export function createScanActions(
       });
       state.jobKeys.clear();
       state.uploadedPhoto = null;
+      state.photoIdentity = null;
       return job;
     },
 

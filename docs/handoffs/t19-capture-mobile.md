@@ -17,7 +17,8 @@
   and result presentation. Scan screens expose no consumption write.
 - Added `carin-app/lib/food/` helpers and tests for permission fallbacks, polling,
   provider failures, null/partial/unrecognized values, synthetic labels, source
-  attribution, and stable idempotency keys across repository recreation.
+  attribution, photo replacement after failed job creation, and stable idempotency
+  keys across repository recreation.
 - Added Expo SDK 56 `expo-camera` and `expo-image-picker` dependencies and
   permission copy/plugin settings. OpenAPI and generated files are unchanged.
 

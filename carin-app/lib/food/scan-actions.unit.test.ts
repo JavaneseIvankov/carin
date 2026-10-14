@@ -11,7 +11,9 @@ describe('scan actions', () => {
     };
     const actions = createScanActions(api);
 
-    await expect(actions.start(new Blob(['photo']), false)).rejects.toThrow(/persetujuan/i);
+    await expect(actions.start(new Blob(['photo']), 'photo-draft-1', false)).rejects.toThrow(
+      /persetujuan/i
+    );
     expect(write).not.toHaveBeenCalled();
   });
 
@@ -32,8 +34,8 @@ describe('scan actions', () => {
     const recreatedActions = createScanActions(api, undefined, actionState);
     const image = new Blob(['photo'], { type: 'image/jpeg' });
 
-    await expect(actions.start(image, true)).rejects.toThrow('server unavailable');
-    await recreatedActions.start(image, true);
+    await expect(actions.start(image, 'photo-draft-1', true)).rejects.toThrow('server unavailable');
+    await recreatedActions.start(image, 'photo-draft-1', true);
 
     expect(write).toHaveBeenNthCalledWith(
       1,
@@ -60,6 +62,34 @@ describe('scan actions', () => {
     );
   });
 
+  it('uploads a newly selected photo after job creation failed for the previous photo', async () => {
+    const uploadPhoto = vi
+      .fn()
+      .mockResolvedValueOnce({ id: 'photo-old' })
+      .mockResolvedValueOnce({ id: 'photo-new' });
+    const createPhotoAnalysis = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('server unavailable'))
+      .mockResolvedValueOnce({ id: 'job-new' });
+    const api: ScanApi = {
+      uploadPhoto,
+      createPhotoAnalysis,
+      retryAnalysisJob: vi.fn(),
+    };
+    const actions = createScanActions(api);
+
+    await expect(actions.start(new Blob(['old']), 'photo-draft-1', true)).rejects.toThrow(
+      'server unavailable'
+    );
+    await actions.start(new Blob(['new']), 'photo-draft-2', true);
+
+    expect(uploadPhoto).toHaveBeenCalledTimes(2);
+    expect(createPhotoAnalysis).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ body: { photoId: 'photo-new' } })
+    );
+  });
+
   it('uploads and creates only an analysis job without writing a consumption', async () => {
     const calls: string[] = [];
     const actions = createScanActions({
@@ -77,7 +107,7 @@ describe('scan actions', () => {
       },
     });
 
-    await actions.start(new Blob(['photo']), true);
+    await actions.start(new Blob(['photo']), 'photo-draft-1', true);
 
     expect(calls).toEqual(['uploadPhoto', 'createPhotoAnalysis']);
   });

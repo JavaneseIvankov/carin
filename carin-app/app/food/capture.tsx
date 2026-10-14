@@ -2,7 +2,11 @@ import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { useAppRead, useAppRepository, useAppWrite } from '@/lib/api/query';
 import { useAppData } from '@/lib/data/provider';
-import { createStableActionKey, getAiConsentStatus } from '@/lib/profile/profile';
+import {
+  createIdempotencyKey,
+  createStableActionKey,
+  getAiConsentStatus,
+} from '@/lib/profile/profile';
 import { createScanActionState, createScanActions } from '@/lib/food/scan-actions';
 import { getPhotoPermissionFallback } from '@/lib/food/permissions';
 import { CameraView, useCameraPermissions } from 'expo-camera';
@@ -12,7 +16,7 @@ import * as Linking from 'expo-linking';
 import * as React from 'react';
 import { ActivityIndicator, Image, ScrollView, View } from 'react-native';
 
-type PhotoDraft = { uri: string; mimeType: string };
+type PhotoDraft = { id: string; uri: string; mimeType: string };
 type PermissionFallback = {
   message: string;
   showSettings: boolean;
@@ -81,7 +85,12 @@ export default function Capture() {
       quality: 0.9,
     });
     const asset = selection.canceled ? null : selection.assets[0];
-    if (asset) setPhoto({ uri: asset.uri, mimeType: asset.mimeType ?? 'image/jpeg' });
+    if (asset)
+      setPhoto({
+        id: createIdempotencyKey(),
+        uri: asset.uri,
+        mimeType: asset.mimeType ?? 'image/jpeg',
+      });
   };
 
   const openCamera = async () => {
@@ -103,7 +112,7 @@ export default function Capture() {
   const takePhoto = async () => {
     const image = await cameraRef.current?.takePictureAsync({ quality: 0.9 });
     if (image?.uri) {
-      setPhoto({ uri: image.uri, mimeType: 'image/jpeg' });
+      setPhoto({ id: createIdempotencyKey(), uri: image.uri, mimeType: 'image/jpeg' });
       setCameraOpen(false);
     }
   };
@@ -156,7 +165,7 @@ export default function Capture() {
       const response = await fetch(photo.uri);
       const blob = await response.blob();
       const typedBlob = new Blob([blob], { type: photo.mimeType });
-      const job = await actions.start(typedBlob, consentIsCurrent);
+      const job = await actions.start(typedBlob, photo.id, consentIsCurrent);
       router.replace({ pathname: '/food/analysis/[id]', params: { id: job.id } });
     } catch (error) {
       setMessage(
