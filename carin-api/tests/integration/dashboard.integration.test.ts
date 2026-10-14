@@ -243,6 +243,8 @@ describe('dashboard API', () => {
     const laterLosAngelesClockId = randomUUID();
     const newerLocalDateButEarlierInstantId = randomUUID();
     const latestPressureId = randomUUID();
+    const olderTimedGlucoseId = randomUUID();
+    const newerDateOnlyGlucoseId = randomUUID();
     const cholesterolId = randomUUID();
     await pool.query(
       `INSERT INTO examination (id,user_id,revision,type,subtype,context,series_key,measured_on,measured_time,timezone,value,systolic,diastolic,unit)
@@ -252,8 +254,10 @@ describe('dashboard API', () => {
        ($4,$2,1,'pressure',NULL,NULL,'pressure','2026-03-08','11:00','America/Los_Angeles',NULL,117,77,'mmHg'),
        ($5,$2,1,'pressure',NULL,NULL,'pressure','2026-03-09','00:30','Asia/Tokyo',NULL,116,76,'mmHg'),
        ($6,$2,1,'pressure',NULL,NULL,'pressure','2026-03-08','23:30','America/Los_Angeles',NULL,115,75,'mmHg'),
-       ($7,$2,1,'cholesterol','total',NULL,'cholesterol:total','2026-03-06',NULL,'America/New_York',200,NULL,NULL,'mg/dL')`,
-      [oldPressureId, owner.userId, laterNewYorkClockId, laterLosAngelesClockId, newerLocalDateButEarlierInstantId, latestPressureId, cholesterolId],
+       ($7,$2,1,'glucose',NULL,'fasting','["glucose","fasting","mg/dL"]','2026-03-08','12:00','Asia/Jakarta',100,NULL,NULL,'mg/dL'),
+       ($8,$2,1,'glucose',NULL,'fasting','["glucose","fasting","mg/dL"]','2026-03-09',NULL,'Asia/Jakarta',105,NULL,NULL,'mg/dL'),
+       ($9,$2,1,'cholesterol','total',NULL,'["cholesterol","total","mg/dL"]','2026-03-06',NULL,'America/New_York',200,NULL,NULL,'mg/dL')`,
+      [oldPressureId, owner.userId, laterNewYorkClockId, laterLosAngelesClockId, newerLocalDateButEarlierInstantId, latestPressureId, olderTimedGlucoseId, newerDateOnlyGlucoseId, cholesterolId],
     );
     const response = await appFor(owner).request('/api/v1/dashboard?date=2026-03-08', {
       headers: { 'x-test-user': owner.userId },
@@ -263,6 +267,7 @@ describe('dashboard API', () => {
     expect(body.consumptionCount).toBe(1);
     expect(body.latestExaminations.map((item: { id: string }) => item.id)).toEqual([
       latestPressureId,
+      newerDateOnlyGlucoseId,
       cholesterolId,
     ]);
   });

@@ -5,6 +5,11 @@ import type { ExaminationRecord } from './types.js';
 
 export type ExaminationTransaction = Parameters<Parameters<Database['transaction']>[0]>[0];
 export type ExaminationRow = typeof examination.$inferSelect;
+export type ActiveExaminationRow = ExaminationRow & {
+  measurementInstant: Date | string | null;
+  measurementDayStart: Date | string;
+  measurementDayEnd: Date | string;
+};
 
 export async function lockExaminationOwner(tx: ExaminationTransaction, userId: string) {
   const [owner] = await tx.select({ id: user.id }).from(user).where(eq(user.id, userId)).for('update');
@@ -166,18 +171,74 @@ export async function listExaminations(
 export async function listAllActiveExaminations(
   db: Database | ExaminationTransaction,
   userId: string,
-): Promise<ExaminationRow[]> {
-  return db.select().from(examination).where(and(
+): Promise<ActiveExaminationRow[]> {
+  return db.select({
+    ...getTableColumns(examination),
+    measurementInstant: sql<Date | null>`CASE WHEN ${examination.measuredTime} IS NOT NULL THEN (${examination.measuredOn} + ${examination.measuredTime}::time) AT TIME ZONE ${examination.timezone} END`,
+    measurementDayStart: sql<Date>`(${examination.measuredOn}::timestamp) AT TIME ZONE ${examination.timezone}`,
+    measurementDayEnd: sql<Date>`((${examination.measuredOn} + 1)::timestamp) AT TIME ZONE ${examination.timezone}`,
+  }).from(examination).where(and(
     eq(examination.userId, userId), isNull(examination.deletedAt),
   )).orderBy(
-    // Timed readings have a comparable instant across timezones. Date-only
-    // readings stay in a lower-precision group and retain their civil date.
-    sql`(${examination.measuredTime} IS NULL) ASC`,
-    sql`CASE WHEN ${examination.measuredTime} IS NOT NULL THEN (${examination.measuredOn} + ${examination.measuredTime}::time) AT TIME ZONE ${examination.timezone} END DESC NULLS LAST`,
     desc(examination.measuredOn),
+    sql`${examination.measuredTime} DESC NULLS LAST`,
     desc(examination.createdAt),
     desc(examination.id),
   );
+}
+
+function createdAfter(left: ExaminationRow, right: ExaminationRow): boolean {
+  const leftTime = left.createdAt.getTime();
+  const rightTime = right.createdAt.getTime();
+  return leftTime === rightTime ? left.id > right.id : leftTime > rightTime;
+}
+
+function compareCreatedNewestFirst(left: ExaminationRow, right: ExaminationRow): number {
+  const byCreation = right.createdAt.getTime() - left.createdAt.getTime();
+  if (byCreation !== 0) return byCreation;
+  return right.id.localeCompare(left.id);
+}
+
+function measurementTimestamp(value: Date | string): number {
+  const timestamp = value instanceof Date ? value.getTime() : Date.parse(value);
+  if (!Number.isFinite(timestamp)) throw new RangeError('Examination measurement timestamp is invalid');
+  return timestamp;
+}
+
+/**
+ * Selects one latest reading per series without turning a date-only value into
+ * an invented instant. A date-only interval wholly after the latest timed
+ * instant wins; an overlapping interval is ambiguous and uses createdAt/id as
+ * a deterministic tie-break because the measurement order is unknowable.
+ */
+export function latestExaminationPerSeries(rows: ActiveExaminationRow[]): ActiveExaminationRow[] {
+  const groups = new Map<string, ActiveExaminationRow[]>();
+  for (const row of rows) {
+    const group = groups.get(row.seriesKey) ?? [];
+    group.push(row);
+    groups.set(row.seriesKey, group);
+  }
+
+  return [...groups.values()].map((group) => {
+    const timed = group.filter((row) => row.measurementInstant !== null)
+      .sort((left, right) => measurementTimestamp(right.measurementInstant!) - measurementTimestamp(left.measurementInstant!) ||
+        compareCreatedNewestFirst(left, right))[0];
+    const dateOnlyRows = group.filter((row) => row.measurementInstant === null)
+      .sort((left, right) => right.measuredOn.localeCompare(left.measuredOn) ||
+        compareCreatedNewestFirst(left, right));
+    if (!timed) return dateOnlyRows[0]!;
+    if (dateOnlyRows.length === 0) return timed;
+
+    const instant = measurementTimestamp(timed.measurementInstant!);
+    const definitelyLater = dateOnlyRows.filter((row) => measurementTimestamp(row.measurementDayStart) > instant)
+      .sort((left, right) => measurementTimestamp(right.measurementDayStart) - measurementTimestamp(left.measurementDayStart) ||
+        compareCreatedNewestFirst(left, right))[0];
+    if (definitelyLater) return definitelyLater;
+
+    const overlapping = dateOnlyRows.filter((row) => measurementTimestamp(row.measurementDayEnd) > instant)
+      .sort(compareCreatedNewestFirst)[0];
+    return overlapping && createdAfter(overlapping, timed) ? overlapping : timed;
+  });
 }
 
 export async function reserveExaminationIdempotency(

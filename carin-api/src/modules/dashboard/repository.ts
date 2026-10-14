@@ -15,9 +15,8 @@ import {
   session,
   user,
 } from '../../db/schema/index.js';
-import { listAllActiveExaminations } from '../examinations/repository.js';
+import { latestExaminationPerSeries, listAllActiveExaminations } from '../examinations/repository.js';
 import { examinationFromRow } from '../examinations/service.js';
-import type { ExaminationRow } from '../examinations/repository.js';
 import { calculateProfilePersonalization, type ProfileCapabilityManifest } from '../profile/validation.js';
 import { buildDashboardSummary, type DashboardSummaryItem } from './summary.js';
 
@@ -107,15 +106,8 @@ function parseManifest(value: unknown): ProfileCapabilityManifest | null {
   }
 }
 
-function latestExaminations(rows: ExaminationRow[]): App['Examination'][] {
-  const seen = new Set<string>();
-  const latest: App['Examination'][] = [];
-  for (const row of rows) {
-    if (seen.has(row.seriesKey)) continue;
-    seen.add(row.seriesKey);
-    latest.push(examinationFromRow(row));
-  }
-  return latest;
+function latestExaminations(rows: Awaited<ReturnType<typeof listAllActiveExaminations>>): App['Examination'][] {
+  return latestExaminationPerSeries(rows).map(examinationFromRow);
 }
 
 function nextActions(input: {

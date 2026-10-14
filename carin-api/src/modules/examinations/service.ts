@@ -11,6 +11,7 @@ import {
   hasActiveExaminationSession,
   insertExamination,
   listAllActiveExaminations,
+  latestExaminationPerSeries,
   listExaminations as listExaminationRows,
   lockExaminationOwner,
   replaceExamination,
@@ -223,6 +224,7 @@ function labelFor(record: ExaminationInput): string {
 
 export async function getExaminationSeries(db: Database, userId: string): Promise<ExamSeries[]> {
   const rows = await listAllActiveExaminations(db, userId);
+  const latestIds = new Map(latestExaminationPerSeries(rows).map((row) => [row.seriesKey, row.id]));
   const groups = new Map<string, Examination[]>();
   for (const row of rows) {
     const record = recordFromRow(row);
@@ -236,6 +238,6 @@ export async function getExaminationSeries(db: Database, userId: string): Promis
     label: labelFor(items[0]!.record),
     unit: items[0]!.record.unit,
     items,
-    latestExaminationId: items[0]!.id,
+    latestExaminationId: latestIds.get(key)!,
   }));
 }

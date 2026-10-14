@@ -118,6 +118,31 @@ describe('examination API', () => {
     expect(sameDay[0].id).toBe((await second.json()).id);
   });
 
+  it('selects a date-only latest value when its whole local day follows a timed reading', async () => {
+    const timed = await create(glucose({
+      measuredOn: '2025-03-09',
+      measuredTime: '14:00',
+      timezone: 'Asia/Tokyo',
+      value: 90,
+    }));
+    const dateOnly = await create(glucose({
+      measuredOn: '2025-03-09',
+      measuredTime: null,
+      timezone: 'America/Los_Angeles',
+      value: 95,
+    }));
+    expect(timed.status).toBe(201);
+    expect(dateOnly.status).toBe(201);
+    const timedBody = await timed.json();
+    const dateOnlyBody = await dateOnly.json();
+
+    const series = await request('/api/v1/examination-series');
+    expect(series.status).toBe(200);
+    expect((await series.json())[0].latestExaminationId).toBe(dateOnlyBody.id);
+    expect(timedBody.record.measuredTime).toBe('14:00');
+    expect(dateOnlyBody.record.measuredTime).toBeNull();
+  });
+
   it('separates glucose contexts and cholesterol subtypes into distinct series', async () => {
     await create(glucose());
     await create(glucose({ context: 'random', value: 101 }));
