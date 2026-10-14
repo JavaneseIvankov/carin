@@ -1,7 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { useAppRead, useAppRepository } from '@/lib/api/query';
+import type { components } from '@/lib/api/generated/app-api';
 import { useAppData } from '@/lib/data/provider';
+import { canConfirmSelectedScanResult, isCurrentScanResult } from '@/lib/food/correction';
 import {
   getAnalysisFailurePresentation,
   getAnalysisPresentation,
@@ -29,6 +31,9 @@ const attentionText = {
 
 export default function AnalysisResultScreen() {
   const { id: routeId } = useLocalSearchParams<{ id: string }>();
+  const { returningToOldResult: returnParam } = useLocalSearchParams<{
+    returningToOldResult?: string;
+  }>();
   const id = Array.isArray(routeId) ? routeId[0] : routeId;
   const router = useRouter();
   const repository = useAppRepository();
@@ -50,13 +55,48 @@ export default function AnalysisResultScreen() {
     [repository, actionState]
   );
   const jobQuery = useAppRead('getAnalysisJob', { path: { id: id ?? '' } }, { enabled: !!id });
+  const job = jobQuery.data?.data;
+  const [actionSnapshot, setActionSnapshot] = React.useState<{
+    scan: components['schemas']['Scan'];
+    latestJob: components['schemas']['AnalysisJob'];
+  } | null>(null);
+  const refreshActionSnapshot = React.useCallback(async () => {
+    setActionSnapshot(null);
+    if (!repository || !id) return;
+    try {
+      const currentJob = await repository.read('getAnalysisJob', { path: { id } });
+      if (currentJob.stale || !currentJob.data.scanId) return;
+      const currentScan = await repository.read('getScan', {
+        path: { id: currentJob.data.scanId },
+      });
+      if (currentScan.stale) return;
+      const currentLatestJob = await repository.read('getAnalysisJob', {
+        path: { id: currentScan.data.latestJobId },
+      });
+      if (currentLatestJob.stale) return;
+      setActionSnapshot({ scan: currentScan.data, latestJob: currentLatestJob.data });
+    } catch {
+      setActionSnapshot(null);
+    }
+  }, [id, repository]);
+  const actionScan = actionSnapshot?.scan;
+  const actionLatestJob = actionSnapshot?.latestJob;
+  const latestResultIsCurrent = !!actionScan && !!job && isCurrentScanResult(actionScan, job);
+  const canConfirm =
+    !!actionScan &&
+    !!job &&
+    !!actionLatestJob &&
+    canConfirmSelectedScanResult(actionScan, job, actionLatestJob, returnParam === 'true');
+  const correctionIsActive =
+    !!actionLatestJob &&
+    actionLatestJob.inputKind === 'correction' &&
+    (actionLatestJob.status === 'queued' || actionLatestJob.status === 'processing');
   const conditionsQuery = useAppRead('getConditions', {});
   const [foreground, setForeground] = React.useState(AppState.currentState === 'active');
   const [focused, setFocused] = React.useState(true);
   const [retrying, setRetrying] = React.useState(false);
   const [retryError, setRetryError] = React.useState<string | null>(null);
   const pollStartedAt = React.useRef(0);
-  const job = jobQuery.data?.data;
   const jobStatus = job?.status;
   const refetchJob = jobQuery.refetch;
 
@@ -65,8 +105,12 @@ export default function AnalysisResultScreen() {
       setFocused(true);
       pollStartedAt.current = Date.now();
       if (id) void refetchJob();
-      return () => setFocused(false);
-    }, [id, refetchJob])
+      void refreshActionSnapshot();
+      return () => {
+        setFocused(false);
+        setActionSnapshot(null);
+      };
+    }, [id, refetchJob, refreshActionSnapshot])
   );
 
   React.useEffect(() => {
@@ -76,10 +120,13 @@ export default function AnalysisResultScreen() {
       if (active) {
         pollStartedAt.current = Date.now();
         if (id) void refetchJob();
+        void refreshActionSnapshot();
+      } else {
+        setActionSnapshot(null);
       }
     });
     return () => subscription.remove();
-  }, [id, refetchJob]);
+  }, [id, refetchJob, refreshActionSnapshot]);
 
   React.useEffect(() => {
     if (connectivity === 'online' && focused && foreground && id) void refetchJob();
@@ -326,6 +373,47 @@ export default function AnalysisResultScreen() {
           <Text accessibilityRole="alert">
             Hasil analisis belum tersedia. Muat status terbaru untuk mencoba lagi.
           </Text>
+        ) : null}
+
+        {result && job.scanId ? (
+          <View className="gap-3 rounded-xl border border-border p-4">
+            <Text variant="h3">Tindakan hasil</Text>
+            <Button
+              variant="outline"
+              disabled={!latestResultIsCurrent || correctionIsActive}
+              onPress={() =>
+                router.push({
+                  pathname: '/food/correction/[id]',
+                  params: { id: job.scanId!, sourceJobId: job.id },
+                })
+              }>
+              <Text>
+                {correctionIsActive ? 'Koreksi sedang berjalan' : 'Koreksi komponen atau porsi'}
+              </Text>
+            </Button>
+            <Button
+              disabled={!canConfirm}
+              onPress={() =>
+                router.push({
+                  pathname: '/consumptions/new',
+                  params: {
+                    scanId: actionScan?.id ?? '',
+                    sourceAnalysisResultId: actionScan?.latestResultId ?? '',
+                  },
+                })
+              }>
+              <Text>
+                {correctionIsActive
+                  ? 'Tunggu koreksi sebelum mencatat konsumsi'
+                  : 'Sudah dikonsumsi'}
+              </Text>
+            </Button>
+            {!canConfirm && !correctionIsActive ? (
+              <Text variant="muted">
+                Konfirmasi tersedia hanya untuk hasil terbaru yang berhasil.
+              </Text>
+            ) : null}
+          </View>
         ) : null}
 
         <Button
