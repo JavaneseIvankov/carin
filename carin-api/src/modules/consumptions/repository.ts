@@ -30,6 +30,7 @@ import { canReusePhotoAttention, evaluatePersonalizationEligibility } from './ev
 import {
   buildConsumptionNutritionSnapshot,
   ConsumptionCatalogInputError,
+  preservePhotoEvaluation,
   type ConsumptionCatalogFood,
 } from './nutrition.js';
 import {
@@ -362,13 +363,17 @@ function viewFromJoinedRow(row: {
   const hasEvaluationOutput = evaluationOutput &&
       Array.isArray(evaluationOutput.attentions) &&
       ['considerable', 'needs_attention', 'insufficient_information'].includes(String(evaluationOutput.overallAttention));
+  const allLimitations = [...snapshot.limitations, ...storedLimitations, ...resultLimitations];
+  const uniqueLimitations = allLimitations.filter((item, index) =>
+    allLimitations.findIndex((candidate) => canonical(candidate) === canonical(item)) === index,
+  );
   const responseSnapshot: ConsumptionSnapshot = {
       ...snapshot,
       ...(hasEvaluationOutput ? {
         overallAttention: evaluationOutput.overallAttention as ConsumptionSnapshot['overallAttention'],
         attentions: evaluationOutput.attentions as ConsumptionSnapshot['attentions'],
       } : {}),
-      limitations: [...snapshot.limitations, ...storedLimitations, ...resultLimitations],
+      limitations: uniqueLimitations,
     };
   return {
     id: row.item.id,
@@ -685,7 +690,7 @@ export async function createConsumption(
       : await storeProfileSnapshot(tx, input.userId, profile, now);
     const id = randomUUID();
     const snapshotId = randomUUID();
-    const snapshot = buildConsumptionNutritionSnapshot({
+    const nutritionSnapshot = buildConsumptionNutritionSnapshot({
       operationId: randomUUID(),
       computedAt: now.toISOString(),
       profileVersion: profile.profileVersion,
@@ -696,6 +701,9 @@ export async function createConsumption(
       components: input.body.components,
       catalogFoods: catalog.foods,
     });
+    const snapshot = reuse && source
+      ? preservePhotoEvaluation(nutritionSnapshot, source.result)
+      : nutritionSnapshot;
 
     await tx.insert(consumption).values({
       id,

@@ -25,7 +25,7 @@
 
 ## Task 2: Add atomic owner-scoped create/read/list and idempotency
 
-- [x] Add PostgreSQL integration tests for manual references, current owned photo result, pending scan guard, source/catalog checks, future-time boundary, owner isolation, unmatched saves, idempotency replay after commit, and competing default submissions.
+- [x] Add PostgreSQL integration tests for manual references, current owned photo result, pending scan guard, source/catalog checks, stale food/serving selections with no side effects, future-time boundary, owner isolation, unmatched saves, idempotency replay after commit, and competing default submissions.
 - [x] Run the focused integration tests and confirm missing route/repository behavior fails for the intended assertions.
 - [x] Implement lock order with owner/session/idempotency/source checks; call `lockScanForConfirmation` in this same transaction before writing photo-confirmed consumption.
 - [x] Snapshot exact selected inputs/catalog values/profile context. Schedule evaluation only when current consent, profile, and catalog/rule capabilities support it; persist explicit `not_requested` explanations otherwise. Reuse current photo-result attention only for identical inputs and the same frozen profile/catalog.
@@ -34,9 +34,9 @@
 
 ## Task 3: Add immutable revision edits, deletion, and evaluation publication
 
-- [x] Add integration tests for edit math/revision, failed enrichment preserving nutrition, stale worker after edit/delete, same/different duplicate inputs, explicit new occurrence, delete then reconfirm, and snapshot immutability.
+- [x] Add integration tests for edit math/revision, failed enrichment preserving nutrition, stale worker after edit/delete, source-result purge preserving reused photo attention, same/different duplicate inputs, explicit new occurrence, delete then reconfirm, and snapshot immutability.
 - [x] Run the focused integration tests and observe failures before implementation.
-- [x] Implement edit as an atomic generation/revision change with a new snapshot, profile snapshot, evaluation/job, and current pointer; preserve historical snapshots and make deletion immediately exclude the resource.
+- [x] Implement edit as an atomic generation/revision change with a new snapshot, profile snapshot, evaluation/job, and current pointer; preserve historical snapshots and make deletion immediately exclude the resource. Freeze reused photo evaluation output, limitations, and source references into the consumption snapshot.
 - [x] Extend worker validation for frozen manual evaluation and reject stale catalog/profile/component/portion/source or unsupported capability output. Publish only through existing C16 target/lease/consent/deletion fences.
 - [x] Keep all nutrition values independent from evaluation pending/failure.
 

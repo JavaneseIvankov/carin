@@ -3,6 +3,7 @@ import type { components as AppComponents } from '../../contracts/generated/app-
 import { validateSchema } from '../../contracts/validation.js';
 
 type Ai = components['schemas'];
+type AnalysisResult = Ai['AnalysisResult'];
 type ConsumptionSnapshot = AppComponents['schemas']['ConsumptionSnapshot'];
 type ComponentInput = Ai['ComponentInput'];
 type Nutrients = Ai['Nutrients'];
@@ -69,6 +70,15 @@ const emptyNutrientSources = (): NutrientSources => ({
 
 function rounded(value: number): number {
   return Math.round((value + Number.EPSILON) * 1_000_000) / 1_000_000;
+}
+
+function canonical(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`;
+  if (value !== null && typeof value === 'object') {
+    const object = value as Record<string, unknown>;
+    return `{${Object.keys(object).sort().map((key) => `${JSON.stringify(key)}:${canonical(object[key])}`).join(',')}}`;
+  }
+  return JSON.stringify(value) ?? 'null';
 }
 
 function sumKnown(values: Array<number | null>): number | null {
@@ -259,4 +269,35 @@ export function buildConsumptionNutritionSnapshot(input: ConsumptionNutritionInp
   };
   validateSchema('app.ConsumptionSnapshot', snapshot);
   return snapshot;
+}
+
+/** Freeze reusable photo evaluation output into this consumption's own snapshot. */
+export function preservePhotoEvaluation(
+  snapshot: ConsumptionSnapshot,
+  sourceResult: AnalysisResult,
+): ConsumptionSnapshot {
+  const limitations = [...snapshot.limitations];
+  const limitationKeys = new Set(limitations.map(canonical));
+  for (const item of sourceResult.limitations) {
+    const key = canonical(item);
+    if (!limitationKeys.has(key)) {
+      limitations.push(item);
+      limitationKeys.add(key);
+    }
+  }
+
+  const sources = new Map(snapshot.sources.map((source) => [source.id, source]));
+  for (const source of sourceResult.sources) {
+    if (!sources.has(source.id)) sources.set(source.id, source);
+  }
+
+  const preserved: ConsumptionSnapshot = {
+    ...snapshot,
+    overallAttention: sourceResult.overallAttention,
+    attentions: sourceResult.attentions,
+    limitations,
+    sources: [...sources.values()].sort((left, right) => left.id.localeCompare(right.id)),
+  };
+  validateSchema('app.ConsumptionSnapshot', preserved);
+  return preserved;
 }
