@@ -35,7 +35,7 @@ export function useAppRepository() {
 export function useAppRead<O extends ReadOperation>(
   name: O,
   input: AppRequestInput<O>,
-  options: { enabled?: boolean } = {}
+  options: { enabled?: boolean; refetchOnReconnect?: boolean } = {}
 ) {
   const { scope } = useAppData();
   const repository = useAppRepository();
@@ -43,6 +43,9 @@ export function useAppRead<O extends ReadOperation>(
     queryKey: scope ? scopeKey(scope, name, input) : ['carin', 'no-session', name],
     queryFn: () => repository!.read(name, input),
     enabled: !!repository && (options.enabled ?? true),
+    ...(options.refetchOnReconnect === undefined
+      ? {}
+      : { refetchOnReconnect: options.refetchOnReconnect }),
     networkMode: 'always',
   });
 }

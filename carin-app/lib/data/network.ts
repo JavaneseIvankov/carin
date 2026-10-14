@@ -13,5 +13,6 @@ export function requireOnline(connectivity: Connectivity) {
 
 export function staleReadLabel(updatedAt: number, connectivity: Connectivity, locale = 'id-ID') {
   const date = new Date(updatedAt).toLocaleString(locale);
-  return `${connectivity === 'offline' ? 'Offline · ' : ''}Data terakhir diperbarui ${date}`;
+  const status = connectivity === 'offline' ? 'Offline' : 'Cache';
+  return `${status} · Data terakhir diperbarui ${date}`;
 }

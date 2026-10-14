@@ -4,8 +4,10 @@ import type { components } from '@/lib/api/generated/app-api';
 import { createAppRepository } from '@/lib/api/repository';
 import { invalidateScopedQueries } from '@/lib/api/query-cache';
 import { createManualConsumptionActions } from '@/lib/consumptions/manual-actions';
+import { staleReadLabel, type Connectivity } from '@/lib/data/network';
 import type { DataScope, StorageAdapter } from '@/lib/data/scope';
 import { scopeKey } from '@/lib/data/scope';
+import { shouldRefetchDashboardOnReconnect } from './reconnect';
 import {
   formatDashboardDate,
   getDailyIntakeSummary,
@@ -101,11 +103,15 @@ function aggregateRecords(records: ManualRecord[]): Dashboard {
   return dashboard({ consumptionCount: records.length, componentCount, coverage });
 }
 
-function createRepository(storage: StorageAdapter, fetcher: typeof fetch) {
+function createRepository(
+  storage: StorageAdapter,
+  fetcher: typeof fetch,
+  connectivity: () => Connectivity = () => 'online'
+) {
   return createAppRepository({
     scope: owner,
     storage,
-    connectivity: () => 'online',
+    connectivity,
     onUnauthorized: async () => {},
     fetcher,
     baseUrl: 'https://api.test',
@@ -288,5 +294,96 @@ describe('dashboard consumer API refresh', () => {
     );
     unsubscribe();
     client.clear();
+  });
+
+  it('refreshes stale cached data after reconnect while the home query stays active', async () => {
+    const storage = new MemoryStorage();
+    let connectivity: Connectivity = 'online';
+    let server = dashboard({
+      consumptionCount: 1,
+      totals: {
+        energyKcal: 120,
+        carbohydrateG: null,
+        proteinG: null,
+        fatG: null,
+        fiberG: null,
+        sugarsG: null,
+        sodiumMg: null,
+      },
+    });
+    let deferNextResponse = false;
+    let signalRefreshStarted: (() => void) | undefined;
+    let releaseRefresh: (() => void) | undefined;
+    const refreshStarted = new Promise<void>((resolve) => {
+      signalRefreshStarted = resolve;
+    });
+    const fetcher = (async () => {
+      if (deferNextResponse) {
+        deferNextResponse = false;
+        signalRefreshStarted?.();
+        await new Promise<void>((resolve) => {
+          releaseRefresh = resolve;
+        });
+      }
+      return Response.json(server);
+    }) as typeof fetch;
+    const repository = createRepository(storage, fetcher, () => connectivity);
+    const client = new QueryClient();
+    const observer = createDashboardObserver(client, repository);
+    const unsubscribe = observer.subscribe(() => {});
+
+    try {
+      await observer.refetch();
+      expect(observer.getCurrentResult().data).toMatchObject({
+        stale: false,
+        data: { consumptionCount: 1 },
+      });
+
+      connectivity = 'offline';
+      await observer.refetch();
+      const cached = observer.getCurrentResult().data!;
+      expect(cached).toMatchObject({ stale: true, data: { consumptionCount: 1 } });
+      expect(staleReadLabel(cached.updatedAt, connectivity)).toContain('Offline');
+
+      const previousConnectivity = connectivity;
+      connectivity = 'online';
+      server = dashboard({
+        consumptionCount: 2,
+        totals: {
+          energyKcal: 240,
+          carbohydrateG: null,
+          proteinG: null,
+          fatG: null,
+          fiberG: null,
+          sugarsG: null,
+          sodiumMg: null,
+        },
+      });
+      deferNextResponse = true;
+      const homeIsFocused = true;
+      const shouldRefetch = shouldRefetchDashboardOnReconnect(
+        previousConnectivity,
+        connectivity,
+        homeIsFocused
+      );
+      expect(shouldRefetch).toBe(true);
+      const refetch = shouldRefetch ? observer.refetch() : Promise.resolve();
+      await refreshStarted;
+
+      const stillCached = observer.getCurrentResult().data!;
+      expect(stillCached).toMatchObject({ stale: true, data: { consumptionCount: 1 } });
+      expect(staleReadLabel(stillCached.updatedAt, connectivity)).toContain('Cache');
+
+      releaseRefresh?.();
+      await refetch;
+      expect(observer.getCurrentResult().data).toMatchObject({
+        stale: false,
+        data: { consumptionCount: 2, totals: { energyKcal: 240 } },
+      });
+    } finally {
+      releaseRefresh?.();
+      unsubscribe();
+      client.clear();
+    }
   });
 });
