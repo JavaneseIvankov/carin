@@ -14,5 +14,7 @@ describe('photo MIME type resolution', () => {
     expect(resolvePhotoMimeType('', 'content://media/123', 'meal.jpg')).toBeNull();
     expect(resolvePhotoMimeType('  ', 'content://media/123', 'meal.jpg')).toBeNull();
     expect(resolvePhotoMimeType(';foo', 'content://media/123', 'meal.jpg')).toBeNull();
+    expect(resolvePhotoMimeType('image/jpeg;not-a-parameter', 'content://media/123', 'meal.png')).toBeNull();
+    expect(resolvePhotoMimeType('image/png;=', 'content://media/123', 'meal.jpg')).toBeNull();
   });
 });
