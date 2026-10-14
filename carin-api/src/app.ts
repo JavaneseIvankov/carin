@@ -10,7 +10,7 @@ import {
   registerLegalRegistryRoute,
 } from "./modules/legal/routes.js";
 import { registerCatalogRoutes, type CatalogRouteDependencies } from "./catalog/routes.js";
-import { registerAccountRoutes } from './modules/account/routes.js';
+import { registerAccountRoutes, type AccountRouteDependencies } from './modules/account/routes.js';
 import { registerEmailLandingRoutes } from './modules/email/landing.js';
 import { registerProfileRoutes } from './modules/profile/routes.js';
 import { registerAnalysisJobRoutes, type AnalysisJobRouteDependencies } from "./jobs/routes.js";
@@ -34,7 +34,7 @@ export type AppDependencies = {
   registerRoutes?: (app: Hono<AppEnv>) => void;
   legalConsent?: { db: Database; resolveSession: SessionResolver };
   catalog?: CatalogRouteDependencies;
-  account?: { db: Database; resolveSession: SessionResolver };
+  account?: AccountRouteDependencies;
   examinations?: { db: Database; resolveSession: SessionResolver; cursorSecret: string };
   dashboard?: DashboardRouteDependencies;
   auth?: { handler: (request: Request) => Promise<Response> };
@@ -124,13 +124,14 @@ export type VerifiedAppDependencies = Omit<
 > & {
   db: Database;
   resolveSession: SessionResolver;
+  accountDeletion?: Pick<AccountRouteDependencies, 'verifyPassword' | 'deletionSecret'>;
 };
 
-export function createVerifiedApp({ db, resolveSession, ...dependencies }: VerifiedAppDependencies) {
+export function createVerifiedApp({ db, resolveSession, accountDeletion, ...dependencies }: VerifiedAppDependencies) {
   const resources = { db, resolveSession };
   return createApp({
     ...dependencies,
-    account: resources,
+    account: { ...resources, ...accountDeletion },
     legalConsent: resources,
     catalog: resources,
     analysisJobs: dependencies.analysisJobs ?? resources,

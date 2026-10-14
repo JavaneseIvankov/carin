@@ -228,6 +228,10 @@ describe('private photo media routes', () => {
     const first = await reserve(createdAt);
     expect(first.state).toBe('upload');
     if (first.state !== 'upload') throw new Error('Expected an upload reservation');
+    expect(await repository.beginUpload({
+      userId: ownerA, sessionId: sessionA, photoId: first.photoId, objectKey: first.objectKey,
+      reservationToken: first.reservationToken, now: createdAt,
+    })).toBe(true);
 
     const retryAt = new Date(createdAt.getTime() + 6 * 60 * 1000);
     const second = await reserve(retryAt);
@@ -235,6 +239,10 @@ describe('private photo media routes', () => {
     if (second.state !== 'upload') throw new Error('Expired reservation was not acquired');
     expect(second.photoId).not.toBe(first.photoId);
     expect(second.objectKey).not.toBe(first.objectKey);
+    expect(await repository.beginUpload({
+      userId: ownerA, sessionId: sessionA, photoId: second.photoId, objectKey: second.objectKey,
+      reservationToken: second.reservationToken, now: retryAt,
+    })).toBe(true);
 
     const response = (id: string, time: Date) => ({
       id,
@@ -350,7 +358,7 @@ describe('private photo media routes', () => {
     expect(JSON.stringify(log)).not.toContain(expiredToken);
   });
 
-  it('queues a delayed object write when account deletion and cleanup win first', async () => {
+  it('drains an in-flight object write before final account cleanup', async () => {
     const { app, store, objects } = makeMediaContext();
     const bytes = await jpeg();
     const idempotencyKey = randomUUID();
@@ -391,7 +399,7 @@ describe('private photo media routes', () => {
       );
       await client.query(
         'INSERT INTO deletion_task (user_id,kind,object_keys,status,attempts,next_attempt_at,created_at) VALUES ($1,$2,$3::jsonb,$4,0,$5,$5)',
-        [ownerB, 'photo', JSON.stringify([photoRow.object_key]), 'queued', cleanupAt],
+        [ownerB, 'account', JSON.stringify([photoRow.object_key]), 'queued', cleanupAt],
       );
       await client.query('COMMIT');
     } catch (error) {
@@ -401,9 +409,9 @@ describe('private photo media routes', () => {
       client.release();
     }
     const beforeLatePut = await runPhotoCleanupBatch(createDatabase(pool), store, { now: cleanupAt });
-    expect(beforeLatePut).toMatchObject({ removed: 1, failed: 0 });
+    expect(beforeLatePut).toMatchObject({ removed: 0, failed: 0, deferred: 1, accountsPurged: 0 });
     expect((await pool.query('SELECT lifecycle FROM photo WHERE id=$1', [photoRow.id])).rows[0].lifecycle)
-      .toBe('deleted');
+      .toBe('deleting');
 
     store.removeObject = vi.fn(async () => { throw new Error('MinIO unavailable after late PUT'); });
     const accountGuard = await pool.connect();
@@ -431,18 +439,11 @@ describe('private photo media routes', () => {
     const lateUpload = await uploadPromise;
     expect(lateUpload.status).toBe(503);
     expect(objects.has(photoRow.object_key)).toBe(true);
-    const queued = await pool.query(
-      "SELECT object_keys FROM deletion_task WHERE user_id=$1 AND kind='photo'",
-      [ownerB],
-    );
-    expect(queued.rows.some((row) => (row.object_keys as string[]).includes(photoRow.object_key))).toBe(true);
-
     store.removeObject = vi.fn(async (key) => { objects.delete(key); });
     const retryAt = new Date(Date.now() + 60_000);
     const cleanup = await runPhotoCleanupBatch(createDatabase(pool), store, { now: retryAt });
-    expect(cleanup).toMatchObject({ scheduled: 0, removed: 1, failed: 0 });
+    expect(cleanup).toMatchObject({ scheduled: 0, removed: 1, failed: 0, accountsPurged: 1 });
     expect(objects.has(photoRow.object_key)).toBe(false);
-    expect((await pool.query('SELECT lifecycle FROM photo WHERE id=$1', [photoRow.id])).rows[0].lifecycle)
-      .toBe('deleted');
+    expect((await pool.query('SELECT id FROM "user" WHERE id=$1', [ownerB])).rows).toHaveLength(0);
   });
 });

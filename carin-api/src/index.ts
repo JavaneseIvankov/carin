@@ -37,6 +37,7 @@ const app = createVerifiedApp({
   auth: authRuntime.auth,
   db,
   resolveSession: authRuntime.resolveSession,
+  accountDeletion: { verifyPassword: authRuntime.verifyPassword, deletionSecret: authSecret },
   appLinkScheme: config.appLinkScheme,
   media: { ...mediaOptions, resolveSession: authRuntime.resolveSession },
   examinations: { db, resolveSession: authRuntime.resolveSession, cursorSecret: authSecret },

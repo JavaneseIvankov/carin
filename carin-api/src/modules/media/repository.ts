@@ -4,6 +4,7 @@ import {
   deletionTask,
   idempotencyRecord,
   photo,
+  photoUploadOperation,
   session,
   user,
 } from '../../db/schema/index.js';
@@ -68,6 +69,8 @@ export class MediaIdempotencyConflict extends Error {}
 export class MediaUploadInProgress extends Error {}
 
 const RESERVATION_LEASE_MS = 5 * 60 * 1000;
+export const STORAGE_PUT_TIMEOUT_MS = 60 * 1000;
+export const UPLOAD_DRAIN_GRACE_MS = 30 * 1000;
 const IDEMPOTENCY_TTL_MS = 24 * 60 * 60 * 1000;
 type ReservationLease = { version: 'photo-upload-v1'; token: string; expiresAt: string };
 
@@ -93,6 +96,7 @@ function parseReservationLease(value: unknown): ReservationLease | null {
 
 export type MediaRepository = {
   reserveUpload(input: ReservePhotoUpload): Promise<UploadReservation>;
+  beginUpload(input: { userId: string; sessionId: string; photoId: string; objectKey: string; reservationToken: string; now: Date }): Promise<boolean>;
   completeUpload(input: CompletePhotoUpload): Promise<boolean>;
   resolveUploadCompletion(input: CompletePhotoUpload): Promise<UploadCompletionResolution>;
   recordUploadFailure(input: {
@@ -161,6 +165,15 @@ export function createMediaRepository(db: Database): MediaRepository {
             mimeType: input.mimeType,
             sizeBytes: input.sizeBytes,
             lifecycle: 'uploaded',
+            createdAt: input.createdAt,
+          });
+          await tx.insert(photoUploadOperation).values({
+            photoId: input.photoId,
+            userId: input.userId,
+            objectKey: input.objectKey,
+            reservationToken: input.reservationToken,
+            state: 'reserved',
+            fenceUntil: new Date(input.createdAt.getTime() + RESERVATION_LEASE_MS),
             createdAt: input.createdAt,
           });
         };
@@ -245,6 +258,35 @@ export function createMediaRepository(db: Database): MediaRepository {
       });
     },
 
+    async beginUpload(input) {
+      return db.transaction(async (tx) => {
+        const [account] = await tx.select({ deletionStatus: user.deletionStatus }).from(user)
+          .where(eq(user.id, input.userId)).for('update');
+        if (!account || account.deletionStatus !== 'active') return false;
+        const [activeSession] = await tx.select({ id: session.id }).from(session).where(and(
+          eq(session.id, input.sessionId), eq(session.userId, input.userId), gt(session.expiresAt, input.now),
+        )).for('update');
+        if (!activeSession) return false;
+        const [photoRow] = await tx.select({ id: photo.id, lifecycle: photo.lifecycle }).from(photo).where(and(
+          eq(photo.id, input.photoId), eq(photo.userId, input.userId), eq(photo.objectKey, input.objectKey),
+        )).for('update');
+        if (!photoRow || photoRow.lifecycle !== 'uploaded') return false;
+        const [operation] = await tx.select({ reservationToken: photoUploadOperation.reservationToken, state: photoUploadOperation.state })
+          .from(photoUploadOperation).where(and(
+            eq(photoUploadOperation.photoId, input.photoId),
+            eq(photoUploadOperation.userId, input.userId),
+            eq(photoUploadOperation.objectKey, input.objectKey),
+          )).for('update');
+        if (!operation || operation.state !== 'reserved' || operation.reservationToken !== input.reservationToken)
+          return false;
+        await tx.update(photoUploadOperation).set({
+          state: 'in_flight',
+          fenceUntil: new Date(input.now.getTime() + STORAGE_PUT_TIMEOUT_MS + UPLOAD_DRAIN_GRACE_MS),
+        }).where(eq(photoUploadOperation.photoId, input.photoId));
+        return true;
+      });
+    },
+
     async completeUpload(input) {
       return db.transaction(async (tx) => {
         const [account] = await tx
@@ -271,13 +313,18 @@ export function createMediaRepository(db: Database): MediaRepository {
             eq(idempotencyRecord.key, input.idempotencyKey),
           ))
           .for('update');
+        const [operation] = await tx.select({ state: photoUploadOperation.state, reservationToken: photoUploadOperation.reservationToken })
+          .from(photoUploadOperation).where(and(
+            eq(photoUploadOperation.photoId, input.photo.id), eq(photoUploadOperation.userId, input.userId),
+          )).for('update');
         const lease = parseReservationLease(reservation?.responseBody);
         const ownsReservation = Boolean(
           reservation && reservation.responseStatus === null &&
           reservation.requestHash === input.requestHash &&
           reservation.resourceId === input.photo.id &&
           lease?.token === input.reservationToken &&
-          lease.expiresAt && Date.parse(lease.expiresAt) > input.now.getTime()
+          lease.expiresAt && Date.parse(lease.expiresAt) > input.now.getTime() &&
+          operation?.state === 'in_flight' && operation.reservationToken === input.reservationToken
         );
         if (
           account?.deletionStatus === 'active' && photoRow?.lifecycle === 'uploaded' &&
@@ -286,6 +333,7 @@ export function createMediaRepository(db: Database): MediaRepository {
           await tx.update(idempotencyRecord)
             .set({ responseStatus: 201, responseBody: input.photo })
             .where(eq(idempotencyRecord.id, reservation!.id));
+          await tx.delete(photoUploadOperation).where(eq(photoUploadOperation.photoId, input.photo.id));
           return true;
         }
 
@@ -294,7 +342,7 @@ export function createMediaRepository(db: Database): MediaRepository {
             .set({ lifecycle: 'deleting', deletedAt: input.now })
             .where(eq(photo.id, photoRow.id));
         }
-        if (account) {
+        if (account?.deletionStatus === 'active') {
           const [pendingCleanup] = await tx
             .select({ id: deletionTask.id })
             .from(deletionTask)
@@ -328,7 +376,7 @@ export function createMediaRepository(db: Database): MediaRepository {
     async resolveUploadCompletion(input) {
       return db.transaction(async (tx) => {
         const [account] = await tx
-          .select({ id: user.id })
+          .select({ id: user.id, deletionStatus: user.deletionStatus })
           .from(user)
           .where(eq(user.id, input.userId))
           .for('update');
@@ -373,7 +421,7 @@ export function createMediaRepository(db: Database): MediaRepository {
             .set({ lifecycle: 'deleting', deletedAt: input.now })
             .where(eq(photo.id, photoRow.id));
         }
-        const [pendingCleanup] = await tx
+        const [pendingCleanup] = account?.deletionStatus === 'active' ? await tx
           .select({ id: deletionTask.id })
           .from(deletionTask)
           .where(and(
@@ -382,8 +430,10 @@ export function createMediaRepository(db: Database): MediaRepository {
             inArray(deletionTask.status, ['queued', 'failed']),
             sql`${deletionTask.objectKeys} @> ${JSON.stringify([input.objectKey])}::jsonb`,
           ))
-          .for('update');
-        if (pendingCleanup) {
+          .for('update') : [undefined];
+        if (account?.deletionStatus !== 'active') {
+          return { state: 'fenced' } as const;
+        } else if (pendingCleanup) {
           await tx.update(deletionTask)
             .set({ status: 'queued', attempts: 0, nextAttemptAt: input.now, leaseToken: null, leaseExpiresAt: null })
             .where(eq(deletionTask.id, pendingCleanup.id));
@@ -405,7 +455,7 @@ export function createMediaRepository(db: Database): MediaRepository {
     async recordUploadFailure(input) {
       await db.transaction(async (tx) => {
         const [account] = await tx
-          .select({ id: user.id })
+          .select({ id: user.id, deletionStatus: user.deletionStatus })
           .from(user)
           .where(eq(user.id, input.userId))
           .for('update');
@@ -431,6 +481,11 @@ export function createMediaRepository(db: Database): MediaRepository {
             sql`${idempotencyRecord.responseBody}->>'token' = ${input.reservationToken}`,
           ))
           .for('update');
+        const [operation] = await tx.select({ reservationToken: photoUploadOperation.reservationToken })
+          .from(photoUploadOperation).where(and(
+            eq(photoUploadOperation.photoId, input.photoId),
+            eq(photoUploadOperation.userId, input.userId),
+          )).for('update');
 
         if (photoRow?.lifecycle === 'uploaded') {
           await tx.update(photo)
@@ -445,7 +500,7 @@ export function createMediaRepository(db: Database): MediaRepository {
             .where(eq(photo.id, photoRow.id));
         }
 
-        if (account && input.objectMayExist) {
+        if (account?.deletionStatus === 'active' && input.objectMayExist) {
           const [pendingCleanup] = await tx
             .select({ id: deletionTask.id })
             .from(deletionTask)
@@ -473,6 +528,8 @@ export function createMediaRepository(db: Database): MediaRepository {
           }
         }
         if (reservation) await tx.delete(idempotencyRecord).where(eq(idempotencyRecord.id, reservation.id));
+        if (operation?.reservationToken === input.reservationToken)
+          await tx.delete(photoUploadOperation).where(eq(photoUploadOperation.photoId, input.photoId));
       });
     },
 

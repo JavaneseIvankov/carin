@@ -6,11 +6,13 @@ import {
   inArray,
   isNotNull,
   lte,
+  gt,
+  notExists,
   or,
   sql,
 } from 'drizzle-orm';
 import type { Database } from '../../db/client.js';
-import { deletionTask, photo, user } from '../../db/schema/index.js';
+import { deletionTask, photo, photoUploadOperation, user } from '../../db/schema/index.js';
 import type { MediaObjectStore } from './storage.js';
 
 export const ORPHAN_PHOTO_RETENTION_MS = 60 * 60 * 1000;
@@ -30,10 +32,12 @@ export type PhotoCleanupResult = {
   scheduled: number;
   removed: number;
   failed: number;
+  accountsPurged: number;
+  deferred: number;
 };
 
-function parsePhotoKeys(value: unknown): string[] {
-  if (!Array.isArray(value) || value.length === 0) throw new Error('Invalid photo cleanup task');
+function parsePhotoKeys(value: unknown, allowEmpty = false): string[] {
+  if (!Array.isArray(value) || (!allowEmpty && value.length === 0)) throw new Error('Invalid photo cleanup task');
   if (!value.every((item) => typeof item === 'string' && PHOTO_KEY_PATTERN.test(item)))
     throw new Error('Invalid photo cleanup task');
   return [...new Set(value as string[])];
@@ -57,6 +61,11 @@ async function scheduleExpiredPhotos(db: Database, now: Date, batchSize: number)
         eq(photo.lifecycle, 'uploaded'),
         eq(user.deletionStatus, 'active'),
         lte(photo.createdAt, cutoff),
+        notExists(db.select({ id: photoUploadOperation.photoId }).from(photoUploadOperation).where(and(
+          eq(photoUploadOperation.photoId, photo.id),
+          eq(photoUploadOperation.state, 'in_flight'),
+          gt(photoUploadOperation.fenceUntil, now),
+        ))),
       ))
       .orderBy(asc(photo.createdAt), asc(photo.id))
       .limit(batchSize)
@@ -94,8 +103,10 @@ async function claimPhotoTasks(db: Database, now: Date, batchSize: number): Prom
         attempts: deletionTask.attempts,
       })
       .from(deletionTask)
+      .innerJoin(user, eq(deletionTask.userId, user.id))
       .where(and(
         eq(deletionTask.kind, 'photo'),
+        eq(user.deletionStatus, 'active'),
         or(
           and(inArray(deletionTask.status, ['queued', 'failed']), lte(deletionTask.nextAttemptAt, now)),
           and(
@@ -107,9 +118,18 @@ async function claimPhotoTasks(db: Database, now: Date, batchSize: number): Prom
       ))
       .orderBy(asc(deletionTask.nextAttemptAt), asc(deletionTask.createdAt))
       .limit(batchSize)
-      .for('update', { skipLocked: true });
+      .for('update', { of: deletionTask, skipLocked: true });
     const tasks: CleanupTask[] = [];
     for (const task of due) {
+      const keys = parsePhotoKeys(task.objectKeys);
+      const activeOperation = await tx.select({ photoId: photoUploadOperation.photoId })
+        .from(photoUploadOperation).where(and(
+          eq(photoUploadOperation.userId, task.userId),
+          eq(photoUploadOperation.state, 'in_flight'),
+          gt(photoUploadOperation.fenceUntil, now),
+          inArray(photoUploadOperation.objectKey, keys),
+        )).limit(1);
+      if (activeOperation.length) continue;
       const leaseToken = randomUUID();
       const [claimed] = await tx
         .update(deletionTask)
@@ -128,6 +148,37 @@ async function claimPhotoTasks(db: Database, now: Date, batchSize: number): Prom
   });
 }
 
+async function claimAccountTasks(db: Database, now: Date, batchSize: number): Promise<CleanupTask[]> {
+  return db.transaction(async (tx) => {
+    const due = await tx.select({
+      id: deletionTask.id,
+      userId: deletionTask.userId,
+      objectKeys: deletionTask.objectKeys,
+      attempts: deletionTask.attempts,
+    }).from(deletionTask).innerJoin(user, eq(deletionTask.userId, user.id)).where(and(
+      eq(deletionTask.kind, 'account'),
+      eq(user.deletionStatus, 'deleting'),
+      or(
+        and(inArray(deletionTask.status, ['queued', 'failed']), lte(deletionTask.nextAttemptAt, now)),
+        and(eq(deletionTask.status, 'processing'), isNotNull(deletionTask.leaseExpiresAt), lte(deletionTask.leaseExpiresAt, now)),
+      ),
+    )).orderBy(asc(deletionTask.nextAttemptAt), asc(deletionTask.createdAt))
+      .limit(batchSize).for('update', { of: deletionTask, skipLocked: true });
+    const tasks: CleanupTask[] = [];
+    for (const task of due) {
+      const leaseToken = randomUUID();
+      const [claimed] = await tx.update(deletionTask).set({
+        status: 'processing',
+        attempts: sql`${deletionTask.attempts} + 1`,
+        leaseToken,
+        leaseExpiresAt: new Date(now.getTime() + CLEANUP_LEASE_MS),
+      }).where(eq(deletionTask.id, task.id)).returning({ attempts: deletionTask.attempts });
+      if (claimed) tasks.push({ ...task, attempts: claimed.attempts, leaseToken });
+    }
+    return tasks;
+  });
+}
+
 async function completePhotoTask(
   db: Database,
   task: CleanupTask,
@@ -135,6 +186,12 @@ async function completePhotoTask(
   now: Date,
 ): Promise<void> {
   await db.transaction(async (tx) => {
+    const [owner] = await tx.select({ id: user.id }).from(user)
+      .where(eq(user.id, task.userId)).for('update');
+    if (!owner) return;
+    const photos = await tx.select({ id: photo.id }).from(photo).where(and(
+      eq(photo.userId, task.userId), inArray(photo.objectKey, keys), eq(photo.lifecycle, 'deleting'),
+    )).for('update');
     const [current] = await tx
       .select({ id: deletionTask.id })
       .from(deletionTask)
@@ -145,16 +202,8 @@ async function completePhotoTask(
       ))
       .for('update');
     if (!current) return;
-    for (const key of keys) {
-      await tx
-        .update(photo)
-        .set({ lifecycle: 'deleted', deletedAt: now })
-        .where(and(
-          eq(photo.userId, task.userId),
-          eq(photo.objectKey, key),
-          eq(photo.lifecycle, 'deleting'),
-        ));
-    }
+    for (const row of photos) await tx.update(photo)
+      .set({ lifecycle: 'deleted', deletedAt: now }).where(eq(photo.id, row.id));
     await tx.delete(deletionTask).where(and(
       eq(deletionTask.id, task.id),
       eq(deletionTask.leaseToken, task.leaseToken),
@@ -182,7 +231,75 @@ async function persistPhotoRetry(
     ));
 }
 
-/** Schedules expired uploads and processes durable photo cleanup rows for C29's worker loop. */
+async function accountCleanupKeys(db: Database, task: CleanupTask, now: Date) {
+  const keys = new Set<string>(parsePhotoKeys(task.objectKeys, true));
+  const [photos, photoTasks, operations] = await Promise.all([
+    db.select({ objectKey: photo.objectKey }).from(photo).where(eq(photo.userId, task.userId)),
+    db.select({ objectKeys: deletionTask.objectKeys }).from(deletionTask).where(and(
+      eq(deletionTask.userId, task.userId), eq(deletionTask.kind, 'photo'),
+    )),
+    db.select({ objectKey: photoUploadOperation.objectKey, state: photoUploadOperation.state, fenceUntil: photoUploadOperation.fenceUntil })
+      .from(photoUploadOperation).where(eq(photoUploadOperation.userId, task.userId)),
+  ]);
+  for (const row of photos) keys.add(row.objectKey);
+  for (const row of photoTasks) for (const key of parsePhotoKeys(row.objectKeys)) keys.add(key);
+  for (const row of operations) keys.add(row.objectKey);
+  for (const key of keys) if (!PHOTO_KEY_PATTERN.test(key)) throw new Error('Invalid account cleanup object key');
+  const uploadInFlight = operations.some((row) => row.state === 'in_flight' && row.fenceUntil > now);
+  return { keys: [...keys], uploadInFlight };
+}
+
+async function deferAccountTask(db: Database, task: CleanupTask, now: Date): Promise<void> {
+  await db.update(deletionTask).set({
+    status: 'queued',
+    nextAttemptAt: new Date(now.getTime() + 15_000),
+    leaseToken: null,
+    leaseExpiresAt: null,
+  }).where(and(
+    eq(deletionTask.id, task.id), eq(deletionTask.status, 'processing'), eq(deletionTask.leaseToken, task.leaseToken),
+  ));
+}
+
+async function finalizeAccountTask(
+  db: Database,
+  task: CleanupTask,
+  removedKeys: Set<string>,
+  now: Date,
+): Promise<'purged' | 'deferred' | 'stale'> {
+  return db.transaction(async (tx) => {
+    const [account] = await tx.select({ deletionStatus: user.deletionStatus }).from(user)
+      .where(eq(user.id, task.userId)).for('update');
+    if (!account || account.deletionStatus !== 'deleting') return 'stale';
+    const [current] = await tx.select({ id: deletionTask.id }).from(deletionTask).where(and(
+      eq(deletionTask.id, task.id), eq(deletionTask.kind, 'account'),
+      eq(deletionTask.status, 'processing'), eq(deletionTask.leaseToken, task.leaseToken),
+    )).for('update');
+    if (!current) return 'stale';
+
+    const activeUploads = await tx.select({ photoId: photoUploadOperation.photoId }).from(photoUploadOperation)
+      .where(and(
+        eq(photoUploadOperation.userId, task.userId),
+        eq(photoUploadOperation.state, 'in_flight'),
+        gt(photoUploadOperation.fenceUntil, now),
+      )).limit(1);
+    if (activeUploads.length) return 'deferred';
+    const remainingPhotos = await tx.select({ objectKey: photo.objectKey }).from(photo)
+      .where(eq(photo.userId, task.userId));
+    if (remainingPhotos.some((row) => !removedKeys.has(row.objectKey))) return 'deferred';
+    const photoTasks = await tx.select({ objectKeys: deletionTask.objectKeys }).from(deletionTask).where(and(
+      eq(deletionTask.userId, task.userId), eq(deletionTask.kind, 'photo'),
+    ));
+    for (const row of photoTasks) {
+      const missingKey = parsePhotoKeys(row.objectKeys).some((key) => !removedKeys.has(key));
+      if (missingKey) return 'deferred';
+    }
+
+    await tx.delete(user).where(eq(user.id, task.userId));
+    return 'purged';
+  });
+}
+
+/** Schedules expired uploads and processes durable photo and account cleanup rows. */
 export async function runPhotoCleanupBatch(
   db: Database,
   store: Pick<MediaObjectStore, 'removeObject'>,
@@ -194,8 +311,11 @@ export async function runPhotoCleanupBatch(
     throw new Error('Photo cleanup batch size must be from 1 to 1000');
   const scheduled = await scheduleExpiredPhotos(db, now, batchSize);
   const tasks = await claimPhotoTasks(db, now, batchSize);
+  const accountTasks = await claimAccountTasks(db, now, batchSize);
   let removed = 0;
   let failed = 0;
+  let accountsPurged = 0;
+  let deferred = 0;
   for (const task of tasks) {
     try {
       const keys = parsePhotoKeys(task.objectKeys);
@@ -207,5 +327,46 @@ export async function runPhotoCleanupBatch(
       failed++;
     }
   }
-  return { scheduled, removed, failed };
+  for (const task of accountTasks) {
+    try {
+      const state = await accountCleanupKeys(db, task, now);
+      if (state.uploadInFlight) {
+        await deferAccountTask(db, task, now);
+        deferred++;
+        continue;
+      }
+      for (const key of state.keys) await store.removeObject(key);
+      const outcome = await finalizeAccountTask(db, task, new Set(state.keys), now);
+      if (outcome === 'purged') {
+        accountsPurged++;
+        removed++;
+      } else if (outcome === 'deferred') {
+        await deferAccountTask(db, task, now);
+        deferred++;
+      }
+    } catch {
+      await persistPhotoRetry(db, task, now);
+      failed++;
+    }
+  }
+  return { scheduled, removed, failed, accountsPurged, deferred };
+}
+
+export async function runPhotoCleanupWorker(
+  db: Database,
+  store: Pick<MediaObjectStore, 'removeObject'>,
+  options: { signal?: AbortSignal; pollIntervalMs?: number; onError?: () => void } = {},
+): Promise<void> {
+  const pollIntervalMs = options.pollIntervalMs ?? 1_000;
+  if (!Number.isInteger(pollIntervalMs) || pollIntervalMs < 50)
+    throw new RangeError('Cleanup worker poll interval must be at least 50 milliseconds');
+  while (!options.signal?.aborted) {
+    try {
+      await runPhotoCleanupBatch(db, store);
+    } catch {
+      options.onError?.();
+    }
+    if (options.signal?.aborted) break;
+    await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
+  }
 }

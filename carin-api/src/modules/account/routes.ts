@@ -1,9 +1,14 @@
 import { Hono } from 'hono';
+import { createHmac } from 'node:crypto';
 import type { Database } from '../../db/client.js';
 import { ContractValidationError, validateRequest, validateResponse } from '../../contracts/validation.js';
 import { requireSession, type SessionResolver } from '../../http/access.js';
 import { ApiError } from '../../http/errors.js';
 import type { AppEnv } from '../../http/types.js';
+import {
+  AccountDeletionSessionError,
+  acceptAccountDeletion,
+} from './deletion-service.js';
 import {
   AccountIdempotencyConflict,
   AccountNotFoundError,
@@ -17,6 +22,8 @@ import {
 export type AccountRouteDependencies = {
   db: Database;
   resolveSession: SessionResolver;
+  verifyPassword?: (request: Request, password: string) => Promise<boolean>;
+  deletionSecret?: string;
 };
 
 export function registerAccountRoutes(
@@ -95,4 +102,56 @@ export function registerAccountRoutes(
       throw error;
     }
   });
+
+  const verifyPassword = dependencies.verifyPassword;
+  const deletionSecret = dependencies.deletionSecret;
+  if (verifyPassword && deletionSecret) {
+    app.post('/api/v1/account-deletion', requireSession(dependencies.resolveSession), async (c) => {
+      let body: unknown;
+      try {
+        body = await c.req.json();
+      } catch {
+        throw new ApiError(422, 'INVALID_REQUEST', 'Request does not match the API contract');
+      }
+      let request: ReturnType<typeof validateRequest>;
+      try {
+        request = validateRequest('app.deleteAccount', {
+          headers: c.req.header(),
+          body,
+          contentType: c.req.header('content-type'),
+        });
+      } catch (error) {
+        if (error instanceof ContractValidationError)
+          throw new ApiError(422, 'INVALID_REQUEST', 'Request does not match the API contract');
+        throw error;
+      }
+      const currentSession = c.get('session');
+      if (!currentSession.sessionId)
+        throw new ApiError(401, 'UNAUTHENTICATED', 'Authentication session is unavailable');
+      const input = request.body as { password: string; confirmation: 'DELETE_MY_ACCOUNT' };
+      if (!await verifyPassword(c.req.raw, input.password))
+        throw new ApiError(403, 'REAUTHENTICATION_REQUIRED', 'Current password is incorrect');
+      const requestHash = createHmac('sha256', deletionSecret)
+        .update(JSON.stringify({ confirmation: input.confirmation, password: input.password }), 'utf8')
+        .digest('hex');
+      try {
+        const result = await acceptAccountDeletion(dependencies.db, {
+          userId: currentSession.userId,
+          sessionId: currentSession.sessionId,
+          idempotencyKey: request.headers['idempotency-key'] as string,
+          requestHash,
+        });
+        try {
+          validateResponse('app.deleteAccount', 202, result, { contentType: 'application/json' });
+        } catch {
+          throw new ApiError(500, 'INTERNAL_ERROR', 'Account deletion response is invalid');
+        }
+        return c.json(result, 202);
+      } catch (error) {
+        if (error instanceof AccountDeletionSessionError)
+          throw new ApiError(401, 'UNAUTHENTICATED', 'Authentication session is no longer active');
+        throw error;
+      }
+    });
+  }
 }

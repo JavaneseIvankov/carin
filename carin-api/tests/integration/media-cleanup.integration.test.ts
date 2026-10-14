@@ -93,4 +93,52 @@ describe('durable orphan photo cleanup', () => {
     expect((await pool.query('SELECT id FROM deletion_task WHERE user_id=$1', [userId])).rows)
       .toHaveLength(0);
   });
+
+  it('retains an inaccessible account tombstone after MinIO failure and purges it after a later retry', async () => {
+    const accountId = randomUUID();
+    const accountPhotoId = randomUUID();
+    const accountKey = `photos/${randomUUID()}`;
+    const now = new Date('2026-10-14T05:00:00.000Z');
+    await pool.query(
+      'INSERT INTO "user" (id,name,email,email_verified,birth_date,accepted_terms_version,accepted_privacy_version,accepted_at,deletion_status) VALUES ($1,$2,$3,false,$4,$5,$5,$6,$7)',
+      [accountId, 'Deleted account', `${accountId}@deleted.invalid`, '1900-01-01', 'deleted', now, 'deleting'],
+    );
+    await pool.query(
+      'INSERT INTO photo (id,user_id,object_key,checksum,mime_type,size_bytes,lifecycle,created_at,deleted_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$8)',
+      [accountPhotoId, accountId, accountKey, 'b'.repeat(64), 'image/jpeg', 100, 'deleting', now],
+    );
+    await pool.query(
+      'INSERT INTO deletion_task (user_id,kind,object_keys,status,attempts,next_attempt_at,created_at) VALUES ($1,$2,$3::jsonb,$4,0,$5,$5)',
+      [accountId, 'account', JSON.stringify([accountKey]), 'queued', now],
+    );
+    const state = { failuresLeft: 1, removed: [] as string[] };
+    const store: MediaObjectStore = {
+      putObject: async () => undefined,
+      readObject: async () => Buffer.alloc(0),
+      presignRead: async () => 'http://minio:9000/carin/object?X-Amz-Signature=valid',
+      removeObject: async (objectKey) => {
+        if (state.failuresLeft > 0) {
+          state.failuresLeft--;
+          throw new Error('MinIO unavailable');
+        }
+        state.removed.push(objectKey);
+      },
+    };
+
+    const failed = await runPhotoCleanupBatch(createDatabase(pool), store, { now });
+    expect(failed).toMatchObject({ removed: 0, failed: 1, accountsPurged: 0 });
+    expect((await pool.query('SELECT deletion_status FROM "user" WHERE id=$1', [accountId])).rows[0].deletion_status)
+      .toBe('deleting');
+    const retryTask = (await pool.query(
+      "SELECT status,attempts,next_attempt_at FROM deletion_task WHERE user_id=$1 AND kind='account'", [accountId],
+    )).rows[0];
+    expect(retryTask).toMatchObject({ status: 'failed', attempts: 1 });
+    const retryAt = new Date(retryTask.next_attempt_at);
+    const early = await runPhotoCleanupBatch(createDatabase(pool), store, { now: new Date(retryAt.getTime() - 1) });
+    expect(early.accountsPurged).toBe(0);
+    const retried = await runPhotoCleanupBatch(createDatabase(pool), store, { now: new Date(retryAt.getTime() + 1) });
+    expect(retried).toMatchObject({ removed: 1, failed: 0, accountsPurged: 1 });
+    expect(state.removed).toEqual([accountKey]);
+    expect((await pool.query('SELECT id FROM "user" WHERE id=$1', [accountId])).rows).toHaveLength(0);
+  });
 });
