@@ -46,4 +46,5 @@ Run from `carin-app/`:
 Integrate C18, then exercise upload, job creation, resume, retry, and result rendering
 on the agreed demo device. TSK 19 remains `started` pending review.
 
-Commit SHA and final worktree status will be recorded after commit.
+Implementation commit: `fe1a4e84b6277f23ad60b8b3829a7e4060dc4bc8` on
+`feat/c19-capture-mobile`. Worktree was clean after that commit. No push was made.
