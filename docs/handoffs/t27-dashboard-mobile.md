@@ -6,9 +6,9 @@ Changes and affected files:
 
 - `carin-app/components/dashboard/dashboard-screen.tsx` displays a distinct visible identity for each recurring-attention group and loads the first linked consumption detail to show its reason when the exact rule and condition match.
 - `carin-app/lib/dashboard/presentation.ts` provides stable-in-list fallback labels (`Kelompok perhatian N`) and exact-pair reason lookup; group IDs use tuple encoding to avoid delimiter collisions. The presentation test covers distinct group labels, matching reasons, and linked records.
-- `carin-app/lib/dashboard/use-dashboard.ts` listens to shared connectivity state and refreshes only on offline-to-online transitions while the home tab remains focused. `carin-app/lib/data/network.ts` keeps stale data visibly labeled as `Cache` while a reconnect read is pending.
+- `carin-app/lib/dashboard/use-dashboard.ts` listens to shared connectivity state and refreshes only on offline-to-online transitions while the home tab remains focused. Tab focus, reconnect, and AppState refreshes share the `refetchDashboard` helper in `carin-app/lib/dashboard/reconnect.ts`, which sets TanStack Query's `cancelRefetch: false` so overlapping triggers reuse the in-flight read. `carin-app/lib/data/network.ts` keeps stale data visibly labeled as `Cache` while a reconnect read is pending.
 - `carin-app/lib/dashboard/dashboard-query.integration.test.ts` exercises the mobile repository and manual-consumption actions across an in-memory HTTP boundary for empty, create, edit, delete, and scan-only states.
-- `carin-app/lib/dashboard/reconnect.unit.test.ts` and the dashboard query integration regression cover the focused reconnect condition and stale-cache → reconnect → successful refresh sequence.
+- `carin-app/lib/dashboard/reconnect.unit.test.ts` and the dashboard query integration regression cover the focused reconnect condition and stale-cache → reconnect → successful refresh sequence. The integration regression overlaps reconnect and AppState refreshes and asserts the pair causes exactly one GET.
 
 Verification:
 

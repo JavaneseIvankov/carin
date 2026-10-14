@@ -7,7 +7,7 @@ import { createManualConsumptionActions } from '@/lib/consumptions/manual-action
 import { staleReadLabel, type Connectivity } from '@/lib/data/network';
 import type { DataScope, StorageAdapter } from '@/lib/data/scope';
 import { scopeKey } from '@/lib/data/scope';
-import { shouldRefetchDashboardOnReconnect } from './reconnect';
+import { refetchDashboard, shouldRefetchDashboardOnReconnect } from './reconnect';
 import {
   formatDashboardDate,
   getDailyIntakeSummary,
@@ -312,12 +312,14 @@ describe('dashboard consumer API refresh', () => {
       },
     });
     let deferNextResponse = false;
+    let dashboardReads = 0;
     let signalRefreshStarted: (() => void) | undefined;
     let releaseRefresh: (() => void) | undefined;
     const refreshStarted = new Promise<void>((resolve) => {
       signalRefreshStarted = resolve;
     });
     const fetcher = (async () => {
+      dashboardReads += 1;
       if (deferNextResponse) {
         deferNextResponse = false;
         signalRefreshStarted?.();
@@ -367,15 +369,20 @@ describe('dashboard consumer API refresh', () => {
         homeIsFocused
       );
       expect(shouldRefetch).toBe(true);
-      const refetch = shouldRefetch ? observer.refetch() : Promise.resolve();
+      const reconnectRefetch = shouldRefetch
+        ? refetchDashboard(observer.refetch)
+        : Promise.resolve();
       await refreshStarted;
+      const appStateRefetch = refetchDashboard(observer.refetch);
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
+      expect(dashboardReads).toBe(2);
 
       const stillCached = observer.getCurrentResult().data!;
       expect(stillCached).toMatchObject({ stale: true, data: { consumptionCount: 1 } });
       expect(staleReadLabel(stillCached.updatedAt, connectivity)).toContain('Cache');
 
       releaseRefresh?.();
-      await refetch;
+      await Promise.all([reconnectRefetch, appStateRefetch]);
       expect(observer.getCurrentResult().data).toMatchObject({
         stale: false,
         data: { consumptionCount: 2, totals: { energyKcal: 240 } },

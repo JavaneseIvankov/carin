@@ -1,6 +1,6 @@
 import { useAppRead } from '@/lib/api/query';
 import { useAppData } from '@/lib/data/provider';
-import { shouldRefetchDashboardOnReconnect } from './reconnect';
+import { refetchDashboard, shouldRefetchDashboardOnReconnect } from './reconnect';
 import { AppState } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import * as React from 'react';
@@ -20,7 +20,7 @@ export function useDashboard() {
   useFocusEffect(
     React.useCallback(() => {
       homeIsFocused.current = true;
-      if (hasFocused.current) void refetchRef.current();
+      if (hasFocused.current) void refetchDashboard(refetchRef.current);
       hasFocused.current = true;
       return () => {
         homeIsFocused.current = false;
@@ -32,13 +32,13 @@ export function useDashboard() {
     const previous = previousConnectivity.current;
     previousConnectivity.current = connectivity;
     if (shouldRefetchDashboardOnReconnect(previous, connectivity, homeIsFocused.current)) {
-      void refetchRef.current();
+      void refetchDashboard(refetchRef.current);
     }
   }, [connectivity]);
 
   React.useEffect(() => {
     const subscription = AppState.addEventListener('change', (state) => {
-      if (state === 'active') void refetchRef.current();
+      if (state === 'active') void refetchDashboard(refetchRef.current);
     });
     return () => subscription.remove();
   }, []);
