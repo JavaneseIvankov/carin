@@ -42,13 +42,19 @@ type PhotoConfirmationApi = {
 };
 
 type PhotoConfirmationActions = {
-  create: (draftId: string, body: components['schemas']['ConsumptionCreate']) => Promise<Consumption>;
+  create: (
+    draftId: string,
+    body: components['schemas']['ConsumptionCreate']
+  ) => Promise<Consumption>;
   clearCreate: (draftId: string) => Promise<void>;
 };
 
 const FALLBACK_TIME_ZONE = 'Asia/Jakarta';
 
-export function photoConfirmationDraftName(scanId: string, occurrence: PhotoConfirmationOccurrence) {
+export function photoConfirmationDraftName(
+  scanId: string,
+  occurrence: PhotoConfirmationOccurrence
+) {
   return `photo-consumption:create:${scanId}:${occurrence}`;
 }
 
@@ -100,6 +106,8 @@ export function createPhotoConfirmationFlow(options: {
   let snapshot: PhotoConfirmationSnapshot = { availability: 'loading' };
   let submitInFlight = false;
   let persistQueue = Promise.resolve();
+  let lifecycleGeneration = 0;
+  let loadGeneration = 0;
 
   const setSnapshot = (next: PhotoConfirmationSnapshot) => {
     snapshot = next;
@@ -110,15 +118,29 @@ export function createPhotoConfirmationFlow(options: {
     const scanRead = await options.api.getScan(options.scanId);
     const scan = scanRead.data;
     if (options.occurrence === 'default_confirmation' && scan.defaultConsumptionId) {
-      return { scan, latestJob: undefined, resultId: scan.latestResultId ?? undefined, result: undefined, stale: scanRead.stale };
+      return {
+        scan,
+        latestJob: undefined,
+        resultId: scan.latestResultId ?? undefined,
+        result: undefined,
+        stale: scanRead.stale,
+      };
     }
     if (scanRead.stale) {
-      return { scan, latestJob: undefined, resultId: scan.latestResultId ?? undefined, result: undefined, stale: true };
+      return {
+        scan,
+        latestJob: undefined,
+        resultId: scan.latestResultId ?? undefined,
+        result: undefined,
+        stale: true,
+      };
     }
 
     const [jobRead, resultRead] = await Promise.all([
       options.api.getAnalysisJob(scan.latestJobId),
-      scan.latestResultId ? options.api.getAnalysisResult(scan.latestResultId) : Promise.resolve(undefined),
+      scan.latestResultId
+        ? options.api.getAnalysisResult(scan.latestResultId)
+        : Promise.resolve(undefined),
     ]);
     return {
       scan,
@@ -174,11 +196,20 @@ export function createPhotoConfirmationFlow(options: {
         loadError: undefined,
       });
     } catch (error) {
-      return setSnapshot({ ...snapshot, availability: 'unavailable', submitMessage: message, loadError: error });
+      return setSnapshot({
+        ...snapshot,
+        availability: 'unavailable',
+        submitMessage: message,
+        loadError: error,
+      });
     }
   }
 
   async function load() {
+    const routeGeneration = lifecycleGeneration;
+    const requestGeneration = ++loadGeneration;
+    const isCurrent = () =>
+      routeGeneration === lifecycleGeneration && requestGeneration === loadGeneration;
     setSnapshot({ availability: 'loading' });
     try {
       const [timeZoneRead, sources, persistedRecord] = await Promise.all([
@@ -186,6 +217,7 @@ export function createPhotoConfirmationFlow(options: {
         loadCurrentSources(),
         store.load<SavedPhotoDraft>(options.scope, draftName),
       ]);
+      if (!isCurrent()) return snapshot;
       let record = persistedRecord;
       let availability = availabilityFor(sources);
 
@@ -201,7 +233,8 @@ export function createPhotoConfirmationFlow(options: {
             scan: sources.scan,
             latestJob: sources.latestJob,
             record,
-            submitMessage: 'Hasil analisis berubah. Draft lama tetap tersimpan; mulai ulang dari hasil terbaru untuk melanjutkan.',
+            submitMessage:
+              'Hasil analisis berubah. Draft lama tetap tersimpan; mulai ulang dari hasil terbaru untuk melanjutkan.',
           });
         }
         if (record) {
@@ -219,8 +252,14 @@ export function createPhotoConfirmationFlow(options: {
             }
             record = { ...record, timeZone: timeZoneRead.value };
             await store.save(options.scope, draftName, record);
+            if (!isCurrent()) return snapshot;
           }
-          return setSnapshot({ availability, scan: sources.scan, latestJob: sources.latestJob, record });
+          return setSnapshot({
+            availability,
+            scan: sources.scan,
+            latestJob: sources.latestJob,
+            record,
+          });
         }
         if ('error' in timeZoneRead) {
           return setSnapshot({
@@ -239,6 +278,7 @@ export function createPhotoConfirmationFlow(options: {
             form: createPhotoConfirmationDraft(sources.result, now(), timeZoneRead.value),
           };
           await store.save(options.scope, draftName, record);
+          if (!isCurrent()) return snapshot;
         }
       }
 
@@ -249,6 +289,7 @@ export function createPhotoConfirmationFlow(options: {
         ...(record ? { record } : {}),
       });
     } catch (error) {
+      if (!isCurrent()) return snapshot;
       return setSnapshot({ availability: 'unavailable', loadError: error });
     }
   }
@@ -314,19 +355,29 @@ export function createPhotoConfirmationFlow(options: {
     if (options.connectivity() !== 'online') {
       return setSnapshot({
         ...snapshot,
-        submitMessage: 'Perlu koneksi internet untuk menyimpan catatan konsumsi. Draft Anda tetap tersimpan.',
+        submitMessage:
+          'Perlu koneksi internet untuk menyimpan catatan konsumsi. Draft Anda tetap tersimpan.',
       });
     }
 
     submitInFlight = true;
+    const routeGeneration = lifecycleGeneration;
+    const isCurrent = () => routeGeneration === lifecycleGeneration;
     const currentRecord = { ...snapshot.record, form };
-    setSnapshot({ ...snapshot, record: currentRecord, submitMessage: undefined, conflict: undefined });
+    setSnapshot({
+      ...snapshot,
+      record: currentRecord,
+      submitMessage: undefined,
+      conflict: undefined,
+    });
     try {
       await persistQueue.catch(() => {});
       await store.save(options.scope, draftName, currentRecord);
+      if (!isCurrent()) return snapshot;
 
       // Re-read all server-owned source state immediately before building the write.
       const sources = await loadCurrentSources();
+      if (!isCurrent()) return snapshot;
       const availability = availabilityFor(sources);
       if (
         availability !== 'confirm' ||
@@ -359,6 +410,7 @@ export function createPhotoConfirmationFlow(options: {
       }
 
       const saved = await options.actions.create(currentRecord.draftId, payload.value);
+      if (!isCurrent()) return snapshot;
       try {
         await store.remove(options.scope, draftName);
         await options.actions.clearCreate(currentRecord.draftId);
@@ -375,20 +427,32 @@ export function createPhotoConfirmationFlow(options: {
         submitMessage: undefined,
       });
     } catch (error) {
+      if (!isCurrent()) return snapshot;
       if (error instanceof ApiError && error.code === 'ANALYSIS_PENDING') {
-        return refreshSources('Perbaikan analisis masih berlangsung. Tunggu sampai selesai sebelum menyimpan.');
+        return refreshSources(
+          'Perbaikan analisis masih berlangsung. Tunggu sampai selesai sebelum menyimpan.'
+        );
       }
       if (error instanceof ApiError && error.code === 'SOURCE_REVISION_CONFLICT') {
-        return refreshSources('Hasil analisis berubah. Draft Anda tetap tersimpan; muat hasil terbaru sebelum menyimpan.');
+        return refreshSources(
+          'Hasil analisis berubah. Draft Anda tetap tersimpan; muat hasil terbaru sebelum menyimpan.'
+        );
       }
       if (error instanceof ApiError && error.code === 'CONSUMPTION_ALREADY_CONFIRMED') {
-        const refreshed = await refreshSources('Catatan default sudah tersimpan. Anda dapat membukanya atau mencatat konsumsi baru.');
+        const refreshed = await refreshSources(
+          'Catatan default sudah tersimpan. Anda dapat membukanya atau mencatat konsumsi baru.'
+        );
         if (refreshed.scan?.defaultConsumptionId) {
-          return setSnapshot({ ...refreshed, availability: 'open_existing', conflict: 'already_confirmed' });
+          return setSnapshot({
+            ...refreshed,
+            availability: 'open_existing',
+            conflict: 'already_confirmed',
+          });
         }
         return setSnapshot({
           ...refreshed,
-          availability: refreshed.availability === 'correction_pending' ? 'correction_pending' : 'unavailable',
+          availability:
+            refreshed.availability === 'correction_pending' ? 'correction_pending' : 'unavailable',
           conflict: 'already_confirmed',
           submitMessage: refreshed.loadError
             ? 'Catatan mungkin sudah tersimpan, tetapi belum dapat dimuat. Coba muat ulang.'
@@ -409,6 +473,9 @@ export function createPhotoConfirmationFlow(options: {
   }
 
   return {
+    invalidate: () => {
+      lifecycleGeneration += 1;
+    },
     load,
     refresh: load,
     updateDraft,

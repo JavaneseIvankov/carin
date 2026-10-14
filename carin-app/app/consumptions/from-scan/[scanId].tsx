@@ -98,7 +98,8 @@ export default function PhotoConsumptionConfirmation() {
     owner: FlowInstance | null;
     snapshot: PhotoConfirmationSnapshot;
   }>({ owner: null, snapshot: { availability: 'loading' } });
-  const snapshot = screenState.owner === flow ? screenState.snapshot : { availability: 'loading' as const };
+  const snapshot =
+    screenState.owner === flow ? screenState.snapshot : { availability: 'loading' as const };
   const [submittingOwner, setSubmittingOwner] = React.useState<FlowInstance | null>(null);
   const isSubmitting = flow !== null && submittingOwner === flow;
 
@@ -112,7 +113,11 @@ export default function PhotoConsumptionConfirmation() {
   const load = React.useCallback(() => {
     const owner = flow;
     if (!owner) return;
-    void routeGuard.run(owner, () => owner.load(), (next) => commitSnapshot(owner, next));
+    void routeGuard.run(
+      owner,
+      () => owner.load(),
+      (next) => commitSnapshot(owner, next)
+    );
   }, [flow, routeGuard, commitSnapshot]);
 
   useFocusEffect(
@@ -122,6 +127,7 @@ export default function PhotoConsumptionConfirmation() {
       load();
       return () => {
         routeGuard.deactivate(flow);
+        flow.invalidate();
         setSubmittingOwner((current) => (current === flow ? null : current));
       };
     }, [flow, load, routeGuard])
@@ -143,19 +149,28 @@ export default function PhotoConsumptionConfirmation() {
 
   const submit = async (form: NonNullable<typeof snapshot.record>['form']) => {
     const owner = flow;
-    if (!owner || !routeGuard.isActive(owner) || screenState.owner !== owner || isSubmitting) return;
+    if (!owner || !routeGuard.isActive(owner) || screenState.owner !== owner || isSubmitting)
+      return;
     setSubmittingOwner(owner);
-    await routeGuard.run(owner, () => owner.submit(form), (next) => {
-      setSubmittingOwner((current) => (current === owner ? null : current));
-      commitSnapshot(owner, next);
-      if (next.savedId) openConsumption(next.savedId);
-    });
+    await routeGuard.run(
+      owner,
+      () => owner.submit(form),
+      (next) => {
+        setSubmittingOwner((current) => (current === owner ? null : current));
+        commitSnapshot(owner, next);
+        if (next.savedId) openConsumption(next.savedId);
+      }
+    );
   };
 
   const restartFromLatestResult = async () => {
     const owner = flow;
     if (!owner || !routeGuard.isActive(owner) || screenState.owner !== owner) return;
-    await routeGuard.run(owner, () => owner.restartFromLatestResult(), (next) => commitSnapshot(owner, next));
+    await routeGuard.run(
+      owner,
+      () => owner.restartFromLatestResult(),
+      (next) => commitSnapshot(owner, next)
+    );
   };
 
   const openConsumption = (id: string) => {
@@ -211,7 +226,9 @@ export default function PhotoConsumptionConfirmation() {
             <Text>Kembali</Text>
           </Button>
           <Text variant="h2">
-            {snapshot.availability === 'open_existing' ? 'Konsumsi sudah dicatat' : 'Konfirmasi konsumsi'}
+            {snapshot.availability === 'open_existing'
+              ? 'Konsumsi sudah dicatat'
+              : 'Konfirmasi konsumsi'}
           </Text>
           {snapshot.availability === 'open_existing' && snapshot.scan?.defaultConsumptionId ? (
             <>
@@ -228,7 +245,8 @@ export default function PhotoConsumptionConfirmation() {
           ) : snapshot.availability === 'correction_pending' ? (
             <>
               <Text accessibilityRole="alert">
-                Perbaikan analisis masih berlangsung. Tunggu sampai selesai sebelum mengonfirmasi konsumsi.
+                Perbaikan analisis masih berlangsung. Tunggu sampai selesai sebelum mengonfirmasi
+                konsumsi.
               </Text>
               <Button variant="outline" className="min-h-12" onPress={load}>
                 <Text>Coba periksa lagi</Text>
@@ -254,9 +272,13 @@ export default function PhotoConsumptionConfirmation() {
               snapshot.latestJob?.status === 'completed' ? (
                 <>
                   <Text variant="muted">
-                    Draft lama tetap tersimpan sampai Anda memilih mengganti makanan dan porsi dari hasil terbaru.
+                    Draft lama tetap tersimpan sampai Anda memilih mengganti makanan dan porsi dari
+                    hasil terbaru.
                   </Text>
-                  <Button variant="outline" className="min-h-12" onPress={() => void restartFromLatestResult()}>
+                  <Button
+                    variant="outline"
+                    className="min-h-12"
+                    onPress={() => void restartFromLatestResult()}>
                     <Text>Ganti dengan hasil terbaru</Text>
                   </Button>
                 </>

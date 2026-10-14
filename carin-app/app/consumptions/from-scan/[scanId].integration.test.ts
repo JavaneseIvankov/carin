@@ -122,12 +122,14 @@ function errorWithCode(code: string) {
   return Object.assign(new ApiError(409, code), { code });
 }
 
-function createHarness(options: {
-  occurrence?: 'default_confirmation' | 'new_occurrence';
-  useLastSuccessfulResult?: boolean;
-  onCreate?: (input: unknown, remote: RemoteState) => Promise<unknown>;
-  storage?: MemoryStorage;
-} = {}) {
+function createHarness(
+  options: {
+    occurrence?: 'default_confirmation' | 'new_occurrence';
+    useLastSuccessfulResult?: boolean;
+    onCreate?: (input: unknown, remote: RemoteState) => Promise<unknown>;
+    storage?: MemoryStorage;
+  } = {}
+) {
   const storage = options.storage ?? new MemoryStorage();
   const remote: RemoteState = {
     me: { timezone: 'Asia/Jakarta' },
@@ -228,7 +230,11 @@ describe('photo consumption route flow', () => {
 
     const snapshot = await harness.flow.load();
     const afterSubmit = await harness.flow.submit(
-      createPhotoConfirmationDraft(makeResult(), new Date('2026-10-14T05:30:00.000Z'), 'Asia/Jakarta')
+      createPhotoConfirmationDraft(
+        makeResult(),
+        new Date('2026-10-14T05:30:00.000Z'),
+        'Asia/Jakarta'
+      )
     );
 
     expect(snapshot.availability).toBe('unavailable');
@@ -271,14 +277,20 @@ describe('photo consumption route flow', () => {
   it('opens a saved default record before analysis gates, while new occurrences remain gated', async () => {
     const defaultRecord = createHarness();
     defaultRecord.remote.scan = makeScan({ defaultConsumptionId: 'consumption-existing' });
-    defaultRecord.remote.jobs.set('job-1', makeJob({ status: 'processing', inputKind: 'correction', targetRevision: 3 }));
+    defaultRecord.remote.jobs.set(
+      'job-1',
+      makeJob({ status: 'processing', inputKind: 'correction', targetRevision: 3 })
+    );
     const openExisting = await defaultRecord.flow.load();
     expect(openExisting.availability).toBe('open_existing');
     expect(openExisting.scan?.defaultConsumptionId).toBe('consumption-existing');
     expect(defaultRecord.api.getAnalysisJob).not.toHaveBeenCalled();
 
     const newOccurrence = createHarness({ occurrence: 'new_occurrence' });
-    newOccurrence.remote.scan = makeScan({ defaultConsumptionId: 'consumption-existing', latestResultId: null });
+    newOccurrence.remote.scan = makeScan({
+      defaultConsumptionId: 'consumption-existing',
+      latestResultId: null,
+    });
     const gated = await newOccurrence.flow.load();
     expect(gated.availability).toBe('unavailable');
   });
@@ -355,9 +367,9 @@ describe('photo consumption route flow', () => {
     expect(saved.savedId).toBe('consumption-from-server');
     expect(calls).toHaveLength(2);
     expect(calls[0]).toEqual(calls[1]);
-    expect((calls[0] as { headers: { 'Idempotency-Key': string } }).headers['Idempotency-Key']).toBe(
-      '00000000-0000-4000-8000-000000000101'
-    );
+    expect(
+      (calls[0] as { headers: { 'Idempotency-Key': string } }).headers['Idempotency-Key']
+    ).toBe('00000000-0000-4000-8000-000000000101');
     expect(harness.makeKey).toHaveBeenCalledOnce();
     expect(
       await createDraftStore(harness.storage).load(
@@ -443,11 +455,18 @@ describe('photo consumption route flow', () => {
       onCreate: async (_input, remote) => {
         remote.scan = makeScan({ latestJobId: 'job-2', latestResultId: 'result-2' });
         remote.jobs.set('job-2', makeJob({ id: 'job-2', resultId: 'result-2' }));
-        remote.results.set('result-2', makeResult({ components: [{
-          ...makeResult().components[0],
-          id: 'component-2',
-          displayName: 'Nasi putih',
-        }] }));
+        remote.results.set(
+          'result-2',
+          makeResult({
+            components: [
+              {
+                ...makeResult().components[0],
+                id: 'component-2',
+                displayName: 'Nasi putih',
+              },
+            ],
+          })
+        );
         throw errorWithCode('SOURCE_REVISION_CONFLICT');
       },
     });
@@ -523,7 +542,15 @@ describe('photo confirmation conflict codes', () => {
       onUnauthorized: async () => {},
       fetcher: vi.fn(async () =>
         Response.json(
-          { error: { code: 'ANALYSIS_PENDING', message: 'pending', details: {}, requestId: 'req-1', retryable: true } },
+          {
+            error: {
+              code: 'ANALYSIS_PENDING',
+              message: 'pending',
+              details: {},
+              requestId: 'req-1',
+              retryable: true,
+            },
+          },
           { status: 409 }
         )
       ) as unknown as typeof fetch,
@@ -557,6 +584,91 @@ describe('photo confirmation conflict codes', () => {
 });
 
 describe('photo confirmation route identity', () => {
+  it('keeps the refocused load as the flow snapshot when an older load finishes last', async () => {
+    const harness = createHarness({ occurrence: 'new_occurrence' });
+    const guard = createPhotoConfirmationRouteGuard();
+    let releaseOld!: () => void;
+    const oldMe = new Promise<ReturnType<typeof read<{ timezone: string }>>>((resolve) => {
+      releaseOld = () => resolve(read({ timezone: 'Asia/Jakarta' }));
+    });
+    harness.api.getMe.mockImplementationOnce(() => oldMe);
+    const committed: string[] = [];
+    guard.activate(harness.flow);
+    const oldLoad = guard.run(
+      harness.flow,
+      () => harness.flow.load(),
+      (next) => {
+        committed.push(next.availability);
+      }
+    );
+
+    guard.deactivate(harness.flow);
+    harness.flow.invalidate();
+    guard.activate(harness.flow);
+    const currentLoad = await guard.run(
+      harness.flow,
+      () => harness.flow.load(),
+      (next) => {
+        committed.push(next.availability);
+      }
+    );
+    expect(currentLoad.status).toBe('current');
+    expect(harness.flow.getSnapshot().availability).toBe('confirm');
+
+    releaseOld();
+    expect((await oldLoad).status).toBe('stale');
+    expect(committed).toEqual(['confirm']);
+    expect(harness.flow.getSnapshot()).toEqual(currentLoad.value);
+  });
+
+  it('retains a successful blurred submit for same-key replay without stale navigation', async () => {
+    let acknowledge!: () => void;
+    const firstSave = new Promise<{ id: string }>((resolve) => {
+      acknowledge = () => resolve({ id: 'consumption-saved' });
+    });
+    let saves = 0;
+    const harness = createHarness({
+      occurrence: 'new_occurrence',
+      onCreate: async () => {
+        saves += 1;
+        return saves === 1 ? firstSave : { id: 'consumption-saved' };
+      },
+    });
+    const loaded = await harness.flow.load();
+    const guard = createPhotoConfirmationRouteGuard();
+    const navigate = vi.fn();
+    guard.activate(harness.flow);
+    const submit = guard.run(
+      harness.flow,
+      () => harness.flow.submit(loaded.record!.form),
+      (next) => {
+        if (next.savedId) navigate(next.savedId);
+      }
+    );
+    await vi.waitFor(() => expect(harness.create).toHaveBeenCalledOnce());
+
+    guard.deactivate(harness.flow);
+    harness.flow.invalidate();
+    acknowledge();
+    expect((await submit).status).toBe('stale');
+    expect(navigate).not.toHaveBeenCalled();
+    expect(
+      await createDraftStore(harness.storage).load(
+        scope,
+        photoConfirmationDraftName('scan-1', 'new_occurrence')
+      )
+    ).toEqual(loaded.record);
+
+    guard.activate(harness.flow);
+    const reopened = await harness.flow.load();
+    expect(reopened.record?.draftId).toBe(loaded.record?.draftId);
+    const replayed = await harness.flow.submit(reopened.record!.form);
+    expect(replayed.savedId).toBe('consumption-saved');
+    expect(harness.makeKey).toHaveBeenCalledOnce();
+    expect(harness.create).toHaveBeenCalledTimes(2);
+    expect(harness.create.mock.calls[0]).toEqual(harness.create.mock.calls[1]);
+  });
+
   it('ignores deferred load and submit completions after the route blurs', async () => {
     const guard = createPhotoConfirmationRouteGuard();
     const route = {};
@@ -572,11 +684,19 @@ describe('photo confirmation route identity', () => {
     const navigate = vi.fn();
     guard.activate(route);
 
-    const load = guard.run(route, () => pendingLoad, (value) => committed.push(`load:${value}`));
-    const submit = guard.run(route, () => pendingSubmit, (value) => {
-      committed.push(`submit:${value}`);
-      navigate(value);
-    });
+    const load = guard.run(
+      route,
+      () => pendingLoad,
+      (value) => committed.push(`load:${value}`)
+    );
+    const submit = guard.run(
+      route,
+      () => pendingSubmit,
+      (value) => {
+        committed.push(`submit:${value}`);
+        navigate(value);
+      }
+    );
 
     guard.deactivate(route);
     resolveLoad('late load');
@@ -602,7 +722,11 @@ describe('photo confirmation route identity', () => {
     const committed: string[] = [];
     guard.activate(oldRoute);
 
-    const oldLoad = guard.run(oldRoute, () => oldLoadValue, (value) => committed.push(value));
+    const oldLoad = guard.run(
+      oldRoute,
+      () => oldLoadValue,
+      (value) => committed.push(value)
+    );
     guard.activate(activeRoute);
     const currentLoad = await guard.run(
       activeRoute,
