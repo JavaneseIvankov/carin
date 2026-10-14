@@ -5,8 +5,8 @@ export function resolvePhotoMimeType(
   uri: string,
   fileName?: string | null
 ): 'image/jpeg' | 'image/png' | null {
-  const normalizedMimeType = mimeType?.split(';', 1)[0]?.trim().toLowerCase();
-  if (normalizedMimeType) {
+  if (mimeType !== null && mimeType !== undefined) {
+    const normalizedMimeType = mimeType.split(';', 1)[0]?.trim().toLowerCase();
     return supportedPhotoMimeTypes.has(normalizedMimeType)
       ? (normalizedMimeType as 'image/jpeg' | 'image/png')
       : null;
