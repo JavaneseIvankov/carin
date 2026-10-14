@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { Pool } from 'pg';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../../src/app.js';
 import { createAuthRuntime, type AuthMail } from '../../src/auth/runtime.js';
 import { createDatabase } from '../../src/db/client.js';
@@ -226,5 +226,81 @@ describe('Better Auth registration boundary', () => {
     const cookie = await verifyAndSignIn(email);
     await pool.query('UPDATE "user" SET email_verified=false WHERE email=$1', [email]);
     expect((await app.request('/api/v1/me', { headers: { cookie } })).status).toBe(403);
+  });
+
+  it('sends verification at most once per email in 60 seconds across client IPs', async () => {
+    const email = `${randomUUID()}@example.invalid`;
+    await register(email, '1976-10-14');
+    const before = mail.filter((item) => item.kind === 'verification' && item.to === email).length;
+    for (const ip of [randomUUID(), randomUUID()]) {
+      const response = await app.request('/api/auth/send-verification-email', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-forwarded-for': ip },
+        body: JSON.stringify({ email }),
+      });
+      expect(response.status).toBe(200);
+      expect(await response.json()).toEqual({ status: true });
+    }
+    expect(mail.filter((item) => item.kind === 'verification' && item.to === email)).toHaveLength(before);
+    const key = `verification-email:${createHash('sha256').update(email).digest('hex')}`;
+    await pool.query('UPDATE rate_limit SET last_request=$1 WHERE key=$2', [Date.now() - 59_000, key]);
+    const tooSoon = await app.request('/api/auth/send-verification-email', {
+      method: 'POST', headers: { 'content-type': 'application/json', 'x-forwarded-for': randomUUID() },
+      body: JSON.stringify({ email }),
+    });
+    expect(tooSoon.status).toBe(200);
+    expect(mail.filter((item) => item.kind === 'verification' && item.to === email)).toHaveLength(before);
+    await pool.query("DELETE FROM rate_limit WHERE key NOT LIKE 'verification-email:%'");
+    await pool.query('UPDATE rate_limit SET last_request=$1 WHERE key=$2', [Date.now() - 60_000, key]);
+    const allowed = await app.request('/api/auth/send-verification-email', {
+      method: 'POST', headers: { 'content-type': 'application/json', 'x-forwarded-for': randomUUID() },
+      body: JSON.stringify({ email }),
+    });
+    expect(allowed.status).toBe(200);
+    expect(mail.filter((item) => item.kind === 'verification' && item.to === email)).toHaveLength(before + 1);
+  });
+
+  it('rejects expired verification links', async () => {
+    const email = `${randomUUID()}@example.invalid`;
+    await register(email, '1976-10-14');
+    const token = mail.at(-1)!.token;
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(Date.now() + 3_601_000);
+    try {
+      const expired = await app.request(`/api/auth/verify-email?token=${encodeURIComponent(token)}`);
+      expect(expired.status).toBeGreaterThanOrEqual(400);
+      expect((await pool.query('SELECT email_verified FROM "user" WHERE email=$1', [email])).rows[0].email_verified).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('disables the vendor delete-user endpoint', async () => {
+    const email = `${randomUUID()}@example.invalid`;
+    await register(email, '1976-10-14');
+    const cookie = await verifyAndSignIn(email);
+    const response = await app.request('/api/auth/delete-user', {
+      method: 'POST', headers: { cookie, origin: 'carin://', 'content-type': 'application/json' },
+      body: JSON.stringify({ password: 'password123' }),
+    });
+    expect(response.status).toBeGreaterThanOrEqual(400);
+    expect((await pool.query('SELECT id FROM "user" WHERE email=$1', [email])).rowCount).toBe(1);
+  });
+
+  it('revokes existing sessions when the password is reset', async () => {
+    const email = `${randomUUID()}@example.invalid`;
+    await register(email, '1976-10-14');
+    const cookie = await verifyAndSignIn(email);
+    const requested = await app.request('/api/auth/request-password-reset', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email }),
+    });
+    expect(requested.status).toBe(200);
+    const token = mail.at(-1)!.token;
+    const reset = await app.request('/api/auth/reset-password', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ token, newPassword: 'replacement123' }),
+    });
+    expect(reset.status).toBe(200);
+    expect((await app.request('/api/v1/me', { headers: { cookie } })).status).toBe(401);
   });
 });

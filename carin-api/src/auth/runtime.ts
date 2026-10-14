@@ -1,4 +1,6 @@
 import { betterAuth } from 'better-auth';
+import { createHash } from 'node:crypto';
+import { sql } from 'drizzle-orm';
 import type { Database } from '../db/client.js';
 import type { SessionResolver } from '../http/access.js';
 import type { Session } from '../http/types.js';
@@ -32,6 +34,19 @@ export function createAuthRuntime({
   trustedOrigins,
   sendEmail,
 }: AuthRuntimeOptions): AuthRuntime {
+  const sendVerificationWithCooldown = async (mail: AuthMail): Promise<void> => {
+    const key = `verification-email:${createHash('sha256').update(mail.to.trim().toLowerCase()).digest('hex')}`;
+    const now = Date.now();
+    const claimed = await db.execute(sql`
+      INSERT INTO rate_limit (key, count, last_request)
+      VALUES (${key}, 1, ${now})
+      ON CONFLICT (key) DO UPDATE SET last_request = EXCLUDED.last_request
+      WHERE rate_limit.last_request <= EXCLUDED.last_request - 60000
+      RETURNING key
+    `);
+    if (claimed.rowCount) await sendEmail(mail);
+  };
+
   const auth = betterAuth({
     ...authOptions,
     baseURL,
@@ -42,7 +57,7 @@ export function createAuthRuntime({
     emailVerification: {
       ...authOptions.emailVerification,
       sendVerificationEmail: async ({ user, url, token }) =>
-        sendEmail({ kind: 'verification', to: user.email, url, token }),
+        sendVerificationWithCooldown({ kind: 'verification', to: user.email, url, token }),
     },
     emailAndPassword: {
       ...authOptions.emailAndPassword,
