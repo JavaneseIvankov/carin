@@ -19,6 +19,10 @@ All experiment reports and operational notes are kept under [`docs/`](docs/):
 | Document | Description |
 | --- | --- |
 | [docs/SMOKE_TEST_2026-10-14.md](docs/SMOKE_TEST_2026-10-14.md) | Initial Alibaba 5-sample live smoke test report (Qwen 3.7 Flash) |
+| [docs/QWEN37_STAGED_ABLATION_2026-10-14.md](docs/QWEN37_STAGED_ABLATION_2026-10-14.md) | Nine A1–A6 variants on the paired five-image pilot, with fixed Qwen3.7 controls |
+| [docs/QWEN37_COMBO_CPU_PILOT_2026-10-14.md](docs/QWEN37_COMBO_CPU_PILOT_2026-10-14.md) | A1V1 + A6V1 CPU-client pilot; pooled/normalized MAE rankings and mean latency |
+| [docs/QWEN38_A1_PAIRED_2026-10-14.md](docs/QWEN38_A1_PAIRED_2026-10-14.md) | Qwen3.8 Max vs Flash using identical A1V1/A1V2 prompts; paired MAE and average latency |
+| [docs/A1V1_BENCHMARK25_2026-10-14.md](docs/A1V1_BENCHMARK25_2026-10-14.md) | 25 images per model with shared A1V1 prompt v2 + strict JSON Schema; numeric coverage, full MAE, latency and tokens |
 | [docs/QWEN38_MAX_COMPARISON_2026-10-14.md](docs/QWEN38_MAX_COMPARISON_2026-10-14.md) | Paired smoke test comparison of Qwen 3.8 Max vs Qwen 3.7 Flash |
 | [docs/OMNIFOOD_3050_SMOKE_TEST_2026-10-14.md](docs/OMNIFOOD_3050_SMOKE_TEST_2026-10-14.md) | Local OmniFood8K (FP32 & INT8) evaluation on RTX 3050 Laptop GPU |
 | [docs/HF_FOOD_ANALYSIS.md](docs/HF_FOOD_ANALYSIS.md) | Ateeqq/food-analysis hosted model preflight and smoke runner |

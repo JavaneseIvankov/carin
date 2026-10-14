@@ -1,0 +1,35 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "is_food": {"type": "boolean"},
+    "container_diameter_cm": {"type": ["number", "null"]},
+    "apparent_volume_cm3": {"type": ["number", "null"]},
+    "weight_g": {"type": ["number", "null"]},
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {"type": "string"},
+          "mass_g": {"type": ["number", "null"]}
+        },
+        "required": ["name", "mass_g"]
+      }
+    },
+    "prediction": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "energy_kcal": {"type": ["number", "null"]},
+        "protein_g": {"type": ["number", "null"]},
+        "carbohydrate_g": {"type": ["number", "null"]},
+        "fat_g": {"type": ["number", "null"]}
+      },
+      "required": ["energy_kcal", "protein_g", "carbohydrate_g", "fat_g"]
+    },
+    "limitations": {"type": "array", "items": {"type": "string"}}
+  },
+  "required": ["is_food", "container_diameter_cm", "apparent_volume_cm3", "weight_g", "components", "prediction", "limitations"]
+}

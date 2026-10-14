@@ -1,0 +1,239 @@
+{
+  "version": "usda-sr-legacy-ablation-v1",
+  "created_at": "2026-10-14T14:02:27.502708+00:00",
+  "license": "CC0-1.0",
+  "foods": [
+    {
+      "canonical_name": "Raspberries, raw",
+      "aliases": [
+        "raspberries",
+        "raspberry",
+        "fresh raspberries",
+        "raw raspberries",
+        "raspberries raw"
+      ],
+      "basis_grams": 100,
+      "per_100g": {
+        "energy_kcal": 52.0,
+        "protein_g": 1.2,
+        "carbohydrate_g": 11.94,
+        "fat_g": 0.65
+      },
+      "source": {
+        "provider": "USDA FoodData Central",
+        "fdc_id": 167755,
+        "data_type": "SR Legacy",
+        "publication_date": "2019-04-01",
+        "url": "https://fdc.nal.usda.gov/food-details/167755/nutrients",
+        "archive_url": "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_csv_2018-04.zip",
+        "archive_sha256": "b80817294b8850530aaedf2e515c02593b1824f763a0ff356e5c2081643e6fd0",
+        "release": "April 2018"
+      }
+    },
+    {
+      "canonical_name": "Watermelon, raw",
+      "aliases": [
+        "watermelon",
+        "raw watermelon",
+        "watermelon raw",
+        "watermelon cubes",
+        "fresh watermelon"
+      ],
+      "basis_grams": 100,
+      "per_100g": {
+        "energy_kcal": 30.0,
+        "protein_g": 0.61,
+        "carbohydrate_g": 7.55,
+        "fat_g": 0.15
+      },
+      "source": {
+        "provider": "USDA FoodData Central",
+        "fdc_id": 167765,
+        "data_type": "SR Legacy",
+        "publication_date": "2019-04-01",
+        "url": "https://fdc.nal.usda.gov/food-details/167765/nutrients",
+        "archive_url": "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_csv_2018-04.zip",
+        "archive_sha256": "b80817294b8850530aaedf2e515c02593b1824f763a0ff356e5c2081643e6fd0",
+        "release": "April 2018"
+      }
+    },
+    {
+      "canonical_name": "Melons, cantaloupe, raw",
+      "aliases": [
+        "cantaloupe",
+        "cantaloupe melon",
+        "cantaloupe cubes",
+        "raw cantaloupe",
+        "cantaloupe raw",
+        "orange melon"
+      ],
+      "basis_grams": 100,
+      "per_100g": {
+        "energy_kcal": 34.0,
+        "protein_g": 0.84,
+        "carbohydrate_g": 8.16,
+        "fat_g": 0.19
+      },
+      "source": {
+        "provider": "USDA FoodData Central",
+        "fdc_id": 169092,
+        "data_type": "SR Legacy",
+        "publication_date": "2019-04-01",
+        "url": "https://fdc.nal.usda.gov/food-details/169092/nutrients",
+        "archive_url": "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_csv_2018-04.zip",
+        "archive_sha256": "b80817294b8850530aaedf2e515c02593b1824f763a0ff356e5c2081643e6fd0",
+        "release": "April 2018"
+      }
+    },
+    {
+      "canonical_name": "Potatoes, baked, flesh and skin, without salt",
+      "aliases": [
+        "baked potato",
+        "baked potatoes",
+        "roasted potato",
+        "roasted potatoes",
+        "potatoes baked",
+        "baked potato with skin"
+      ],
+      "basis_grams": 100,
+      "per_100g": {
+        "energy_kcal": 93.0,
+        "protein_g": 2.5,
+        "carbohydrate_g": 21.15,
+        "fat_g": 0.13
+      },
+      "source": {
+        "provider": "USDA FoodData Central",
+        "fdc_id": 170093,
+        "data_type": "SR Legacy",
+        "publication_date": "2019-04-01",
+        "url": "https://fdc.nal.usda.gov/food-details/170093/nutrients",
+        "archive_url": "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_csv_2018-04.zip",
+        "archive_sha256": "b80817294b8850530aaedf2e515c02593b1824f763a0ff356e5c2081643e6fd0",
+        "release": "April 2018"
+      }
+    },
+    {
+      "canonical_name": "Potatoes, boiled, cooked without skin, flesh, without salt",
+      "aliases": [
+        "boiled potato",
+        "boiled potatoes",
+        "potatoes boiled",
+        "cooked potato",
+        "cooked potatoes"
+      ],
+      "basis_grams": 100,
+      "per_100g": {
+        "energy_kcal": 86.0,
+        "protein_g": 1.71,
+        "carbohydrate_g": 20.01,
+        "fat_g": 0.1
+      },
+      "source": {
+        "provider": "USDA FoodData Central",
+        "fdc_id": 170440,
+        "data_type": "SR Legacy",
+        "publication_date": "2019-04-01",
+        "url": "https://fdc.nal.usda.gov/food-details/170440/nutrients",
+        "archive_url": "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_csv_2018-04.zip",
+        "archive_sha256": "b80817294b8850530aaedf2e515c02593b1824f763a0ff356e5c2081643e6fd0",
+        "release": "April 2018"
+      }
+    },
+    {
+      "canonical_name": "Sweet potato, cooked, baked in skin, flesh, without salt",
+      "aliases": [
+        "baked sweet potato",
+        "roasted sweet potato",
+        "cooked sweet potato",
+        "sweet potatoes baked",
+        "roasted sweet potato cubes",
+        "sweet potato"
+      ],
+      "basis_grams": 100,
+      "per_100g": {
+        "energy_kcal": 90.0,
+        "protein_g": 2.01,
+        "carbohydrate_g": 20.71,
+        "fat_g": 0.15
+      },
+      "source": {
+        "provider": "USDA FoodData Central",
+        "fdc_id": 168483,
+        "data_type": "SR Legacy",
+        "publication_date": "2019-04-01",
+        "url": "https://fdc.nal.usda.gov/food-details/168483/nutrients",
+        "archive_url": "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_csv_2018-04.zip",
+        "archive_sha256": "b80817294b8850530aaedf2e515c02593b1824f763a0ff356e5c2081643e6fd0",
+        "release": "April 2018"
+      }
+    },
+    {
+      "canonical_name": "Rice, white, long-grain, regular, enriched, cooked",
+      "aliases": [
+        "cooked white rice",
+        "white rice cooked",
+        "cooked rice",
+        "steamed white rice",
+        "steamed rice",
+        "white rice"
+      ],
+      "basis_grams": 100,
+      "per_100g": {
+        "energy_kcal": 130.0,
+        "protein_g": 2.69,
+        "carbohydrate_g": 28.17,
+        "fat_g": 0.28
+      },
+      "source": {
+        "provider": "USDA FoodData Central",
+        "fdc_id": 168878,
+        "data_type": "SR Legacy",
+        "publication_date": "2019-04-01",
+        "url": "https://fdc.nal.usda.gov/food-details/168878/nutrients",
+        "archive_url": "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_csv_2018-04.zip",
+        "archive_sha256": "b80817294b8850530aaedf2e515c02593b1824f763a0ff356e5c2081643e6fd0",
+        "release": "April 2018"
+      }
+    },
+    {
+      "canonical_name": "Apples, raw, with skin (Includes foods for USDA's Food Distribution Program)",
+      "aliases": [
+        "apple",
+        "apples",
+        "raw apple",
+        "raw apples",
+        "apple chunks"
+      ],
+      "basis_grams": 100,
+      "per_100g": {
+        "energy_kcal": 52.0,
+        "protein_g": 0.26,
+        "carbohydrate_g": 13.81,
+        "fat_g": 0.17
+      },
+      "source": {
+        "provider": "USDA FoodData Central",
+        "fdc_id": 171688,
+        "data_type": "SR Legacy",
+        "publication_date": "2019-04-01",
+        "url": "https://fdc.nal.usda.gov/food-details/171688/nutrients",
+        "archive_url": "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_csv_2018-04.zip",
+        "archive_sha256": "b80817294b8850530aaedf2e515c02593b1824f763a0ff356e5c2081643e6fd0",
+        "release": "April 2018"
+      }
+    }
+  ],
+  "units": {
+    "energy_kcal": "kcal",
+    "protein_g": "g",
+    "carbohydrate_g": "g",
+    "fat_g": "g"
+  },
+  "limitations": [
+    "Experimental snapshot, not an approved T31 production catalog.",
+    "Aliases select reference preparations; actual recipe/oil/water content can differ.",
+    "No TKPI values are invented; unsupported Indonesian dishes remain unmatched.",
+    "No Nutrition5k or LeFood reference nutrient/weight labels were used to make this catalog."
+  ]
+}
