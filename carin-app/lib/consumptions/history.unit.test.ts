@@ -28,3 +28,22 @@ describe('consumption history pagination', () => {
     expect(getConsumptionHistoryItems(undefined)).toEqual([]);
   });
 });
+
+describe('consumption history filters', () => {
+  it('uses the local calendar window with an inclusive start and exclusive next-day end', () => {
+    const now = new Date(2026, 9, 14, 15, 30);
+    const input = createConsumptionHistoryPageInput('next', '7d', now);
+    expect(input.query).toEqual({
+      limit: 20,
+      cursor: 'next',
+      from: new Date(2026, 9, 8).toISOString(),
+      to: new Date(2026, 9, 15).toISOString(),
+    });
+    expect(createConsumptionHistoryPageInput(undefined, '30d', now).query?.from).toBe(
+      new Date(2026, 8, 15).toISOString()
+    );
+    expect(createConsumptionHistoryPageInput(undefined, 'all', now)).toEqual({
+      query: { limit: 20 },
+    });
+  });
+});
