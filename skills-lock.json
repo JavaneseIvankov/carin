@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "react-native-reusables": {
+      "source": "maikotrindade/awesome-react-native-skills",
+      "sourceType": "github",
+      "skillPath": "skills/react-native-reusables/SKILL.md",
+      "computedHash": "7cc5b2b8d44d525fe9070c33330096aa706527309fe9a2525561d1642926a4e6"
+    }
+  }
+}
