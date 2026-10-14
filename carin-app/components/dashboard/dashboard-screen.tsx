@@ -4,6 +4,7 @@ import { ServiceError } from '@/components/app/service-error';
 import { MissingFieldActions } from '@/components/profile/missing-field-actions';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
+import { useAppRead } from '@/lib/api/query';
 import { useAppData } from '@/lib/data/provider';
 import {
   formatDashboardDate,
@@ -11,11 +12,50 @@ import {
   getLatestExaminationCards,
   getNextActionTarget,
   getRecurringAttentionCards,
+  getRecurringAttentionReason,
 } from '@/lib/dashboard/presentation';
 import { useDashboard } from '@/lib/dashboard/use-dashboard';
 import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
+
+function RecurringAttentionCard({
+  attention,
+  onOpenLink,
+}: {
+  attention: ReturnType<typeof getRecurringAttentionCards>[number];
+  onOpenLink: (
+    href: ReturnType<typeof getRecurringAttentionCards>[number]['links'][number]['href']
+  ) => void;
+}) {
+  const firstConsumptionId = attention.links[0]?.id;
+  const detailQuery = useAppRead(
+    'getConsumption',
+    { path: { id: firstConsumptionId ?? '' } },
+    { enabled: Boolean(firstConsumptionId) }
+  );
+  const reason = detailQuery.data
+    ? getRecurringAttentionReason(attention, detailQuery.data.data)
+    : null;
+
+  return (
+    <View className="gap-2 rounded-lg border border-border p-3">
+      <Text variant="large">{attention.label}</Text>
+      {reason ? <Text variant="muted">{reason}</Text> : null}
+      <Text>Tercatat pada {attention.count} catatan konsumsi</Text>
+      {attention.links.map((link) => (
+        <Pressable
+          key={link.id}
+          className="min-h-11 justify-center"
+          accessibilityRole="link"
+          accessibilityLabel={`${link.label} dari ${attention.label}`}
+          onPress={() => onOpenLink(link.href)}>
+          <Text className="font-medium text-primary">{link.label} →</Text>
+        </Pressable>
+      ))}
+    </View>
+  );
+}
 
 export function DashboardScreen() {
   const router = useRouter();
@@ -133,19 +173,11 @@ export function DashboardScreen() {
             </View>
             {recurringAttentions.length ? (
               recurringAttentions.map((attention) => (
-                <View key={attention.id} className="gap-2 rounded-lg border border-border p-3">
-                  <Text>Tercatat pada {attention.count} catatan konsumsi</Text>
-                  {attention.links.map((link) => (
-                    <Pressable
-                      key={link.id}
-                      className="min-h-11 justify-center"
-                      accessibilityRole="link"
-                      accessibilityLabel={`${link.label} dari perhatian berulang`}
-                      onPress={() => router.push(link.href as Href)}>
-                      <Text className="font-medium text-primary">{link.label} →</Text>
-                    </Pressable>
-                  ))}
-                </View>
+                <RecurringAttentionCard
+                  key={attention.id}
+                  attention={attention}
+                  onOpenLink={(href) => router.push(href as Href)}
+                />
               ))
             ) : (
               <Text variant="muted">

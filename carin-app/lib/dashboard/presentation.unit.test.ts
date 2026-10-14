@@ -5,6 +5,7 @@ import {
   getLatestExaminationCards,
   getNextActionTarget,
   getRecurringAttentionCards,
+  getRecurringAttentionReason,
 } from './presentation';
 
 type Dashboard = components['schemas']['Dashboard'];
@@ -95,7 +96,7 @@ describe('dashboard mobile presentation', () => {
   });
 
   it('links every recurring-attention occurrence to its consumption detail', () => {
-    const [attention] = getRecurringAttentionCards(
+    const attentions = getRecurringAttentionCards(
       dashboard({
         recurringAttentions: [
           {
@@ -104,10 +105,22 @@ describe('dashboard mobile presentation', () => {
             count: 2,
             consumptionIds: ['consumption-a', 'consumption-b'],
           },
+          {
+            ruleId: 'rule-sugar',
+            conditionId: 'condition-diabetes',
+            count: 1,
+            consumptionIds: ['consumption-c'],
+          },
         ],
       })
     );
+    const [attention] = attentions;
 
+    expect(attention?.label).toBe('Kelompok perhatian 1');
+    expect(attentions.map(({ label }) => label)).toEqual([
+      'Kelompok perhatian 1',
+      'Kelompok perhatian 2',
+    ]);
     expect(attention?.count).toBe(2);
     expect(attention?.links).toEqual([
       {
@@ -121,6 +134,40 @@ describe('dashboard mobile presentation', () => {
         href: { pathname: '/consumptions/[id]', params: { id: 'consumption-b' } },
       },
     ]);
+  });
+
+  it('shows the human-readable reason belonging to the exact recurring rule and condition', () => {
+    const [attention] = getRecurringAttentionCards(
+      dashboard({
+        recurringAttentions: [
+          {
+            ruleId: 'rule-sodium',
+            conditionId: 'condition-hypertension',
+            count: 1,
+            consumptionIds: ['consumption-a'],
+          },
+        ],
+      })
+    );
+
+    expect(
+      getRecurringAttentionReason(attention!, {
+        snapshot: {
+          attentions: [
+            {
+              ruleId: 'rule-sodium',
+              conditionId: 'condition-other',
+              reason: 'Do not show a reason from another condition.',
+            },
+            {
+              ruleId: 'rule-sodium',
+              conditionId: 'condition-hypertension',
+              reason: 'Periksa kandungan natrium pada makanan ini.',
+            },
+          ],
+        },
+      })
+    ).toBe('Periksa kandungan natrium pada makanan ini.');
   });
 
   it('uses the recorded measurement date for each latest examination card', () => {

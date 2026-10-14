@@ -6,6 +6,11 @@ import { formatMeasuredAt, formatMeasurement, recordTitle } from '@/lib/exams/mo
 export type Dashboard = components['schemas']['Dashboard'];
 type NutrientKey = keyof Dashboard['totals'];
 type DashboardAction = Dashboard['nextActions'][number];
+type RecurringAttention = Dashboard['recurringAttentions'][number];
+type AttentionReason = Pick<
+  components['schemas']['ai__Attention'],
+  'ruleId' | 'conditionId' | 'reason'
+>;
 
 const nutrientDefinitions = [
   ['energyKcal', 'Energi', 'kkal'],
@@ -40,8 +45,11 @@ export function getDailyIntakeSummary(dashboard: Dashboard) {
 }
 
 export function getRecurringAttentionCards(dashboard: Dashboard) {
-  return dashboard.recurringAttentions.map((attention) => ({
+  return dashboard.recurringAttentions.map((attention, index) => ({
     id: `${attention.ruleId}:${attention.conditionId}`,
+    ruleId: attention.ruleId,
+    conditionId: attention.conditionId,
+    label: `Kelompok perhatian ${index + 1}`,
     count: attention.count,
     links: attention.consumptionIds.map((id, index) => ({
       id,
@@ -49,6 +57,16 @@ export function getRecurringAttentionCards(dashboard: Dashboard) {
       href: { pathname: '/consumptions/[id]' as const, params: { id } },
     })),
   }));
+}
+
+export function getRecurringAttentionReason(
+  attention: Pick<RecurringAttention, 'ruleId' | 'conditionId'>,
+  consumption: { snapshot: { attentions: AttentionReason[] } } | null | undefined
+) {
+  const reason = consumption?.snapshot.attentions.find(
+    (item) => item.ruleId === attention.ruleId && item.conditionId === attention.conditionId
+  )?.reason;
+  return reason?.trim() || null;
 }
 
 function examinationValue(record: components['schemas']['Examination']['record']) {
