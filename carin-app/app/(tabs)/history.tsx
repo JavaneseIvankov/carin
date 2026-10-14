@@ -1,4 +1,5 @@
 import { OnlineIndicator } from '@/components/app/online-indicator';
+import { ScanDeletionControl } from '@/components/food/scan-deletion-control';
 import { ServiceError } from '@/components/app/service-error';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
@@ -23,7 +24,7 @@ import {
   SCAN_HISTORY_PAGE_LIMIT,
 } from '@/lib/food/history';
 import { useInfiniteQuery, useQueries, useQueryClient } from '@tanstack/react-query';
-import { useFocusEffect, useRouter, type Href } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import * as React from 'react';
 import { ActivityIndicator, AppState, Pressable, ScrollView, View } from 'react-native';
 
@@ -36,10 +37,12 @@ const filters: { value: ConsumptionHistoryFilter; label: string }[] = [
 
 export default function History() {
   const router = useRouter();
+  const { tab: tabParam } = useLocalSearchParams<{ tab?: string }>();
   const { connectivity, scope } = useAppData();
   const repository = useAppRepository();
   const queryClient = useQueryClient();
-  const [tab, setTab] = React.useState<HistoryTab>('consumption');
+  const [selectedTab, setSelectedTab] = React.useState<HistoryTab>('consumption');
+  const tab: HistoryTab = tabParam === 'analysis' ? 'analysis' : selectedTab;
   const [filter, setFilter] = React.useState<ConsumptionHistoryFilter>('all');
   const [filterNow, setFilterNow] = React.useState(() => new Date());
   const range = getHistoryDateRange(filter, filterNow);
@@ -126,7 +129,10 @@ export default function History() {
               key={entry.value}
               accessibilityRole="tab"
               accessibilityState={{ selected: tab === entry.value }}
-              onPress={() => setTab(entry.value)}
+              onPress={() => {
+                setSelectedTab(entry.value);
+                if (tabParam) router.setParams({ tab: undefined });
+              }}
               className={`min-h-12 flex-1 items-center justify-center rounded-xl border p-3 ${tab === entry.value ? 'border-primary bg-primary' : 'border-border bg-card'}`}>
               <Text className={tab === entry.value ? 'text-primary-foreground' : ''}>
                 {entry.label}
@@ -281,6 +287,11 @@ export default function History() {
                         <Text>Buka catatan konsumsi</Text>
                       </Button>
                     ) : null}
+                    <ScanDeletionControl
+                      scanId={scan.id}
+                      jobId={scan.latestJobId}
+                      photoId={scan.photoId}
+                    />
                   </View>
                 );
               })

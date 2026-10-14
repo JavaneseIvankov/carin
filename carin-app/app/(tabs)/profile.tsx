@@ -208,6 +208,18 @@ export default function ProfileScreen() {
       <Button variant="outline" onPress={() => void leaveAccount()}>
         <Text>Keluar dari akun</Text>
       </Button>
+      <View className="gap-2 rounded-xl border border-destructive/40 p-4">
+        <Text variant="h4">Penghapusan data</Text>
+        <Text variant="muted">
+          Hapus akun dan data, atau hapus satu hasil analisis beserta foto sumbernya.
+        </Text>
+        <Button
+          variant="destructive"
+          className="min-h-12"
+          onPress={() => router.push('/account/delete' as Href)}>
+          <Text>Hapus akun dan data</Text>
+        </Button>
+      </View>
     </ScrollView>
   );
 }

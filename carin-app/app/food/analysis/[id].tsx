@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { ScanDeletionControl } from '@/components/food/scan-deletion-control';
 import { Text } from '@/components/ui/text';
 import { useAppRead, useAppRepository } from '@/lib/api/query';
 import type { components } from '@/lib/api/generated/app-api';
@@ -487,6 +488,14 @@ export default function AnalysisResultScreen() {
             {consumptionActions?.message ? (
               <Text variant="muted">{consumptionActions.message}</Text>
             ) : null}
+            <ScanDeletionControl
+              scanId={job.scanId}
+              jobId={job.id}
+              photoId={actionScan?.photoId}
+              onDeleted={() =>
+                router.replace({ pathname: '/(tabs)/history', params: { tab: 'analysis' } })
+              }
+            />
           </View>
         ) : null}
 
