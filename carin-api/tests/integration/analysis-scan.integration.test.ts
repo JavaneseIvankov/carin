@@ -365,7 +365,10 @@ describe('C18 scan and analysis API', () => {
       });
     } finally {
       await pool.query('UPDATE catalog_version SET is_current=false WHERE version=$1', [missingAuthorityVersion]);
-      await pool.query('UPDATE catalog_version SET is_current=true WHERE version=$1', [catalogVersion]);
+      await pool.query(
+        'UPDATE catalog_version SET is_current=true, activation_generation=activation_generation+1 WHERE version=$1',
+        [catalogVersion],
+      );
     }
   });
 

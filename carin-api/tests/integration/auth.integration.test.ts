@@ -501,7 +501,7 @@ describe('Better Auth registration boundary', () => {
     await pool.query('DELETE FROM rate_limit');
     const failedDelivery = createAuthRuntime({
       db: createDatabase(pool), baseURL: 'http://test.local',
-      secret: 'test-secret-that-is-long-enough-for-auth', trustedOrigins: ['carin://'],
+      secret: 'test-secret-that-is-long-enough-for-auth', trustedOrigins: ['carin://'], appEnv: 'dev',
       sendEmail: async () => { throw new Error('test delivery failed'); },
     });
     const failingApp = createApp({ readiness: async () => true, auth: failedDelivery.auth });

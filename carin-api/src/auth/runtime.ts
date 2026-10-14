@@ -112,14 +112,15 @@ export function createAuthRuntime({
     },
     emailAndPassword: {
       ...authOptions.emailAndPassword,
-      sendResetPassword: async ({ user, token }) =>
-        deliverAuthMail({
+      sendResetPassword: async ({ user, token }) => {
+        await deliverAuthMail({
           kind: 'password-reset',
           userId: user.id,
           to: user.email,
           url: createResetLandingUrl(token, baseURL),
           token,
-        }),
+        });
+      },
     },
   });
 
@@ -158,11 +159,19 @@ export function createAuthRuntime({
       response = await run(request);
     }
 
-    if (state.queueFailed && request.method === 'POST' && url.pathname.endsWith('/sign-up/email')) {
-      return Response.json(
-        { code: 'AUTH_EMAIL_QUEUE_FAILED', message: 'Registration could not be completed. Please try again.' },
-        { status: 503 },
-      );
+    if (state.queueFailed && request.method === 'POST') {
+      if (url.pathname.endsWith('/sign-up/email')) {
+        return Response.json(
+          { code: 'AUTH_EMAIL_QUEUE_FAILED', message: 'Registration could not be completed. Please try again.' },
+          { status: 503 },
+        );
+      }
+      if (url.pathname.endsWith('/send-verification-email')) {
+        return Response.json(
+          { code: 'AUTH_EMAIL_QUEUE_FAILED', message: 'Verification email could not be sent. Please try again.' },
+          { status: 503 },
+        );
+      }
     }
     return response;
   };
