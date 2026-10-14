@@ -14,8 +14,8 @@ Changes and affected files:
 
 Verification: From `carin-app/`, `pnpm run contracts:check`, `pnpm run typecheck`, `pnpm run lint`, `pnpm run test:unit` (20 files, 127 tests), and `pnpm run test:integration` (7 files, 34 tests) all passed. From the worktree root, `git diff --check` passed. The manual routes/editor have no camera, photo-upload, or scan-analysis imports. T22 branch includes the parent-merged C21 API commit `73c6047`; C22 app changes were based on the preserved C19 app files from `234c1fd`.
 
-Unverified work / blockers: No Android or iOS device/Expo interaction session was available, and tests use the app repository boundary rather than a live backend/AI service. Parent/reviewer should exercise create/detail/edit/delete and load-more flows and verify platform layout/accessibility before changing T22 from `started`.
+Unverified work / blockers: No Android or iOS device/Expo interaction session was available, and tests use the app repository boundary rather than a live backend/AI service. Device layout and accessibility checks remain for a platform-enabled review.
 
-Next step: Independent re-review of the deleted-photo and paginated-history fixes, then mobile/device checks. Keep T22 `started` until those checks are accepted.
+Next step: Parent review of the completed implementation; run Android/iOS interaction checks when a device or Expo session is available.
 
-Worktree state: Original implementation is committed on `feat/c22-manual-consumption-mobile`; deleted-photo and pagination follow-up is pending commit; C21 merge is included; nothing was pushed.
+Worktree state: `feat/c22-manual-consumption-mobile` is clean. Original implementation is `cebb88b`, reviewer fixes are `9b00bb3`, and this handoff refresh follows. Independent review approved `9b00bb3`; C21 merge is included; nothing was pushed.
