@@ -170,9 +170,11 @@ export async function listAllActiveExaminations(
   return db.select().from(examination).where(and(
     eq(examination.userId, userId), isNull(examination.deletedAt),
   )).orderBy(
-    desc(examination.measuredOn),
+    // Timed readings have a comparable instant across timezones. Date-only
+    // readings stay in a lower-precision group and retain their civil date.
     sql`(${examination.measuredTime} IS NULL) ASC`,
-    sql`(${examination.measuredOn} + ${examination.measuredTime}::time) AT TIME ZONE ${examination.timezone} DESC NULLS LAST`,
+    sql`CASE WHEN ${examination.measuredTime} IS NOT NULL THEN (${examination.measuredOn} + ${examination.measuredTime}::time) AT TIME ZONE ${examination.timezone} END DESC NULLS LAST`,
+    desc(examination.measuredOn),
     desc(examination.createdAt),
     desc(examination.id),
   );

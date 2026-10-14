@@ -240,6 +240,8 @@ describe('dashboard API', () => {
     await seedConsumption(other, { consumedAt: '2026-03-08T12:00:00.000Z', state: 'not_requested' });
     const oldPressureId = randomUUID();
     const laterNewYorkClockId = randomUUID();
+    const laterLosAngelesClockId = randomUUID();
+    const newerLocalDateButEarlierInstantId = randomUUID();
     const latestPressureId = randomUUID();
     const cholesterolId = randomUUID();
     await pool.query(
@@ -248,8 +250,10 @@ describe('dashboard API', () => {
        ($1,$2,1,'pressure',NULL,NULL,'pressure','2026-03-07','23:00','America/New_York',NULL,120,80,'mmHg'),
        ($3,$2,1,'pressure',NULL,NULL,'pressure','2026-03-08','13:00','America/New_York',NULL,118,78,'mmHg'),
        ($4,$2,1,'pressure',NULL,NULL,'pressure','2026-03-08','11:00','America/Los_Angeles',NULL,117,77,'mmHg'),
-       ($5,$2,1,'cholesterol','total',NULL,'cholesterol:total','2026-03-06',NULL,'America/New_York',200,NULL,NULL,'mg/dL')`,
-      [oldPressureId, owner.userId, laterNewYorkClockId, latestPressureId, cholesterolId],
+       ($5,$2,1,'pressure',NULL,NULL,'pressure','2026-03-09','00:30','Asia/Tokyo',NULL,116,76,'mmHg'),
+       ($6,$2,1,'pressure',NULL,NULL,'pressure','2026-03-08','23:30','America/Los_Angeles',NULL,115,75,'mmHg'),
+       ($7,$2,1,'cholesterol','total',NULL,'cholesterol:total','2026-03-06',NULL,'America/New_York',200,NULL,NULL,'mg/dL')`,
+      [oldPressureId, owner.userId, laterNewYorkClockId, laterLosAngelesClockId, newerLocalDateButEarlierInstantId, latestPressureId, cholesterolId],
     );
     const response = await appFor(owner).request('/api/v1/dashboard?date=2026-03-08', {
       headers: { 'x-test-user': owner.userId },

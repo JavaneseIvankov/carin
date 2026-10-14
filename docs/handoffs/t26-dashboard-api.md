@@ -6,7 +6,7 @@ Changes and affected files:
 
 - Added the dashboard module: read-only repeatable-read repository, contract-validated route, nutrient and recurring-attention aggregation, neutral next actions, and latest examination per comparable series.
 - Added account-local date windows including daylight-saving boundaries and integration coverage for empty/non-empty days, boundary timestamps, pending evaluations, completed attention grouping, soft deletion, foreign-user isolation, and examination ordering.
-- Latest timed examinations on the same recorded local date are ordered by their timezone-adjusted instant; date-only readings remain lower precision and fall back to creation time and ID.
+- Timed examinations are ordered globally by their timezone-adjusted instant, including across local-date boundaries. Date-only readings stay in a lower-precision group ordered by recorded civil date, creation time, and ID; the query does not invent a measurement time.
 - Completed personal evaluation attentions are read from the owner-scoped `analysis_result` referenced by the active `consumption_evaluation`; the stored AI result is contract-validated and used only when evaluation state is completed. Frozen photo attention remains preserved in the consumption snapshot.
 - Mounted dashboard in the verified API app and wired the shared session resolver.
 - Merged the current C21 snapshot-consent fix (`331103d`) so dashboard attention reads only frozen, consent-gated consumption snapshots.
@@ -21,8 +21,8 @@ Verification from `carin-api/` in this worktree:
 - `carin-app/ pnpm run contracts:check`: generated mobile contracts match OpenAPI.
 - Focused dashboard integration: 4 tests passed, including result-backed attentions and cross-timezone ordering.
 
-Unverified work / blockers: Independent C26 re-review is pending. No live AI behavior is involved; dashboard calculations use stored snapshots only. No push or deployment was performed.
+Unverified work / blockers: Independent C26 re-review of the cross-date timezone follow-up is pending. No live AI behavior is involved; dashboard calculations use stored snapshots only. No push or deployment was performed.
 
 Next step: Obtain independent review, resolve any findings, rerun affected checks, then set T26 to `review` in `tsk` (never `done` without user approval).
 
-Worktree state: `feat/c26-dashboard-api`; initial implementation is committed at `d024fd7`, with the reviewer follow-ups awaiting commit/re-review. Preserve the existing merged C21 and C24 commits and all current user-owned files in the root `dev` worktree.
+Worktree state: `feat/c26-dashboard-api`; implementation is committed at `d024fd7`, `a21cc58`, and `8bdd49a`; latest reviewer follow-up awaits re-review. Preserve the existing merged C21 and C24 commits and all current user-owned files in the root `dev` worktree.
