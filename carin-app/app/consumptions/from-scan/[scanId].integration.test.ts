@@ -890,6 +890,71 @@ describe('photo confirmation route identity', () => {
     expect(
       await createDraftStore(storage).load(scope, `manual-request:create:${loaded.record!.draftId}`)
     ).not.toBeNull();
+    await harness.flow.submit(refocused.record!.form);
+    expect(harness.create.mock.calls[1]).toEqual(harness.create.mock.calls[0]);
+    expect(harness.makeKey).toHaveBeenCalledOnce();
+  });
+
+  it('restores the draft and request key if blur interrupts request-key cleanup', async () => {
+    let releaseKeyRemoval!: () => void;
+    let markKeyRemovalStarted!: () => void;
+    const keyRemovalStarted = new Promise<void>((resolve) => {
+      markKeyRemovalStarted = resolve;
+    });
+    const storage = new (class extends MemoryStorage {
+      override async removeItem(key: string) {
+        if (key.includes('manual-request%3Acreate')) {
+          markKeyRemovalStarted();
+          await new Promise<void>((resolve) => {
+            releaseKeyRemoval = resolve;
+          });
+        }
+        await super.removeItem(key);
+      }
+    })();
+    const harness = createHarness({ occurrence: 'new_occurrence', storage });
+    const loaded = await harness.flow.load();
+    const saved = await harness.flow.submit(loaded.record!.form);
+    const cleanup = harness.flow.finalizeSaved(saved.savedId!);
+    await keyRemovalStarted;
+
+    harness.flow.invalidate();
+    const refocusedLoad = harness.flow.load();
+    releaseKeyRemoval();
+    await cleanup;
+    const refocused = await refocusedLoad;
+
+    expect(refocused.record).toEqual(loaded.record);
+    expect(
+      await createDraftStore(storage).load(scope, `manual-request:create:${loaded.record!.draftId}`)
+    ).not.toBeNull();
+    await harness.flow.submit(refocused.record!.form);
+    expect(harness.create.mock.calls[1]).toEqual(harness.create.mock.calls[0]);
+    expect(harness.makeKey).toHaveBeenCalledOnce();
+  });
+
+  it('restores the draft and request key when request-key cleanup rejects', async () => {
+    const storage = new (class extends MemoryStorage {
+      override async removeItem(key: string) {
+        if (key.includes('manual-request%3Acreate')) throw new Error('request key removal failed');
+        await super.removeItem(key);
+      }
+    })();
+    const harness = createHarness({ occurrence: 'new_occurrence', storage });
+    const loaded = await harness.flow.load();
+    const saved = await harness.flow.submit(loaded.record!.form);
+
+    await harness.flow.finalizeSaved(saved.savedId!);
+    harness.flow.invalidate();
+    const reopened = await harness.flow.load();
+
+    expect(reopened.record).toEqual(loaded.record);
+    expect(
+      await createDraftStore(storage).load(scope, `manual-request:create:${loaded.record!.draftId}`)
+    ).not.toBeNull();
+    await harness.flow.submit(reopened.record!.form);
+    expect(harness.create.mock.calls[1]).toEqual(harness.create.mock.calls[0]);
+    expect(harness.makeKey).toHaveBeenCalledOnce();
   });
 
   it('ignores deferred load and submit completions after the route blurs', async () => {
