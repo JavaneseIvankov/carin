@@ -18,13 +18,20 @@ import {
 import {
   createCorrectionDraftWriter,
   disposeCorrectionDraftWriter,
+  canRetryFailedCorrection,
   getCorrectionScreenActions,
+  loadCorrectionDraft,
   persistCorrectionDraft,
 } from '@/lib/food/correction-screen';
 import { startAnalysisPolling } from '@/lib/food/analysis-polling';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
 import { ActivityIndicator, AppState, ScrollView, View } from 'react-native';
+
+type CorrectionSubmissionSnapshot = {
+  jobId: string;
+  components: CorrectionDraftComponent[];
+};
 
 export default function FoodCorrectionScreen() {
   const { id: routeId, sourceJobId: routeSourceJobId } = useLocalSearchParams<{
@@ -79,9 +86,17 @@ export default function FoodCorrectionScreen() {
   const refetchScan = scanQuery.refetch;
   const refetchLatestJob = latestJobQuery.refetch;
   const draftName = `food-correction:${scanId ?? ''}:${sourceJob?.resultId ?? ''}`;
+  const submissionSnapshotName = `${draftName}:submission`;
   const [draft, setDraft] = React.useState<CorrectionDraftComponent[]>([]);
   const draftRef = React.useRef(draft);
   const [draftInitialized, setDraftInitialized] = React.useState(false);
+  const [draftLoadError, setDraftLoadError] = React.useState(false);
+  const [draftLoadVersion, setDraftLoadVersion] = React.useState(0);
+  const [submissionSnapshot, setSubmissionSnapshot] =
+    React.useState<CorrectionSubmissionSnapshot | null>(null);
+  const [invalidPortionComponentIds, setInvalidPortionComponentIds] = React.useState<
+    Record<string, true>
+  >({});
   const [draftSaveError, setDraftSaveError] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
   const [retrying, setRetrying] = React.useState(false);
@@ -161,26 +176,48 @@ export default function FoodCorrectionScreen() {
     }
     initializedDraftName.current = draftName;
     let current = true;
-    void draftStore
-      .load<CorrectionDraftComponent[]>(scope, draftName)
-      .then((saved) => {
+    void Promise.all([
+      loadCorrectionDraft(
+        () => draftStore.load<CorrectionDraftComponent[]>(scope, draftName),
+        () => createCorrectionDraft(sourceResult)
+      ),
+      draftStore
+        .load<CorrectionSubmissionSnapshot>(scope, submissionSnapshotName)
+        .catch(() => null),
+    ])
+      .then(([savedDraft, savedSubmission]) => {
         if (!current) return;
-        const loadedDraft = Array.isArray(saved) ? saved : createCorrectionDraft(sourceResult);
+        const loadedDraft = Array.isArray(savedDraft)
+          ? savedDraft
+          : createCorrectionDraft(sourceResult);
         draftRef.current = loadedDraft;
         setDraft(loadedDraft);
+        setSubmissionSnapshot(
+          savedSubmission &&
+            typeof savedSubmission.jobId === 'string' &&
+            Array.isArray(savedSubmission.components)
+            ? savedSubmission
+            : null
+        );
+        setDraftLoadError(false);
         setDraftInitialized(true);
       })
       .catch(() => {
         if (!current) return;
-        const initialDraft = createCorrectionDraft(sourceResult);
-        draftRef.current = initialDraft;
-        setDraft(initialDraft);
-        setDraftInitialized(true);
+        setDraftLoadError(true);
       });
     return () => {
       current = false;
     };
-  }, [draftName, draftStore, scope, sourceJob?.resultId, sourceResult]);
+  }, [
+    draftLoadVersion,
+    draftName,
+    draftStore,
+    scope,
+    sourceJob?.resultId,
+    sourceResult,
+    submissionSnapshotName,
+  ]);
 
   React.useEffect(() => {
     if (!draftInitialized || navigationDone.current) return;
@@ -276,6 +313,7 @@ export default function FoodCorrectionScreen() {
       }
       if (scope && draftInitialized) {
         await draftStore.remove(scope, draftName).catch(() => {});
+        await draftStore.remove(scope, submissionSnapshotName).catch(() => {});
       }
       router.replace({ pathname: '/food/analysis/[id]', params: { id: latestJob.id } });
     })();
@@ -288,11 +326,24 @@ export default function FoodCorrectionScreen() {
     persistLatestDraft,
     router,
     scope,
+    submissionSnapshotName,
     successfulCorrection,
   ]);
 
   const allComponentsNamed =
     draft.length > 0 && draft.every((component) => component.displayName.trim());
+  const allPortionsValid = draft.every((component) => !invalidPortionComponentIds[component.id]);
+  const onPortionValidityChange = React.useCallback((componentId: string, valid: boolean) => {
+    setInvalidPortionComponentIds((current) => {
+      if (valid) {
+        if (!current[componentId]) return current;
+        const next = { ...current };
+        delete next[componentId];
+        return next;
+      }
+      return current[componentId] ? current : { ...current, [componentId]: true };
+    });
+  }, []);
   const canSubmit =
     !!actions &&
     !!scan &&
@@ -301,19 +352,34 @@ export default function FoodCorrectionScreen() {
     sourceIsCurrent &&
     draftInitialized &&
     allComponentsNamed &&
+    allPortionsValid &&
     !correctionPending &&
+    !retrying &&
     !submitting;
+  const matchesFailedPayload =
+    !!latestJob && canRetryFailedCorrection(draft, submissionSnapshot, latestJob.id);
+  const hasFailedPayloadSnapshot =
+    failedCorrection && !!latestJob && submissionSnapshot?.jobId === latestJob.id;
+  const canRetryFailedJob = failedCorrection && matchesFailedPayload && allPortionsValid;
+  const draftChangedSinceFailedJob =
+    failedCorrection && hasFailedPayloadSnapshot && !matchesFailedPayload;
+  const failedPayloadUnavailable = failedCorrection && !hasFailedPayloadSnapshot;
   const screenActions = getCorrectionScreenActions({
     canSubmit,
     correctionPending,
     sourceIsCurrent,
     submitting,
-    failedCorrection,
+    failedCorrection: canRetryFailedJob,
     retrying,
+    portionsValid: allPortionsValid,
   });
 
   const submit = async () => {
     if (!canSubmit || !actions || !scan || !sourceJob?.resultId || !sourceResult) return;
+    const submittedDraft = draft.map((component) => ({
+      ...component,
+      portion: { ...component.portion },
+    }));
     setSubmitting(true);
     setErrorMessage(null);
     try {
@@ -323,12 +389,21 @@ export default function FoodCorrectionScreen() {
         scan,
         sourceJob.resultId,
         sourceResult.catalogVersion,
-        draft
+        submittedDraft
       );
       if (job.scanId !== scan.id || job.targetType !== 'scan') {
         throw new Error('Respons koreksi tidak sesuai dengan scan ini.');
       }
       setAcceptedCorrectionJob({ job, acceptedAt: Date.now() });
+      const submittedSnapshot = { jobId: job.id, components: submittedDraft };
+      setSubmissionSnapshot(submittedSnapshot);
+      if (scope) {
+        try {
+          await draftStore.save(scope, submissionSnapshotName, submittedSnapshot);
+        } catch {
+          setSubmissionSnapshot(null);
+        }
+      }
       void refetchScan();
     } catch (error) {
       setErrorMessage(
@@ -343,12 +418,21 @@ export default function FoodCorrectionScreen() {
   };
 
   const retry = async () => {
-    if (!actions || !latestJob || retrying || !failedCorrection) return;
+    if (!actions || !latestJob || retrying || !canRetryFailedJob || !submissionSnapshot) return;
     setRetrying(true);
     setErrorMessage(null);
     try {
       const job = await actions.retry(latestJob.id);
       setAcceptedCorrectionJob({ job, acceptedAt: Date.now() });
+      const retriedSnapshot = { ...submissionSnapshot, jobId: job.id };
+      setSubmissionSnapshot(retriedSnapshot);
+      if (scope) {
+        try {
+          await draftStore.save(scope, submissionSnapshotName, retriedSnapshot);
+        } catch {
+          setSubmissionSnapshot(null);
+        }
+      }
       await Promise.all([refetchScan(), refetchLatestJob()]);
     } catch (error) {
       setErrorMessage(
@@ -375,19 +459,45 @@ export default function FoodCorrectionScreen() {
     });
   };
 
+  const retryDraftLoad = () => {
+    initializedDraftName.current = null;
+    setDraftLoadError(false);
+    setDraftLoadVersion((version) => version + 1);
+  };
+
   if (!sourceJobId || !scanId) {
     return (
       <View className="flex-1 gap-4 bg-background p-6">
         <Text variant="h2">Koreksi makanan</Text>
         <Text accessibilityRole="alert">Referensi hasil koreksi tidak lengkap.</Text>
-        <Button variant="outline" onPress={() => router.back()}>
+        <Button className="min-h-12" variant="outline" onPress={() => router.back()}>
           <Text>Kembali</Text>
         </Button>
       </View>
     );
   }
 
-  if (sourceJobQuery.isPending || scanQuery.isPending || !draftInitialized) {
+  if (sourceJobQuery.error || scanQuery.error) {
+    return (
+      <View className="flex-1 gap-4 bg-background p-6">
+        <Text variant="h2">Koreksi makanan</Text>
+        <Text accessibilityRole="alert">
+          Hasil sumber belum dapat dimuat. Versi katalog dan porsi lama tetap dipertahankan.
+        </Text>
+        <Button
+          className="min-h-12"
+          variant="outline"
+          onPress={() => void Promise.all([refetchSourceJob(), refetchScan()])}>
+          <Text>Muat ulang</Text>
+        </Button>
+        <Button className="min-h-12" variant="ghost" onPress={returnToOldResult}>
+          <Text>Kembali ke hasil sebelumnya</Text>
+        </Button>
+      </View>
+    );
+  }
+
+  if (sourceJobQuery.isPending || scanQuery.isPending) {
     return (
       <View className="flex-1 items-center justify-center gap-3 bg-background p-8">
         <ActivityIndicator accessibilityLabel="Memuat hasil koreksi" />
@@ -396,7 +506,7 @@ export default function FoodCorrectionScreen() {
     );
   }
 
-  if (sourceJobQuery.error || scanQuery.error || !sourceJob || !scan || !sourceResult) {
+  if (!sourceJob || !scan || !sourceResult) {
     return (
       <View className="flex-1 gap-4 bg-background p-6">
         <Text variant="h2">Koreksi makanan</Text>
@@ -404,13 +514,40 @@ export default function FoodCorrectionScreen() {
           Hasil sumber belum dapat dimuat. Versi katalog dan porsi lama tetap dipertahankan.
         </Text>
         <Button
+          className="min-h-12"
           variant="outline"
           onPress={() => void Promise.all([refetchSourceJob(), refetchScan()])}>
           <Text>Muat ulang</Text>
         </Button>
-        <Button variant="ghost" onPress={returnToOldResult}>
+        <Button className="min-h-12" variant="ghost" onPress={returnToOldResult}>
           <Text>Kembali ke hasil sebelumnya</Text>
         </Button>
+      </View>
+    );
+  }
+
+  if (draftLoadError) {
+    return (
+      <View className="flex-1 gap-4 bg-background p-6">
+        <Text variant="h2">Koreksi makanan</Text>
+        <Text accessibilityRole="alert">
+          Draft koreksi belum dapat dibaca. Muat ulang draft sebelum melanjutkan.
+        </Text>
+        <Button className="min-h-12" onPress={retryDraftLoad}>
+          <Text>Coba muat draft lagi</Text>
+        </Button>
+        <Button className="min-h-12" variant="ghost" onPress={returnToOldResult}>
+          <Text>Kembali ke hasil sebelumnya</Text>
+        </Button>
+      </View>
+    );
+  }
+
+  if (!draftInitialized) {
+    return (
+      <View className="flex-1 items-center justify-center gap-3 bg-background p-8">
+        <ActivityIndicator accessibilityLabel="Memuat hasil koreksi" />
+        <Text variant="muted">Memuat hasil dan porsi…</Text>
       </View>
     );
   }
@@ -437,6 +574,7 @@ export default function FoodCorrectionScreen() {
             </Text>
             <ActivityIndicator accessibilityLabel="Koreksi sedang diproses" />
             <Button
+              className="min-h-12"
               variant="outline"
               disabled={scanQuery.isFetching || latestJobQuery.isFetching}
               onPress={() => void Promise.all([refetchScan(), refetchLatestJob()])}>
@@ -451,21 +589,36 @@ export default function FoodCorrectionScreen() {
           </Text>
         ) : null}
 
-        {screenActions.retryVisible && latestJob ? (
+        {failedCorrection && latestJob ? (
           <View
             className="gap-3 rounded-xl border border-destructive/40 p-4"
             accessibilityRole="alert">
             <Text variant="large">Koreksi gagal; draft tetap tersimpan.</Text>
             <Text>{latestJob.error?.message ?? 'Hasil sebelumnya tetap dapat dibuka.'}</Text>
-            <Button onPress={retry} disabled={screenActions.retryDisabled}>
-              {retrying ? (
-                <ActivityIndicator color="white" />
-              ) : (
-                <Text>Coba ulang koreksi yang gagal</Text>
-              )}
-            </Button>
+            {draftChangedSinceFailedJob ? (
+              <Text>
+                Draft berubah setelah koreksi gagal. Perubahan terbaru akan dikirim sebagai koreksi
+                baru; coba ulang hanya tersedia untuk input yang gagal.
+              </Text>
+            ) : failedPayloadUnavailable ? (
+              <Text>
+                Input koreksi yang gagal tidak dapat dipastikan. Kirim draft ini sebagai koreksi
+                baru untuk menjaga perubahan terbaru.
+              </Text>
+            ) : !allPortionsValid ? (
+              <Text>Perbaiki angka porsi atau pilih Tidak tahu porsi sebelum mencoba ulang.</Text>
+            ) : null}
+            {screenActions.retryVisible ? (
+              <Button className="min-h-12" onPress={retry} disabled={screenActions.retryDisabled}>
+                {retrying ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <Text>Coba ulang koreksi yang gagal</Text>
+                )}
+              </Button>
+            ) : null}
             {screenActions.returnVisible ? (
-              <Button variant="outline" onPress={returnToOldResult}>
+              <Button className="min-h-12" variant="outline" onPress={returnToOldResult}>
                 <Text>Kembali ke hasil sebelumnya</Text>
               </Button>
             ) : null}
@@ -483,6 +636,7 @@ export default function FoodCorrectionScreen() {
           components={draft}
           catalogVersion={sourceResult.catalogVersion}
           disabled={screenActions.editorDisabled}
+          onPortionValidityChange={onPortionValidityChange}
           onChange={(nextDraft) => {
             draftRef.current = nextDraft;
             setDraft(nextDraft);
@@ -490,11 +644,19 @@ export default function FoodCorrectionScreen() {
           }}
         />
 
-        <Button onPress={submit} disabled={screenActions.submitDisabled}>
-          {submitting ? <ActivityIndicator color="white" /> : <Text>Kirim koreksi</Text>}
+        <Button className="min-h-12" onPress={submit} disabled={screenActions.submitDisabled}>
+          {submitting ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <Text>
+              {draftChangedSinceFailedJob || failedPayloadUnavailable
+                ? 'Kirim koreksi baru'
+                : 'Kirim koreksi'}
+            </Text>
+          )}
         </Button>
         {!failedCorrection && screenActions.returnVisible ? (
-          <Button variant="outline" onPress={returnToOldResult}>
+          <Button className="min-h-12" variant="outline" onPress={returnToOldResult}>
             <Text>Kembali ke hasil sebelumnya</Text>
           </Button>
         ) : null}

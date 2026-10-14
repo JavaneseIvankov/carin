@@ -6,6 +6,14 @@ import { useAppData } from '@/lib/data/provider';
 import { canConfirmSelectedScanResult, isCurrentScanResult } from '@/lib/food/correction';
 import { getResultScreenActions } from '@/lib/food/correction-screen';
 import {
+  createLatestAnalysisSnapshotRefreshCoordinator,
+  getActiveCorrectionStatus,
+  getCorrectionPollingStatus,
+  readLatestAnalysisSnapshot,
+  refreshAnalysisStateOnReconnect,
+  type ActiveCorrectionStatus,
+} from '@/lib/food/analysis-refresh';
+import {
   getAnalysisFailurePresentation,
   getAnalysisPresentation,
 } from '@/lib/food/analysis-presentation';
@@ -30,6 +38,11 @@ const attentionText = {
   insufficient_information: 'Informasi belum cukup untuk pertimbangan personal',
 } as const;
 
+type AnalysisActionSnapshot = {
+  scan: components['schemas']['Scan'];
+  latestJob: components['schemas']['AnalysisJob'];
+};
+
 export default function AnalysisResultScreen() {
   const { id: routeId } = useLocalSearchParams<{ id: string }>();
   const { returningToOldResult: returnParam } = useLocalSearchParams<{
@@ -39,6 +52,14 @@ export default function AnalysisResultScreen() {
   const router = useRouter();
   const repository = useAppRepository();
   const { connectivity } = useAppData();
+  const selectedRouteIdRef = React.useRef(id);
+  React.useLayoutEffect(() => {
+    selectedRouteIdRef.current = id;
+  }, [id]);
+  const [snapshotRefreshCoordinator] = React.useState(() =>
+    createLatestAnalysisSnapshotRefreshCoordinator<AnalysisActionSnapshot>()
+  );
+  const previousConnectivity = React.useRef(connectivity);
   const [actionState] = React.useState(() => createScanActionState());
   const actions = React.useMemo(
     () =>
@@ -57,41 +78,43 @@ export default function AnalysisResultScreen() {
   );
   const jobQuery = useAppRead('getAnalysisJob', { path: { id: id ?? '' } }, { enabled: !!id });
   const job = jobQuery.data?.data;
-  const [actionSnapshot, setActionSnapshot] = React.useState<{
-    scan: components['schemas']['Scan'];
-    latestJob: components['schemas']['AnalysisJob'];
-  } | null>(null);
+  const [actionSnapshot, setActionSnapshot] = React.useState<AnalysisActionSnapshot | null>(null);
+  const [retainedCorrectionStatus, setRetainedCorrectionStatus] =
+    React.useState<ActiveCorrectionStatus | null>(null);
   const refreshActionSnapshot = React.useCallback(async () => {
-    setActionSnapshot(null);
-    if (!repository || !id) return;
+    if (!repository || !id) return null;
     try {
-      const currentJob = await repository.read('getAnalysisJob', { path: { id } });
-      if (currentJob.stale || !currentJob.data.scanId) return;
-      const currentScan = await repository.read('getScan', {
-        path: { id: currentJob.data.scanId },
-      });
-      if (currentScan.stale) return;
-      const currentLatestJob = await repository.read('getAnalysisJob', {
-        path: { id: currentScan.data.latestJobId },
-      });
-      if (currentLatestJob.stale) return;
-      setActionSnapshot({ scan: currentScan.data, latestJob: currentLatestJob.data });
+      const snapshot = await snapshotRefreshCoordinator.refresh(
+        id,
+        () => selectedRouteIdRef.current,
+        () =>
+          readLatestAnalysisSnapshot(id, {
+            readJob: (jobId) => repository.read('getAnalysisJob', { path: { id: jobId } }),
+            readScan: (scanId) => repository.read('getScan', { path: { id: scanId } }),
+          }),
+        (latestSnapshot) => {
+          setActionSnapshot(latestSnapshot);
+          setRetainedCorrectionStatus(getActiveCorrectionStatus(latestSnapshot.latestJob));
+        }
+      );
+      return snapshot?.latestJob.status ?? null;
     } catch {
-      setActionSnapshot(null);
+      return null;
     }
-  }, [id, repository]);
+  }, [id, repository, snapshotRefreshCoordinator]);
   const actionScan = actionSnapshot?.scan;
   const actionLatestJob = actionSnapshot?.latestJob;
+  const activeCorrectionStatus = getCorrectionPollingStatus(
+    actionSnapshot,
+    retainedCorrectionStatus
+  );
   const latestResultIsCurrent = !!actionScan && !!job && isCurrentScanResult(actionScan, job);
   const canConfirm =
     !!actionScan &&
     !!job &&
     !!actionLatestJob &&
     canConfirmSelectedScanResult(actionScan, job, actionLatestJob, returnParam === 'true');
-  const correctionIsActive =
-    !!actionLatestJob &&
-    actionLatestJob.inputKind === 'correction' &&
-    (actionLatestJob.status === 'queued' || actionLatestJob.status === 'processing');
+  const correctionIsActive = !!activeCorrectionStatus;
   const screenActions = getResultScreenActions({
     latestResultIsCurrent,
     canConfirm,
@@ -135,8 +158,18 @@ export default function AnalysisResultScreen() {
   }, [id, refetchJob, refreshActionSnapshot]);
 
   React.useEffect(() => {
-    if (connectivity === 'online' && focused && foreground && id) void refetchJob();
-  }, [connectivity, focused, foreground, id, refetchJob]);
+    const wasConnected = previousConnectivity.current;
+    previousConnectivity.current = connectivity;
+    void refreshAnalysisStateOnReconnect({
+      previousConnectivity: wasConnected,
+      connectivity,
+      focused,
+      foreground,
+      hasJobId: !!id,
+      refetchJob,
+      refreshActionSnapshot,
+    });
+  }, [connectivity, focused, foreground, id, refetchJob, refreshActionSnapshot]);
 
   React.useEffect(() => {
     if (!jobStatus || !focused || !foreground) return;
@@ -150,6 +183,16 @@ export default function AnalysisResultScreen() {
       },
     });
   }, [jobStatus, focused, foreground, connectivity, refetchJob]);
+
+  React.useEffect(() => {
+    if (!activeCorrectionStatus || !focused || !foreground || !id) return;
+    return startAnalysisPolling({
+      initialStatus: activeCorrectionStatus,
+      getElapsedMs: () => (pollStartedAt.current ? Date.now() - pollStartedAt.current : 0),
+      shouldPoll: () => focused && foreground && connectivity !== 'offline',
+      refetch: refreshActionSnapshot,
+    });
+  }, [activeCorrectionStatus, connectivity, focused, foreground, id, refreshActionSnapshot]);
 
   const retry = async () => {
     if (!job || !actions || retrying) return;
@@ -183,10 +226,10 @@ export default function AnalysisResultScreen() {
         <Text accessibilityRole="alert">
           Analisis belum dapat dimuat. Periksa koneksi lalu coba lagi.
         </Text>
-        <Button variant="outline" onPress={() => void jobQuery.refetch()}>
+        <Button className="min-h-12" variant="outline" onPress={() => void jobQuery.refetch()}>
           <Text>Coba muat lagi</Text>
         </Button>
-        <Button variant="ghost" onPress={() => router.back()}>
+        <Button className="min-h-12" variant="ghost" onPress={() => router.back()}>
           <Text>Kembali</Text>
         </Button>
       </View>
@@ -198,7 +241,7 @@ export default function AnalysisResultScreen() {
       <View className="flex-1 gap-4 bg-background p-6">
         <Text variant="h2">Hasil analisis</Text>
         <Text>Analisis ini tidak ditemukan atau tidak dapat dibuka.</Text>
-        <Button variant="outline" onPress={() => router.back()}>
+        <Button className="min-h-12" variant="outline" onPress={() => router.back()}>
           <Text>Kembali</Text>
         </Button>
       </View>
@@ -241,7 +284,7 @@ export default function AnalysisResultScreen() {
             <Text variant="large">Analisis belum berhasil</Text>
             <Text>{failure.message}</Text>
             {failure.retryable ? (
-              <Button onPress={retry} disabled={retrying}>
+              <Button className="min-h-12" onPress={retry} disabled={retrying}>
                 {retrying ? <ActivityIndicator color="white" /> : <Text>Coba lagi</Text>}
               </Button>
             ) : null}
@@ -362,7 +405,10 @@ export default function AnalysisResultScreen() {
                     {source.kind} · {source.itemRef}
                   </Text>
                   {source.url ? (
-                    <Button variant="link" onPress={() => void Linking.openURL(source.url!)}>
+                    <Button
+                      className="min-h-12"
+                      variant="link"
+                      onPress={() => void Linking.openURL(source.url!)}>
                       <Text>Lihat sumber</Text>
                     </Button>
                   ) : null}
@@ -386,6 +432,7 @@ export default function AnalysisResultScreen() {
             <Text variant="h3">Tindakan hasil</Text>
             <Button
               variant="outline"
+              className="min-h-12"
               disabled={screenActions.correctionDisabled}
               onPress={() =>
                 router.push({
@@ -398,6 +445,7 @@ export default function AnalysisResultScreen() {
               </Text>
             </Button>
             <Button
+              className="min-h-12"
               disabled={screenActions.consumptionDisabled}
               onPress={() =>
                 router.push({
@@ -424,7 +472,11 @@ export default function AnalysisResultScreen() {
 
         <Button
           variant="outline"
-          onPress={() => void jobQuery.refetch()}
+          className="min-h-12"
+          onPress={() => {
+            void jobQuery.refetch();
+            void refreshActionSnapshot();
+          }}
           disabled={jobQuery.isFetching}>
           <Text>{jobQuery.isFetching ? 'Memuat…' : 'Muat status terbaru'}</Text>
         </Button>

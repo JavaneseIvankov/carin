@@ -1,3 +1,67 @@
+import type { CorrectionDraftComponent } from './correction';
+
+export function loadCorrectionDraft<T>(load: () => Promise<T | null>, create: () => T): Promise<T> {
+  return load().then((saved) => saved ?? create());
+}
+
+export function parseCorrectionQuantity(value: string): number | null {
+  const trimmed = value.trim();
+  if (!/^(?:\d+(?:[.,]\d+)?|[.,]\d+)$/.test(trimmed)) return null;
+  const quantity = Number(trimmed.replace(',', '.'));
+  return Number.isFinite(quantity) && quantity > 0 ? quantity : null;
+}
+
+export function updateCorrectionDraftQuantity(
+  component: CorrectionDraftComponent,
+  value: string,
+  mode: 'unknown' | 'g' | 'serving',
+  servingId: string | null
+): CorrectionDraftComponent | null {
+  const quantity = parseCorrectionQuantity(value);
+  if (!quantity || mode === 'unknown') return null;
+  if (mode === 'serving') {
+    if (!servingId) return null;
+    return {
+      ...component,
+      portion: { kind: 'known', quantity, servingId, unit: 'serving' },
+    };
+  }
+  return {
+    ...component,
+    portion: { kind: 'known', quantity, unit: 'g' },
+  };
+}
+
+function correctionDraftFingerprint(draft: CorrectionDraftComponent[]): string {
+  return JSON.stringify(
+    draft.map((component) => ({
+      id: component.id,
+      catalogFoodId: component.catalogFoodId,
+      displayName: component.displayName.trim(),
+      preparation: component.preparation,
+      portion:
+        component.portion.kind === 'unknown'
+          ? ['unknown']
+          : component.portion.unit === 'g'
+            ? ['known', 'g', component.portion.quantity]
+            : ['known', 'serving', component.portion.quantity, component.portion.servingId],
+    }))
+  );
+}
+
+export function canRetryFailedCorrection(
+  draft: CorrectionDraftComponent[],
+  snapshot: { jobId: string; components: CorrectionDraftComponent[] } | null,
+  failedJobId: string
+): boolean {
+  return (
+    !!snapshot &&
+    snapshot.jobId === failedJobId &&
+    Array.isArray(snapshot.components) &&
+    correctionDraftFingerprint(draft) === correctionDraftFingerprint(snapshot.components)
+  );
+}
+
 export function createCorrectionDraftWriter<T>(
   save: (value: T) => Promise<void>,
   delayMs = 250,
@@ -71,10 +135,17 @@ export function getCorrectionScreenActions(input: {
   submitting: boolean;
   failedCorrection: boolean;
   retrying: boolean;
+  portionsValid?: boolean;
 }) {
   return {
-    editorDisabled: input.correctionPending || !input.sourceIsCurrent,
-    submitDisabled: !input.canSubmit || input.correctionPending || input.submitting,
+    editorDisabled:
+      input.correctionPending || !input.sourceIsCurrent || input.submitting || input.retrying,
+    submitDisabled:
+      !input.canSubmit ||
+      input.correctionPending ||
+      input.submitting ||
+      input.retrying ||
+      !(input.portionsValid ?? true),
     retryVisible: input.failedCorrection,
     retryDisabled: input.retrying,
     returnVisible: true,

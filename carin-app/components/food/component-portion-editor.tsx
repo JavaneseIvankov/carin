@@ -5,6 +5,10 @@ import { useAppRead } from '@/lib/api/query';
 import type { components } from '@/lib/api/generated/app-api';
 import { createIdempotencyKey } from '@/lib/profile/profile';
 import { replaceCorrectionFood, type CorrectionDraftComponent } from '@/lib/food/correction';
+import {
+  parseCorrectionQuantity,
+  updateCorrectionDraftQuantity,
+} from '@/lib/food/correction-screen';
 import * as React from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
@@ -17,16 +21,19 @@ type Props = {
   catalogVersion: string;
   disabled?: boolean;
   onChange: (next: CorrectionDraftComponent) => void;
+  onPortionValidityChange: (componentId: string, valid: boolean) => void;
   onRemove: () => void;
 };
 
-function parseQuantity(value: string) {
-  if (!value.trim()) return null;
-  const quantity = Number(value.replace(',', '.'));
-  return Number.isFinite(quantity) && quantity > 0 ? quantity : null;
-}
-
-function FoodRow({ component, index, catalogVersion, disabled, onChange, onRemove }: Props) {
+function FoodRow({
+  component,
+  index,
+  catalogVersion,
+  disabled,
+  onChange,
+  onPortionValidityChange,
+  onRemove,
+}: Props) {
   const [search, setSearch] = React.useState(component.catalogFoodId ? component.displayName : '');
   const [selectedFoodOverride, setSelectedFoodOverride] = React.useState<Food | null>(null);
   const [quantityText, setQuantityText] = React.useState(
@@ -53,24 +60,9 @@ function FoodRow({ component, index, catalogVersion, disabled, onChange, onRemov
 
   const updateQuantity = (raw: string) => {
     setQuantityText(raw);
-    const quantity = parseQuantity(raw);
-    if (!quantity) {
-      onChange({ ...component, portion: { kind: 'unknown' } });
-      return;
-    }
-    if (portionMode === 'serving' && selectedServingId) {
-      onChange({
-        ...component,
-        portion: {
-          kind: 'known',
-          quantity,
-          servingId: selectedServingId,
-          unit: 'serving',
-        },
-      });
-    } else {
-      onChange({ ...component, portion: { kind: 'known', quantity, unit: 'g' } });
-    }
+    const updated = updateCorrectionDraftQuantity(component, raw, portionMode, selectedServingId);
+    onPortionValidityChange(component.id, !!updated);
+    if (updated) onChange(updated);
   };
 
   const chooseFood = (food: Food) => {
@@ -80,6 +72,7 @@ function FoodRow({ component, index, catalogVersion, disabled, onChange, onRemov
     setQuantityText('');
     setPortionMode('unknown');
     setSelectedServingId(null);
+    onPortionValidityChange(component.id, true);
     onChange(replaceCorrectionFood(component, food));
   };
 
@@ -87,6 +80,7 @@ function FoodRow({ component, index, catalogVersion, disabled, onChange, onRemov
     setPortionMode('serving');
     setSelectedServingId(serving.id);
     setQuantityText('1');
+    onPortionValidityChange(component.id, true);
     onChange({
       ...component,
       portion: { kind: 'known', quantity: 1, servingId: serving.id, unit: 'serving' },
@@ -97,14 +91,14 @@ function FoodRow({ component, index, catalogVersion, disabled, onChange, onRemov
     setPortionMode('g');
     setSelectedServingId(null);
     setQuantityText('');
-    onChange({ ...component, portion: { kind: 'unknown' } });
+    onPortionValidityChange(component.id, false);
   };
 
   return (
     <View className="gap-3 rounded-xl border border-border p-4">
       <View className="flex-row items-center justify-between gap-3">
         <Text variant="large">Komponen {index + 1}</Text>
-        <Button variant="ghost" disabled={disabled} onPress={onRemove}>
+        <Button className="min-h-12" variant="ghost" disabled={disabled} onPress={onRemove}>
           <Text>Hapus</Text>
         </Button>
       </View>
@@ -117,6 +111,7 @@ function FoodRow({ component, index, catalogVersion, disabled, onChange, onRemov
           setPortionMode('unknown');
           setSelectedServingId(null);
           setQuantityText('');
+          onPortionValidityChange(component.id, true);
           onChange({
             ...component,
             catalogFoodId: null,
@@ -146,6 +141,7 @@ function FoodRow({ component, index, catalogVersion, disabled, onChange, onRemov
         <Button
           key={food.id}
           variant="outline"
+          className="min-h-12"
           disabled={disabled || food.catalogVersion !== catalogVersion}
           onPress={() => chooseFood(food)}>
           <Text>
@@ -165,6 +161,7 @@ function FoodRow({ component, index, catalogVersion, disabled, onChange, onRemov
             <Button
               key={serving.id}
               variant="outline"
+              className="min-h-12"
               disabled={disabled}
               onPress={() => chooseServing(serving)}>
               <Text>
@@ -176,18 +173,21 @@ function FoodRow({ component, index, catalogVersion, disabled, onChange, onRemov
       ) : null}
       <View className="flex-row flex-wrap gap-2">
         <Button
-          variant={component.portion.kind === 'unknown' ? 'default' : 'outline'}
+          variant={portionMode === 'unknown' ? 'default' : 'outline'}
+          className="min-h-12"
           disabled={disabled}
           onPress={() => {
             setQuantityText('');
             setPortionMode('unknown');
             setSelectedServingId(null);
+            onPortionValidityChange(component.id, true);
             onChange({ ...component, portion: { kind: 'unknown' } });
           }}>
           <Text>Tidak tahu porsi</Text>
         </Button>
         <Button
           variant={portionMode === 'g' ? 'default' : 'outline'}
+          className="min-h-12"
           disabled={disabled}
           onPress={selectGramUnit}>
           <Text>Gram</Text>
@@ -200,6 +200,12 @@ function FoodRow({ component, index, catalogVersion, disabled, onChange, onRemov
           keyboardType="decimal-pad"
           value={quantityText}
           onChangeText={updateQuantity}
+          hint="Isi angka lebih dari 0, atau pilih Tidak tahu porsi."
+          error={
+            quantityText.length > 0 && parseCorrectionQuantity(quantityText) === null
+              ? 'Masukkan jumlah lebih dari 0.'
+              : undefined
+          }
           editable={!disabled}
         />
       ) : portionMode === 'g' ? (
@@ -209,6 +215,12 @@ function FoodRow({ component, index, catalogVersion, disabled, onChange, onRemov
           keyboardType="decimal-pad"
           value={quantityText}
           onChangeText={updateQuantity}
+          hint="Isi angka lebih dari 0, atau pilih Tidak tahu porsi."
+          error={
+            quantityText.length > 0 && parseCorrectionQuantity(quantityText) === null
+              ? 'Masukkan jumlah lebih dari 0.'
+              : undefined
+          }
           editable={!disabled}
         />
       ) : null}
@@ -224,11 +236,13 @@ export function ComponentPortionEditor({
   catalogVersion,
   disabled = false,
   onChange,
+  onPortionValidityChange,
 }: {
   components: CorrectionDraftComponent[];
   catalogVersion: string;
   disabled?: boolean;
   onChange: (next: CorrectionDraftComponent[]) => void;
+  onPortionValidityChange: (componentId: string, valid: boolean) => void;
 }) {
   return (
     <View className="gap-4">
@@ -239,6 +253,7 @@ export function ComponentPortionEditor({
           index={index}
           catalogVersion={catalogVersion}
           disabled={disabled}
+          onPortionValidityChange={onPortionValidityChange}
           onChange={(next) =>
             onChange(components.map((item) => (item.id === next.id ? next : item)))
           }
@@ -247,6 +262,7 @@ export function ComponentPortionEditor({
       ))}
       {components.length < 30 ? (
         <Button
+          className="min-h-12"
           variant="outline"
           disabled={disabled}
           onPress={() =>
