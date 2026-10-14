@@ -1,14 +1,16 @@
 import { and, desc, eq, getTableColumns, gt, isNull, lt, or, sql } from 'drizzle-orm';
 import type { Database } from '../../db/client.js';
 import { examination, idempotencyRecord, session, user } from '../../db/schema/index.js';
+import { getCalendarDayWindow } from '../../domain/time-window.js';
 import type { ExaminationRecord } from './types.js';
 
 export type ExaminationTransaction = Parameters<Parameters<Database['transaction']>[0]>[0];
 export type ExaminationRow = typeof examination.$inferSelect;
 export type ActiveExaminationRow = ExaminationRow & {
-  measurementInstant: Date | string | null;
-  measurementDayStart: Date | string;
-  measurementDayEnd: Date | string;
+  measurementInstant: string | null;
+  measurementDayStart: string;
+  measurementDayEnd: string;
+  createdAtExact: string;
 };
 
 export async function lockExaminationOwner(tx: ExaminationTransaction, userId: string) {
@@ -172,11 +174,11 @@ export async function listAllActiveExaminations(
   db: Database | ExaminationTransaction,
   userId: string,
 ): Promise<ActiveExaminationRow[]> {
-  return db.select({
+  const rows = await db.select({
     ...getTableColumns(examination),
-    measurementInstant: sql<Date | null>`CASE WHEN ${examination.measuredTime} IS NOT NULL THEN (${examination.measuredOn} + ${examination.measuredTime}::time) AT TIME ZONE ${examination.timezone} END`,
-    measurementDayStart: sql<Date>`(${examination.measuredOn}::timestamp) AT TIME ZONE ${examination.timezone}`,
-    measurementDayEnd: sql<Date>`((${examination.measuredOn} + 1)::timestamp) AT TIME ZONE ${examination.timezone}`,
+    measurementInstant: sql<string | null>`CASE WHEN ${examination.measuredTime} IS NOT NULL THEN
+      to_char(((${examination.measuredOn} + ${examination.measuredTime}::time) AT TIME ZONE ${examination.timezone}) AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') END`,
+    createdAtExact: sql<string>`to_char(${examination.createdAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
   }).from(examination).where(and(
     eq(examination.userId, userId), isNull(examination.deletedAt),
   )).orderBy(
@@ -185,24 +187,34 @@ export async function listAllActiveExaminations(
     desc(examination.createdAt),
     desc(examination.id),
   );
+  return rows.map((row) => {
+    const dayWindow = getCalendarDayWindow(row.measuredOn, row.timezone);
+    return {
+      ...row,
+      measurementDayStart: dayWindow.startAt,
+      measurementDayEnd: dayWindow.endAt,
+    };
+  });
 }
 
-function createdAfter(left: ExaminationRow, right: ExaminationRow): boolean {
-  const leftTime = left.createdAt.getTime();
-  const rightTime = right.createdAt.getTime();
+function createdAfter(left: ActiveExaminationRow, right: ActiveExaminationRow): boolean {
+  const leftTime = left.createdAtExact;
+  const rightTime = right.createdAtExact;
   return leftTime === rightTime ? left.id > right.id : leftTime > rightTime;
 }
 
-function compareCreatedNewestFirst(left: ExaminationRow, right: ExaminationRow): number {
-  const byCreation = right.createdAt.getTime() - left.createdAt.getTime();
-  if (byCreation !== 0) return byCreation;
-  return right.id.localeCompare(left.id);
+function sortableInstant(value: Date | string): string {
+  const instant = value instanceof Date ? value.toISOString() : value;
+  // The SQL formatter returns six fractional digits; Date.toISOString() only
+  // returns milliseconds, so pad those values before comparing lexically.
+  return instant.replace(/(\.\d{3})Z$/, '$1000Z');
 }
 
-function measurementTimestamp(value: Date | string): number {
-  const timestamp = value instanceof Date ? value.getTime() : Date.parse(value);
-  if (!Number.isFinite(timestamp)) throw new RangeError('Examination measurement timestamp is invalid');
-  return timestamp;
+function compareCreatedNewestFirst(left: ActiveExaminationRow, right: ActiveExaminationRow): number {
+  const leftCreation = left.createdAtExact;
+  const rightCreation = right.createdAtExact;
+  if (leftCreation !== rightCreation) return rightCreation.localeCompare(leftCreation);
+  return right.id.localeCompare(left.id);
 }
 
 /**
@@ -221,7 +233,7 @@ export function latestExaminationPerSeries(rows: ActiveExaminationRow[]): Active
 
   return [...groups.values()].map((group) => {
     const timed = group.filter((row) => row.measurementInstant !== null)
-      .sort((left, right) => measurementTimestamp(right.measurementInstant!) - measurementTimestamp(left.measurementInstant!) ||
+      .sort((left, right) => right.measurementInstant!.localeCompare(left.measurementInstant!) ||
         compareCreatedNewestFirst(left, right))[0];
     const dateOnlyRows = group.filter((row) => row.measurementInstant === null)
       .sort((left, right) => right.measuredOn.localeCompare(left.measuredOn) ||
@@ -229,13 +241,13 @@ export function latestExaminationPerSeries(rows: ActiveExaminationRow[]): Active
     if (!timed) return dateOnlyRows[0]!;
     if (dateOnlyRows.length === 0) return timed;
 
-    const instant = measurementTimestamp(timed.measurementInstant!);
-    const definitelyLater = dateOnlyRows.filter((row) => measurementTimestamp(row.measurementDayStart) > instant)
-      .sort((left, right) => measurementTimestamp(right.measurementDayStart) - measurementTimestamp(left.measurementDayStart) ||
+    const instant = sortableInstant(timed.measurementInstant!);
+    const definitelyLater = dateOnlyRows.filter((row) => sortableInstant(row.measurementDayStart) > instant)
+      .sort((left, right) => sortableInstant(right.measurementDayStart).localeCompare(sortableInstant(left.measurementDayStart)) ||
         compareCreatedNewestFirst(left, right))[0];
     if (definitelyLater) return definitelyLater;
 
-    const overlapping = dateOnlyRows.filter((row) => measurementTimestamp(row.measurementDayEnd) > instant)
+    const overlapping = dateOnlyRows.filter((row) => sortableInstant(row.measurementDayEnd) > instant)
       .sort(compareCreatedNewestFirst)[0];
     return overlapping && createdAfter(overlapping, timed) ? overlapping : timed;
   });

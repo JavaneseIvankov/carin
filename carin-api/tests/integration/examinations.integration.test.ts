@@ -143,6 +143,50 @@ describe('examination API', () => {
     expect(dateOnlyBody.record.measuredTime).toBeNull();
   });
 
+  it('treats a date-only Havana day as overlapping a timed reading at its first repeated midnight', async () => {
+    const dateOnlyId = randomUUID();
+    const timedId = randomUUID();
+    const context = 'random';
+    const seriesKey = JSON.stringify(['glucose', context, 'mg/dL']);
+    await pool.query(
+      `INSERT INTO examination (id,user_id,revision,type,context,series_key,measured_on,measured_time,timezone,value,unit,created_at,updated_at)
+       VALUES
+         ($1,$3,1,'glucose',$5,$4,'2024-11-03',NULL,'America/Havana',90,'mg/dL','2020-01-01T00:00:00.100000Z','2020-01-01T00:00:00.100000Z'),
+         ($2,$3,1,'glucose',$5,$4,'2024-11-03','00:30','America/New_York',91,'mg/dL','2020-01-01T00:00:00.200000Z','2020-01-01T00:00:00.200000Z')`,
+      [dateOnlyId, timedId, ownerId, seriesKey, context],
+    );
+
+    try {
+      const series = await request('/api/v1/examination-series');
+      expect(series.status).toBe(200);
+      expect((await series.json()).find((item: { key: string }) => item.key === seriesKey).latestExaminationId).toBe(timedId);
+    } finally {
+      await pool.query('DELETE FROM examination WHERE id = ANY($1::uuid[])', [[dateOnlyId, timedId]]);
+    }
+  });
+
+  it('uses PostgreSQL sub-millisecond createdAt precision when selecting a date-only latest value', async () => {
+    const olderCreatedId = 'ffffffff-ffff-4fff-bfff-ffffffffffff';
+    const newerCreatedId = '00000000-0000-4000-8000-000000000001';
+    const context = 'random';
+    const seriesKey = JSON.stringify(['glucose', context, 'mg/dL']);
+    await pool.query(
+      `INSERT INTO examination (id,user_id,revision,type,context,series_key,measured_on,timezone,value,unit,created_at,updated_at)
+       VALUES
+         ($1,$3,1,'glucose',$5,$4,'2024-02-02','UTC',90,'mg/dL','2020-01-01T00:00:00.123400Z','2020-01-01T00:00:00.123400Z'),
+         ($2,$3,1,'glucose',$5,$4,'2024-02-02','UTC',91,'mg/dL','2020-01-01T00:00:00.123456Z','2020-01-01T00:00:00.123456Z')`,
+      [olderCreatedId, newerCreatedId, ownerId, seriesKey, context],
+    );
+
+    try {
+      const series = await request('/api/v1/examination-series');
+      expect(series.status).toBe(200);
+      expect((await series.json()).find((item: { key: string }) => item.key === seriesKey).latestExaminationId).toBe(newerCreatedId);
+    } finally {
+      await pool.query('DELETE FROM examination WHERE id = ANY($1::uuid[])', [[olderCreatedId, newerCreatedId]]);
+    }
+  });
+
   it('separates glucose contexts and cholesterol subtypes into distinct series', async () => {
     await create(glucose());
     await create(glucose({ context: 'random', value: 101 }));
