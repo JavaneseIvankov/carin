@@ -165,6 +165,28 @@ describe('examination API', () => {
     }
   });
 
+  it('does not treat a midnight rollback interval as wholly later than a timed reading', async () => {
+    const dateOnlyId = randomUUID();
+    const timedId = randomUUID();
+    const context = 'post_meal';
+    const seriesKey = JSON.stringify(['glucose', context, 'mg/dL']);
+    await pool.query(
+      `INSERT INTO examination (id,user_id,revision,type,context,series_key,measured_on,measured_time,timezone,value,unit,created_at,updated_at)
+       VALUES
+         ($1,$3,1,'glucose',$5,$4,'1987-10-25',NULL,'America/St_Johns',90,'mg/dL','2020-01-01T00:00:00.100000Z','2020-01-01T00:00:00.100000Z'),
+         ($2,$3,1,'glucose',$5,$4,'1987-10-24','23:00','America/New_York',91,'mg/dL','2020-01-01T00:00:00.200000Z','2020-01-01T00:00:00.200000Z')`,
+      [dateOnlyId, timedId, ownerId, seriesKey, context],
+    );
+
+    try {
+      const series = await request('/api/v1/examination-series');
+      expect(series.status).toBe(200);
+      expect((await series.json()).find((item: { key: string }) => item.key === seriesKey).latestExaminationId).toBe(timedId);
+    } finally {
+      await pool.query('DELETE FROM examination WHERE id = ANY($1::uuid[])', [[dateOnlyId, timedId]]);
+    }
+  });
+
   it('uses PostgreSQL sub-millisecond createdAt precision when selecting a date-only latest value', async () => {
     const olderCreatedId = 'ffffffff-ffff-4fff-bfff-ffffffffffff';
     const newerCreatedId = '00000000-0000-4000-8000-000000000001';

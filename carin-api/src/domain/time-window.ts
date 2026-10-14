@@ -8,14 +8,50 @@ export type DashboardWindow = {
 };
 
 function localDateAt(instant: Date, timeZone: string): string {
-  const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).formatToParts(instant);
+  let formatter = localDateFormatters.get(timeZone);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+    localDateFormatters.set(timeZone, formatter);
+  }
+  const parts = formatter.formatToParts(instant);
   const value = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)!.value;
   return `${value('year')}-${value('month')}-${value('day')}`;
+}
+
+const localDateFormatters = new Map<string, Intl.DateTimeFormat>();
+const localDateTimeFormatters = new Map<string, Intl.DateTimeFormat>();
+const localDayBoundaryCache = new Map<string, string>();
+
+function localWallTimeAsUtc(instant: Date, timeZone: string): number {
+  let formatter = localDateTimeFormatters.get(timeZone);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hourCycle: 'h23',
+    });
+    localDateTimeFormatters.set(timeZone, formatter);
+  }
+  const parts = formatter.formatToParts(instant);
+  const value = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)!.value;
+  return Date.UTC(
+    Number(value('year')),
+    Number(value('month')) - 1,
+    Number(value('day')),
+    Number(value('hour')),
+    Number(value('minute')),
+    Number(value('second')),
+  );
 }
 
 function addDays(date: string, count: number): string {
@@ -25,26 +61,47 @@ function addDays(date: string, count: number): string {
     .toString().padStart(2, '0')}-${result.getUTCDate().toString().padStart(2, '0')}`;
 }
 
-function firstInstantOnOrAfterLocalDate(date: string, timeZone: string): Date {
+function firstInstantOnLocalDate(date: string, timeZone: string): Date | null {
   const [year, month, day] = date.split('-').map(Number);
   const target = Date.UTC(year!, month! - 1, day!);
-  const dayMs = 24 * 60 * 60 * 1000;
-  let before = target - dayMs;
-  let after = target + dayMs;
+  const hourMs = 60 * 60 * 1000;
+  const offsets = new Set<number>();
 
-  // Bracket the local-date boundary. Expanding the bracket avoids assumptions
-  // about offset size or a fixed number of DST corrections.
-  while (localDateAt(new Date(before), timeZone) >= date) before -= dayMs;
-  while (localDateAt(new Date(after), timeZone) < date) after += dayMs;
-
-  // Find the first millisecond whose local date is the requested date or later.
-  // If a civil date was skipped entirely, this resolves to the next valid date.
-  while (after - before > 1) {
-    const middle = before + Math.floor((after - before) / 2);
-    if (localDateAt(new Date(middle), timeZone) < date) before = middle;
-    else after = middle;
+  // Sample both sides of the civil midnight in case a rollback makes the
+  // local-date predicate non-monotonic around the boundary.
+  for (let offsetFromTarget = -24 * hourMs; offsetFromTarget <= 24 * hourMs; offsetFromTarget += hourMs) {
+    const sample = new Date(target + offsetFromTarget);
+    offsets.add(localWallTimeAsUtc(sample, timeZone) - sample.getTime());
   }
-  return new Date(after);
+
+  const candidates = [...offsets]
+    .map((offset) => new Date(target - offset))
+    .filter((candidate) => localDateAt(candidate, timeZone) === date)
+    .sort((left, right) => left.getTime() - right.getTime());
+  return candidates[0] ?? null;
+}
+
+function firstInstantOnOrAfterLocalDate(date: string, timeZone: string): Date {
+  const cacheKey = `${timeZone}\u0000${date}`;
+  const cached = localDayBoundaryCache.get(cacheKey);
+  if (cached) return new Date(cached);
+
+  let candidateDate = date;
+  // A civil date can be skipped by a timezone offset change. Resolve that
+  // request to the next local date that actually exists.
+  for (let daysAhead = 0; daysAhead <= 370; daysAhead += 1) {
+    const candidate = firstInstantOnLocalDate(candidateDate, timeZone);
+    if (candidate) {
+      if (localDayBoundaryCache.size >= 512) {
+        const oldestKey = localDayBoundaryCache.keys().next().value;
+        if (oldestKey !== undefined) localDayBoundaryCache.delete(oldestKey);
+      }
+      localDayBoundaryCache.set(cacheKey, candidate.toISOString());
+      return candidate;
+    }
+    candidateDate = addDays(candidateDate, 1);
+  }
+  throw new RangeError('No local date boundary found');
 }
 
 function assertCalendarDate(date: string): void {

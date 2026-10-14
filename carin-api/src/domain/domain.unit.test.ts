@@ -171,6 +171,12 @@ describe('timezone dashboard window', () => {
     expect(window.endExclusiveUtc).toBe('2026-03-10T04:00:00.000Z');
   });
 
+  it('uses the first occurrence of a local date when a midnight rollback repeats the prior date', () => {
+    expect(getCalendarDayWindow('1987-10-25', 'America/St_Johns').startAt).toBe(
+      '1987-10-25T02:30:00.000Z',
+    );
+  });
+
   it('builds the selected date and preceding six-day window across DST', () => {
     expect(getDashboardWindowForDate('2026-03-09', 'America/New_York')).toEqual({
       timezone: 'America/New_York',
