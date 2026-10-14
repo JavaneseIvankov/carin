@@ -219,6 +219,7 @@ export default function SignUpScreen() {
 
         <View className="gap-3 border-t border-border pt-4">
           <Text className="font-semibold">Persetujuan wajib</Text>
+          <Text variant="muted">Baca dan setujui kedua dokumen berikut untuk membuat akun.</Text>
           {isLoadingLegal && !registry ? (
             <View className="flex-row items-center gap-3 py-3">
               <ActivityIndicator accessibilityLabel="Memuat dokumen persetujuan" />
@@ -241,41 +242,39 @@ export default function SignUpScreen() {
               </Pressable>
             </View>
           ) : null}
-          {registry ? (
-            <>
-              {versionNotice ? (
-                <Text
-                  className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm"
-                  accessibilityRole="alert">
-                  {versionNotice}
-                </Text>
-              ) : null}
-              <LegalCheckbox
-                label="Syarat dan Ketentuan"
-                version={registry.terms.version}
-                checked={acceptedTerms}
-                error={fieldErrors.acceptedTerms}
-                onCheckedChange={(value) => {
-                  setAcceptedTerms(value);
-                  updateField('acceptedTerms');
-                  if (value && acceptedPrivacy) setVersionNotice(null);
-                }}
-                onOpenDocument={() => setActiveDocument('terms')}
-              />
-              <LegalCheckbox
-                label="Pemberitahuan Privasi"
-                version={registry.privacy.version}
-                checked={acceptedPrivacy}
-                error={fieldErrors.acceptedPrivacy}
-                onCheckedChange={(value) => {
-                  setAcceptedPrivacy(value);
-                  updateField('acceptedPrivacy');
-                  if (value && acceptedTerms) setVersionNotice(null);
-                }}
-                onOpenDocument={() => setActiveDocument('privacy')}
-              />
-            </>
+          {versionNotice ? (
+            <Text
+              className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm"
+              accessibilityRole="alert">
+              {versionNotice}
+            </Text>
           ) : null}
+          <LegalCheckbox
+            label="Syarat dan Ketentuan"
+            version={registry?.terms.version}
+            disabled={!registry || isLoadingLegal || !!legalLoadError || isSubmitting}
+            checked={acceptedTerms}
+            error={fieldErrors.acceptedTerms}
+            onCheckedChange={(value) => {
+              setAcceptedTerms(value);
+              updateField('acceptedTerms');
+              if (value && acceptedPrivacy) setVersionNotice(null);
+            }}
+            onOpenDocument={() => setActiveDocument('terms')}
+          />
+          <LegalCheckbox
+            label="Pemberitahuan Privasi"
+            version={registry?.privacy.version}
+            disabled={!registry || isLoadingLegal || !!legalLoadError || isSubmitting}
+            checked={acceptedPrivacy}
+            error={fieldErrors.acceptedPrivacy}
+            onCheckedChange={(value) => {
+              setAcceptedPrivacy(value);
+              updateField('acceptedPrivacy');
+              if (value && acceptedTerms) setVersionNotice(null);
+            }}
+            onOpenDocument={() => setActiveDocument('privacy')}
+          />
         </View>
 
         {submitError ? (
@@ -286,7 +285,14 @@ export default function SignUpScreen() {
         <Button
           size="lg"
           onPress={() => void submit()}
-          disabled={isSubmitting || isLoadingLegal || !registry || !!legalLoadError}
+          disabled={
+            isSubmitting ||
+            isLoadingLegal ||
+            !registry ||
+            !!legalLoadError ||
+            !acceptedTerms ||
+            !acceptedPrivacy
+          }
           accessibilityLabel={isSubmitting ? 'Mendaftarkan akun' : 'Daftar'}>
           <Text>{isSubmitting ? 'Mendaftarkan…' : 'Daftar'}</Text>
         </Button>

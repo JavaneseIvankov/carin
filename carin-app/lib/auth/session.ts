@@ -23,6 +23,7 @@ type Dependencies = {
   setSessionUser: (userId: string | null) => Promise<void>;
   clearSession: () => Promise<void>;
   onState: (state: AuthLifecycleState) => void;
+  restorationTimeoutMs?: number;
 };
 
 export function createAuthSessionLifecycle(deps: Dependencies) {
@@ -39,7 +40,16 @@ export function createAuthSessionLifecycle(deps: Dependencies) {
     const generation = ++requestGeneration;
     publish({ status: 'loading', user: state.user });
     try {
-      const response = await deps.getSession();
+      let timeout: ReturnType<typeof setTimeout> | undefined;
+      const response = await Promise.race([
+        Promise.resolve().then(() => deps.getSession()),
+        new Promise<never>((_, reject) => {
+          timeout = setTimeout(
+            () => reject(new Error('Pemeriksaan sesi terlalu lama. Silakan coba lagi.')),
+            deps.restorationTimeoutMs ?? 10_000
+          );
+        }),
+      ]).finally(() => clearTimeout(timeout));
       if (generation !== requestGeneration) return;
       if (response.error) throw response.error;
 

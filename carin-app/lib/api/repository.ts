@@ -46,6 +46,7 @@ type Dependencies = {
   isCurrentScope?: () => boolean;
   fetcher?: typeof fetch;
   getCookie?: () => Promise<string>;
+  credentials?: RequestCredentials;
   baseUrl?: string;
 };
 
@@ -63,7 +64,7 @@ export function createAppRepository(deps: Dependencies) {
       method: request.method,
       headers: cookie ? { ...request.headers, Cookie: cookie } : request.headers,
       body: request.body,
-      credentials: 'omit',
+      credentials: deps.credentials ?? 'omit',
     });
     if (response.status === 401) {
       if (deps.isCurrentScope?.() ?? true) await deps.onUnauthorized();

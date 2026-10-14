@@ -25,6 +25,59 @@ const sessionFor = (userId: string): AuthSession => ({
 });
 
 describe('auth session lifecycle', () => {
+  it('times out a stalled restoration and ignores its late session after retry', async () => {
+    vi.useFakeTimers();
+    try {
+      let resolveStalled!: (session: AuthSession) => void;
+      const stalled = new Promise<AuthSession>((resolve) => {
+        resolveStalled = resolve;
+      });
+      const getSession = vi
+        .fn<() => Promise<AuthSession>>()
+        .mockReturnValueOnce(stalled)
+        .mockResolvedValueOnce(sessionFor('bob'));
+      const setSessionUser = vi.fn(async () => {});
+      const lifecycle = createAuthSessionLifecycle({
+        getSession,
+        setSessionUser,
+        clearSession: async () => {},
+        onState: () => {},
+        restorationTimeoutMs: 100,
+      });
+      const restoration = lifecycle.restore();
+      await vi.advanceTimersByTimeAsync(100);
+      await restoration;
+      expect(lifecycle.getState()).toMatchObject({ status: 'loading', error: expect.any(Error) });
+      expect(setSessionUser).not.toHaveBeenCalled();
+      await lifecycle.restore();
+      resolveStalled(sessionFor('alice'));
+      await Promise.resolve();
+      expect(setSessionUser).toHaveBeenCalledExactlyOnceWith('bob');
+      expect(lifecycle.getState()).toMatchObject({ status: 'authenticated', user: { id: 'bob' } });
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('allows leaving a failed restoration for sign-in without granting a data scope', async () => {
+    const setSessionUser = vi.fn(async () => {});
+    const clearSession = vi.fn(async () => {});
+    const lifecycle = createAuthSessionLifecycle({
+      getSession: async () => {
+        throw new Error('offline');
+      },
+      setSessionUser,
+      clearSession,
+      onState: () => {},
+    });
+    await lifecycle.restore();
+    await lifecycle.invalidateSession();
+    expect(lifecycle.getState()).toEqual({ status: 'unauthenticated', user: null });
+    expect(setSessionUser).not.toHaveBeenCalled();
+    expect(clearSession).toHaveBeenCalledOnce();
+  });
+
   it('establishes app scope only after the server confirms a verified session', async () => {
     const states: string[] = [];
     const setSessionUser = vi.fn(async () => {});

@@ -6,11 +6,13 @@ export function LegalCheckbox({
   version,
   checked,
   error,
+  disabled = false,
   onCheckedChange,
   onOpenDocument,
 }: {
   label: string;
-  version: string;
+  version?: string;
+  disabled?: boolean;
   checked: boolean;
   error?: string;
   onCheckedChange: (checked: boolean) => void;
@@ -22,7 +24,8 @@ export function LegalCheckbox({
         <Pressable
           accessibilityRole="checkbox"
           accessibilityLabel={`Saya menyetujui ${label}`}
-          accessibilityState={{ checked }}
+          accessibilityState={{ checked, disabled }}
+          disabled={disabled}
           accessibilityHint="Pilih untuk menyetujui dokumen ini. Buka nama dokumen untuk membacanya."
           className="min-h-11 min-w-11 items-center justify-center"
           onPress={() => onCheckedChange(!checked)}>
@@ -35,11 +38,15 @@ export function LegalCheckbox({
         </Pressable>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`Baca ${label}, versi ${version}`}
+          disabled={disabled}
+          accessibilityState={{ disabled }}
+          accessibilityLabel={version ? `Baca ${label}, versi ${version}` : `Baca ${label}`}
           className="flex-1 gap-1 py-2"
           onPress={onOpenDocument}>
           <Text className="font-medium leading-5">{label}</Text>
-          <Text variant="muted">Versi {version} · Ketuk untuk membaca</Text>
+          <Text variant="muted">
+            {version ? `Versi ${version} · Ketuk untuk membaca` : 'Dokumen belum tersedia'}
+          </Text>
         </Pressable>
       </View>
       {error ? (
