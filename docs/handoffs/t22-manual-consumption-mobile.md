@@ -1,6 +1,6 @@
 # T22 — Manual Consumption Mobile Handoff
 
-Task / scope: Implement the mobile manual-consumption flow for create, reopen, detail, edit, and delete. T22 remains `started` pending parent/reviewer checks.
+Task / scope: Implement the mobile manual-consumption flow for create, reopen, detail, edit, and delete. T22 is handed back as `review`.
 
 Changes and affected files:
 
@@ -16,6 +16,6 @@ Verification: From `carin-app/`, `pnpm run contracts:check`, `pnpm run typecheck
 
 Unverified work / blockers: No Android or iOS device/Expo interaction session was available, and tests use the app repository boundary rather than a live backend/AI service. Device layout and accessibility checks remain for a platform-enabled review.
 
-Next step: Parent review of the completed implementation; run Android/iOS interaction checks when a device or Expo session is available.
+Next step: Run Android/iOS interaction checks when a device or Expo session is available; the independent code review approved the implementation.
 
-Worktree state: `feat/c22-manual-consumption-mobile` is clean. Original implementation is `cebb88b`, reviewer fixes are `9b00bb3`, and this handoff refresh follows. Independent review approved `9b00bb3`; C21 merge is included; nothing was pushed.
+Worktree state: `feat/c22-manual-consumption-mobile` is clean. Original implementation is `cebb88b`, reviewer fixes are `9b00bb3`, and handoff/status refreshes follow. Independent review approved `9b00bb3`; C21 merge is included; nothing was pushed.
