@@ -367,9 +367,9 @@ function validateOverallAttention(
 ): void {
   const requiresInsufficient = result.limitations.some(({ critical }) => critical) || result.supportStatus === 'unrecognized';
   const hasSupportGap = hasPersonalizationSupportGap(result, profile, catalog);
-  if ((requiresInsufficient || hasSupportGap || emptyProfile(profile)) && result.overallAttention !== 'insufficient_information') {
-    invalid();
-  }
+  const hasInsufficiencyReason = requiresInsufficient || hasSupportGap || emptyProfile(profile);
+  if (hasInsufficiencyReason && result.overallAttention !== 'insufficient_information') invalid();
+  if (!hasInsufficiencyReason && result.attentions.length > 0 && result.overallAttention !== 'needs_attention') invalid();
   if (result.overallAttention === 'needs_attention' && result.attentions.length === 0) invalid();
   if (result.overallAttention === 'considerable' && result.attentions.length > 0) invalid();
 }

@@ -202,6 +202,13 @@ describe('validateAnalysisResult', () => {
     expect(() => validateAnalysisResult(result, photoExpectation(result), catalog)).toThrow();
   });
 
+  it('rejects insufficient_information when supported attention has no critical or profile gap', () => {
+    const result = resultFixture('analysis-complete');
+    result.overallAttention = 'insufficient_information';
+
+    expect(() => validateAnalysisResult(result, photoExpectation(result), catalogFor(result))).toThrow();
+  });
+
   it('rejects needs_attention when a critical limitation is present', () => {
     const result = partialWithSupportedAttention();
     result.overallAttention = 'needs_attention';
