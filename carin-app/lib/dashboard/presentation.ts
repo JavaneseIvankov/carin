@@ -46,7 +46,7 @@ export function getDailyIntakeSummary(dashboard: Dashboard) {
 
 export function getRecurringAttentionCards(dashboard: Dashboard) {
   return dashboard.recurringAttentions.map((attention, index) => ({
-    id: `${attention.ruleId}:${attention.conditionId}`,
+    id: JSON.stringify([attention.ruleId, attention.conditionId]),
     ruleId: attention.ruleId,
     conditionId: attention.conditionId,
     label: `Kelompok perhatian ${index + 1}`,

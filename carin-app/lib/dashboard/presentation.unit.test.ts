@@ -170,6 +170,40 @@ describe('dashboard mobile presentation', () => {
     ).toBe('Periksa kandungan natrium pada makanan ini.');
   });
 
+  it('keeps recurring groups distinct when rule and condition IDs contain delimiters', () => {
+    const attentions = getRecurringAttentionCards(
+      dashboard({
+        recurringAttentions: [
+          {
+            ruleId: 'rule:alert',
+            conditionId: 'high',
+            count: 2,
+            consumptionIds: ['consumption-a', 'consumption-b'],
+          },
+          {
+            ruleId: 'rule',
+            conditionId: 'alert:high',
+            count: 2,
+            consumptionIds: ['consumption-c', 'consumption-d'],
+          },
+        ],
+      })
+    );
+    const consumption = {
+      snapshot: {
+        attentions: [
+          { ruleId: 'rule:alert', conditionId: 'high', reason: 'First group reason.' },
+          { ruleId: 'rule', conditionId: 'alert:high', reason: 'Second group reason.' },
+        ],
+      },
+    };
+
+    expect(attentions[0]?.id).not.toBe(attentions[1]?.id);
+    expect(
+      attentions.map((attention) => getRecurringAttentionReason(attention, consumption))
+    ).toEqual(['First group reason.', 'Second group reason.']);
+  });
+
   it('uses the recorded measurement date for each latest examination card', () => {
     const [card] = getLatestExaminationCards(
       dashboard({

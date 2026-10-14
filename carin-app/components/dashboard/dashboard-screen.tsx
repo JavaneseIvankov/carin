@@ -46,7 +46,7 @@ function RecurringAttentionCard({
       {attention.links.map((link) => (
         <Pressable
           key={link.id}
-          className="min-h-11 justify-center"
+          className="min-h-12 justify-center"
           accessibilityRole="link"
           accessibilityLabel={`${link.label} dari ${attention.label}`}
           onPress={() => onOpenLink(link.href)}>
