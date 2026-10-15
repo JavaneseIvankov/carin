@@ -16,13 +16,19 @@ estimasi satu foto penuh dengan angka per komponen.
   membawa estimasi nutrisi untuk porsi yang tampak pada foto, per ID komponen.
 - Komponen dengan match katalog selalu memakai nilai dan provenance katalog.
   Hasil VLM tidak mengganti nilai katalog, tidak menghasilkan nilai per 100 g,
-  dan tidak dihitung sebagai total seluruh foto.
+  dan tidak mengestimasi seluruh foto dalam satu angka. Estimasi per komponen
+  untuk makanan tanpa match ikut dijumlahkan ke total hasil dan coverage.
 - Nutrisi hasil VLM memakai source dengan kind `model_estimate`, dirujuk melalui
   `nutrientSourceIds`. UI menandainya sebagai estimasi visual VLM. Versi katalog,
   dataset, snapshot, dan coverage tetap mengikuti kontrak yang sama.
 - Nutrisi yang tidak disediakan model tetap `null`. Kegagalan atau jawaban
   malformed dari permintaan estimasi menambahkan limitation dan tidak
   menggagalkan hasil pengenalan foto.
+- `supportStatus` tetap merefleksikan pemadanan katalog: `unrecognized` jika
+  tidak ada komponen yang match dan `partial` bila ada campuran. Estimasi VLM
+  tidak mengubah status makanan menjadi catalog-matched. Total per nutrient
+  menjadi `null` hanya jika tidak ada komponen yang memiliki nilai untuk nutrient
+  tersebut.
 - Estimasi visual tidak digunakan untuk health rules, attention, diagnosis,
   atau personalisasi kesehatan. Recalculation/manual input tetap memakai
   perhitungan katalog.
@@ -39,8 +45,9 @@ provenance request/response, dan coverage; snapshot menyimpan hasil komponen dan
 source yang sama. Tidak ada nutrient dari source model yang boleh muncul tanpa
 rujukan source.
 
-Kontrak A1V1 untuk evaluasi model tetap khusus berisi estimasi total satu foto;
-endpoint itu tidak digunakan sebagai fallback produksi.
+Kontrak naik menjadi 2.0.0 karena semantik total/coverage untuk hasil foto
+`unrecognized` berubah. Kontrak A1V1 untuk evaluasi model tetap khusus berisi
+estimasi total satu foto; endpoint itu tidak digunakan sebagai fallback produksi.
 
 ## Perubahan aplikasi
 
