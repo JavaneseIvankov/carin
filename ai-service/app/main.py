@@ -17,14 +17,13 @@ from fastapi.openapi.docs import get_swagger_ui_html
 from starlette.requests import ClientDisconnect
 
 from .config import Settings, load_settings
+from .catalog import catalog_page, load_catalog_bundle
 from .contract import OPENAPI_DOCUMENT, validate_payload
 from .errors import ContractViolation, PayloadValidationError, ServiceError
 from .media import fetch_and_normalize
 from .provider import A1V1_FLASH_MODEL, A1V1_MAX_MODEL, A1V1VLMClient, VLMClient
 from .security import MemoryRateLimiter, enforce_rate, rate_limiter
 from .service import (
-    UNCONFIGURED_VERSION,
-    catalog_page,
     capabilities,
     photo_result,
     recalculation_result,
@@ -57,6 +56,10 @@ async def request_context(request: Request, call_next):  # type: ignore[no-untyp
         except (ValueError, TypeError):
             raise ServiceError(503, "SERVICE_UNAVAILABLE", "Konfigurasi AI service tidak valid.") from None
         request.state.settings = settings
+        try:
+            request.state.catalog_bundle = load_catalog_bundle(settings.ai_catalog_mode)
+        except (ValueError, KeyError, TypeError):
+            raise ServiceError(503, "SERVICE_UNAVAILABLE", "Artifact katalog AI tidak valid.") from None
         if request.headers.get("content-encoding", "identity").lower() != "identity":
             raise ServiceError(415, "UNSUPPORTED_MEDIA_TYPE", "Content-Encoding tidak didukung.")
         length = request.headers.get("content-length")
@@ -161,10 +164,13 @@ async def _json_body(request: Request, schema_name: str) -> dict[str, Any]:
     # Contract version mismatches are conflicts; malformed field types remain 422.
     if isinstance(payload.get("contractVersion"), str) and payload["contractVersion"] != "1.0.0":
         raise ServiceError(409, "UNSUPPORTED_VERSION", "contractVersion tidak didukung.")
-    for key in ("catalogVersion", "ruleSetVersion"):
-        value = payload.get(key)
-        if isinstance(value, str) and value != UNCONFIGURED_VERSION:
-            raise ServiceError(409, "UNSUPPORTED_VERSION", f"{key} tidak tersedia pada service ini.")
+    bundle = request.state.catalog_bundle
+    catalog_version = payload.get("catalogVersion")
+    if isinstance(catalog_version, str) and catalog_version != bundle.manifest["catalogVersion"]:
+        raise ServiceError(409, "CATALOG_VERSION_UNAVAILABLE", "catalogVersion tidak tersedia pada service ini.")
+    rule_set_version = payload.get("ruleSetVersion")
+    if isinstance(rule_set_version, str) and rule_set_version != bundle.manifest["ruleSetVersion"]:
+        raise ServiceError(409, "UNSUPPORTED_VERSION", "ruleSetVersion tidak tersedia pada service ini.")
 
     try:
         validate_payload(schema_name, payload)
@@ -197,8 +203,8 @@ async def swagger_docs() -> HTMLResponse:
 
 
 @app.get("/internal/v1/capabilities")
-async def get_capabilities(_settings: Settings = Depends(require_service_key)) -> JSONResponse:
-    result = capabilities()
+async def get_capabilities(request: Request, _settings: Settings = Depends(require_service_key)) -> JSONResponse:
+    result = capabilities(request.state.catalog_bundle)
     _validate_response("CapabilityManifest", result)
     return JSONResponse(result)
 
@@ -218,7 +224,7 @@ async def get_catalog(request: Request, settings: Settings = Depends(require_ser
         raise ServiceError(422, "INVALID_INPUT", "Parameter limit harus antara 1 dan 200.", details={"field": "limit"})
     if len(query.get("cursor", "")) > 500:
         raise ServiceError(422, "INVALID_INPUT", "Parameter cursor terlalu panjang.", details={"field": "cursor"})
-    result = catalog_page(version, query.get("cursor"), limit)
+    result = catalog_page(request.state.catalog_bundle, version, query.get("cursor"), limit)
     _validate_response("CatalogPage", result)
     return JSONResponse(result)
 
@@ -229,7 +235,9 @@ async def analyze_photo(request: Request, settings: Settings = Depends(require_s
     normalized = await fetch_and_normalize(payload["image"], settings)
     provider = getattr(request.app.state, "vlm_client_factory", VLMClient)
     observation = await provider(settings).observe(normalized.data, normalized.mime_type)
-    result = photo_result(payload["operationId"], payload["profile"]["profileVersion"], observation)
+    result = photo_result(
+        payload["operationId"], payload["profile"]["profileVersion"], observation, request.state.catalog_bundle
+    )
     _validate_response("AnalysisResult", result)
     return JSONResponse(result)
 

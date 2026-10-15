@@ -1,0 +1,12 @@
+{
+  "contractVersion": "1.0.0",
+  "catalogVersion": "synthetic-live-catalog-1",
+  "nutritionDatasetVersion": "synthetic-live-nutrition-1",
+  "ruleSetVersion": "synthetic-live-rules-1",
+  "conditions": [],
+  "supportedPhotoFoodIds": ["demo-rice-001", "demo-fried-chicken-001"],
+  "supportedRules": [],
+  "nutrients": ["energyKcal", "carbohydrateG", "proteinG", "fatG", "fiberG", "sugarsG", "sodiumMg"],
+  "dataMode": "synthetic",
+  "publishedAt": "2026-10-15T00:00:00Z"
+}

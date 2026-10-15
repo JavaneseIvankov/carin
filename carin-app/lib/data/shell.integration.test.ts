@@ -2,6 +2,7 @@ import { QueryClient } from '@tanstack/react-query';
 import { describe, expect, it, vi } from 'vitest';
 import { createAppRepository, ApiError } from '@/lib/api/repository';
 import { nextSheetOpen } from '@/lib/navigation';
+import { cachePhotoUri, getCachedPhotoUri } from '@/lib/food/photo-media';
 import { createDraftStore } from './drafts';
 import { OfflineError, staleReadLabel } from './network';
 import {
@@ -186,6 +187,7 @@ describe('mobile shell and data boundary', () => {
     await drafts.save(bob, 'meal', { name: 'soto' });
     await drafts.save({ environment: 'staging', userId: 'alice' }, 'meal', { name: 'staging' });
     queryClient.setQueryData(scopeKey(alice, 'getDashboard'), { sample: true });
+    cachePhotoUri('alice-scan', 'file:///private/alice-photo.jpg');
     const mutationCache = queryClient.getMutationCache();
     mutationCache.build(queryClient, { mutationKey: scopeKey(alice, 'saveProfile') });
     mutationCache.build(queryClient, { mutationKey: scopeKey(bob, 'saveProfile') });
@@ -197,6 +199,7 @@ describe('mobile shell and data boundary', () => {
       name: 'staging',
     });
     expect(queryClient.getQueryData(scopeKey(alice, 'getDashboard'))).toBeUndefined();
+    expect(getCachedPhotoUri('alice-scan')).toBeUndefined();
     expect(mutationCache.findAll({ mutationKey: scopeKey(alice) })).toHaveLength(0);
     expect(mutationCache.findAll({ mutationKey: scopeKey(bob) })).toHaveLength(1);
   });

@@ -1,6 +1,7 @@
 import { OnlineIndicator } from '@/components/app/online-indicator';
 import { serviceErrorMessage } from '@/components/app/presentation';
 import { ScanDeletionControl } from '@/components/food/scan-deletion-control';
+import { PhotoThumbnail } from '@/components/food/photo-thumbnail';
 import { ServiceError } from '@/components/app/service-error';
 import { ConsumptionForm } from '@/components/consumptions/consumption-form';
 import { Button } from '@/components/ui/button';
@@ -471,12 +472,25 @@ export default function History() {
                         {jobQuery.data.data.error.message}
                       </Text>
                     ) : null}
-                    <Text variant="muted">{presentation.consumptionLabel}</Text>
-                    {scan.photoId === null ? (
-                      <Text variant="caption" className="text-muted-foreground">
-                        Foto sumber telah dihapus
-                      </Text>
-                    ) : null}
+                    <View className="flex-row items-center gap-3">
+                      <PhotoThumbnail
+                        photoId={scan.photoId}
+                        accessibilityLabel={
+                          scan.photoId === null
+                            ? 'Foto sumber telah dihapus'
+                            : 'Thumbnail foto makanan yang dianalisis'
+                        }
+                        fallbackLabel={scan.photoId === null ? 'Foto dihapus' : undefined}
+                      />
+                      <View className="flex-1 gap-1">
+                        <Text variant="muted">{presentation.consumptionLabel}</Text>
+                        {scan.photoId === null ? (
+                          <Text variant="caption" className="text-muted-foreground">
+                            Foto sumber telah dihapus
+                          </Text>
+                        ) : null}
+                      </View>
+                    </View>
                     {jobQuery?.error ? (
                       <ServiceError
                         error={jobQuery.error}
@@ -594,10 +608,7 @@ export default function History() {
               </Text>
               <Text className="text-foreground">{serviceErrorMessage(draftLoadError)}</Text>
             </View>
-            <Button
-              variant="outline"
-              className="min-h-12 w-full"
-              onPress={closeCreateDrawer}>
+            <Button variant="outline" className="min-h-12 w-full" onPress={closeCreateDrawer}>
               <Text>Tutup</Text>
             </Button>
           </View>

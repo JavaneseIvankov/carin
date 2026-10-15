@@ -397,7 +397,11 @@ export function createHttpAiClient(options: {
       }
       const errorBody = decoded as { error: { code: string; message: string; retryable: boolean } };
       throw new AiAdapterError(
-        errorBody.error.code === 'MODEL_FAILURE' ? 'MODEL_FAILURE' : 'SERVICE_UNAVAILABLE',
+        errorBody.error.code === 'MODEL_FAILURE'
+          ? 'MODEL_FAILURE'
+          : errorBody.error.code === 'CATALOG_VERSION_UNAVAILABLE'
+            ? 'CATALOG_VERSION_UNAVAILABLE'
+            : 'SERVICE_UNAVAILABLE',
         errorBody.error.message,
         errorBody.error.retryable
       );

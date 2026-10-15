@@ -232,6 +232,25 @@ describe('internal HTTP AI adapter', () => {
     );
   });
 
+  it('maps an unavailable AI catalog version to a non-retryable catalog error', async () => {
+    const response = Response.json({
+      error: {
+        code: 'CATALOG_VERSION_UNAVAILABLE',
+        message: 'catalogVersion tidak tersedia pada service ini.',
+        retryable: false,
+        requestId: operationId,
+        details: {},
+      },
+    }, { status: 409 });
+    const client = makeClient(async () => response);
+
+    await expect(client.analyzePhoto(photoRequest)).rejects.toMatchObject({
+      code: 'CATALOG_VERSION_UNAVAILABLE',
+      retryable: false,
+      message: 'catalogVersion tidak tersedia pada service ini.',
+    });
+  });
+
   it.each([
     ['invalid JSON', new Response('{', { status: 200, headers: { 'content-type': 'application/json' } })],
     ['invalid schema', Response.json({ operationId })],

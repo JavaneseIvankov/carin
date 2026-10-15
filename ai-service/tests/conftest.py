@@ -16,7 +16,7 @@ def service_environment(monkeypatch: pytest.MonkeyPatch):
         "VLM_BASE_URL": "https://workspace.example/compatible-mode/v1",
         "VLM_MODEL": "qwen3.7-flash-2026-07-15", "VLM_FALLBACK_MODEL": "qwen3.7-flash",
         "MEDIA_ALLOWED_HOSTS": "minio:9000", "REQUEST_MAX_BYTES": "65536",
-        "API_RATE_LIMIT_PER_MINUTE": "5",
+        "API_RATE_LIMIT_PER_MINUTE": "5", "APP_ENV": "dev", "AI_CATALOG_MODE": "unconfigured",
     }
     for key, value in values.items():
         monkeypatch.setenv(key, value)

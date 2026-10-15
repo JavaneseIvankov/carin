@@ -109,6 +109,50 @@ async def test_capabilities_and_catalog_follow_shared_contract(client):
     assert page.json() == {"catalogVersion": "unconfigured", "items": [], "nextCursor": None}
 
 
+async def test_synthetic_demo_capabilities_and_catalog_follow_shared_contract(client, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setenv("APP_ENV", "dev")
+    monkeypatch.setenv("AI_CATALOG_MODE", "synthetic-demo")
+
+    capabilities_response = await client.get("/internal/v1/capabilities", headers=HEADERS)
+    assert capabilities_response.status_code == 200
+    validate_payload("CapabilityManifest", capabilities_response.json())
+    manifest = capabilities_response.json()
+    assert manifest["catalogVersion"] == "synthetic-live-catalog-1"
+    assert manifest["nutritionDatasetVersion"] == "synthetic-live-nutrition-1"
+    assert manifest["ruleSetVersion"] == "synthetic-live-rules-1"
+    assert manifest["dataMode"] == "synthetic"
+    assert manifest["conditions"] == []
+    assert manifest["supportedRules"] == []
+
+    page = await client.get(
+        "/internal/v1/catalog",
+        params={"version": "synthetic-live-catalog-1", "limit": 1},
+        headers=HEADERS,
+    )
+    assert page.status_code == 200
+    validate_payload("CatalogPage", page.json())
+    assert page.json()["catalogVersion"] == "synthetic-live-catalog-1"
+    assert len(page.json()["items"]) == 1
+    assert page.json()["nextCursor"] is not None
+
+    next_page = await client.get(
+        "/internal/v1/catalog",
+        params={"version": "synthetic-live-catalog-1", "cursor": page.json()["nextCursor"], "limit": 1},
+        headers=HEADERS,
+    )
+    assert next_page.status_code == 200
+    assert len(next_page.json()["items"]) == 1
+    assert next_page.json()["nextCursor"] is None
+
+
+async def test_synthetic_demo_mode_is_rejected_outside_dev_and_test(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setenv("APP_ENV", "prod")
+    monkeypatch.setenv("AI_CATALOG_MODE", "synthetic-demo")
+
+    with pytest.raises(ValueError, match="synthetic demo catalog is development-only"):
+        main.load_settings()
+
+
 async def test_catalog_unknown_version_is_contract_error(client):
     response = await client.get("/internal/v1/catalog", params={"version": "old-catalog"}, headers=HEADERS)
     assert response.status_code == 404
@@ -137,6 +181,91 @@ async def test_unsupported_contract_version_is_409(client):
     assert response.status_code == 409
     validate_payload("Error", response.json())
     assert response.json()["error"]["code"] == "UNSUPPORTED_VERSION"
+
+
+async def test_analysis_with_unavailable_catalog_version_is_409(client, monkeypatch: pytest.MonkeyPatch):
+    body = photo_request()
+    body["catalogVersion"] = "synthetic-catalog-1"
+
+    async def fail_if_media_is_fetched(*_args, **_kwargs):
+        raise AssertionError("media must not be fetched for an unavailable catalog version")
+
+    monkeypatch.setattr(main, "fetch_and_normalize", fail_if_media_is_fetched)
+    response = await client.post("/internal/v1/analyses", headers=HEADERS, json=body)
+
+    assert response.status_code == 409
+    validate_payload("Error", response.json())
+    assert response.json()["error"]["code"] == "CATALOG_VERSION_UNAVAILABLE"
+    assert response.json()["error"]["retryable"] is False
+
+
+async def test_photo_analysis_matches_synthetic_alias_and_computes_nutrients(client, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setenv("APP_ENV", "dev")
+    monkeypatch.setenv("AI_CATALOG_MODE", "synthetic-demo")
+    body = photo_request()
+    body["catalogVersion"] = "synthetic-live-catalog-1"
+    body["ruleSetVersion"] = "synthetic-live-rules-1"
+
+    async def fake_fetch(image, settings):
+        return NormalizedImage(b"normalized-photo")
+
+    class FakeVLM:
+        async def observe(self, data, mime_type):
+            assert data == b"normalized-photo"
+            assert mime_type == "image/jpeg"
+            return FoodObservation.model_validate({
+                "isFood": True,
+                "components": [{"displayName": "Nasi Putih!", "estimatedMassGrams": 150}],
+            })
+
+    monkeypatch.setattr(main, "fetch_and_normalize", fake_fetch)
+    main.app.state.vlm_client_factory = lambda settings: FakeVLM()
+
+    response = await client.post("/internal/v1/analyses", headers=HEADERS, json=body)
+
+    assert response.status_code == 200
+    validate_payload("AnalysisResult", response.json())
+    result = response.json()
+    assert result["dataMode"] == "synthetic"
+    assert result["supportStatus"] == "complete"
+    assert result["components"][0]["catalogFoodId"] == "demo-rice-001"
+    assert result["components"][0]["matchStatus"] == "matched"
+    assert result["components"][0]["portion"]["grams"] == 150
+    assert result["components"][0]["nutrients"]["energyKcal"] == 225
+    assert result["totals"]["energyKcal"] == 225
+    assert result["limitations"][0]["code"] == "SYNTHETIC_DATA"
+    assert result["attentions"] == []
+
+
+async def test_photo_analysis_keeps_unmatched_food_unrecognized(client, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setenv("APP_ENV", "dev")
+    monkeypatch.setenv("AI_CATALOG_MODE", "synthetic-demo")
+    body = photo_request()
+    body["catalogVersion"] = "synthetic-live-catalog-1"
+    body["ruleSetVersion"] = "synthetic-live-rules-1"
+
+    async def fake_fetch(image, settings):
+        return NormalizedImage(b"normalized-photo")
+
+    class FakeVLM:
+        async def observe(self, data, mime_type):
+            return FoodObservation.model_validate({
+                "isFood": True,
+                "components": [{"displayName": "Makanan tidak dikenal", "estimatedMassGrams": 150}],
+            })
+
+    monkeypatch.setattr(main, "fetch_and_normalize", fake_fetch)
+    main.app.state.vlm_client_factory = lambda settings: FakeVLM()
+
+    response = await client.post("/internal/v1/analyses", headers=HEADERS, json=body)
+
+    assert response.status_code == 200
+    result = response.json()
+    assert result["supportStatus"] == "unrecognized"
+    assert result["components"][0]["catalogFoodId"] is None
+    assert result["components"][0]["nutrients"]["energyKcal"] is None
+    assert result["totals"]["energyKcal"] is None
+    assert result["limitations"][0]["code"] == "SYNTHETIC_DATA"
 
 
 async def test_recalculation_preserves_portion_but_never_invents_nutrients(client):
