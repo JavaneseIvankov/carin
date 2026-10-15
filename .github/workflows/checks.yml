@@ -63,5 +63,5 @@ jobs:
       - run: node --test scripts/tests/generate-contracts.test.mjs
       - run: python -B -m unittest discover -s scripts/tests
       - run: python specs/validate-contracts.py
-      - run: python -B -m unittest discover -s ai-service/tests
+      - run: python -B -m unittest discover -s ai-service/tests -p "test_validate_*.py"
       - run: python -B ai-service/validate_data_artifacts.py

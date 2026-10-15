@@ -1,5 +1,45 @@
 // Generated from specs/contracts/. Do not edit; run pnpm contracts:generate in carin-app.
 export type paths = {
+  '/internal/ai-service/a-model': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Experimental A1V1 image analysis, variant A
+     * @description Uses the fixed A1V1 prompt and strict JSON schema with temperature 0, thinking disabled, and max_tokens 1024. This returns direct visual nutrient estimates for model evaluation; they are not catalog-grounded or suitable as health advice. No fallback model is used.
+     */
+    post: operations['analyzeA1V1VariantA'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/internal/ai-service/b-model': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Experimental A1V1 image analysis, variant B
+     * @description Uses the fixed A1V1 prompt and strict JSON schema with temperature 0, thinking disabled, and max_tokens 1024. This returns direct visual nutrient estimates for model evaluation; they are not catalog-grounded or suitable as health advice. No fallback model is used.
+     */
+    post: operations['analyzeA1V1VariantB'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/internal/v1/analyses': {
     parameters: {
       query?: never;
@@ -78,6 +118,26 @@ export type paths = {
 export type webhooks = Record<string, never>;
 export type components = {
   schemas: {
+    A1V1PhotoRequest: {
+      image: components['schemas']['ImageReference'];
+    };
+    A1V1Prediction: {
+      apparent_volume_cm3: number | null;
+      components: {
+        mass_g: number | null;
+        name: string;
+      }[];
+      container_diameter_cm: number | null;
+      is_food: boolean;
+      limitations: string[];
+      prediction: {
+        carbohydrate_g: number | null;
+        energy_kcal: number | null;
+        fat_g: number | null;
+        protein_g: number | null;
+      };
+      weight_g: number | null;
+    };
     AnalysisResult: {
       attentions: components['schemas']['Attention'][];
       catalogVersion: string;
@@ -192,6 +252,13 @@ export type components = {
         retryable: boolean;
       };
     };
+    ImageReference: {
+      /** Format: uri */
+      downloadUrl: string;
+      /** @enum {string} */
+      mimeType: 'image/jpeg' | 'image/png';
+      sha256: string;
+    };
     Limitation: {
       code: string;
       componentIds: string[];
@@ -249,13 +316,7 @@ export type components = {
     PhotoAnalysisRequest: {
       catalogVersion: string;
       contractVersion: components['schemas']['ContractVersion'];
-      image: {
-        /** Format: uri */
-        downloadUrl: string;
-        /** @enum {string} */
-        mimeType: 'image/jpeg' | 'image/png';
-        sha256: string;
-      };
+      image: components['schemas']['ImageReference'];
       /** Format: uuid */
       operationId: string;
       profile: components['schemas']['ProfileContext'];
@@ -350,7 +411,7 @@ export type components = {
         'application/json': components['schemas']['Error'];
       };
     };
-    /** @description Structured error; code examples INVALID_INPUT, UNSUPPORTED_VERSION, CATALOG_VERSION_UNAVAILABLE, SERVICE_UNAVAILABLE, MODEL_FAILURE. No successful result body on error. */
+    /** @description Structured error with Retry-After. RATE_LIMITED indicates request/attempt quotas, CAPACITY_LIMITED indicates active inference capacity, MODEL_FAILURE indicates provider throttling. Retrying must wait for the indicated delay. No successful result body on error. */
     TooManyRequests: {
       headers: {
         /** @description Retry delay seconds */
@@ -369,6 +430,72 @@ export type components = {
 };
 export type $defs = Record<string, never>;
 export interface operations {
+  analyzeA1V1VariantA: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['A1V1PhotoRequest'];
+      };
+    };
+    responses: {
+      /** @description Validated A1V1 model output */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['A1V1Prediction'];
+        };
+      };
+      400: components['responses']['Error'];
+      401: components['responses']['Error'];
+      408: components['responses']['Error'];
+      413: components['responses']['Error'];
+      415: components['responses']['Error'];
+      422: components['responses']['Error'];
+      429: components['responses']['TooManyRequests'];
+      503: components['responses']['Error'];
+      default: components['responses']['Error'];
+    };
+  };
+  analyzeA1V1VariantB: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['A1V1PhotoRequest'];
+      };
+    };
+    responses: {
+      /** @description Validated A1V1 model output */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['A1V1Prediction'];
+        };
+      };
+      400: components['responses']['Error'];
+      401: components['responses']['Error'];
+      408: components['responses']['Error'];
+      413: components['responses']['Error'];
+      415: components['responses']['Error'];
+      422: components['responses']['Error'];
+      429: components['responses']['TooManyRequests'];
+      503: components['responses']['Error'];
+      default: components['responses']['Error'];
+    };
+  };
   analyzePhoto: {
     parameters: {
       query?: never;
@@ -393,7 +520,10 @@ export interface operations {
       };
       400: components['responses']['Error'];
       401: components['responses']['Error'];
+      408: components['responses']['Error'];
       409: components['responses']['Error'];
+      413: components['responses']['Error'];
+      415: components['responses']['Error'];
       422: components['responses']['Error'];
       429: components['responses']['TooManyRequests'];
       503: components['responses']['Error'];
@@ -475,7 +605,10 @@ export interface operations {
       };
       400: components['responses']['Error'];
       401: components['responses']['Error'];
+      408: components['responses']['Error'];
       409: components['responses']['Error'];
+      413: components['responses']['Error'];
+      415: components['responses']['Error'];
       422: components['responses']['Error'];
       429: components['responses']['TooManyRequests'];
       503: components['responses']['Error'];

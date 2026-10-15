@@ -18,7 +18,7 @@ class BundleTests(unittest.TestCase):
     def test_all_operations_have_separate_request_and_response_schemas(self):
         bundle = module.build_bundle()
         operations = bundle['operations']
-        self.assertEqual(len(operations), 38)
+        self.assertEqual(len(operations), 40)
         upload = operations['app.uploadPhoto']
         self.assertEqual(upload['method'], 'post')
         self.assertEqual(upload['parameters']['header']['required'], ['idempotency-key'])
