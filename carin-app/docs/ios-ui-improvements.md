@@ -108,3 +108,43 @@ Verification: In carin-app, tsc --noEmit, eslint . --max-warnings 0 and vitest r
 Next step: Review the merged branch; restart local testing when desired.
 
 Worktree state: Merge committed locally. Preserve the user's local infra/.env.example changes separately from the merge.
+
+## Transparent 3D outline buttons
+
+Task / scope: Give buttons like Lengkapi profil kesehatan tactile depth while blending their background into the surrounding surface.
+
+Changes and affected files: The shared `outline` variant in `components/ui/button.tsx` now uses a transparent background, rounded 20 dp corners, an olive outline and 4 dp lower bevel. Outline buttons use the same 2 dp pressed translation as existing tactile buttons, preserving text styles, touch heights, loading and disabled behavior. Caller-provided styles still apply. This updates outline buttons consistently across the app.
+
+Verification (from `carin-app/`): Prettier, tsc --noEmit, component ESLint, and vitest run passed (56 files, 405 tests). git diff --check passed. Device appearance and pressed feedback still need iPhone review.
+
+Worktree state: Uncommitted together with the latest onboarding-control adjustments; preserve local infra changes.
+
+## Health-profile/settings clearance and button clipping
+
+Task / scope: Fix button label clipping, health-profile/settings status-bar overlap, remove the redundant health-profile top row and reuse the doctor mascot.
+
+Changes: Shared Button sizes now use minimum heights and sufficient content-based height rather than fixed height; text can shrink/wrap and is centered. This preserves transparent outline/bevel styling while avoiding clipping from padding plus the 4 dp bevel. `app/(onboarding)/health-profile.tsx` uses top/side safe areas around the form, retains the separate bottom-safe footer, removes Langkah opsional / Nanti saja from the top, and uses the existing doctor mascot. Optional-profile messaging and bottom Isi nanti remain available. `app/settings.tsx` now has all-edge safe areas for loaded/loading/error states.
+
+Verification (from carin-app): Prettier on the three changed sources, tsc --noEmit, eslint . --max-warnings 0 and vitest run passed (56 files, 405 tests). Metro returned HTTP 200 for the updated iOS bundle. git diff --check passed. Real iPhone label wrapping, Dynamic Type, safe-area clearance and keyboard interaction require visual review.
+
+Worktree state: These changes and earlier uncommitted onboarding-control changes are uncommitted. Preserve infra/.env.example local settings.
+
+## Tonal bevel button refinement
+
+Task / scope: Remove the outline around secondary outlined buttons, slightly darken their face and retain tactile depth.
+
+Changes: The shared outline variant now uses the existing muted surface token and only a 4 dp bottom bevel (border token in light mode, background token in dark mode). Top/side borders are removed; press translation, accessible focus states and content-based sizing are retained. This supersedes the earlier transparent outline treatment.
+
+Verification: TypeScript and component ESLint passed from carin-app; git diff --check passed. Native appearance remains for iPhone review. Uncommitted with prior UI adjustments.
+
+## Tactile hover and press interaction
+
+Task / scope: Add more pronounced 3D interaction to the existing beveled buttons.
+
+Changes: Shared tactile and outline buttons lift 2 dp and scale to 1.01 on hover, then move down 3 dp and scale to 0.98 while pressed. Web transforms transition over 150 ms and disable transitions under reduced-motion preferences. Native touch uses Pressable's pressed state. Loading/disabled buttons do not apply the transforms. Caller-provided hover callbacks and transform styles are preserved.
+
+Verification (from carin-app): Prettier, tsc --noEmit, component ESLint and vitest run passed (56 files, 405 tests). git diff --check passed. Native touch feedback and browser pointer interaction remain for visual review. Changes are uncommitted with the preceding UI work.
+
+## Restore prior press feedback
+
+At the user's request, the elevated box-shadow experiment was reverted. The tonal button face, 4 dp lower border, press translation/scale and web hover lift are restored. Earlier safe-area, button-sizing and onboarding changes remain preserved.

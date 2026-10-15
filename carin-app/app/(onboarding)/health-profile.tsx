@@ -37,7 +37,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const MASCOT = require('../../assets/images/carin-mascot.png');
+const MASCOT = require('../../assets/images/carin-mascot-doctor.png');
 
 type ProfileFields = components['schemas']['Profile']['fields'];
 type Condition = components['schemas']['ai__Condition'];
@@ -437,27 +437,29 @@ export default function HealthProfileScreen() {
 
   if (profileQuery.isPending && !profileQuery.data) {
     return (
-      <View className="flex-1 items-center justify-center gap-3 bg-background p-6">
+      <SafeAreaView
+        edges={['top', 'left', 'right', 'bottom']}
+        className="flex-1 items-center justify-center gap-3 bg-background p-6">
         <ActivityIndicator accessibilityLabel="Memuat profil kesehatan" />
         <Text variant="muted">Memuat profil kesehatan…</Text>
         {completionRecovery}
         <Button variant="outline" onPress={skip} disabled={completeOnboarding.isPending}>
           <Text>Isi nanti</Text>
         </Button>
-      </View>
+      </SafeAreaView>
     );
   }
 
   if (!profileQuery.data && profileQuery.error) {
     return (
-      <View className="flex-1 bg-background p-5">
+      <SafeAreaView edges={['top', 'left', 'right', 'bottom']} className="flex-1 bg-background p-5">
         <Text variant="h3">Profil kesehatan</Text>
         <ServiceError error={profileQuery.error} onRetry={() => void profileQuery.refetch()} />
         {completionRecovery}
         <Button variant="outline" onPress={skip} disabled={completeOnboarding.isPending}>
           <Text>Isi nanti</Text>
         </Button>
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -470,30 +472,11 @@ export default function HealthProfileScreen() {
   ];
 
   return (
-    <View className="flex-1 bg-background">
+    <SafeAreaView edges={['top', 'left', 'right']} className="flex-1 bg-background">
       <ScrollView
         ref={scrollRef}
         keyboardShouldPersistTaps="handled"
         contentContainerClassName="gap-5 px-5 pb-5 pt-4">
-        {/* Top bar with instant skip (explicitly optional invariant) */}
-        <View className="flex-row items-center justify-between pt-1">
-          <View className="flex-row items-center gap-1.5">
-            <View className="h-2 w-2 rounded-full bg-carin-olive" />
-            <Text variant="caption" className="font-medium text-muted-foreground">
-              Langkah opsional
-            </Text>
-          </View>
-          <Button
-            variant="ghost"
-            size="sm"
-            onPress={skip}
-            accessibilityRole="button"
-            accessibilityLabel="Lewati pengisian profil kesehatan"
-            className="h-8 rounded-full px-3">
-            <Text className="text-xs font-semibold text-primary">Nanti saja →</Text>
-          </Button>
-        </View>
-
         {/* Welcoming mascot hero card */}
         <View className="overflow-hidden rounded-summary border border-border bg-card p-5">
           <View className="flex-row items-center gap-4">
@@ -507,7 +490,7 @@ export default function HealthProfileScreen() {
               <Image
                 source={MASCOT}
                 resizeMode="contain"
-                accessibilityLabel="Maskot Carin"
+                accessibilityLabel="Maskot Carin berpakaian dokter membawa catatan kesehatan"
                 style={{
                   width: 80,
                   height: 84,
@@ -526,16 +509,20 @@ export default function HealthProfileScreen() {
           </View>
           <View className="mt-4 gap-1.5 border-t border-border pt-3">
             <Text variant="body" className="text-foreground">
-              Isi yang Anda ketahui. Profil ini opsional dan bisa dilengkapi kapan saja tanpa tekanan.
+              Isi yang Anda ketahui. Profil ini opsional dan bisa dilengkapi kapan saja tanpa
+              tekanan.
             </Text>
             <Text variant="caption" className="text-muted-foreground">
-              Data yang belum diketahui tidak dianggap normal atau nol. Informasi ini membantu personalisasi jika sesuai kebutuhan Anda.
+              Data yang belum diketahui tidak dianggap normal atau nol. Informasi ini membantu
+              personalisasi jika sesuai kebutuhan Anda.
             </Text>
           </View>
           {focusLabel ? (
             <View className="mt-3 rounded-control border border-primary/40 bg-carin-olive-soft/30 p-3">
               <Text className="font-semibold text-foreground">Lengkapi: {focusLabel}</Text>
-              <Text variant="caption" className="text-muted-foreground">Bagian tersebut sudah dituju dari tindakan sebelumnya.</Text>
+              <Text variant="caption" className="text-muted-foreground">
+                Bagian tersebut sudah dituju dari tindakan sebelumnya.
+              </Text>
             </View>
           ) : null}
         </View>
@@ -884,6 +871,6 @@ export default function HealthProfileScreen() {
           </>
         )}
       </SafeAreaView>
-    </View>
+    </SafeAreaView>
   );
 }

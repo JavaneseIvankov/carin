@@ -88,15 +88,21 @@ export function WelcomeCarousel({ onStartProfile }: { onStartProfile: () => void
     <SafeAreaView className="flex-1 bg-background">
       <View className="flex-1 px-5">
         <View className="flex-row items-center justify-between gap-3 py-3">
-          <Text variant="label" className="text-muted-foreground">
-            Kenalan dengan Carin
-          </Text>
           <Text
             variant="label"
             accessibilityLiveRegion="polite"
             accessibilityLabel={`Halaman ${index + 1} dari ${WELCOME_SLIDES.length}`}>
             {index + 1} dari {WELCOME_SLIDES.length}
           </Text>
+          <Button
+            variant="ghost"
+            size="sm"
+            accessibilityRole="button"
+            accessibilityLabel="Lewati pengantar dan lanjut ke profil kesehatan"
+            onPress={onStartProfile}
+            className="min-h-11 px-3">
+            <Text className="text-sm font-semibold text-primary">Lewati</Text>
+          </Button>
         </View>
 
         <ScrollView
@@ -187,16 +193,6 @@ export function WelcomeCarousel({ onStartProfile }: { onStartProfile: () => void
         </ScrollView>
 
         <View className="gap-3 pb-4 pt-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            accessibilityRole="button"
-            accessibilityLabel="Lewati pengantar dan lanjut ke profil kesehatan"
-            onPress={onStartProfile}
-            className="self-end px-2">
-            <Text className="text-sm font-semibold text-primary">Lewati pengantar</Text>
-          </Button>
-
           <View className="flex-row items-center justify-between gap-3">
             <Button
               variant="outline"
@@ -210,17 +206,17 @@ export function WelcomeCarousel({ onStartProfile }: { onStartProfile: () => void
               }}>
               <Text>Kembali</Text>
             </Button>
-            <Button
-              variant="tactile"
-              accessibilityRole="button"
-              accessibilityLabel={
-                isLast ? 'Lanjut ke profil kesehatan' : 'Lanjut ke halaman berikutnya'
-              }
-              onPress={advance}
-              disabled={waitingForNextImage}
-              className="min-w-36">
-              <Text>{isLast ? 'Lanjut ke Profil' : 'Lanjut'}</Text>
-            </Button>
+            {!isLast ? (
+              <Button
+                variant="tactile"
+                accessibilityRole="button"
+                accessibilityLabel="Lanjut ke halaman berikutnya"
+                onPress={advance}
+                disabled={waitingForNextImage}
+                className="min-w-36">
+                <Text>Lanjut</Text>
+              </Button>
+            ) : null}
           </View>
         </View>
       </View>

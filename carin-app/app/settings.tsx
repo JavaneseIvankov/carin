@@ -1,3 +1,4 @@
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { BackButton } from '@/components/app/back-button';
 import { FormField } from '@/components/app/form-field';
 import { ServiceError } from '@/components/app/service-error';
@@ -155,20 +156,24 @@ export default function SettingsScreen() {
 
   if (meQuery.isPending && !meQuery.data) {
     return (
-      <View className="flex-1 items-center justify-center gap-3 bg-background">
+      <SafeAreaView
+        edges={['top', 'left', 'right', 'bottom']}
+        className="flex-1 items-center justify-center gap-3 bg-background">
         <ActivityIndicator accessibilityLabel="Memuat pengaturan" />
         <Text variant="muted">Memuat pengaturan…</Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   if (!account && meQuery.error) {
     return (
-      <View className="flex-1 gap-4 bg-background p-5">
+      <SafeAreaView
+        edges={['top', 'left', 'right', 'bottom']}
+        className="flex-1 gap-4 bg-background p-5">
         <BackButton href="/(tabs)/profile" />
         <Text variant="h2">Pengaturan</Text>
         <ServiceError error={meQuery.error} onRetry={() => void meQuery.refetch()} />
-      </View>
+      </SafeAreaView>
     );
   }
   if (!account) return null;
@@ -184,232 +189,238 @@ export default function SettingsScreen() {
           : 'Belum memberikan persetujuan';
 
   return (
-    <ScrollView className="flex-1 bg-background" contentContainerClassName="gap-5 px-5 pb-10 pt-7">
-      <BackButton href="/(tabs)/profile" />
-      <View className="gap-2">
-        <Text variant="h1">Pengaturan</Text>
-        <Text variant="muted">Perubahan disimpan ke akun Anda saat server mengonfirmasi.</Text>
-      </View>
-
-      <View className="gap-4 rounded-summary border border-border/60 bg-card p-5">
-        <Text variant="h3">Zona waktu</Text>
-        <Text variant="muted">
-          Zona waktu menentukan batas hari pada ringkasan dan catatan asupan Anda.
-        </Text>
-
-        {/* Quick regional preset pills */}
+    <SafeAreaView edges={['top', 'left', 'right', 'bottom']} className="flex-1 bg-background">
+      <ScrollView
+        className="flex-1 bg-background"
+        contentContainerClassName="gap-5 px-5 pb-10 pt-7">
+        <BackButton href="/(tabs)/profile" />
         <View className="gap-2">
-          <Text className="font-medium text-foreground">Pilih zona wilayah Indonesia</Text>
-          <View className="flex-row flex-wrap gap-2.5">
-            {[
-              { code: 'WIB', tz: 'Asia/Jakarta', region: 'Barat (Jawa, Sumatera)' },
-              { code: 'WITA', tz: 'Asia/Makassar', region: 'Tengah (Bali, Sulawesi)' },
-              { code: 'WIT', tz: 'Asia/Jayapura', region: 'Timur (Maluku, Papua)' },
-            ].map((item) => {
-              const isSelected = timezone === item.tz;
-              return (
-                <Pressable
-                  key={item.tz}
-                  onPress={() => setTimezoneDraft(item.tz)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${item.code}: ${item.tz}`}
-                  accessibilityState={{ selected: isSelected }}
-                  className={cn(
-                    'flex-1 min-w-[95px] items-center justify-center rounded-control border p-3 gap-1',
-                    isSelected
-                      ? 'border-primary bg-carin-olive-soft'
-                      : 'border-border bg-card active:bg-muted/30'
-                  )}>
-                  <Text
-                    className={cn(
-                      'text-base font-bold',
-                      isSelected ? 'text-primary' : 'text-foreground'
-                    )}>
-                    {item.code}
-                  </Text>
-                  <Text
-                    variant="caption"
-                    className={cn(
-                      'text-center text-[11px]',
-                      isSelected ? 'font-medium text-primary' : 'text-muted-foreground'
-                    )}>
-                    {item.region}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-
-          {/* Device Auto-detect */}
-          <Pressable
-            onPress={() => {
-              try {
-                const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                if (detected) setTimezoneDraft(detected);
-              } catch {
-                setTimezoneDraft('Asia/Jakarta');
-              }
-            }}
-            accessibilityRole="button"
-            accessibilityLabel="Gunakan zona waktu perangkat"
-            className="mt-1 self-start rounded-full border border-border/80 bg-muted/20 px-3.5 py-1.5 active:bg-muted/40">
-            <Text variant="caption" className="font-medium text-foreground">
-              ⚡ Gunakan waktu perangkat
-            </Text>
-          </Pressable>
+          <Text variant="h1">Pengaturan</Text>
+          <Text variant="muted">Perubahan disimpan ke akun Anda saat server mengonfirmasi.</Text>
         </View>
 
-        <FormField
-          label="Zona waktu aktif (IANA)"
-          value={timezone}
-          onChangeText={(value) => setTimezoneDraft(value)}
-          error={timezoneError ?? undefined}
-          placeholder="Asia/Jakarta"
-          autoCapitalize="none"
-          autoCorrect={false}
-          hint="Pilih tombol wilayah di atas atau ubah manual jika berada di luar negeri."
-        />
-        <Button
-          variant="tactile"
-          className="min-h-12"
-          onPress={() => void saveTimezone()}
-          disabled={updateMe.isPending || timezone === account.timezone}>
-          <Text>{updateMe.isPending ? 'Menyimpan…' : 'Simpan zona waktu'}</Text>
-        </Button>
-        {timezoneMessage ? (
-          <Text variant="muted" accessibilityRole={timezoneConflict ? 'alert' : 'text'}>
-            {timezoneMessage}
-          </Text>
-        ) : null}
-        {timezoneConflict ? (
-          <Button
-            variant="outline"
-            className="min-h-12"
-            onPress={() => void reloadTimezoneRevision()}
-            disabled={meQuery.isFetching}>
-            <Text>{meQuery.isFetching ? 'Memuat versi terbaru…' : 'Muat versi terbaru'}</Text>
-          </Button>
-        ) : null}
-      </View>
-
-      <View className="gap-4 rounded-summary border border-border/60 bg-card p-5">
-        <View className="gap-2">
-          <Text variant="h3">Persetujuan pemrosesan AI</Text>
-          <Text>
-            Persetujuan ini pilihan dan terpisah dari persetujuan saat pendaftaran. Tanpa
-            persetujuan aktif, profil, pencatatan makanan manual, dan catatan pemeriksaan tetap
-            dapat digunakan. Analisis foto dan evaluasi personal berbantuan AI tidak dimulai.
-          </Text>
+        <View className="gap-4 rounded-summary border border-border/60 bg-card p-5">
+          <Text variant="h3">Zona waktu</Text>
           <Text variant="muted">
-            Anda dapat mencabut persetujuan kapan saja. Catatan yang sudah tersimpan tidak otomatis
-            dihapus.
+            Zona waktu menentukan batas hari pada ringkasan dan catatan asupan Anda.
           </Text>
-        </View>
-        {legalQuery.error ? (
-          <ServiceError error={legalQuery.error} onRetry={() => void legalQuery.refetch()} />
-        ) : null}
-        {registry && legalRegistryState === 'stale' ? (
+
+          {/* Quick regional preset pills */}
           <View className="gap-2">
-            <Text variant="muted">
-              Pemberitahuan tersimpan dari cache dan mungkin bukan versi terbaru. Muat versi terbaru
-              sebelum mengubah persetujuan.
-            </Text>
-            {!legalQuery.error ? (
-              <Button
-                variant="outline"
-                className="min-h-12"
-                onPress={() => void legalQuery.refetch()}
-                disabled={legalQuery.isFetching}>
-                <Text>
-                  {legalQuery.isFetching ? 'Memuat versi terbaru…' : 'Muat versi terbaru'}
-                </Text>
-              </Button>
-            ) : null}
-          </View>
-        ) : null}
-        {registry && legalRegistryState === 'refreshing' ? (
-          <Text variant="muted">
-            Memeriksa versi pemberitahuan terbaru. Perubahan persetujuan sementara dinonaktifkan.
-          </Text>
-        ) : null}
-        {registry && legalRegistryState === 'error' ? (
-          <Text variant="muted">
-            Versi pemberitahuan belum dapat diverifikasi. Perubahan persetujuan dinonaktifkan.
-          </Text>
-        ) : null}
-        {registry ? (
-          <>
-            <View className="gap-3 rounded-compact border border-border/60 bg-muted/20 p-4">
-              <Text className="font-semibold text-foreground">
-                {registryCurrent ? 'Pemberitahuan yang berlaku' : 'Pemberitahuan tersimpan'}
-              </Text>
-              <LegalContent document={registry.aiProcessing} />
+            <Text className="font-medium text-foreground">Pilih zona wilayah Indonesia</Text>
+            <View className="flex-row flex-wrap gap-2.5">
+              {[
+                { code: 'WIB', tz: 'Asia/Jakarta', region: 'Barat (Jawa, Sumatera)' },
+                { code: 'WITA', tz: 'Asia/Makassar', region: 'Tengah (Bali, Sulawesi)' },
+                { code: 'WIT', tz: 'Asia/Jayapura', region: 'Timur (Maluku, Papua)' },
+              ].map((item) => {
+                const isSelected = timezone === item.tz;
+                return (
+                  <Pressable
+                    key={item.tz}
+                    onPress={() => setTimezoneDraft(item.tz)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${item.code}: ${item.tz}`}
+                    accessibilityState={{ selected: isSelected }}
+                    className={cn(
+                      'min-w-[95px] flex-1 items-center justify-center gap-1 rounded-control border p-3',
+                      isSelected
+                        ? 'border-primary bg-carin-olive-soft'
+                        : 'border-border bg-card active:bg-muted/30'
+                    )}>
+                    <Text
+                      className={cn(
+                        'text-base font-bold',
+                        isSelected ? 'text-primary' : 'text-foreground'
+                      )}>
+                      {item.code}
+                    </Text>
+                    <Text
+                      variant="caption"
+                      className={cn(
+                        'text-center text-[11px]',
+                        isSelected ? 'font-medium text-primary' : 'text-muted-foreground'
+                      )}>
+                      {item.region}
+                    </Text>
+                  </Pressable>
+                );
+              })}
             </View>
-            {registryCurrent ? (
-              <LegalCheckbox
-                label="Persetujuan pemrosesan AI"
-                version={registry.aiProcessing.version}
-                checked={consentValue}
-                onCheckedChange={(granted) =>
-                  setConsentDraft({ version: registry.aiProcessing.version, granted })
-                }
-                onOpenDocument={openConsentDocument}
-              />
-            ) : null}
-          </>
-        ) : legalQuery.isPending ? (
-          <View className="flex-row items-center gap-2">
-            <ActivityIndicator accessibilityLabel="Memuat dokumen persetujuan AI" />
-            <Text variant="muted">Memuat versi dokumen…</Text>
-          </View>
-        ) : null}
-        <Text variant="muted">
-          Status saat ini: {consentStatusMessage}
-          {account.aiConsent.updatedAt
-            ? ` · diperbarui ${new Date(account.aiConsent.updatedAt).toLocaleString('id-ID')}`
-            : ''}
-        </Text>
-        <Button
-          tactile
-          className="min-h-12"
-          onPress={() => void saveConsent()}
-          disabled={!registryCurrent || !dirtyConsent || consentConflict || setAiConsent.isPending}>
-          <Text>
-            {setAiConsent.isPending
-              ? 'Menyimpan…'
-              : !registryCurrent
-                ? 'Muat versi terbaru sebelum mengubah'
-                : consentValue
-                  ? 'Simpan persetujuan'
-                  : consentActive
-                    ? 'Cabut persetujuan'
-                    : consentStatus === 'stale'
-                      ? 'Setujui versi terbaru'
-                      : 'Belum ada perubahan'}
-          </Text>
-        </Button>
-        {consentMessage ? (
-          <Text variant="muted" accessibilityRole={consentConflict ? 'alert' : 'text'}>
-            {consentMessage}
-          </Text>
-        ) : null}
-        {consentConflict ? (
-          <Button
-            variant="outline"
-            className="min-h-12"
-            onPress={() => void reloadConsentVersion()}
-            disabled={legalQuery.isFetching}>
-            <Text>{legalQuery.isFetching ? 'Memuat dokumen…' : 'Muat dokumen terbaru'}</Text>
-          </Button>
-        ) : null}
-        <Button variant="outline" className="min-h-12" onPress={openConsentDocument}>
-          <Text>Baca pemberitahuan pemrosesan AI</Text>
-        </Button>
-      </View>
 
-      <Button variant="outline" className="min-h-12" onPress={() => router.back()}>
-        <Text>Kembali ke profil</Text>
-      </Button>
-    </ScrollView>
+            {/* Device Auto-detect */}
+            <Pressable
+              onPress={() => {
+                try {
+                  const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                  if (detected) setTimezoneDraft(detected);
+                } catch {
+                  setTimezoneDraft('Asia/Jakarta');
+                }
+              }}
+              accessibilityRole="button"
+              accessibilityLabel="Gunakan zona waktu perangkat"
+              className="mt-1 self-start rounded-full border border-border/80 bg-muted/20 px-3.5 py-1.5 active:bg-muted/40">
+              <Text variant="caption" className="font-medium text-foreground">
+                ⚡ Gunakan waktu perangkat
+              </Text>
+            </Pressable>
+          </View>
+
+          <FormField
+            label="Zona waktu aktif (IANA)"
+            value={timezone}
+            onChangeText={(value) => setTimezoneDraft(value)}
+            error={timezoneError ?? undefined}
+            placeholder="Asia/Jakarta"
+            autoCapitalize="none"
+            autoCorrect={false}
+            hint="Pilih tombol wilayah di atas atau ubah manual jika berada di luar negeri."
+          />
+          <Button
+            variant="tactile"
+            className="min-h-12"
+            onPress={() => void saveTimezone()}
+            disabled={updateMe.isPending || timezone === account.timezone}>
+            <Text>{updateMe.isPending ? 'Menyimpan…' : 'Simpan zona waktu'}</Text>
+          </Button>
+          {timezoneMessage ? (
+            <Text variant="muted" accessibilityRole={timezoneConflict ? 'alert' : 'text'}>
+              {timezoneMessage}
+            </Text>
+          ) : null}
+          {timezoneConflict ? (
+            <Button
+              variant="outline"
+              className="min-h-12"
+              onPress={() => void reloadTimezoneRevision()}
+              disabled={meQuery.isFetching}>
+              <Text>{meQuery.isFetching ? 'Memuat versi terbaru…' : 'Muat versi terbaru'}</Text>
+            </Button>
+          ) : null}
+        </View>
+
+        <View className="gap-4 rounded-summary border border-border/60 bg-card p-5">
+          <View className="gap-2">
+            <Text variant="h3">Persetujuan pemrosesan AI</Text>
+            <Text>
+              Persetujuan ini pilihan dan terpisah dari persetujuan saat pendaftaran. Tanpa
+              persetujuan aktif, profil, pencatatan makanan manual, dan catatan pemeriksaan tetap
+              dapat digunakan. Analisis foto dan evaluasi personal berbantuan AI tidak dimulai.
+            </Text>
+            <Text variant="muted">
+              Anda dapat mencabut persetujuan kapan saja. Catatan yang sudah tersimpan tidak
+              otomatis dihapus.
+            </Text>
+          </View>
+          {legalQuery.error ? (
+            <ServiceError error={legalQuery.error} onRetry={() => void legalQuery.refetch()} />
+          ) : null}
+          {registry && legalRegistryState === 'stale' ? (
+            <View className="gap-2">
+              <Text variant="muted">
+                Pemberitahuan tersimpan dari cache dan mungkin bukan versi terbaru. Muat versi
+                terbaru sebelum mengubah persetujuan.
+              </Text>
+              {!legalQuery.error ? (
+                <Button
+                  variant="outline"
+                  className="min-h-12"
+                  onPress={() => void legalQuery.refetch()}
+                  disabled={legalQuery.isFetching}>
+                  <Text>
+                    {legalQuery.isFetching ? 'Memuat versi terbaru…' : 'Muat versi terbaru'}
+                  </Text>
+                </Button>
+              ) : null}
+            </View>
+          ) : null}
+          {registry && legalRegistryState === 'refreshing' ? (
+            <Text variant="muted">
+              Memeriksa versi pemberitahuan terbaru. Perubahan persetujuan sementara dinonaktifkan.
+            </Text>
+          ) : null}
+          {registry && legalRegistryState === 'error' ? (
+            <Text variant="muted">
+              Versi pemberitahuan belum dapat diverifikasi. Perubahan persetujuan dinonaktifkan.
+            </Text>
+          ) : null}
+          {registry ? (
+            <>
+              <View className="gap-3 rounded-compact border border-border/60 bg-muted/20 p-4">
+                <Text className="font-semibold text-foreground">
+                  {registryCurrent ? 'Pemberitahuan yang berlaku' : 'Pemberitahuan tersimpan'}
+                </Text>
+                <LegalContent document={registry.aiProcessing} />
+              </View>
+              {registryCurrent ? (
+                <LegalCheckbox
+                  label="Persetujuan pemrosesan AI"
+                  version={registry.aiProcessing.version}
+                  checked={consentValue}
+                  onCheckedChange={(granted) =>
+                    setConsentDraft({ version: registry.aiProcessing.version, granted })
+                  }
+                  onOpenDocument={openConsentDocument}
+                />
+              ) : null}
+            </>
+          ) : legalQuery.isPending ? (
+            <View className="flex-row items-center gap-2">
+              <ActivityIndicator accessibilityLabel="Memuat dokumen persetujuan AI" />
+              <Text variant="muted">Memuat versi dokumen…</Text>
+            </View>
+          ) : null}
+          <Text variant="muted">
+            Status saat ini: {consentStatusMessage}
+            {account.aiConsent.updatedAt
+              ? ` · diperbarui ${new Date(account.aiConsent.updatedAt).toLocaleString('id-ID')}`
+              : ''}
+          </Text>
+          <Button
+            tactile
+            className="min-h-12"
+            onPress={() => void saveConsent()}
+            disabled={
+              !registryCurrent || !dirtyConsent || consentConflict || setAiConsent.isPending
+            }>
+            <Text>
+              {setAiConsent.isPending
+                ? 'Menyimpan…'
+                : !registryCurrent
+                  ? 'Muat versi terbaru sebelum mengubah'
+                  : consentValue
+                    ? 'Simpan persetujuan'
+                    : consentActive
+                      ? 'Cabut persetujuan'
+                      : consentStatus === 'stale'
+                        ? 'Setujui versi terbaru'
+                        : 'Belum ada perubahan'}
+            </Text>
+          </Button>
+          {consentMessage ? (
+            <Text variant="muted" accessibilityRole={consentConflict ? 'alert' : 'text'}>
+              {consentMessage}
+            </Text>
+          ) : null}
+          {consentConflict ? (
+            <Button
+              variant="outline"
+              className="min-h-12"
+              onPress={() => void reloadConsentVersion()}
+              disabled={legalQuery.isFetching}>
+              <Text>{legalQuery.isFetching ? 'Memuat dokumen…' : 'Muat dokumen terbaru'}</Text>
+            </Button>
+          ) : null}
+          <Button variant="outline" className="min-h-12" onPress={openConsentDocument}>
+            <Text>Baca pemberitahuan pemrosesan AI</Text>
+          </Button>
+        </View>
+
+        <Button variant="outline" className="min-h-12" onPress={() => router.back()}>
+          <Text>Kembali ke profil</Text>
+        </Button>
+      </ScrollView>
+    </SafeAreaView>
   );
 }

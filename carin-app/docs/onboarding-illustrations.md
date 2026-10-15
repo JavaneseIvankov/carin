@@ -53,3 +53,19 @@ Changes: All three native image layers mount together when onboarding opens, sta
 Verification (from `carin-app/`): Prettier, `tsc --noEmit`, ESLint on `components/onboarding/welcome-carousel.tsx`, and `vitest run lib/onboarding/welcome-slides.unit.test.ts` passed (3 navigation/copy tests). The Metro iOS bundle returned 200 and includes MascotLayer. `git diff --check` passed. These checks do not verify native decode timing or visual smoothness; cold-load, repeated forward/back, network failure/retry and Reduce Motion need iPhone review.
 
 Worktree state: This change and the preceding slide-animation change are uncommitted; unrelated infra env settings remain preserved.
+
+## Skip control placement
+
+Task / scope: Move the onboarding skip control to the top right, shorten its visible label to Lewati, and remove Kenalan dengan Carin.
+
+Changes: The existing SafeAreaView still encloses the top row. Slide count stays on the left; the ghost Lewati button is on the right with at least 44 dp height. Footer now contains only Kembali and Lanjut. Skip still opens the optional profile step and keeps its descriptive accessibility label.
+
+Verification (from `carin-app/`): `tsc --noEmit`, ESLint on the carousel and `git diff --check` passed. iPhone visual clearance remains for user review. Changes are uncommitted; unrelated env settings are preserved.
+
+## Final-slide footer control
+
+Task / scope: Remove the bottom Lanjut ke Profil button from the final onboarding slide.
+
+Changes: The bottom forward button is rendered only on slides one and two. The final slide keeps Kembali; Lewati at the top right remains the action that opens the profile step. No routing or data contract changed.
+
+Verification: TypeScript and component ESLint checks passed from carin-app; git diff --check passed. Device appearance remains for user review. This adjustment is uncommitted.

@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   Platform,
   Pressable,
+  StyleSheet,
   type ColorValue,
   type PressableStateCallbackType,
 } from 'react-native';
@@ -16,7 +17,7 @@ const buttonVariants = cva(
   cn(
     'group shrink-0 flex-row items-center justify-center gap-2 rounded-control',
     Platform.select({
-      web: "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive whitespace-nowrap outline-none transition-all focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+      web: "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive outline-none transition-all focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
     })
   ),
   {
@@ -33,9 +34,9 @@ const buttonVariants = cva(
           })
         ),
         outline: cn(
-          'border border-input bg-background active:bg-accent',
+          'rounded-[20px] border-b-4 border-border bg-muted active:bg-muted active:opacity-95 dark:border-background',
           Platform.select({
-            web: 'hover:bg-accent',
+            web: 'hover:bg-muted hover:opacity-95',
           })
         ),
         secondary: cn(
@@ -48,18 +49,18 @@ const buttonVariants = cva(
         ),
         link: '',
         tactile: cn(
-          'rounded-[20px] bg-primary border-b-4 border-[#33451f] dark:border-[#151d0c] active:opacity-95',
-          Platform.select({ web: 'hover:bg-primary/95 transition-transform' })
+          'rounded-[20px] border-b-4 border-[#33451f] bg-primary active:opacity-95 dark:border-[#151d0c]',
+          Platform.select({ web: 'transition-transform hover:bg-primary/95' })
         ),
         'tactile-secondary': cn(
-          'rounded-[20px] bg-secondary border-b-4 border-[#e2b899] dark:border-[#241b14] active:opacity-95',
-          Platform.select({ web: 'hover:bg-secondary/95 transition-transform' })
+          'rounded-[20px] border-b-4 border-[#e2b899] bg-secondary active:opacity-95 dark:border-[#241b14]',
+          Platform.select({ web: 'transition-transform hover:bg-secondary/95' })
         ),
       },
       size: {
-        default: cn('h-12 px-4 py-3', Platform.select({ web: 'has-[>svg]:px-3' })),
-        sm: cn('h-11 gap-1.5 px-3', Platform.select({ web: 'has-[>svg]:px-2.5' })),
-        lg: cn('h-12 px-6', Platform.select({ web: 'has-[>svg]:px-4' })),
+        default: cn('min-h-12 px-4 py-2.5', Platform.select({ web: 'has-[>svg]:px-3' })),
+        sm: cn('min-h-11 gap-1.5 px-3 py-2', Platform.select({ web: 'has-[>svg]:px-2.5' })),
+        lg: cn('min-h-12 px-6 py-2.5', Platform.select({ web: 'has-[>svg]:px-4' })),
         icon: 'h-11 w-11',
       },
     },
@@ -72,7 +73,7 @@ const buttonVariants = cva(
 
 const buttonTextVariants = cva(
   cn(
-    'text-base font-semibold leading-[22px] text-foreground',
+    'shrink text-center text-base font-semibold leading-[22px] text-foreground',
     Platform.select({ web: 'pointer-events-none transition-colors' })
   ),
   {
@@ -161,10 +162,13 @@ function Button({
   tactile = false,
   accessibilityState,
   onPress,
+  onHoverIn,
+  onHoverOut,
   children,
   style,
   ...props
 }: ButtonProps) {
+  const [hovered, setHovered] = React.useState(false);
   const unavailable = disabled || loading;
   const effectiveVariant = variant ?? (tactile ? 'tactile' : 'default');
   const resolvedVariant =
@@ -173,7 +177,10 @@ function Button({
       : tactile && effectiveVariant === 'default'
         ? 'tactile'
         : effectiveVariant;
-  const isTactile = resolvedVariant === 'tactile' || resolvedVariant === 'tactile-secondary';
+  const isTactile =
+    resolvedVariant === 'tactile' ||
+    resolvedVariant === 'tactile-secondary' ||
+    resolvedVariant === 'outline';
 
   return (
     <TextClassContext.Provider value={buttonTextVariants({ variant: resolvedVariant, size })}>
@@ -181,6 +188,9 @@ function Button({
         className={cn(
           disabled && !loading && 'opacity-50',
           buttonVariants({ variant: resolvedVariant, size }),
+          isTactile &&
+            Platform.OS === 'web' &&
+            'transition-transform duration-150 motion-reduce:transition-none',
           className
         )}
         role="button"
@@ -191,10 +201,29 @@ function Button({
           busy: loading,
         }}
         onPress={loading ? undefined : onPress}
+        onHoverIn={(event) => {
+          if (!unavailable) setHovered(true);
+          onHoverIn?.(event);
+        }}
+        onHoverOut={(event) => {
+          setHovered(false);
+          onHoverOut?.(event);
+        }}
         style={(state: PressableStateCallbackType) => {
           const userStyle = typeof style === 'function' ? style(state) : style;
-          if (isTactile && state.pressed) {
-            return [userStyle, { transform: [{ translateY: 2 }] }];
+          if (isTactile && !unavailable && (state.pressed || hovered)) {
+            const baseTransform = StyleSheet.flatten(userStyle)?.transform;
+            const translateY = state.pressed ? 3 : -2;
+            const scale = state.pressed ? 0.98 : 1.01;
+            return [
+              userStyle,
+              {
+                transform:
+                  typeof baseTransform === 'string'
+                    ? `${baseTransform} translateY(${translateY}px) scale(${scale})`
+                    : [...(baseTransform ?? []), { translateY }, { scale }],
+              },
+            ];
           }
           return userStyle;
         }}
