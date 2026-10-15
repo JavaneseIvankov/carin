@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import asyncio
 import io
 from dataclasses import dataclass
 from urllib.parse import urlsplit
@@ -13,7 +14,8 @@ from .errors import ServiceError
 
 
 MAX_SIDE = 1600
-MAX_PIXELS = 40_000_000
+# Bound decoded memory before loading; ordinary 12 MP phone photos fit this CPU-VPS budget.
+MAX_PIXELS = 16_000_000
 
 
 @dataclass(frozen=True)
@@ -121,4 +123,5 @@ async def fetch_and_normalize(
 
     if hashlib.sha256(original).hexdigest() != image["sha256"]:
         raise ServiceError(422, "INVALID_INPUT", "SHA-256 foto tidak cocok.")
-    return NormalizedImage(_normalize_image(original, image["mimeType"]))
+    normalized = await asyncio.to_thread(_normalize_image, original, image["mimeType"])
+    return NormalizedImage(normalized)

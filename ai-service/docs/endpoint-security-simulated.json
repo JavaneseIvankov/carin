@@ -1,0 +1,76 @@
+{
+  "mode": "simulated-provider",
+  "image": "lefood-14.jpg",
+  "transport": "real local HTTP + fixture object storage + JPEG normalization",
+  "rate_limiter": "in-memory process-local, shared by authenticated internal API routes",
+  "test_api_limit_per_minute": 2,
+  "default_api_limit_per_minute": 60,
+  "target_provider_calls": 2,
+  "endpoints": [
+    {
+      "endpoint": "/internal/ai-service/a-model",
+      "status": 200,
+      "elapsed_seconds": 0.088,
+      "schema_valid": true,
+      "is_food": true,
+      "weight_g": 150
+    },
+    {
+      "endpoint": "/internal/ai-service/b-model",
+      "status": 200,
+      "elapsed_seconds": 0.063,
+      "schema_valid": true,
+      "is_food": true,
+      "weight_g": 150
+    }
+  ],
+  "checks": [
+    {
+      "check": "missing-key",
+      "status": 401,
+      "passed": true
+    },
+    {
+      "check": "invalid-key",
+      "status": 401,
+      "passed": true
+    },
+    {
+      "check": "body-limit",
+      "status": 413,
+      "passed": true
+    },
+    {
+      "check": "retired-aliases-removed",
+      "passed": true
+    },
+    {
+      "check": "shared-spam-quota",
+      "requests": 20,
+      "statuses": [
+        429,
+        429,
+        429,
+        429,
+        429,
+        429,
+        429,
+        429,
+        429,
+        429,
+        429,
+        429,
+        429,
+        429,
+        429,
+        429,
+        429,
+        429,
+        429,
+        429
+      ],
+      "extra_media_downloads": 0,
+      "passed": true
+    }
+  ]
+}

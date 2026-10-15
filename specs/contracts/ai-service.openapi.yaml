@@ -3,7 +3,7 @@ openapi: "3.1.1"
 info:
   title: "Carin Internal AI Service API"
   version: "1.0.0"
-  description: "Stateless internal API. Backend owns durable async jobs. Internal analysis calls return synchronously. No user DB access. Contract and rule/catalog versions are distinct. All fields are explicit; null never implies zero. Synthetic fixtures only in development/test."
+  description: "Stateless internal API. Backend owns durable async jobs. Internal analysis calls return synchronously. No user DB access. Contract and rule/catalog versions are distinct. All fields are explicit; null never implies zero. Synthetic fixtures only in development/test. Default configurable security budgets: 60 authenticated requests/minute, 10 inference attempts/minute, 500 inference attempts/24 hours, two concurrent analyses, 64 KiB JSON body, 5s body-read and 85s analysis deadline. Inference quotas are shared across every analysis URL. Limit rejection is 429 with Retry-After; oversized bodies are 413; body-read timeout is 408; unavailable security storage is 503."
 servers:
   -
     url: "http://ai-service:8000"
@@ -96,6 +96,84 @@ paths:
           $ref: "#/components/responses/Error"
         "409":
           $ref: "#/components/responses/Error"
+        "408":
+          $ref: "#/components/responses/Error"
+        "413":
+          $ref: "#/components/responses/Error"
+        "415":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/internal/ai-service/a-model":
+    post:
+      operationId: "analyzeA1V1VariantA"
+      summary: "Experimental A1V1 image analysis, variant A"
+      description: "Uses the fixed A1V1 prompt and strict JSON schema with temperature 0, thinking disabled, and max_tokens 1024. This returns direct visual nutrient estimates for model evaluation; they are not catalog-grounded or suitable as health advice. No fallback model is used."
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/A1V1PhotoRequest"
+      responses:
+        "200":
+          description: "Validated A1V1 model output"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/A1V1Prediction"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "408":
+          $ref: "#/components/responses/Error"
+        "413":
+          $ref: "#/components/responses/Error"
+        "415":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/internal/ai-service/b-model":
+    post:
+      operationId: "analyzeA1V1VariantB"
+      summary: "Experimental A1V1 image analysis, variant B"
+      description: "Uses the fixed A1V1 prompt and strict JSON schema with temperature 0, thinking disabled, and max_tokens 1024. This returns direct visual nutrient estimates for model evaluation; they are not catalog-grounded or suitable as health advice. No fallback model is used."
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/A1V1PhotoRequest"
+      responses:
+        "200":
+          description: "Validated A1V1 model output"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/A1V1Prediction"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "408":
+          $ref: "#/components/responses/Error"
+        "413":
+          $ref: "#/components/responses/Error"
+        "415":
+          $ref: "#/components/responses/Error"
         "422":
           $ref: "#/components/responses/Error"
         "429":
@@ -127,6 +205,12 @@ paths:
         "401":
           $ref: "#/components/responses/Error"
         "409":
+          $ref: "#/components/responses/Error"
+        "408":
+          $ref: "#/components/responses/Error"
+        "413":
+          $ref: "#/components/responses/Error"
+        "415":
           $ref: "#/components/responses/Error"
         "422":
           $ref: "#/components/responses/Error"
@@ -882,6 +966,95 @@ components:
             -
               type: "null"
       required: ["catalogVersion", "items", "nextCursor"]
+    A1V1PhotoRequest:
+      type: "object"
+      additionalProperties: false
+      properties:
+        image:
+          $ref: "#/components/schemas/ImageReference"
+      required: ["image"]
+    ImageReference:
+      type: "object"
+      additionalProperties: false
+      properties:
+        downloadUrl:
+          type: "string"
+          format: "uri"
+          maxLength: 4096
+        mimeType:
+          type: "string"
+          enum: ["image/jpeg", "image/png"]
+        sha256:
+          type: "string"
+          pattern: "^[a-f0-9]{64}$"
+      required: ["downloadUrl", "mimeType", "sha256"]
+    A1V1Prediction:
+      type: "object"
+      additionalProperties: false
+      properties:
+        is_food:
+          type: "boolean"
+        container_diameter_cm:
+          anyOf:
+            - type: "number"
+              minimum: 0
+            - type: "null"
+        apparent_volume_cm3:
+          anyOf:
+            - type: "number"
+              minimum: 0
+            - type: "null"
+        weight_g:
+          anyOf:
+            - type: "number"
+              minimum: 0
+            - type: "null"
+        components:
+          type: "array"
+          items:
+            type: "object"
+            additionalProperties: false
+            properties:
+              name:
+                type: "string"
+                minLength: 1
+              mass_g:
+                anyOf:
+                  - type: "number"
+                    minimum: 0
+                  - type: "null"
+            required: ["name", "mass_g"]
+        prediction:
+          type: "object"
+          additionalProperties: false
+          properties:
+            energy_kcal:
+              anyOf:
+                - type: "number"
+                  minimum: 0
+                - type: "null"
+            protein_g:
+              anyOf:
+                - type: "number"
+                  minimum: 0
+                - type: "null"
+            carbohydrate_g:
+              anyOf:
+                - type: "number"
+                  minimum: 0
+                - type: "null"
+            fat_g:
+              anyOf:
+                - type: "number"
+                  minimum: 0
+                - type: "null"
+          required: ["energy_kcal", "protein_g", "carbohydrate_g", "fat_g"]
+        limitations:
+          type: "array"
+          maxItems: 3
+          items:
+            type: "string"
+      required: ["is_food", "container_diameter_cm", "apparent_volume_cm3", "weight_g", "components", "prediction", "limitations"]
     PhotoAnalysisRequest:
       type: "object"
       additionalProperties: false
@@ -902,19 +1075,7 @@ components:
         profile:
           $ref: "#/components/schemas/ProfileContext"
         image:
-          type: "object"
-          additionalProperties: false
-          properties:
-            downloadUrl:
-              type: "string"
-              format: "uri"
-            mimeType:
-              type: "string"
-              enum: ["image/jpeg", "image/png"]
-            sha256:
-              type: "string"
-              pattern: "^[a-f0-9]{64}$"
-          required: ["downloadUrl", "mimeType", "sha256"]
+          $ref: "#/components/schemas/ImageReference"
       required: ["contractVersion", "operationId", "catalogVersion", "ruleSetVersion", "profile", "image"]
     RecalculationRequest:
       type: "object"
@@ -1014,7 +1175,7 @@ components:
           schema:
             $ref: "#/components/schemas/Error"
     TooManyRequests:
-      description: "Structured error; code examples INVALID_INPUT, UNSUPPORTED_VERSION, CATALOG_VERSION_UNAVAILABLE, SERVICE_UNAVAILABLE, MODEL_FAILURE. No successful result body on error."
+      description: "Structured error with Retry-After. RATE_LIMITED indicates request/attempt quotas, CAPACITY_LIMITED indicates active inference capacity, MODEL_FAILURE indicates provider throttling. Retrying must wait for the indicated delay. No successful result body on error."
       content:
         "application/json":
           schema:

@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import copy
+import asyncio
 import hmac
+import json
 import logging
 import uuid
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
@@ -11,12 +14,14 @@ from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.openapi.docs import get_swagger_ui_html
+from starlette.requests import ClientDisconnect
 
 from .config import Settings, load_settings
 from .contract import OPENAPI_DOCUMENT, validate_payload
 from .errors import ContractViolation, PayloadValidationError, ServiceError
 from .media import fetch_and_normalize
-from .provider import VLMClient
+from .provider import A1V1_FLASH_MODEL, A1V1_MAX_MODEL, A1V1VLMClient, VLMClient
+from .security import MemoryRateLimiter, enforce_rate, rate_limiter
 from .service import (
     UNCONFIGURED_VERSION,
     catalog_page,
@@ -28,14 +33,56 @@ from .service import (
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=False)
 logger = logging.getLogger("carin.ai_service")
-app = FastAPI(title="Carin Internal AI Service", version="1.0.0", docs_url=None, redoc_url=None, openapi_url=None)
+
+
+@asynccontextmanager
+async def lifespan(application: FastAPI):
+    settings = load_settings()
+    application.state.rate_limiter = MemoryRateLimiter()
+    try:
+        yield
+    finally:
+        del application.state.rate_limiter
+
+
+app = FastAPI(title="Carin Internal AI Service", version="1.0.0", docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
 
 
 @app.middleware("http")
 async def request_context(request: Request, call_next):  # type: ignore[no-untyped-def]
     request.state.request_id = str(uuid.uuid4())
-    response = await call_next(request)
+    try:
+        try:
+            settings = load_settings()
+        except (ValueError, TypeError):
+            raise ServiceError(503, "SERVICE_UNAVAILABLE", "Konfigurasi AI service tidak valid.") from None
+        request.state.settings = settings
+        if request.headers.get("content-encoding", "identity").lower() != "identity":
+            raise ServiceError(415, "UNSUPPORTED_MEDIA_TYPE", "Content-Encoding tidak didukung.")
+        length = request.headers.get("content-length")
+        if length is not None:
+            try:
+                size = int(length)
+            except ValueError:
+                raise ServiceError(400, "INVALID_INPUT", "Content-Length tidak valid.") from None
+            if size < 0:
+                raise ServiceError(400, "INVALID_INPUT", "Content-Length tidak valid.")
+            if size > settings.request_max_bytes:
+                raise ServiceError(413, "PAYLOAD_TOO_LARGE", "Body request melebihi batas.")
+        response = await call_next(request)
+    except ServiceError as exc:
+        headers = {"Retry-After": str(exc.retry_after)} if exc.retry_after is not None else None
+        response = JSONResponse(status_code=exc.status_code, content=_error_body(request, exc), headers=headers)
+    except Exception:
+        logger.error("unhandled service error requestId=%s", request.state.request_id)
+        error = ServiceError(500, "SERVICE_UNAVAILABLE", "Terjadi kesalahan internal.")
+        response = JSONResponse(status_code=500, content=_error_body(request, error))
     response.headers["X-Request-Id"] = request.state.request_id
+    response.headers["Cache-Control"] = "no-store"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "no-referrer"
+    response.headers["Content-Security-Policy"] = "frame-ancestors 'none'"
     return response
 
 
@@ -81,16 +128,13 @@ async def unexpected_error_handler(request: Request, exc: Exception) -> JSONResp
 
 
 async def require_service_key(request: Request) -> Settings:
-    try:
-        settings = load_settings()
-    except (ValueError, TypeError):
-        raise ServiceError(503, "SERVICE_UNAVAILABLE", "Konfigurasi AI service tidak valid.")
+    settings = request.state.settings
     if not settings.service_key:
         raise ServiceError(503, "SERVICE_UNAVAILABLE", "AI_SERVICE_KEY belum dikonfigurasi.")
     supplied = request.headers.get("X-Carin-Service-Key", "")
-    if not supplied or not hmac.compare_digest(supplied, settings.service_key):
+    if not supplied or not hmac.compare_digest(supplied.encode("utf-8"), settings.service_key.encode("utf-8")):
         raise ServiceError(401, "INVALID_SERVICE_KEY", "Service key tidak valid.")
-    request.state.settings = settings
+    await enforce_rate(rate_limiter(request), settings.api_rate_limit, 60)
     return settings
 
 
@@ -100,8 +144,16 @@ async def _json_body(request: Request, schema_name: str) -> dict[str, Any]:
         raise ServiceError(415, "UNSUPPORTED_MEDIA_TYPE", "Content-Type harus application/json.")
 
     try:
-        payload = await request.json()
-    except Exception as exc:
+        raw = bytearray()
+        async with asyncio.timeout(5):
+            async for chunk in request.stream():
+                if len(raw) + len(chunk) > request.state.settings.request_max_bytes:
+                    raise ServiceError(413, "PAYLOAD_TOO_LARGE", "Body request melebihi batas.")
+                raw.extend(chunk)
+        payload = json.loads(raw, parse_constant=_reject_json_constant)
+    except TimeoutError as exc:
+        raise ServiceError(408, "REQUEST_TIMEOUT", "Waktu pembacaan body request habis.", retryable=True) from exc
+    except (ValueError, UnicodeError, ClientDisconnect) as exc:
         raise ServiceError(400, "INVALID_INPUT", "Body harus berupa JSON yang valid.") from exc
     if not isinstance(payload, dict):
         raise ServiceError(422, "INVALID_INPUT", "Body harus berupa object JSON.")
@@ -119,6 +171,10 @@ async def _json_body(request: Request, schema_name: str) -> dict[str, Any]:
     except PayloadValidationError:
         raise
     return payload
+
+
+def _reject_json_constant(value: str) -> None:
+    raise ValueError("Non-finite JSON numbers are unsupported")
 
 
 def _validate_response(schema_name: str, payload: Any) -> None:
@@ -176,6 +232,25 @@ async def analyze_photo(request: Request, settings: Settings = Depends(require_s
     result = photo_result(payload["operationId"], payload["profile"]["profileVersion"], observation)
     _validate_response("AnalysisResult", result)
     return JSONResponse(result)
+
+
+async def _analyze_a1v1(request: Request, settings: Settings, model: str) -> JSONResponse:
+    payload = await _json_body(request, "A1V1PhotoRequest")
+    normalized = await fetch_and_normalize(payload["image"], settings)
+    provider = getattr(request.app.state, "a1v1_client_factory", A1V1VLMClient)
+    prediction = await provider(settings).analyze(normalized.data, normalized.mime_type, model)
+    _validate_response("A1V1Prediction", prediction)
+    return JSONResponse(prediction, headers={"X-Carin-Variant": "A1V1"})
+
+
+@app.post("/internal/ai-service/a-model")
+async def analyze_a1v1_variant_a(request: Request, settings: Settings = Depends(require_service_key)) -> JSONResponse:
+    return await _analyze_a1v1(request, settings, A1V1_MAX_MODEL)
+
+
+@app.post("/internal/ai-service/b-model")
+async def analyze_a1v1_variant_b(request: Request, settings: Settings = Depends(require_service_key)) -> JSONResponse:
+    return await _analyze_a1v1(request, settings, A1V1_FLASH_MODEL)
 
 
 @app.post("/internal/v1/recalculations")

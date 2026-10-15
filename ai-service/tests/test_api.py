@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import io
+from pathlib import Path
 from uuid import uuid4
 
 import httpx
@@ -13,7 +14,16 @@ from app import main
 from app.contract import validate_payload
 from app.errors import ServiceError
 from app.media import NormalizedImage, _normalize_image, fetch_and_normalize, validate_download_url
-from app.provider import FoodObservation, VLMClient
+from app.provider import (
+    A1V1_FLASH_MODEL,
+    A1V1_MAX_MODEL,
+    A1V1_PROMPT,
+    A1V1_RESPONSE_SCHEMA,
+    A1V1VLMClient,
+    FoodObservation,
+    VLMClient,
+    a1v1_response_format,
+)
 from app.config import Settings
 
 
@@ -73,24 +83,16 @@ def recalc_request() -> dict:
     }
 
 
-@pytest.fixture(autouse=True)
-def service_environment(monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.setenv("AI_SERVICE_KEY", SERVICE_KEY)
-    monkeypatch.setenv("DASHSCOPE_API_KEY", "unit-test-provider-key")
-    monkeypatch.setenv("VLM_BASE_URL", "https://workspace.example/compatible-mode/v1")
-    monkeypatch.setenv("VLM_MODEL", "qwen3.7-flash-2026-07-15")
-    monkeypatch.setenv("VLM_FALLBACK_MODEL", "qwen3.7-flash")
-    monkeypatch.setenv("MEDIA_ALLOWED_HOSTS", "minio:9000")
-    main.app.state.vlm_client_factory = VLMClient
-    yield
-    if hasattr(main.app.state, "vlm_client_factory"):
-        del main.app.state.vlm_client_factory
-
-
-@pytest.fixture
-async def client():
-    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=main.app), base_url="http://test") as test_client:
-        yield test_client
+def a1v1_result() -> dict:
+    return {
+        "is_food": True,
+        "container_diameter_cm": 20,
+        "apparent_volume_cm3": 250,
+        "weight_g": 180,
+        "components": [{"name": "nasi goreng", "mass_g": 180}],
+        "prediction": {"energy_kcal": 320, "protein_g": 8, "carbohydrate_g": 45, "fat_g": 11},
+        "limitations": ["Minyak tidak terlihat langsung."],
+    }
 
 
 async def test_capabilities_and_catalog_follow_shared_contract(client):
@@ -187,6 +189,134 @@ async def test_analysis_invokes_vlm_and_returns_contract_result(client, monkeypa
     assert result["overallAttention"] == "insufficient_information"
     assert result["profileVersion"] == 4
     assert result["operationId"] == body["operationId"]
+
+
+@pytest.mark.parametrize(
+    ("route", "model"),
+    [
+        ("/internal/ai-service/a-model", A1V1_MAX_MODEL),
+        ("/internal/ai-service/b-model", A1V1_FLASH_MODEL),
+    ],
+)
+async def test_a1v1_experiment_routes_pin_model_and_return_strict_result(client, monkeypatch, route, model):
+    body = {"image": photo_request()["image"]}
+
+    async def fake_fetch(image, settings):
+        return NormalizedImage(b"normalized-photo")
+
+    class FakeA1V1:
+        async def analyze(self, data, mime_type, requested_model):
+            assert data == b"normalized-photo"
+            assert mime_type == "image/jpeg"
+            assert requested_model == model
+            return a1v1_result()
+
+    monkeypatch.setattr(main, "fetch_and_normalize", fake_fetch)
+    main.app.state.a1v1_client_factory = lambda settings: FakeA1V1()
+    response = await client.post(route, headers=HEADERS, json=body)
+
+    assert response.status_code == 200
+    validate_payload("A1V1Prediction", response.json())
+    assert response.json() == a1v1_result()
+    assert "X-Carin-Model" not in response.headers
+    assert response.headers["X-Carin-Variant"] == "A1V1"
+    del main.app.state.a1v1_client_factory
+
+
+async def test_openapi_uses_neutral_a1v1_routes_without_model_names(client):
+    response = await client.get("/openapi.json")
+    paths = response.json()["paths"]
+    assert "/internal/ai-service/a-model" in paths
+    assert "/internal/ai-service/b-model" in paths
+    assert "/internal/v1/experiments/a1v1/variant-a" not in paths
+    assert "/internal/v1/experiments/a1v1/variant-b" not in paths
+    for route in ("/internal/ai-service/a-model", "/internal/ai-service/b-model"):
+        assert "qwen" not in json.dumps(paths[route]).casefold()
+
+
+@pytest.mark.asyncio
+async def test_a1v1_provider_uses_strict_schema_and_never_falls_back():
+    requests: list[dict] = []
+
+    async def handler(request: httpx.Request) -> httpx.Response:
+        payload = json.loads(request.content)
+        requests.append(payload)
+        return httpx.Response(
+            200,
+            json={
+                "model": A1V1_MAX_MODEL,
+                "choices": [{"finish_reason": "stop", "message": {"content": json.dumps(a1v1_result())}}],
+            },
+        )
+
+    settings = Settings(
+        service_key="service-key",
+        vlm_api_key="provider-key",
+        vlm_base_url="https://workspace.example/compatible-mode/v1",
+        vlm_model="qwen3.7-flash-2026-07-15",
+        vlm_fallback_model="qwen3.7-flash",
+        vlm_timeout_seconds=5,
+        media_allowed_hosts=frozenset({"minio:9000"}),
+        media_max_bytes=10 * 1024 * 1024,
+    )
+    result = await A1V1VLMClient(settings, transport=httpx.MockTransport(handler)).analyze(
+        b"fake-jpeg", "image/jpeg", A1V1_MAX_MODEL
+    )
+
+    assert result == a1v1_result()
+    assert len(requests) == 1
+    payload = requests[0]
+    assert payload["model"] == A1V1_MAX_MODEL
+    assert payload["temperature"] == 0
+    assert payload["enable_thinking"] is False
+    assert payload["max_tokens"] == 1024
+    assert payload["response_format"] == a1v1_response_format()
+    assert payload["messages"][0]["content"][1]["text"] == A1V1_PROMPT
+    assert payload["messages"][0]["content"][0]["image_url"]["url"].startswith("data:image/jpeg;base64,")
+    assert "profile" not in payload
+    assert payload["messages"][0]["role"] == "user"
+
+
+def test_a1v1_prompt_and_schema_match_the_locked_benchmark():
+    root = Path(__file__).resolve().parents[2]
+    prompt = (root / "experiments/model-evaluation/prompts/food-a1v1-v2.txt").read_text(encoding="utf-8")
+    schema = json.loads((root / "experiments/model-evaluation/prompts/food-a1v1-v2.schema.json").read_text(encoding="utf-8"))
+    assert A1V1_PROMPT.strip() == prompt.strip()
+    assert A1V1_RESPONSE_SCHEMA == schema
+
+
+@pytest.mark.asyncio
+async def test_a1v1_provider_rejects_negative_estimates_without_retry():
+    requests = 0
+
+    async def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal requests
+        requests += 1
+        prediction = a1v1_result()
+        prediction["weight_g"] = -1
+        return httpx.Response(
+            200,
+            json={
+                "model": A1V1_FLASH_MODEL,
+                "choices": [{"finish_reason": "stop", "message": {"content": json.dumps(prediction)}}],
+            },
+        )
+
+    settings = Settings(
+        service_key="service-key",
+        vlm_api_key="provider-key",
+        vlm_base_url="https://workspace.example/compatible-mode/v1",
+        vlm_model="qwen3.7-flash-2026-07-15",
+        vlm_fallback_model="qwen3.7-flash",
+        vlm_timeout_seconds=5,
+        media_allowed_hosts=frozenset({"minio:9000"}),
+        media_max_bytes=10 * 1024 * 1024,
+    )
+    with pytest.raises(ServiceError, match="format A1V1"):
+        await A1V1VLMClient(settings, transport=httpx.MockTransport(handler)).analyze(
+            b"fake-jpeg", "image/jpeg", A1V1_FLASH_MODEL
+        )
+    assert requests == 1
 
 
 @pytest.mark.asyncio

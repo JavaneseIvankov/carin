@@ -15,6 +15,8 @@ class Settings:
     vlm_timeout_seconds: float
     media_allowed_hosts: frozenset[str]
     media_max_bytes: int
+    request_max_bytes: int = 65_536
+    api_rate_limit: int = 60
 
 
 def _allowed_hosts(raw: str) -> frozenset[str]:
@@ -22,6 +24,16 @@ def _allowed_hosts(raw: str) -> frozenset[str]:
 
 
 def load_settings() -> Settings:
+    service_key = os.getenv("AI_SERVICE_KEY", "")
+    limits = {
+        "request_max_bytes": int(os.getenv("REQUEST_MAX_BYTES", "65536")),
+        "api_rate_limit": int(os.getenv("API_RATE_LIMIT_PER_MINUTE", "5")),
+    }
+    if not 1024 <= limits["request_max_bytes"] <= 1_048_576:
+        raise ValueError("REQUEST_MAX_BYTES is outside the supported range")
+    if not 1 <= limits["api_rate_limit"] <= 10_000:
+        raise ValueError("API_RATE_LIMIT_PER_MINUTE is outside the supported range")
+
     timeout = float(os.getenv("VLM_TIMEOUT_SECONDS", "35"))
     max_bytes = int(os.getenv("MEDIA_MAX_BYTES", str(10 * 1024 * 1024)))
     if not 1 <= timeout <= 80:
@@ -39,7 +51,7 @@ def load_settings() -> Settings:
             raise ValueError("VLM_BASE_URL must end in /v1 and have no query or fragment")
 
     return Settings(
-        service_key=os.getenv("AI_SERVICE_KEY", ""),
+        service_key=service_key,
         vlm_api_key=os.getenv("DASHSCOPE_API_KEY", ""),
         vlm_base_url=base_url,
         vlm_model=os.getenv("VLM_MODEL", "qwen3.7-flash-2026-07-15").strip(),
@@ -47,4 +59,5 @@ def load_settings() -> Settings:
         vlm_timeout_seconds=timeout,
         media_allowed_hosts=_allowed_hosts(os.getenv("MEDIA_ALLOWED_HOSTS", "")),
         media_max_bytes=max_bytes,
+        **limits,
     )
