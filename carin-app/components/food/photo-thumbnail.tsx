@@ -1,6 +1,11 @@
 import { Icon } from '@/components/ui/icon';
+import { apiEnvironment } from '@/lib/config';
 import { useAppRead } from '@/lib/api/query';
-import { resolvePhotoDisplayUri } from '@/lib/food/photo-media';
+import {
+  resolvePhotoDisplayUri,
+  shouldRefreshPhotoAfterImageError,
+} from '@/lib/food/photo-media';
+import { resolveDevelopmentMediaUrl } from '@/lib/api-url';
 import { Image as ImageIcon } from 'lucide-react-native';
 import * as React from 'react';
 import { ActivityIndicator, Image, View } from 'react-native';
@@ -26,12 +31,16 @@ export function PhotoThumbnail({
     { path: { id: photoId ?? '' } },
     { enabled: !!photoId && !localUri }
   );
-  const privateViewUrl = viewQuery.data?.data.url ?? null;
+  const privateViewUrl = resolveDevelopmentMediaUrl(
+    viewQuery.data?.data.url,
+    apiEnvironment.baseUrl,
+    apiEnvironment.name
+  );
   const expiresAt = viewQuery.data?.data.expiresAt;
   const refetchView = viewQuery.refetch;
   const uri = resolvePhotoDisplayUri(localUri, privateViewUrl);
   const [failedUri, setFailedUri] = React.useState<string | null>(null);
-  const [refreshedFailedUri, setRefreshedFailedUri] = React.useState<string | null>(null);
+  const [refreshedPhotoId, setRefreshedPhotoId] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (!photoId || localUri || !expiresAt) return;
@@ -44,13 +53,13 @@ export function PhotoThumbnail({
 
   const handleImageError = () => {
     if (!uri) return;
-    if (localUri || !photoId || refreshedFailedUri === uri) {
+    if (localUri || !shouldRefreshPhotoAfterImageError(photoId, refreshedPhotoId)) {
       setFailedUri(uri);
       return;
     }
-    setRefreshedFailedUri(uri);
+    setRefreshedPhotoId(photoId);
     void refetchView().then((result) => {
-      if (!result.data || result.data.data.url === uri) setFailedUri(uri);
+      if (!result.data) setFailedUri(uri);
     });
   };
 
@@ -66,7 +75,8 @@ export function PhotoThumbnail({
           accessibilityLabel={accessibilityLabel}
           onError={handleImageError}
         />
-      ) : viewQuery.isPending || (viewQuery.isFetching && !viewQuery.data) ? (
+      ) :
+      photoId && (viewQuery.isPending || (viewQuery.isFetching && !viewQuery.data)) ? (
         <ActivityIndicator accessibilityLabel="Memuat foto makanan" />
       ) : (
         <View className="items-center gap-0.5 px-1">

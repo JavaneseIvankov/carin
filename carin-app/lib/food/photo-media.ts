@@ -23,6 +23,13 @@ export function getCachedPhotoUri(key: string): string | undefined {
   return photoUriCache.get(key);
 }
 
+export function shouldRefreshPhotoAfterImageError(
+  photoId: string | null | undefined,
+  refreshedPhotoId: string | null
+): boolean {
+  return Boolean(photoId && photoId !== refreshedPhotoId);
+}
+
 export function clearPhotoUriCache(): void {
   photoUriCache.clear();
 }

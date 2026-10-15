@@ -5,6 +5,7 @@ import {
   getCachedPhotoUri,
   resolvePhotoDisplayUri,
   resolvePhotoMimeType,
+  shouldRefreshPhotoAfterImageError,
 } from './photo-media';
 
 describe('photo MIME type resolution', () => {
@@ -56,5 +57,13 @@ describe('photo display source', () => {
   it('returns no source when the photo is unavailable', () => {
     expect(resolvePhotoDisplayUri(null, null)).toBeNull();
     expect(resolvePhotoDisplayUri('  ', '  ')).toBeNull();
+  });
+});
+
+describe('private photo image retries', () => {
+  it('refreshes a failed private URL at most once per photo', () => {
+    expect(shouldRefreshPhotoAfterImageError('photo-1', null)).toBe(true);
+    expect(shouldRefreshPhotoAfterImageError('photo-1', 'photo-1')).toBe(false);
+    expect(shouldRefreshPhotoAfterImageError(null, null)).toBe(false);
   });
 });
