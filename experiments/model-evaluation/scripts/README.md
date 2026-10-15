@@ -4,6 +4,7 @@ Daftar script pipeline evaluasi, runner, dan downloader dataset:
 
 | Script | Deskripsi | Perintah Contoh |
 | --- | --- | --- |
+| `run_extended_nutrients.py` | Empat foto SNAPMe berpasangan, schema A1V1 diperluas; natrium, gula total, serat, lemak jenuh, kolesterol, kalium, kalsium terhadap referensi ASA24. | `python3 experiments/model-evaluation/scripts/run_extended_nutrients.py --report-only` |
 | `download_datasets.py` | Download & verifikasi subset Nutrition5k dan LeFood-Set. | `python3 experiments/model-evaluation/scripts/download_datasets.py` |
 | `run_evaluation.py` | Runner evaluasi model visi berbasis OpenAI-compatible API (Alibaba). | `python3 experiments/model-evaluation/scripts/run_evaluation.py --dry-run` |
 | `run_qwen37_ablation.py` | Sembilan varian A1–A6 dengan endpoint dan sampel B0 historis; tidak memakai fallback. | Lihat [laporan dan reproduksi](../docs/QWEN37_STAGED_ABLATION_2026-10-14.md). |

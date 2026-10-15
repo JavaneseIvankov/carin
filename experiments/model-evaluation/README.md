@@ -1,6 +1,9 @@
 # Carin — model evaluation experiment
 
 Evaluation-only subsets: **50 Nutrition5k images + 50 LeFood-Set images**.
+An additional [four-photo SNAPMe nutrient smoke test](docs/EXTENDED_NUTRIENTS_SNAPME_2026-10-15.md)
+uses ASA24 dietary-record references for sodium, sugars, fiber and other nutrients;
+these are not laboratory measurements or weighed-portion ground truth.
 Dataset preparation and Alibaba evaluation scripts require Python 3.10+ and use
 only its standard library. The optional HF runner installs a small SDK through
 `uv`; see [HF food-analysis smoke test](docs/HF_FOOD_ANALYSIS.md). It downloads no model
@@ -18,6 +21,7 @@ All experiment reports and operational notes are kept under [`docs/`](docs/):
 
 | Document | Description |
 | --- | --- |
+| [docs/EXTENDED_NUTRIENTS_SNAPME_2026-10-15.md](docs/EXTENDED_NUTRIENTS_SNAPME_2026-10-15.md) | Four paired SNAPMe photos, seven additional nutrients, explicit ASA24 reference limitations |
 | [docs/SMOKE_TEST_2026-10-14.md](docs/SMOKE_TEST_2026-10-14.md) | Initial Alibaba 5-sample live smoke test report (Qwen 3.7 Flash) |
 | [docs/QWEN37_STAGED_ABLATION_2026-10-14.md](docs/QWEN37_STAGED_ABLATION_2026-10-14.md) | Nine A1–A6 variants on the paired five-image pilot, with fixed Qwen3.7 controls |
 | [docs/QWEN37_COMBO_CPU_PILOT_2026-10-14.md](docs/QWEN37_COMBO_CPU_PILOT_2026-10-14.md) | A1V1 + A6V1 CPU-client pilot; pooled/normalized MAE rankings and mean latency |
