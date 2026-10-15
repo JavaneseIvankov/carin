@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
 import {
-  Redirect,
   useGlobalSearchParams,
   usePathname,
   useRouter,
@@ -14,6 +13,7 @@ import { useAuth } from '@/lib/auth/provider';
 import { decideAuthRoute } from '@/lib/auth/routes';
 import { useOnboardingSession } from '@/components/onboarding/onboarding-session';
 import { decideOnboardingRoute, onboardingGateStateFromQuery } from '@/lib/onboarding/routes';
+import { createRootRedirectCoordinator } from '@/lib/auth/root-redirect';
 
 export function AuthRestorationState({
   error,
@@ -56,6 +56,7 @@ export function AuthGate() {
   const { status, error, user, retryRestoration, invalidateSession } = useAuth();
   const { isBypassed } = useOnboardingSession();
   const router = useRouter();
+  const [coordinateRootRedirect] = React.useState(createRootRedirectCoordinator);
   const segments = useSegments();
   const pathname = usePathname();
   const params = useGlobalSearchParams<{
@@ -74,27 +75,28 @@ export function AuthGate() {
     userId: user?.id,
     bypassedUserId: user?.id && isBypassed(user.id) ? user.id : null,
   });
+  const redirectTarget =
+    onboardingDecision.type === 'redirect' ? onboardingDecision.href : null;
+
+  React.useEffect(() => {
+    coordinateRootRedirect(redirectTarget, (href) => router.replace(href as Href));
+  }, [coordinateRootRedirect, redirectTarget, router]);
 
   if (onboardingDecision.type === 'render') return null;
   const authIsLoading = decision.type === 'loading';
   return (
-    <>
-      <AuthRestorationState
-        className="absolute inset-0 z-50 flex-1 items-center justify-center bg-background px-6"
-        loadingLabel={authIsLoading ? 'Memulihkan sesi' : 'Memeriksa pengenalan Carin'}
-        error={authIsLoading ? error : undefined}
-        onRetry={authIsLoading ? () => void retryRestoration() : undefined}
-        onSignIn={
-          authIsLoading && error !== undefined
-            ? () => {
-                void invalidateSession().then(() => router.replace('/(auth)/sign-in'));
-              }
-            : undefined
-        }
-      />
-      {onboardingDecision.type === 'redirect' ? (
-        <Redirect href={onboardingDecision.href as Href} />
-      ) : null}
-    </>
+    <AuthRestorationState
+      className="absolute inset-0 z-50 flex-1 items-center justify-center bg-background px-6"
+      loadingLabel={authIsLoading ? 'Memulihkan sesi' : 'Memeriksa pengenalan Carin'}
+      error={authIsLoading ? error : undefined}
+      onRetry={authIsLoading ? () => void retryRestoration() : undefined}
+      onSignIn={
+        authIsLoading && error !== undefined
+          ? () => {
+              void invalidateSession().then(() => router.replace('/(auth)/sign-in'));
+            }
+          : undefined
+      }
+    />
   );
 }
