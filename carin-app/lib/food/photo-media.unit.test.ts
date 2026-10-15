@@ -3,7 +3,9 @@ import {
   cachePhotoUri,
   clearPhotoUriCache,
   getCachedPhotoUri,
+  resolvePhotoDisplayUri,
   resolvePhotoMimeType,
+  shouldRefreshPhotoAfterImageError,
 } from './photo-media';
 
 describe('photo MIME type resolution', () => {
@@ -19,7 +21,9 @@ describe('photo MIME type resolution', () => {
     expect(resolvePhotoMimeType('', 'content://media/123', 'meal.jpg')).toBeNull();
     expect(resolvePhotoMimeType('  ', 'content://media/123', 'meal.jpg')).toBeNull();
     expect(resolvePhotoMimeType(';foo', 'content://media/123', 'meal.jpg')).toBeNull();
-    expect(resolvePhotoMimeType('image/jpeg;not-a-parameter', 'content://media/123', 'meal.png')).toBeNull();
+    expect(
+      resolvePhotoMimeType('image/jpeg;not-a-parameter', 'content://media/123', 'meal.png')
+    ).toBeNull();
     expect(resolvePhotoMimeType('image/png;=', 'content://media/123', 'meal.jpg')).toBeNull();
   });
 });
@@ -34,5 +38,32 @@ describe('photo URI cache', () => {
 
   it('handles empty keys safely', () => {
     expect(getCachedPhotoUri('')).toBeUndefined();
+  });
+});
+
+describe('photo display source', () => {
+  it('prefers the selected local photo and falls back to a private view URL', () => {
+    expect(
+      resolvePhotoDisplayUri(
+        'file:///photos/current.jpg',
+        'https://api.test/private.jpg?token=short-lived'
+      )
+    ).toBe('file:///photos/current.jpg');
+    expect(resolvePhotoDisplayUri(null, 'https://api.test/private.jpg?token=short-lived')).toBe(
+      'https://api.test/private.jpg?token=short-lived'
+    );
+  });
+
+  it('returns no source when the photo is unavailable', () => {
+    expect(resolvePhotoDisplayUri(null, null)).toBeNull();
+    expect(resolvePhotoDisplayUri('  ', '  ')).toBeNull();
+  });
+});
+
+describe('private photo image retries', () => {
+  it('refreshes a failed private URL at most once per photo', () => {
+    expect(shouldRefreshPhotoAfterImageError('photo-1', null)).toBe(true);
+    expect(shouldRefreshPhotoAfterImageError('photo-1', 'photo-1')).toBe(false);
+    expect(shouldRefreshPhotoAfterImageError(null, null)).toBe(false);
   });
 });

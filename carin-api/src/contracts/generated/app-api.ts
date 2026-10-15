@@ -500,6 +500,7 @@ export type components = {
       confirmation: 'DELETE_MY_ACCOUNT';
       password: string;
     };
+    /** @description Totals and coverage sum known per-component nutrients. Catalog nutrients are deterministic; model_estimate nutrients are per pictured portion for unmatched photo components only. supportStatus describes catalog matching, so unrecognized may include visual estimates while remaining insufficient for personal assessment. */
     ai__AnalysisResult: {
       attentions: components['schemas']['ai__Attention'][];
       catalogVersion: string;
@@ -584,7 +585,7 @@ export type components = {
       supportedAgeMinimum: number | null;
     };
     /** @enum {string} */
-    ai__ContractVersion: '1.0.0';
+    ai__ContractVersion: '2.0.0';
     ai__Error: {
       error: {
         code: string;
@@ -692,7 +693,7 @@ export type components = {
       id: string;
       itemRef: string;
       /** @enum {string} */
-      kind: 'nutrition' | 'portion' | 'health_rule' | 'synthetic';
+      kind: 'nutrition' | 'portion' | 'health_rule' | 'synthetic' | 'model_estimate';
       title: string;
       url: string | null;
     };

@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createAppRepository } from './repository';
-import type { DataScope, StorageAdapter } from '@/lib/data/scope';
+import { OfflineError } from '@/lib/data/network';
+import { storageKey, type DataScope, type StorageAdapter } from '@/lib/data/scope';
 
 function memoryStorage(): StorageAdapter {
   return {
@@ -55,5 +56,75 @@ describe('repository native file upload', () => {
       })
     );
     expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it('does not persist a short-lived private photo view URL', async () => {
+    const values = new Map<string, string>();
+    const storage: StorageAdapter = {
+      getItem: async (key) => values.get(key) ?? null,
+      setItem: async (key, value) => {
+        values.set(key, value);
+      },
+      removeItem: async (key) => {
+        values.delete(key);
+      },
+      getAllKeys: async () => [...values.keys()],
+    };
+    const repository = createAppRepository({
+      scope,
+      storage,
+      connectivity: () => 'online',
+      onUnauthorized: async () => {},
+      fetcher: (async () =>
+        new Response(
+          JSON.stringify({
+            url: 'https://api.test/media/photo?token=short-lived',
+            expiresAt: '2026-10-15T09:05:00.000Z',
+          }),
+          { status: 200, headers: { 'content-type': 'application/json' } }
+        )) as typeof fetch,
+      baseUrl: 'https://api.test',
+    });
+
+    await repository.read('getPhotoView', { path: { id: 'photo-1' } });
+
+    expect(await storage.getAllKeys()).toEqual([]);
+  });
+
+  it('does not serve or retain a persisted private photo view URL while offline', async () => {
+    const values = new Map<string, string>();
+    const cacheKey = storageKey(scope, 'read', '/api/v1/photos/photo-2/view');
+    values.set(
+      cacheKey,
+      JSON.stringify({
+        data: {
+          url: 'https://api.test/media/photo?token=expired',
+          expiresAt: '2026-10-15T09:05:00.000Z',
+        },
+        updatedAt: 1,
+      })
+    );
+    const storage: StorageAdapter = {
+      getItem: async (key) => values.get(key) ?? null,
+      setItem: async (key, value) => {
+        values.set(key, value);
+      },
+      removeItem: async (key) => {
+        values.delete(key);
+      },
+      getAllKeys: async () => [...values.keys()],
+    };
+    const repository = createAppRepository({
+      scope,
+      storage,
+      connectivity: () => 'offline',
+      onUnauthorized: async () => {},
+      baseUrl: 'https://api.test',
+    });
+
+    await expect(
+      repository.read('getPhotoView', { path: { id: 'photo-2' } })
+    ).rejects.toBeInstanceOf(OfflineError);
+    expect(await storage.getItem(cacheKey)).toBeNull();
   });
 });

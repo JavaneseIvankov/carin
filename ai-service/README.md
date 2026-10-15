@@ -34,7 +34,7 @@ Example request (replace the operation ID, signed URL and hash with values issue
 
 ```json
 {
-  "contractVersion": "1.0.0",
+  "contractVersion": "2.0.0",
   "operationId": "2d3b9841-8d78-44d0-8a8b-c3d173f89a34",
   "catalogVersion": "unconfigured",
   "ruleSetVersion": "unconfigured",
@@ -60,7 +60,17 @@ Example request (replace the operation ID, signed URL and hash with values issue
 }
 ```
 
-The bootstrap capabilities response currently advertises no supported food IDs, nutrients, or conditions and uses `unconfigured` artifact versions. A live VLM call can return candidate food names and a visual portion proposal, but `/analyses` correctly reports `unrecognized`, null nutrients and insufficient information until approved T31 catalog/nutrition/rule artifacts are supplied. `/catalog` returns an empty page for this bootstrap version. `/recalculations` preserves user-entered portions but returns null nutrients; it rejects catalog food IDs it cannot resolve. This lets the team exercise the real HTTP/VLM path without presenting invented nutrition as valid output. It does not complete C32 production acceptance.
+The bootstrap capabilities response currently advertises no supported food IDs, nutrients, or conditions and uses `unconfigured` artifact versions. `/analyses` exact-matches VLM food names against the loaded catalog. For unmatched food components in photo analyses, it makes a second structured VLM request for visual nutrient estimates. These values are included in component nutrients, coverage, and totals, and carry a `model_estimate` source plus a critical limitation; they are not catalog facts or verified nutrition. If estimation fails or a nutrient is omitted, recognition still succeeds and that nutrient remains unavailable. `/catalog` returns an empty page for the unconfigured bootstrap version. `/recalculations` preserves user-entered portions but returns null nutrients; it rejects catalog food IDs it cannot resolve. Approved T31 catalog/nutrition/rule artifacts remain necessary for supported catalog matches and production C32 acceptance.
+
+For a local end-to-end plumbing test, set `APP_ENV=dev` and
+`AI_CATALOG_MODE=synthetic-demo`. The VLM remains provider-backed; service output
+is exact-matched against `data/synthetic-demo/catalog.json` and totals are
+calculated deterministically from its clearly synthetic values. The capability,
+catalog and analysis responses use the shared 2.0.0 wire schema and advertise
+`dataMode: synthetic`; the manifest deliberately contains no health conditions
+or rules. The API can import this immutable catalog through the normal catalog
+import command. Synthetic mode fails startup outside `dev` and `test`; its
+numbers are not nutritional facts and do not satisfy T31 or production C32.
 
 The two `/internal/ai-service/` routes are for paired model evaluation. They accept `{"image":{"downloadUrl":"...","mimeType":"image/jpeg","sha256":"..."}}`, using the same signed-MinIO checks as `/analyses`, and return the strict A1V1 JSON object. The neutral route labels map to two fixed model choices in the service; both use the benchmark A1V1 prompt/schema, the configured `VLM_BASE_URL` and credential, `temperature=0`, `enable_thinking=false`, and `max_tokens=1024`. Neither route falls back to another model. The response includes only the `X-Carin-Variant: A1V1` header.
 

@@ -430,7 +430,7 @@ export async function createScanCorrection(
     const generation = target.generation + 1;
     const targetRevision = target.revision + 1;
     const jobInput = {
-      contractVersion: '1.0.0',
+      contractVersion: '2.0.0',
       inputKind: 'correction',
       catalogVersion: version.version,
       ruleSetVersion: version.ruleSetVersion,

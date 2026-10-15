@@ -1,4 +1,5 @@
 import type { QueryClient } from '@tanstack/react-query';
+import { clearPhotoUriCache } from '@/lib/food/photo-media';
 
 export type DataScope = { environment: string; userId: string };
 
@@ -90,6 +91,7 @@ export async function clearScopedData(
   storage: StorageAdapter
 ) {
   if (!scope) return;
+  clearPhotoUriCache();
   const state = writeState(storage, scope);
   state.generation += 1;
   queryClient.removeQueries({ queryKey: scopeKey(scope) });

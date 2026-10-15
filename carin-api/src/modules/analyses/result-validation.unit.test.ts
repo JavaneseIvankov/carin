@@ -121,6 +121,44 @@ describe('validateAnalysisResult', () => {
     expect(() => validateAnalysisResult(result, photoExpectation(result), catalogFor(result))).not.toThrow();
   });
 
+  it('accepts unrecognized photo components with model-estimated nutrients in totals and coverage', () => {
+    const result = resultFixture('analysis-vlm-fallback');
+    expect(() => validateAnalysisResult(result, photoExpectation(result), catalogFor(result))).not.toThrow();
+  });
+
+  it('rejects model-estimated nutrients without component source provenance', () => {
+    const result = resultFixture('analysis-vlm-fallback');
+    result.sources = [];
+    expect(() => validateAnalysisResult(result, photoExpectation(result), catalogFor(result))).toThrow();
+  });
+
+  it('accepts catalog and model estimates together and sums each component once', () => {
+    const result = resultFixture('analysis-partial');
+    const unknown = result.components[1]!;
+    const estimateSource: AnalysisResult['sources'][number] = {
+      id: 'vlm-estimate-' + unknown.id,
+      kind: 'model_estimate',
+      title: 'Estimasi visual VLM untuk porsi pada foto',
+      datasetVersion: 'vlm-estimate-v1',
+      itemRef: `${result.operationId}/${unknown.id}`,
+      url: null,
+    };
+    result.sources.push(estimateSource);
+    unknown.nutrients.energyKcal = 55;
+    unknown.nutrientSourceIds.energyKcal = estimateSource.id;
+    unknown.sourceIds.push(estimateSource.id);
+    result.totals.energyKcal = 255;
+    result.coverage.energyKcal.knownComponentCount = 2;
+    result.limitations.push({
+      code: 'VLM_NUTRIENT_ESTIMATE',
+      message: 'Estimasi visual VLM.',
+      componentIds: [unknown.id],
+      critical: true,
+    });
+
+    expect(() => validateAnalysisResult(result, photoExpectation(result), catalogFor(result))).not.toThrow();
+  });
+
   it('rejects a photo food match outside the imported supported-photo allowlist', () => {
     const result = resultFixture('analysis-complete');
     const catalog = catalogFor(result);

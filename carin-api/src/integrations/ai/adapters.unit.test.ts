@@ -11,12 +11,19 @@ import {
 } from './index.js';
 
 const operationId = '123e4567-e89b-42d3-a456-426614174000';
-const fixtureResponse = (): Record<string, unknown> => {
+const fixtureResponse = (fixtureName = 'analysis-unrecognized'): Record<string, unknown> => {
   const value = JSON.parse(
-    readFileSync(new URL('../../../../specs/fixtures/ai/analysis-unrecognized.json', import.meta.url), 'utf8')
+    readFileSync(new URL(`../../../../specs/fixtures/ai/${fixtureName}.json`, import.meta.url), 'utf8')
   ) as Record<string, unknown>;
   value.operationId = operationId;
   value.profileVersion = 7;
+  const sources = value.sources as Array<Record<string, unknown>>;
+  const components = value.components as Array<Record<string, unknown>>;
+  for (const source of sources) {
+    if (source.kind === 'model_estimate') {
+      source.itemRef = `${operationId}/${components[0]?.id}`;
+    }
+  }
   return value;
 };
 const profile: components['schemas']['ProfileContext'] = {
@@ -34,7 +41,7 @@ const profile: components['schemas']['ProfileContext'] = {
   smoking: null,
 };
 const photoRequest: components['schemas']['PhotoAnalysisRequest'] = {
-  contractVersion: '1.0.0',
+  contractVersion: '2.0.0',
   operationId,
   catalogVersion: 'synthetic-catalog-1',
   ruleSetVersion: 'synthetic-rules-1',
@@ -46,7 +53,7 @@ const photoRequest: components['schemas']['PhotoAnalysisRequest'] = {
   },
 };
 const recalculationRequest: components['schemas']['RecalculationRequest'] = {
-  contractVersion: '1.0.0',
+  contractVersion: '2.0.0',
   operationId,
   inputKind: 'correction',
   catalogVersion: 'synthetic-catalog-1',
@@ -232,6 +239,36 @@ describe('internal HTTP AI adapter', () => {
     );
   });
 
+  it('accepts and preserves per-component VLM estimates in an unrecognized photo result', async () => {
+    const body = fixtureResponse('analysis-vlm-fallback');
+    const result = await makeClient(async () => Response.json(body)).analyzePhoto(photoRequest);
+
+    expect(result.supportStatus).toBe('unrecognized');
+    expect(result.components[0]?.nutrients.energyKcal).toBe(320);
+    expect(result.totals.energyKcal).toBe(320);
+    expect(result.coverage.energyKcal.knownComponentCount).toBe(1);
+    expect(result.sources[0]?.kind).toBe('model_estimate');
+  });
+
+  it('maps an unavailable AI catalog version to a non-retryable catalog error', async () => {
+    const response = Response.json({
+      error: {
+        code: 'CATALOG_VERSION_UNAVAILABLE',
+        message: 'catalogVersion tidak tersedia pada service ini.',
+        retryable: false,
+        requestId: operationId,
+        details: {},
+      },
+    }, { status: 409 });
+    const client = makeClient(async () => response);
+
+    await expect(client.analyzePhoto(photoRequest)).rejects.toMatchObject({
+      code: 'CATALOG_VERSION_UNAVAILABLE',
+      retryable: false,
+      message: 'catalogVersion tidak tersedia pada service ini.',
+    });
+  });
+
   it.each([
     ['invalid JSON', new Response('{', { status: 200, headers: { 'content-type': 'application/json' } })],
     ['invalid schema', Response.json({ operationId })],
@@ -247,7 +284,7 @@ describe('internal HTTP AI adapter', () => {
   it('rejects a request with an unsupported contract version before network access', async () => {
     const fetcher = vi.fn<typeof fetch>();
     const client = makeClient(fetcher);
-    await expect(client.analyzePhoto({ ...photoRequest, contractVersion: '2.0.0' as '1.0.0' })).rejects.toMatchObject({
+    await expect(client.analyzePhoto({ ...photoRequest, contractVersion: '1.0.0' as '2.0.0' })).rejects.toMatchObject({
       code: 'INVALID_REQUEST',
     });
     expect(fetcher).not.toHaveBeenCalled();

@@ -71,6 +71,7 @@ def same_number(actual, expected, message):
 
 
 def check_analysis(result):
+    require(result["contractVersion"] == "2.0.0", "Analysis result is not contract 2.0.0")
     components = result["components"]
     component_ids = {c["id"] for c in components}
     sources = {s["id"]: s for s in result["sources"]}
@@ -79,6 +80,11 @@ def check_analysis(result):
     if result["dataMode"] == "real":
         require(all(s["kind"] != "synthetic" for s in sources.values()),
                 "Synthetic sources cannot be promoted to real mode")
+    for source in result["sources"]:
+        if source["kind"] == "model_estimate":
+            require(result["inputKind"] == "photo", "Model estimates are only allowed for photo results")
+            require(source["datasetVersion"] == "vlm-estimate-v1" and source["url"] is None,
+                    "Model estimate source metadata is invalid")
     for component in components:
         portion = component["portion"]
         grams = portion["grams"]
@@ -89,8 +95,8 @@ def check_analysis(result):
             require(component["catalogFoodId"] is not None, "Matched food needs catalog ID")
         else:
             require(component["catalogFoodId"] is None, "Unmatched food has catalog ID")
-            require(all(v is None for v in component["nutrients"].values()),
-                    "Unmatched food cannot have numeric nutrition")
+            require(all(v is None for v in component["per100g"].values()),
+                    "Unmatched food cannot claim per-100-g catalog nutrition")
         if grams is not None:
             require(portion["quantity"] is not None and portion["unit"] is not None,
                     "Known grams need visible quantity/unit")
@@ -104,14 +110,34 @@ def check_analysis(result):
             basis = component["per100g"][key]
             source_id = component["nutrientSourceIds"][key]
             if basis is None:
-                require(source_id is None, f"Unknown {key} should not claim a source value")
+                if component["matchStatus"] == "matched":
+                    require(source_id is None, f"Unknown {key} should not claim a catalog source value")
+                    same_number(component["nutrients"][key], None, f"Missing catalog basis must remain null: {key}")
+                elif component["nutrients"][key] is None:
+                    require(source_id is None, f"Unknown {key} should not claim a visual source value")
+                else:
+                    require(result["inputKind"] == "photo" and source_id in sources,
+                            f"Visual estimate is missing its source: {key}")
+                    estimate_source = sources[source_id]
+                    require(estimate_source["kind"] == "model_estimate" and
+                            estimate_source["datasetVersion"] == "vlm-estimate-v1" and
+                            estimate_source["url"] is None and
+                            estimate_source["itemRef"] == f"{result['operationId']}/{component['id']}" and
+                            source_id in component["sourceIds"],
+                            f"Visual estimate provenance is invalid: {key}")
             else:
                 require(source_id in sources, f"Missing source for {key}")
                 require(source_id in component["sourceIds"], f"Source not linked to component: {key}")
-            expected = None if grams is None or basis is None else (
-                Decimal(str(basis)) * Decimal(str(grams)) / Decimal(100)
-            )
-            same_number(component["nutrients"][key], expected, f"Bad portion math: {key}")
+                require(sources[source_id]["kind"] != "model_estimate",
+                        f"Matched catalog value cannot use a visual estimate source: {key}")
+            if basis is not None:
+                expected = None if grams is None else (
+                    Decimal(str(basis)) * Decimal(str(grams)) / Decimal(100)
+                )
+                same_number(component["nutrients"][key], expected, f"Bad portion math: {key}")
+            else:
+                require(component["nutrients"][key] is None or source_id in sources,
+                        f"Numeric nutrient has no source: {key}")
     for key in NUTRIENTS:
         values = [c["nutrients"][key] for c in components if c["nutrients"][key] is not None]
         expected = sum((Decimal(str(v)) for v in values), Decimal(0)) if values else None
@@ -134,8 +160,8 @@ def check_analysis(result):
     if result["supportStatus"] == "unrecognized":
         require(all(c["matchStatus"] != "matched" for c in components),
                 "Unrecognized result claims matched food")
-        require(all(v is None for v in result["totals"].values()),
-                "Unrecognized result claims numeric totals")
+        require(result["overallAttention"] == "insufficient_information",
+                "Unrecognized result must retain insufficient personal assessment")
 
 
 def check_job(job):
@@ -196,10 +222,10 @@ def main():
         (check_job if is_job else check_analysis)(data)
         if not is_job:
             require(data["dataMode"] == "synthetic", "Fixture lacks explicit synthetic marker")
-            require(all(s["kind"] == "synthetic" for s in data["sources"]),
-                    "Fixture appears to claim a real source")
+            require(all(s["kind"] in {"synthetic", "model_estimate"} for s in data["sources"]),
+                    "Fixture appears to claim a real reference source")
         fixtures[path.name] = data
-    require(len(fixtures) == 5, "Expected five scenario fixtures")
+    require(len(fixtures) == 6, "Expected six scenario fixtures")
     complete = fixtures["analysis-complete.json"]
     correction = fixtures["correction-complete.json"]
     for key in NUTRIENTS:

@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Drawer } from '@/components/ui/drawer';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
+import { PhotoThumbnail } from '@/components/food/photo-thumbnail';
 import { useAppRead, useAppRepository, useAppWrite } from '@/lib/api/query';
 import { useAppData } from '@/lib/data/provider';
 import { getPhotoPermissionFallback } from '@/lib/food/permissions';
@@ -39,7 +40,7 @@ import {
   ZapOff,
 } from 'lucide-react-native';
 import * as React from 'react';
-import { ActivityIndicator, Image, Platform, Pressable, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type PhotoDraft = { id: string; uri: string; mimeType: string };
@@ -248,29 +249,7 @@ export default function Capture() {
   // State 1: Photo captured or selected -> Viewfinder background with slide-up Drawer
   if (photo) {
     return (
-      <View className="flex-1 bg-black">
-        <Image
-          source={{ uri: photo.uri }}
-          resizeMode="cover"
-          accessibilityLabel="Pratinjau foto makanan"
-          className="absolute inset-0 h-full w-full"
-        />
-
-        {/* Top close button to quickly dismiss preview */}
-        <View
-          style={{ paddingTop: Math.max(insets.top, 16) }}
-          className="absolute left-0 right-0 top-0 z-10 flex-row items-center px-6">
-          <Pressable
-            onPress={retakePhoto}
-            disabled={busy}
-            accessibilityRole="button"
-            accessibilityLabel="Ambil ulang foto"
-            hitSlop={12}
-            className="h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/40 active:bg-black/60">
-            <Icon as={X} size={20} className="text-white" />
-          </Pressable>
-        </View>
-
+      <View className="flex-1 bg-background">
         <Drawer
           isOpen={Boolean(photo)}
           onClose={retakePhoto}
@@ -309,6 +288,22 @@ export default function Capture() {
             </View>
           }>
           <View className="gap-3 py-1">
+            <View className="flex-row items-center gap-3.5 rounded-summary border border-border/70 bg-muted/30 p-3">
+              <PhotoThumbnail
+                photoId={null}
+                localUri={photo.uri}
+                accessibilityLabel="Thumbnail foto yang akan dikirim untuk analisis AI"
+                className="h-24 w-24"
+                resizeMode="contain"
+              />
+              <View className="flex-1 gap-1">
+                <Text className="font-semibold text-foreground">Foto yang akan dikirim</Text>
+                <Text variant="caption" className="text-muted-foreground">
+                  Pastikan makanan terlihat jelas sebelum memulai analisis.
+                </Text>
+              </View>
+            </View>
+
             {!consentCurrent ? (
               <View className="gap-3 rounded-summary border border-border/80 bg-card p-4">
                 <View className="flex-row items-center gap-2.5">

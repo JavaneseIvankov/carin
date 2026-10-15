@@ -7,7 +7,7 @@ type Schemas = components['schemas'];
 type CatalogFood = Schemas['CatalogFood'];
 
 const manifest: Schemas['CapabilityManifest'] = {
-  contractVersion: '1.0.0',
+  contractVersion: '2.0.0',
   catalogVersion: 'synthetic-catalog-test-1',
   nutritionDatasetVersion: 'synthetic-nutrition-test-1',
   ruleSetVersion: 'synthetic-rules-test-1',

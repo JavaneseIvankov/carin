@@ -1,8 +1,8 @@
-# Carin contract 1.0.0 — validated with specs/validate-contracts.py
+# Carin contract 2.0.0 — validated with specs/validate-contracts.py
 openapi: "3.1.1"
 info:
   title: "Carin Application Resource API"
-  version: "1.0.0"
+  version: "2.0.0"
   description: "Mobile/backend contract for Carin-owned resources. Better Auth raw /api/auth/* endpoints use pinned SDK/generated vendor schema and mandatory registration hooks described in 03-system-architecture.md. All application routes require verified DB session except explicitly public routes. Business invariants in 02-domain-model-and-business-rules.md apply in addition to schema. JSON timestamps include timezone offset; storage normalizes UTC. Resource ownership is server-enforced; no userId supplied by client."
 servers:
   -

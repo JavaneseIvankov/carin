@@ -2,6 +2,16 @@ const supportedPhotoMimeTypes = new Set(['image/jpeg', 'image/png']);
 
 const photoUriCache = new Map<string, string>();
 
+export function resolvePhotoDisplayUri(
+  localUri: string | null | undefined,
+  privateViewUrl: string | null | undefined
+): string | null {
+  const local = localUri?.trim();
+  if (local) return local;
+  const remote = privateViewUrl?.trim();
+  return remote || null;
+}
+
 export function cachePhotoUri(key: string, uri: string): void {
   if (key && uri) {
     photoUriCache.set(key, uri);
@@ -11,6 +21,13 @@ export function cachePhotoUri(key: string, uri: string): void {
 export function getCachedPhotoUri(key: string): string | undefined {
   if (!key) return undefined;
   return photoUriCache.get(key);
+}
+
+export function shouldRefreshPhotoAfterImageError(
+  photoId: string | null | undefined,
+  refreshedPhotoId: string | null
+): boolean {
+  return Boolean(photoId && photoId !== refreshedPhotoId);
 }
 
 export function clearPhotoUriCache(): void {

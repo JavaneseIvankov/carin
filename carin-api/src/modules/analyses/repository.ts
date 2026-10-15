@@ -178,7 +178,7 @@ export async function createPhotoAnalysisJob(
     const jobId = randomUUID();
     const operationId = randomUUID();
     const inputSnapshot = {
-      contractVersion: '1.0.0',
+      contractVersion: '2.0.0',
       catalogVersion: currentCatalog.version,
       ruleSetVersion: currentCatalog.ruleSetVersion,
       profile,

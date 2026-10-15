@@ -1,6 +1,7 @@
 import { BackButton } from '@/components/app/back-button';
 import { Button } from '@/components/ui/button';
 import { ScanDeletionControl } from '@/components/food/scan-deletion-control';
+import { PhotoThumbnail } from '@/components/food/photo-thumbnail';
 import { Text } from '@/components/ui/text';
 import { useAppRead, useAppRepository } from '@/lib/api/query';
 import type { components } from '@/lib/api/generated/app-api';
@@ -601,29 +602,16 @@ export default function AnalysisResultScreen() {
             {/* Top Food Result Card with Photo Thumbnail or Butter Pebble */}
             <View className="gap-3.5 rounded-[20px] border border-border bg-card p-5 shadow-sm">
               <View className="flex-row items-center gap-3.5">
-                {effectivePhotoUri ? (
-                  <View className="h-16 w-16 overflow-hidden rounded-[16px] border border-border/70 bg-muted">
-                    <Image
-                      source={{ uri: effectivePhotoUri }}
-                      resizeMode="cover"
-                      className="h-full w-full"
-                      accessibilityLabel="Foto makanan yang dianalisis"
-                    />
-                  </View>
-                ) : (
-                  <View
-                    className="items-center justify-center bg-carin-butter"
-                    style={{
-                      borderTopLeftRadius: 25,
-                      borderTopRightRadius: 31,
-                      borderBottomRightRadius: 23,
-                      borderBottomLeftRadius: 29,
-                      width: 64,
-                      height: 64,
-                    }}>
-                    <Icon as={Utensils} size={28} className="text-primary" />
-                  </View>
-                )}
+                <PhotoThumbnail
+                  photoId={actionScan?.photoId ?? null}
+                  localUri={actionScan?.photoId === null ? null : effectivePhotoUri}
+                  accessibilityLabel={
+                    actionScan?.photoId === null
+                      ? 'Foto sumber telah dihapus'
+                      : 'Foto makanan yang dianalisis'
+                  }
+                  fallbackLabel={actionScan?.photoId === null ? 'Foto dihapus' : undefined}
+                />
 
                 <View className="flex-1 gap-1">
                   <View className="flex-row items-center gap-2">
@@ -639,6 +627,11 @@ export default function AnalysisResultScreen() {
                   {formattedTimestamp ? (
                     <Text variant="caption" className="text-muted-foreground">
                       {formattedTimestamp}
+                    </Text>
+                  ) : null}
+                  {actionScan?.photoId === null ? (
+                    <Text variant="caption" className="text-muted-foreground">
+                      Foto sumber telah dihapus
                     </Text>
                   ) : null}
                 </View>
@@ -700,6 +693,11 @@ export default function AnalysisResultScreen() {
                       {component.portionSource ? (
                         <Text variant="caption" className="text-muted-foreground">
                           Sumber porsi: {component.portionSource}
+                        </Text>
+                      ) : null}
+                      {component.nutritionLabel === 'Estimasi visual VLM' ? (
+                        <Text variant="caption" className="text-muted-foreground">
+                          Estimasi gizi dari analisis visual AI
                         </Text>
                       ) : null}
                       {component.matchStatus !== 'matched' ? (
@@ -797,6 +795,15 @@ export default function AnalysisResultScreen() {
                 ) : null}
               </View>
 
+              {presentation.hasVisualEstimates ? (
+                <View className="rounded-[14px] bg-carin-butter/40 p-3">
+                  <Text variant="caption" className="text-foreground">
+                    Estimasi visual VLM sudah dihitung dalam total gizi. Nilainya merupakan
+                    perkiraan untuk porsi pada foto.
+                  </Text>
+                </View>
+              ) : null}
+
               <View className="flex-row gap-2.5">
                 <View className="flex-1 items-center gap-0.5 rounded-[14px] bg-carin-olive-soft p-2.5">
                   <Text variant="caption" className="font-semibold text-muted-foreground">
@@ -857,6 +864,9 @@ export default function AnalysisResultScreen() {
                         <Text className="font-medium text-foreground">{nutrient.label}</Text>
                         <Text variant="caption" className="text-muted-foreground">
                           Cakupan: {nutrient.coverage}
+                        </Text>
+                        <Text variant="caption" className="text-muted-foreground">
+                          {nutrient.sourceLabel}
                         </Text>
                         {nutrient.sources.length ? (
                           <Text variant="caption" className="text-[11px] text-muted-foreground">

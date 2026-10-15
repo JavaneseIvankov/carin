@@ -1,0 +1,102 @@
+{
+  "contractVersion": "2.0.0",
+  "dataMode": "synthetic",
+  "operationId": "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+  "inputKind": "photo",
+  "supportStatus": "unrecognized",
+  "overallAttention": "insufficient_information",
+  "profileVersion": 1,
+  "catalogVersion": "synthetic-catalog-1",
+  "nutritionDatasetVersion": "synthetic-nutrition-1",
+  "ruleSetVersion": "synthetic-rules-1",
+  "computedAt": "2026-10-15T05:00:00Z",
+  "components": [
+    {
+      "id": "33333333-3333-4333-8333-333333333333",
+      "displayName": "Makanan tidak dikenal",
+      "catalogFoodId": null,
+      "preparation": null,
+      "matchStatus": "unrecognized",
+      "portion": {
+        "quantity": null,
+        "unit": null,
+        "servingId": null,
+        "grams": null,
+        "origin": "photo_estimate",
+        "basis": null,
+        "sourceId": null
+      },
+      "nutrients": {
+        "energyKcal": 320,
+        "carbohydrateG": 42,
+        "proteinG": 9,
+        "fatG": 12,
+        "fiberG": null,
+        "sugarsG": null,
+        "sodiumMg": null
+      },
+      "per100g": {
+        "energyKcal": null,
+        "carbohydrateG": null,
+        "proteinG": null,
+        "fatG": null,
+        "fiberG": null,
+        "sugarsG": null,
+        "sodiumMg": null
+      },
+      "nutrientSourceIds": {
+        "energyKcal": "vlm-estimate-1",
+        "carbohydrateG": "vlm-estimate-1",
+        "proteinG": "vlm-estimate-1",
+        "fatG": "vlm-estimate-1",
+        "fiberG": null,
+        "sugarsG": null,
+        "sodiumMg": null
+      },
+      "sourceIds": ["vlm-estimate-1"]
+    }
+  ],
+  "totals": {
+    "energyKcal": 320,
+    "carbohydrateG": 42,
+    "proteinG": 9,
+    "fatG": 12,
+    "fiberG": null,
+    "sugarsG": null,
+    "sodiumMg": null
+  },
+  "coverage": {
+    "energyKcal": {"knownComponentCount": 1, "totalComponentCount": 1},
+    "carbohydrateG": {"knownComponentCount": 1, "totalComponentCount": 1},
+    "proteinG": {"knownComponentCount": 1, "totalComponentCount": 1},
+    "fatG": {"knownComponentCount": 1, "totalComponentCount": 1},
+    "fiberG": {"knownComponentCount": 0, "totalComponentCount": 1},
+    "sugarsG": {"knownComponentCount": 0, "totalComponentCount": 1},
+    "sodiumMg": {"knownComponentCount": 0, "totalComponentCount": 1}
+  },
+  "attentions": [],
+  "limitations": [
+    {
+      "code": "SYNTHETIC_DATA",
+      "message": "Data sintetis untuk pengujian kontrak; estimasi visual tidak tervalidasi.",
+      "componentIds": [],
+      "critical": false
+    },
+    {
+      "code": "UNRECOGNIZED_COMPONENT",
+      "message": "Angka gizi untuk komponen ini adalah estimasi visual VLM, bukan nilai katalog.",
+      "componentIds": ["33333333-3333-4333-8333-333333333333"],
+      "critical": true
+    }
+  ],
+  "sources": [
+    {
+      "id": "vlm-estimate-1",
+      "kind": "model_estimate",
+      "title": "Estimasi visual VLM untuk porsi pada foto",
+      "datasetVersion": "vlm-estimate-v1",
+      "itemRef": "dddddddd-dddd-4ddd-8ddd-dddddddddddd/33333333-3333-4333-8333-333333333333",
+      "url": null
+    }
+  ]
+}

@@ -51,7 +51,7 @@ function manifest(
   withRule = true,
 ): Ai['CapabilityManifest'] {
   return {
-    contractVersion: '1.0.0',
+    contractVersion: '2.0.0',
     catalogVersion: photoResult.catalogVersion,
     nutritionDatasetVersion: photoResult.nutritionDatasetVersion,
     ruleSetVersion: photoResult.ruleSetVersion,

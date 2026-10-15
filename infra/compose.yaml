@@ -151,7 +151,43 @@ services:
         condition: service_healthy
       minio-init:
         condition: service_completed_successfully
+      ai-service:
+        condition: service_healthy
     command: ["node", "dist/worker.js"]
+    networks:
+      - private
+    restart: unless-stopped
+
+  ai-service:
+    build:
+      context: ..
+      dockerfile: ai-service/Dockerfile
+    profiles: ["worker"]
+    environment:
+      APP_ENV: dev
+      AI_CATALOG_MODE: ${AI_CATALOG_MODE:-unconfigured}
+      AI_SERVICE_KEY: ${AI_SERVICE_KEY:-local-placeholder-change-before-use}
+      DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY:-}
+      VLM_BASE_URL: ${VLM_BASE_URL:-}
+      VLM_MODEL: ${VLM_MODEL:-qwen3.7-flash-2026-07-15}
+      VLM_FALLBACK_MODEL: ${VLM_FALLBACK_MODEL:-qwen3.7-flash}
+      VLM_TIMEOUT_SECONDS: ${VLM_TIMEOUT_SECONDS:-35}
+      MEDIA_ALLOWED_HOSTS: minio:9000
+      MEDIA_MAX_BYTES: ${MEDIA_MAX_BYTES:-10485760}
+      REQUEST_MAX_BYTES: ${AI_REQUEST_MAX_BYTES:-65536}
+      API_RATE_LIMIT_PER_MINUTE: ${AI_SERVICE_RATE_LIMIT_PER_MINUTE:-5}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/openapi.json', timeout=2)"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop: ["ALL"]
+    security_opt:
+      - no-new-privileges:true
     networks:
       - private
     restart: unless-stopped

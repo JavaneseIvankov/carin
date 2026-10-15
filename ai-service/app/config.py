@@ -15,6 +15,8 @@ class Settings:
     vlm_timeout_seconds: float
     media_allowed_hosts: frozenset[str]
     media_max_bytes: int
+    app_env: str = "prod"
+    ai_catalog_mode: str = "unconfigured"
     request_max_bytes: int = 65_536
     api_rate_limit: int = 60
 
@@ -24,6 +26,15 @@ def _allowed_hosts(raw: str) -> frozenset[str]:
 
 
 def load_settings() -> Settings:
+    app_env = os.getenv("APP_ENV", "prod").strip().lower()
+    catalog_mode = os.getenv("AI_CATALOG_MODE", "unconfigured").strip().lower()
+    if app_env not in {"dev", "test", "staging", "prod"}:
+        raise ValueError("APP_ENV is not supported")
+    if catalog_mode not in {"unconfigured", "synthetic-demo"}:
+        raise ValueError("AI_CATALOG_MODE is not supported")
+    if catalog_mode == "synthetic-demo" and app_env not in {"dev", "test"}:
+        raise ValueError("synthetic demo catalog is development-only")
+
     service_key = os.getenv("AI_SERVICE_KEY", "")
     limits = {
         "request_max_bytes": int(os.getenv("REQUEST_MAX_BYTES", "65536")),
@@ -51,6 +62,8 @@ def load_settings() -> Settings:
             raise ValueError("VLM_BASE_URL must end in /v1 and have no query or fragment")
 
     return Settings(
+        app_env=app_env,
+        ai_catalog_mode=catalog_mode,
         service_key=service_key,
         vlm_api_key=os.getenv("DASHSCOPE_API_KEY", ""),
         vlm_base_url=base_url,

@@ -1,6 +1,6 @@
 # Carin — data gizi, AI, dan policy hasil
 
-Versi 1.0.0. Dokumen ini menetapkan kewajiban implementasi/evaluasi, tidak
+Versi 2.0.0. Dokumen ini menetapkan kewajiban implementasi/evaluasi, tidak
 mengesahkan nilai gizi atau threshold klinis. Service implementation mengikuti
 [REST contract](contracts/ai-service.openapi.yaml).
 
@@ -60,9 +60,15 @@ pemeriksaan dalam request P0. Foto URL harus berasal dari allowlist host MinIO,
 tidak boleh arbitrary URL/redirect ke jaringan lain.
 
 Photo pipeline: validate input → propose components/portion → match versioned
-catalog → deterministic nutrient math → evaluate supported rules → structured
-result. Model dapat mengusulkan label/porsi; angka gizi harus dapat dihitung ulang
-dari source data. Backend menolak output yang melanggar schema/provenance/math.
+catalog → deterministic nutrient math → estimate nutrients for unmatched photo
+components with a separately scoped VLM request → evaluate supported rules →
+structured result. Catalog-matched values remain deterministic and catalog-backed.
+Visual nutrient estimates are allowed only for unmatched photo components, are
+returned per component with `model_estimate` provenance, and are included in
+result totals and coverage. They are not per-100-g values and are never used for
+health rules, attention, or personalized assessment. Manual input and
+recalculation remain catalog-only. Backend rejects outputs that violate the
+schema, provenance, or catalog math.
 
 Recalculation tidak perlu foto ulang. Pakai komponen dan portion terbaru, profil
 snapshot yang dikirim, dan catalog/rule versions yang diminta. Foto tidak menjadi
@@ -75,7 +81,11 @@ Status data dan status perhatian terpisah:
   requested supported scope. Optional nutrient null tetap dilabeli unavailable.
 - `partial`: ada komponen/porsi/core nutrient yang tidak lengkap; bagian yang
   diketahui tetap muncul, coverage per zat jelas.
-- `unrecognized`: tidak ada komponen yang dapat dipadankan; angka total null.
+- `unrecognized`: tidak ada komponen yang dapat dipadankan dengan katalog.
+  Nutrisi `model_estimate` masih boleh ada untuk komponen foto dan masuk ke total
+  serta coverage per zat gizi. Total tetap null jika tidak ada nilai katalog atau
+  estimasi visual yang diketahui. Status ini selalu berarti informasi untuk
+  penilaian personal belum cukup.
 - Kegagalan layanan/invalid input adalah error response, bukan successful analysis.
   Backend job menjadi failed jika retry tidak memulihkan.
 
@@ -120,7 +130,9 @@ per-food outcomes dan limitations, lalu PM/dev memutuskan cakupan yang layak dem
 Acceptance math/provenance/status wajib lulus seluruh golden cases; hasil model
 yang tidak memadai dikeluarkan dari supported manifest secara transparan.
 
-Versioning: kontrak 1.0.0; breaking field/type/semantic change menaikkan major dan
-memerlukan review kedua tim. Dataset/rules/catalog versions terpisah dari API
-contractVersion. Optional backward-compatible additions memerlukan fixture dan
-validator update; fixture tidak mengikuti endpoint mock yang berbeda bentuknya.
+Versioning: kontrak 2.0.0 memperkenalkan estimasi gizi visual per komponen dan
+memasukkannya ke total untuk makanan foto yang tidak cocok dengan katalog.
+Perubahan semantik ini memerlukan pembaruan provider dan consumer bersama.
+Versi dataset/rule/katalog tetap terpisah dari API `contractVersion`. Penambahan
+opsional yang kompatibel berikutnya memerlukan pembaruan fixture dan validator;
+fixture memakai bentuk payload endpoint yang sama dengan respons real.

@@ -1,8 +1,8 @@
-# Carin contract 1.0.0 — validated with specs/validate-contracts.py
+# Carin contract 2.0.0 — validated with specs/validate-contracts.py
 openapi: "3.1.1"
 info:
   title: "Carin Internal AI Service API"
-  version: "1.0.0"
+  version: "2.0.0"
   description: "Stateless internal API. Backend owns durable async jobs. Internal analysis calls return synchronously. No user DB access. Contract and rule/catalog versions are distinct. All fields are explicit; null never implies zero. Synthetic fixtures only in development/test. Default configurable security budgets: 60 authenticated requests/minute, 10 inference attempts/minute, 500 inference attempts/24 hours, two concurrent analyses, 64 KiB JSON body, 5s body-read and 85s analysis deadline. Inference quotas are shared across every analysis URL. Limit rejection is 429 with Retry-After; oversized bodies are 413; body-read timeout is 408; unavailable security storage is 503."
 servers:
   -
@@ -230,7 +230,7 @@ components:
   schemas:
     ContractVersion:
       type: "string"
-      enum: ["1.0.0"]
+      enum: ["2.0.0"]
     Error:
       type: "object"
       additionalProperties: false
@@ -269,7 +269,7 @@ components:
           maxLength: 500
         kind:
           type: "string"
-          enum: ["nutrition", "portion", "health_rule", "synthetic"]
+          enum: ["nutrition", "portion", "health_rule", "synthetic", "model_estimate"]
         title:
           type: "string"
           minLength: 1
@@ -741,6 +741,7 @@ components:
     AnalysisResult:
       type: "object"
       additionalProperties: false
+      description: "Totals and coverage sum known per-component nutrients. Catalog nutrients are deterministic; model_estimate nutrients are per pictured portion for unmatched photo components only. supportStatus describes catalog matching, so unrecognized may include visual estimates while remaining insufficient for personal assessment."
       properties:
         contractVersion:
           $ref: "#/components/schemas/ContractVersion"

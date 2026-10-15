@@ -6856,6 +6856,8 @@ export const contracts = {
       },
       'ai.AnalysisResult': {
         additionalProperties: false,
+        description:
+          'Totals and coverage sum known per-component nutrients. Catalog nutrients are deterministic; model_estimate nutrients are per pictured portion for unmatched photo components only. supportStatus describes catalog matching, so unrecognized may include visual estimates while remaining insufficient for personal assessment.',
         properties: {
           attentions: {
             items: {
@@ -7398,7 +7400,7 @@ export const contracts = {
         type: 'object',
       },
       'ai.ContractVersion': {
-        enum: ['1.0.0'],
+        enum: ['2.0.0'],
         type: 'string',
       },
       'ai.Error': {
@@ -8188,7 +8190,7 @@ export const contracts = {
             type: 'string',
           },
           kind: {
-            enum: ['nutrition', 'portion', 'health_rule', 'synthetic'],
+            enum: ['nutrition', 'portion', 'health_rule', 'synthetic', 'model_estimate'],
             type: 'string',
           },
           title: {
@@ -10004,8 +10006,8 @@ export const contracts = {
         type: 'object',
       },
     },
-    $id: 'urn:carin:contracts:1.0.0',
+    $id: 'urn:carin:contracts:2.0.0',
     $schema: 'https://json-schema.org/draft/2020-12/schema',
   },
-  version: '1.0.0',
+  version: '2.0.0',
 };

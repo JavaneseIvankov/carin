@@ -172,7 +172,9 @@ export function createAppRepository(deps: Dependencies) {
       assertCurrent();
       const request = prepareAppRequest(name, input);
       const cacheKey = storageKey(deps.scope, 'read', request.path);
-      const cached = await deps.storage.getItem(cacheKey);
+      const isEphemeralPhotoView = name === 'getPhotoView' || name === 'readSignedPhoto';
+      if (isEphemeralPhotoView) await deps.storage.removeItem(cacheKey);
+      const cached = isEphemeralPhotoView ? null : await deps.storage.getItem(cacheKey);
       assertCurrent();
       if (deps.connectivity() === 'offline' && cached) {
         return {
@@ -186,7 +188,7 @@ export function createAppRepository(deps: Dependencies) {
         assertCurrent();
         const result = { data, updatedAt: Date.now(), stale: false };
         // /me is never persisted as evidence of a session.
-        if (name !== 'getMe' && name !== 'readSignedPhoto' && (deps.isCurrentScope?.() ?? true)) {
+        if (name !== 'getMe' && !isEphemeralPhotoView && (deps.isCurrentScope?.() ?? true)) {
           await persistScopedData(
             deps.storage,
             deps.scope,

@@ -96,3 +96,15 @@ Verification (from `carin-app/`): `tsc --noEmit` and ESLint on `app/consumptions
 Next step: Reopen Detail konsumsi in Expo Go and check Kembali and scrolling.
 
 Worktree state: Uncommitted on the existing UI branch; earlier changes preserved.
+
+## Merge latest dev
+
+Task / scope: Merge origin/dev at 1578724 into feat/ios-ui-improvements while retaining the improved iPhone UI and SDK 57.
+
+Changes: Merged five upstream commits for synthetic AI catalog, photo thumbnails, development media URLs and VLM nutrition fallback totals. History merged automatically, retaining the UI branch's safe-area/header and adding upstream thumbnails. Other UI-only files and SDK dependencies are unchanged relative to the UI branch.
+
+Verification: In carin-app, tsc --noEmit, eslint . --max-warnings 0 and vitest run passed (56 files, 405 tests). In carin-api, tsc --noEmit and vitest run .unit.test. passed (27 files, 235 tests). Staged diff whitespace checks passed. python3 specs/validate-contracts.py was unavailable because openapi_spec_validator is not installed. No device, real-AI or database integration test was run.
+
+Next step: Review the merged branch; restart local testing when desired.
+
+Worktree state: Merge committed locally. Preserve the user's local infra/.env.example changes separately from the merge.

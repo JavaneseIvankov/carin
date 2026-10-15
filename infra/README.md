@@ -91,11 +91,37 @@ exec postgres psql -U carin_dev -d carin_dev`. An S3 client pointed at
 MinIO is only reachable by services on the private network. No database,
 MinIO, AI, or worker port is published.
 
-The optional `worker` profile runs the durable C16/C18 analysis worker at
-`dist/worker.js`. Before enabling it, create a least-privilege Silo account for
-the bucket and replace `MINIO_ACCESS_KEY` and `MINIO_SECRET_KEY`; the example
-values are placeholders. The worker creates private, short-lived photo URLs for
-the configured internal AI service. This Compose stack does not run that service;
-`AI_SERVICE_URL`, `AI_SERVICE_KEY`, and `AI_MODE` must target a separately
-available service. The default fixture mode is for local development only and
-does not represent live AI analysis.
+The optional `worker` profile runs the durable analysis worker and the private
+`ai-service` container on the same Compose network. Before enabling it, create a
+least-privilege Silo account for the bucket and replace `MINIO_ACCESS_KEY` and
+`MINIO_SECRET_KEY`; the example values are placeholders. The worker creates
+private, short-lived photo URLs for AI service requests. The AI container gets
+`DASHSCOPE_API_KEY`; the worker gets only `AI_SERVICE_KEY` and calls
+`AI_SERVICE_URL` on the private network. `AI_MODE=fixture` remains the local
+development default. Set `AI_MODE=real`, `DASHSCOPE_API_KEY`, and `VLM_BASE_URL`
+in ignored `infra/.env` to exercise provider-backed analysis. By default the
+service advertises the empty `unconfigured` catalog and returns safe null
+nutrients. For an isolated local live-test stack, set
+`AI_CATALOG_MODE=synthetic-demo`: the real VLM still processes the photo, then
+the service exact-matches the proposal to a small synthetic catalog and computes
+from explicitly synthetic nutrient values. The result and sources are marked
+`synthetic`, with no health rules or personal attention output. These values are
+plumbing fixtures, not nutritional facts, and cannot be enabled outside `dev`
+or `test`. The service uses one worker process for its shared in-memory request
+quota.
+
+Before submitting real analyses, synchronize the API's active catalog snapshot
+with the AI service capabilities. Start `ai-service` and wait for it to become
+healthy, then run:
+
+```sh
+docker compose --env-file infra/.env -f infra/compose.yaml --profile worker run --rm --no-deps worker node dist/catalog/import-cli.js
+```
+
+Catalog sync activates an immutable version while retaining prior snapshots and
+makes it current for that database. For a synthetic live test, start the stack
+with `AI_CATALOG_MODE=synthetic-demo` and `AI_MODE=real`, then run the command
+above against an isolated development database. The catalog version is
+`synthetic-live-catalog-2`; sources and the analysis result remain explicitly
+synthetic. Do not sync it into a shared database. The default `unconfigured`
+mode remains empty until the approved T31 artifacts are delivered.

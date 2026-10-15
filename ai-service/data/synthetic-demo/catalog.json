@@ -1,0 +1,82 @@
+{
+  "catalogVersion": "synthetic-live-catalog-2",
+  "items": [
+    {
+      "id": "demo-rice-001",
+      "catalogVersion": "synthetic-live-catalog-2",
+      "displayName": "Nasi putih (data sintetis)",
+      "aliases": ["nasi putih", "white rice", "nasi matang"],
+      "preparation": "matang",
+      "per100g": {
+        "energyKcal": 150,
+        "carbohydrateG": 31,
+        "proteinG": 3,
+        "fatG": 1,
+        "fiberG": 1,
+        "sugarsG": 0.5,
+        "sodiumMg": 2
+      },
+      "servings": [
+        {"id": "demo-rice-serving-100g", "label": "100 gram sintetis", "grams": 100, "sourceId": "demo-rice-nutrition"}
+      ],
+      "sources": [
+        {
+          "id": "demo-rice-nutrition",
+          "kind": "synthetic",
+          "title": "Data gizi sintetis untuk live-test plumbing; bukan data gizi nyata",
+          "datasetVersion": "synthetic-live-nutrition-1",
+          "itemRef": "demo-rice-001 per 100 g",
+          "url": "https://fixtures.carin.invalid/synthetic-live/rice"
+        }
+      ],
+      "nutrientSourceIds": {
+        "energyKcal": "demo-rice-nutrition",
+        "carbohydrateG": "demo-rice-nutrition",
+        "proteinG": "demo-rice-nutrition",
+        "fatG": "demo-rice-nutrition",
+        "fiberG": "demo-rice-nutrition",
+        "sugarsG": "demo-rice-nutrition",
+        "sodiumMg": "demo-rice-nutrition"
+      }
+    },
+    {
+      "id": "demo-fried-chicken-001",
+      "catalogVersion": "synthetic-live-catalog-2",
+      "displayName": "Ayam goreng (data sintetis)",
+      "aliases": ["ayam goreng", "fried chicken"],
+      "preparation": "digoreng",
+      "per100g": {
+        "energyKcal": 245,
+        "carbohydrateG": 10,
+        "proteinG": 22,
+        "fatG": 13,
+        "fiberG": 0,
+        "sugarsG": 1,
+        "sodiumMg": 430
+      },
+      "servings": [
+        {"id": "demo-chicken-serving-100g", "label": "100 gram sintetis", "grams": 100, "sourceId": "demo-chicken-nutrition"}
+      ],
+      "sources": [
+        {
+          "id": "demo-chicken-nutrition",
+          "kind": "synthetic",
+          "title": "Data gizi sintetis untuk live-test plumbing; bukan data gizi nyata",
+          "datasetVersion": "synthetic-live-nutrition-1",
+          "itemRef": "demo-fried-chicken-001 per 100 g",
+          "url": "https://fixtures.carin.invalid/synthetic-live/fried-chicken"
+        }
+      ],
+      "nutrientSourceIds": {
+        "energyKcal": "demo-chicken-nutrition",
+        "carbohydrateG": "demo-chicken-nutrition",
+        "proteinG": "demo-chicken-nutrition",
+        "fatG": "demo-chicken-nutrition",
+        "fiberG": "demo-chicken-nutrition",
+        "sugarsG": "demo-chicken-nutrition",
+        "sodiumMg": "demo-chicken-nutrition"
+      }
+    }
+  ],
+  "nextCursor": null
+}

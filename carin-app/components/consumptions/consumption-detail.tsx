@@ -114,11 +114,7 @@ export function ConsumptionDetail({
         <View className="gap-0.5">
           <Text variant="h3">Estimasi gizi tersimpan</Text>
           <Text variant="caption" className="text-muted-foreground">
-            {consumption.snapshot.dataMode === 'synthetic'
-              ? 'Data sintetis untuk demonstrasi'
-              : consumption.snapshot.dataMode === 'unavailable'
-                ? 'Gizi belum tersedia dari katalog'
-                : 'Snapshot gizi dari katalog'}
+            {presentation.dataLabel}
           </Text>
         </View>
 
@@ -146,6 +142,12 @@ export function ConsumptionDetail({
             <Text variant="caption" className="text-muted-foreground">
               Cakupan {energy.coverage}
             </Text>
+              {energy.sourceLabel === 'Estimasi visual VLM' ||
+              energy.sourceLabel === 'Gabungan katalog dan estimasi visual VLM' ? (
+                <Text variant="caption" className="text-muted-foreground">
+                  {energy.sourceLabel}
+                </Text>
+              ) : null}
           </View>
         ) : null}
 
@@ -164,6 +166,11 @@ export function ConsumptionDetail({
               <Text className="text-[11px] text-muted-foreground leading-tight">
                 {macro.coverage}
               </Text>
+              {macro.sourceLabel.includes('visual VLM') ? (
+                <Text className="text-[10px] text-muted-foreground leading-tight">
+                  {macro.sourceLabel}
+                </Text>
+              ) : null}
             </View>
           ))}
         </View>
@@ -198,6 +205,11 @@ export function ConsumptionDetail({
                       <Text variant="caption" className="text-muted-foreground">
                         Cakupan {item.coverage}
                       </Text>
+                      {item.sourceLabel.includes('visual VLM') ? (
+                        <Text variant="caption" className="text-muted-foreground">
+                          {item.sourceLabel}
+                        </Text>
+                      ) : null}
                     </View>
                     <Text className="font-semibold text-foreground">{item.value}</Text>
                   </View>
@@ -254,6 +266,11 @@ export function ConsumptionDetail({
                       Makanan lain · belum cocok dengan katalog
                     </Text>
                   </View>
+                ) : null}
+                {component.nutritionLabel === 'Estimasi visual VLM' ? (
+                  <Text variant="caption" className="text-muted-foreground">
+                    {component.nutritionLabel}
+                  </Text>
                 ) : null}
               </View>
             ))}

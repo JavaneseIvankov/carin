@@ -1,7 +1,7 @@
 {
   "artifactVersion": "1.0.0-draft",
   "publicationStatus": "unpublished",
-  "contractVersion": "1.0.0",
+  "contractVersion": "2.0.0",
   "catalogVersion": "catalog-unpublished-0.1.0",
   "nutritionDatasetVersion": "nutrition-unpublished-0.1.0",
   "ruleSetVersion": "rules-unpublished-0.1.0",

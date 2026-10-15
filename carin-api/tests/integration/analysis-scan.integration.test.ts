@@ -57,7 +57,7 @@ async function seedCatalog(): Promise<void> {
   const sample = complete.components[0]!;
   const sources = complete.sources.filter((source) => sample.sourceIds.includes(source.id));
   const manifest: components['schemas']['CapabilityManifest'] = {
-    contractVersion: '1.0.0',
+    contractVersion: '2.0.0',
     catalogVersion,
     nutritionDatasetVersion: complete.nutritionDatasetVersion,
     ruleSetVersion: complete.ruleSetVersion,

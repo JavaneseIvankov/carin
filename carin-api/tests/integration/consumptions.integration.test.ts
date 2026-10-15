@@ -58,7 +58,7 @@ function fixture(name: 'complete' | 'correction'): Ai['AnalysisResult'] {
 async function seedCatalog(): Promise<void> {
   const sources = complete.sources.filter((source) => sample.sourceIds.includes(source.id));
   const manifest: Ai['CapabilityManifest'] = {
-    contractVersion: '1.0.0',
+    contractVersion: '2.0.0',
     catalogVersion,
     nutritionDatasetVersion: complete.nutritionDatasetVersion,
     ruleSetVersion: complete.ruleSetVersion,
