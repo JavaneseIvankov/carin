@@ -1,6 +1,6 @@
 {
-  "contractVersion": "1.0.0",
-  "catalogVersion": "synthetic-live-catalog-1",
+  "contractVersion": "2.0.0",
+  "catalogVersion": "synthetic-live-catalog-2",
   "nutritionDatasetVersion": "synthetic-live-nutrition-1",
   "ruleSetVersion": "synthetic-live-rules-1",
   "conditions": [],

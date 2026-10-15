@@ -101,7 +101,7 @@ beforeAll(async () => {
   await pool.query(
     `INSERT INTO catalog_capability_manifest (catalog_version,manifest) VALUES ($1,$2)`,
     [catalogSample.catalogVersion, JSON.stringify({
-      contractVersion: '1.0.0',
+      contractVersion: '2.0.0',
       catalogVersion: catalogSample.catalogVersion,
       nutritionDatasetVersion: catalogSample.nutritionDatasetVersion,
       ruleSetVersion: catalogSample.ruleSetVersion,
@@ -683,7 +683,7 @@ describe('durable analysis job leases and publication', () => {
 
   it('executes a durable claim through the shared fixture AI client and publishes its result', async () => {
     const inputSnapshot = {
-        contractVersion: '1.0.0',
+        contractVersion: '2.0.0',
         catalogVersion: 'synthetic-catalog-1',
         ruleSetVersion: 'synthetic-rules-1',
         profile: testProfileContext,

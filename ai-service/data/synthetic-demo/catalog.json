@@ -1,9 +1,9 @@
 {
-  "catalogVersion": "synthetic-live-catalog-1",
+  "catalogVersion": "synthetic-live-catalog-2",
   "items": [
     {
       "id": "demo-rice-001",
-      "catalogVersion": "synthetic-live-catalog-1",
+      "catalogVersion": "synthetic-live-catalog-2",
       "displayName": "Nasi putih (data sintetis)",
       "aliases": ["nasi putih", "white rice", "nasi matang"],
       "preparation": "matang",
@@ -41,7 +41,7 @@
     },
     {
       "id": "demo-fried-chicken-001",
-      "catalogVersion": "synthetic-live-catalog-1",
+      "catalogVersion": "synthetic-live-catalog-2",
       "displayName": "Ayam goreng (data sintetis)",
       "aliases": ["ayam goreng", "fried chicken"],
       "preparation": "digoreng",

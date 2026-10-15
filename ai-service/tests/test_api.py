@@ -50,7 +50,7 @@ def profile() -> dict:
 
 def photo_request() -> dict:
     return {
-        "contractVersion": "1.0.0",
+        "contractVersion": "2.0.0",
         "operationId": str(uuid4()),
         "catalogVersion": "unconfigured",
         "ruleSetVersion": "unconfigured",
@@ -65,7 +65,7 @@ def photo_request() -> dict:
 
 def recalc_request() -> dict:
     return {
-        "contractVersion": "1.0.0",
+        "contractVersion": "2.0.0",
         "operationId": str(uuid4()),
         "inputKind": "manual",
         "catalogVersion": "unconfigured",
@@ -117,7 +117,7 @@ async def test_synthetic_demo_capabilities_and_catalog_follow_shared_contract(cl
     assert capabilities_response.status_code == 200
     validate_payload("CapabilityManifest", capabilities_response.json())
     manifest = capabilities_response.json()
-    assert manifest["catalogVersion"] == "synthetic-live-catalog-1"
+    assert manifest["catalogVersion"] == "synthetic-live-catalog-2"
     assert manifest["nutritionDatasetVersion"] == "synthetic-live-nutrition-1"
     assert manifest["ruleSetVersion"] == "synthetic-live-rules-1"
     assert manifest["dataMode"] == "synthetic"
@@ -126,18 +126,18 @@ async def test_synthetic_demo_capabilities_and_catalog_follow_shared_contract(cl
 
     page = await client.get(
         "/internal/v1/catalog",
-        params={"version": "synthetic-live-catalog-1", "limit": 1},
+        params={"version": "synthetic-live-catalog-2", "limit": 1},
         headers=HEADERS,
     )
     assert page.status_code == 200
     validate_payload("CatalogPage", page.json())
-    assert page.json()["catalogVersion"] == "synthetic-live-catalog-1"
+    assert page.json()["catalogVersion"] == "synthetic-live-catalog-2"
     assert len(page.json()["items"]) == 1
     assert page.json()["nextCursor"] is not None
 
     next_page = await client.get(
         "/internal/v1/catalog",
-        params={"version": "synthetic-live-catalog-1", "cursor": page.json()["nextCursor"], "limit": 1},
+        params={"version": "synthetic-live-catalog-2", "cursor": page.json()["nextCursor"], "limit": 1},
         headers=HEADERS,
     )
     assert next_page.status_code == 200
@@ -174,9 +174,21 @@ async def test_invalid_request_uses_shared_error_envelope(client):
     assert response.json()["error"]["code"] == "INVALID_INPUT"
 
 
+def test_contract_v2_allows_model_estimate_source_kind():
+    validate_payload("ContractVersion", "2.0.0")
+    validate_payload("Source", {
+        "id": "visual-estimate-1",
+        "kind": "model_estimate",
+        "title": "Estimasi visual VLM",
+        "datasetVersion": "vlm-estimate-v1",
+        "itemRef": "operation-1/component-1",
+        "url": None,
+    })
+
+
 async def test_unsupported_contract_version_is_409(client):
     body = photo_request()
-    body["contractVersion"] = "2.0.0"
+    body["contractVersion"] = "1.0.0"
     response = await client.post("/internal/v1/analyses", headers=HEADERS, json=body)
     assert response.status_code == 409
     validate_payload("Error", response.json())
@@ -203,7 +215,7 @@ async def test_photo_analysis_matches_synthetic_alias_and_computes_nutrients(cli
     monkeypatch.setenv("APP_ENV", "dev")
     monkeypatch.setenv("AI_CATALOG_MODE", "synthetic-demo")
     body = photo_request()
-    body["catalogVersion"] = "synthetic-live-catalog-1"
+    body["catalogVersion"] = "synthetic-live-catalog-2"
     body["ruleSetVersion"] = "synthetic-live-rules-1"
 
     async def fake_fetch(image, settings):
@@ -241,7 +253,7 @@ async def test_photo_analysis_keeps_unmatched_food_unrecognized(client, monkeypa
     monkeypatch.setenv("APP_ENV", "dev")
     monkeypatch.setenv("AI_CATALOG_MODE", "synthetic-demo")
     body = photo_request()
-    body["catalogVersion"] = "synthetic-live-catalog-1"
+    body["catalogVersion"] = "synthetic-live-catalog-2"
     body["ruleSetVersion"] = "synthetic-live-rules-1"
 
     async def fake_fetch(image, settings):
@@ -254,6 +266,17 @@ async def test_photo_analysis_keeps_unmatched_food_unrecognized(client, monkeypa
                 "components": [{"displayName": "Makanan tidak dikenal", "estimatedMassGrams": 150}],
             })
 
+        async def estimate_component_nutrients(self, data, mime_type, components):
+            return {components[0]["id"]: {
+                "energyKcal": 310,
+                "carbohydrateG": 34,
+                "proteinG": 12,
+                "fatG": 14,
+                "fiberG": None,
+                "sugarsG": None,
+                "sodiumMg": None,
+            }}
+
     monkeypatch.setattr(main, "fetch_and_normalize", fake_fetch)
     main.app.state.vlm_client_factory = lambda settings: FakeVLM()
 
@@ -263,9 +286,94 @@ async def test_photo_analysis_keeps_unmatched_food_unrecognized(client, monkeypa
     result = response.json()
     assert result["supportStatus"] == "unrecognized"
     assert result["components"][0]["catalogFoodId"] is None
+    assert result["components"][0]["nutrients"]["energyKcal"] == 310
+    assert result["components"][0]["per100g"]["energyKcal"] is None
+    assert result["totals"]["energyKcal"] == 310
+    assert result["coverage"]["energyKcal"] == {"knownComponentCount": 1, "totalComponentCount": 1}
+    source_id = result["components"][0]["nutrientSourceIds"]["energyKcal"]
+    assert next(source for source in result["sources"] if source["id"] == source_id)["kind"] == "model_estimate"
+    assert result["limitations"][0]["code"] == "SYNTHETIC_DATA"
+
+
+async def test_mixed_photo_analysis_uses_catalog_and_vlm_without_double_counting(client, monkeypatch):
+    monkeypatch.setenv("APP_ENV", "dev")
+    monkeypatch.setenv("AI_CATALOG_MODE", "synthetic-demo")
+    body = photo_request()
+    body["catalogVersion"] = "synthetic-live-catalog-2"
+    body["ruleSetVersion"] = "synthetic-live-rules-1"
+
+    async def fake_fetch(image, settings):
+        return NormalizedImage(b"normalized-photo")
+
+    class FakeVLM:
+        estimation_targets = None
+
+        async def observe(self, data, mime_type):
+            return FoodObservation.model_validate({
+                "isFood": True,
+                "components": [
+                    {"displayName": "Nasi putih", "estimatedMassGrams": 150},
+                    {"displayName": "Sambal unik", "estimatedMassGrams": None},
+                ],
+            })
+
+        async def estimate_component_nutrients(self, data, mime_type, components):
+            self.estimation_targets = components
+            return {components[0]["id"]: {
+                "energyKcal": 55,
+                "carbohydrateG": 7,
+                "proteinG": 1,
+                "fatG": 2,
+                "fiberG": None,
+                "sugarsG": None,
+                "sodiumMg": 180,
+            }}
+
+    provider = FakeVLM()
+    monkeypatch.setattr(main, "fetch_and_normalize", fake_fetch)
+    main.app.state.vlm_client_factory = lambda settings: provider
+
+    response = await client.post("/internal/v1/analyses", headers=HEADERS, json=body)
+
+    assert response.status_code == 200
+    result = response.json()
+    validate_payload("AnalysisResult", result)
+    assert result["supportStatus"] == "partial"
+    assert [component["matchStatus"] for component in result["components"]] == ["matched", "unrecognized"]
+    assert result["components"][0]["nutrients"]["energyKcal"] == 225
+    assert result["components"][1]["nutrients"]["energyKcal"] == 55
+    assert result["components"][1]["portion"]["grams"] is None
+    assert result["totals"]["energyKcal"] == 280
+    assert result["coverage"]["energyKcal"] == {"knownComponentCount": 2, "totalComponentCount": 2}
+    assert len(provider.estimation_targets) == 1
+    assert provider.estimation_targets[0]["displayName"] == "Sambal unik"
+
+
+async def test_vlm_estimation_failure_preserves_recognition_and_null_nutrients(client, monkeypatch):
+    async def fake_fetch(image, settings):
+        return NormalizedImage(b"normalized-photo")
+
+    class FakeVLM:
+        async def observe(self, data, mime_type):
+            return FoodObservation.model_validate({
+                "isFood": True,
+                "components": [{"displayName": "Unknown food", "estimatedMassGrams": 120}],
+            })
+
+        async def estimate_component_nutrients(self, data, mime_type, components):
+            raise ServiceError(503, "MODEL_FAILURE", "provider unavailable", retryable=True)
+
+    monkeypatch.setattr(main, "fetch_and_normalize", fake_fetch)
+    main.app.state.vlm_client_factory = lambda settings: FakeVLM()
+
+    response = await client.post("/internal/v1/analyses", headers=HEADERS, json=photo_request())
+
+    assert response.status_code == 200
+    result = response.json()
+    assert result["components"][0]["displayName"] == "Unknown food"
     assert result["components"][0]["nutrients"]["energyKcal"] is None
     assert result["totals"]["energyKcal"] is None
-    assert result["limitations"][0]["code"] == "SYNTHETIC_DATA"
+    assert any(item["code"] == "VLM_NUTRITION_UNAVAILABLE" for item in result["limitations"])
 
 
 async def test_recalculation_preserves_portion_but_never_invents_nutrients(client):

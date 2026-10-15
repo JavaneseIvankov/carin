@@ -122,6 +122,6 @@ Catalog sync activates an immutable version while retaining prior snapshots and
 makes it current for that database. For a synthetic live test, start the stack
 with `AI_CATALOG_MODE=synthetic-demo` and `AI_MODE=real`, then run the command
 above against an isolated development database. The catalog version is
-`synthetic-live-catalog-1`; sources and the analysis result remain explicitly
+`synthetic-live-catalog-2`; sources and the analysis result remain explicitly
 synthetic. Do not sync it into a shared database. The default `unconfigured`
 mode remains empty until the approved T31 artifacts are delivered.

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import math
 import re
 import unicodedata
 from typing import Any
@@ -11,7 +12,8 @@ from .errors import ServiceError
 from .provider import FoodObservation
 
 
-CONTRACT_VERSION = "1.0.0"
+CONTRACT_VERSION = "2.0.0"
+MODEL_ESTIMATE_VERSION = "vlm-estimate-v1"
 NUTRIENT_FIELDS = (
     "energyKcal",
     "carbohydrateG",
@@ -331,6 +333,95 @@ def photo_result(
         "sources": [],
         "dataMode": "real",
     }
+
+
+def apply_visual_estimates(
+    result: dict[str, Any], estimates: dict[str, dict[str, float | None]],
+) -> None:
+    targets = [component for component in result["components"] if component["catalogFoodId"] is None]
+    target_ids = {component["id"] for component in targets}
+    if set(estimates) != target_ids:
+        raise ValueError("VLM estimate IDs do not match unmatched photo components")
+
+    validated: dict[str, dict[str, float | None]] = {}
+    for component_id, nutrients in estimates.items():
+        if set(nutrients) != set(NUTRIENT_FIELDS):
+            raise ValueError("VLM nutrient fields do not match the shared nutrient set")
+        for value in nutrients.values():
+            if value is not None and (
+                isinstance(value, bool) or not isinstance(value, (int, float)) or
+                not math.isfinite(value) or value < 0
+            ):
+                raise ValueError("VLM nutrient estimates must be finite and nonnegative")
+        validated[component_id] = nutrients
+
+    sources_by_id = {source["id"]: source for source in result["sources"]}
+    estimated_component_ids: list[str] = []
+    unavailable_component_ids: list[str] = []
+    for component in targets:
+        component_id = component["id"]
+        nutrient_values = validated[component_id]
+        known_nutrients = [key for key in NUTRIENT_FIELDS if nutrient_values[key] is not None]
+        if not known_nutrients:
+            unavailable_component_ids.append(component_id)
+            continue
+
+        source_id = f"vlm-estimate-{component_id}"
+        source = {
+            "id": source_id,
+            "kind": "model_estimate",
+            "title": "Estimasi visual VLM untuk porsi pada foto",
+            "datasetVersion": MODEL_ESTIMATE_VERSION,
+            "itemRef": f"{result['operationId']}/{component_id}",
+            "url": None,
+        }
+        existing = sources_by_id.get(source_id)
+        if existing is not None and existing != source:
+            raise ValueError("VLM estimate source ID conflicts with an existing source")
+        sources_by_id[source_id] = source
+        component["sourceIds"].append(source_id)
+        for key in NUTRIENT_FIELDS:
+            value = nutrient_values[key]
+            component["nutrients"][key] = value
+            component["nutrientSourceIds"][key] = source_id if value is not None else None
+        estimated_component_ids.append(component_id)
+
+    result["sources"] = list(sources_by_id.values())
+    if estimated_component_ids:
+        result["limitations"].append({
+            "code": "VLM_NUTRIENT_ESTIMATE",
+            "message": "Nilai gizi untuk makanan tanpa match katalog adalah estimasi visual VLM, bukan data terverifikasi.",
+            "componentIds": estimated_component_ids,
+            "critical": True,
+        })
+    if unavailable_component_ids:
+        result["limitations"].append({
+            "code": "VLM_NUTRITION_UNAVAILABLE",
+            "message": "VLM tidak dapat memperkirakan zat gizi untuk sebagian komponen; nilainya tetap tidak tersedia.",
+            "componentIds": unavailable_component_ids,
+            "critical": True,
+        })
+
+    totals: dict[str, float | None] = {}
+    coverage = _coverage(len(result["components"]))
+    for field in NUTRIENT_FIELDS:
+        known = [component["nutrients"][field] for component in result["components"] if component["nutrients"][field] is not None]
+        totals[field] = _round_nutrient(sum(known)) if known else None
+        coverage[field] = {
+            "knownComponentCount": len(known),
+            "totalComponentCount": len(result["components"]),
+        }
+    result["totals"] = totals
+    result["coverage"] = coverage
+
+
+def visual_estimation_failure(result: dict[str, Any], component_ids: list[str]) -> None:
+    result["limitations"].append({
+        "code": "VLM_NUTRITION_UNAVAILABLE",
+        "message": "Estimasi gizi visual tidak tersedia; nilai yang tidak diketahui tetap null.",
+        "componentIds": component_ids,
+        "critical": True,
+    })
 
 
 def recalculation_result(payload: dict[str, Any]) -> dict[str, Any]:

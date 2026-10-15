@@ -249,7 +249,7 @@ export function buildConsumptionNutritionSnapshot(input: ConsumptionNutritionInp
   const knownNutrients = nutrientKeys.some((key) => totals[key] !== null);
   const complete = resultComponents.every((component) => nutrientKeys.every((key) => component.nutrients[key] !== null));
   const snapshot: ConsumptionSnapshot = {
-    contractVersion: '1.0.0',
+    contractVersion: '2.0.0',
     operationId: input.operationId,
     inputKind: 'manual',
     supportStatus: complete ? 'complete' : knownNutrients ? 'partial' : 'unrecognized',

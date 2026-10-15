@@ -23,7 +23,7 @@ class CatalogBundle:
 def _unconfigured_bundle() -> CatalogBundle:
     return CatalogBundle(
         manifest={
-            "contractVersion": "1.0.0",
+            "contractVersion": "2.0.0",
             "catalogVersion": UNCONFIGURED_VERSION,
             "nutritionDatasetVersion": UNCONFIGURED_VERSION,
             "ruleSetVersion": UNCONFIGURED_VERSION,

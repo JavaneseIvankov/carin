@@ -13,7 +13,7 @@ This preparation is on `feat/t32-real-ai-service`, as requested. The supplied
 T32/C32 issue assigns held-out evaluation to C33. These experimental references
 are not approved T31 food/rule artifacts and do not implement the internal REST
 service or establish T32 acceptance. Production food values and attention still
-follow `specs/04-ai-data-and-policy.md` and contract 1.0.0.
+follow `specs/04-ai-data-and-policy.md` and contract 2.0.0.
 
 ## Documentation and Reports
 

@@ -52,7 +52,26 @@ function attentionPresentation(consumption: ManualConsumption) {
 }
 
 export function getConsumptionDetailPresentation(consumption: ManualConsumption) {
+  const visualSourceIds = new Set(
+    consumption.snapshot.sources
+      .filter((source) => source.kind === 'model_estimate')
+      .map((source) => source.id)
+  );
+  const sourceNames = new Map(consumption.snapshot.sources.map((source) => [source.id, source.title]));
+  const hasVisualEstimates = consumption.snapshot.components.some((component) =>
+    Object.values(component.nutrientSourceIds).some(
+      (sourceId) => sourceId !== null && visualSourceIds.has(sourceId)
+    )
+  );
   return {
+    hasVisualEstimates,
+    dataLabel: hasVisualEstimates
+      ? 'Termasuk estimasi visual VLM'
+      : consumption.snapshot.dataMode === 'synthetic'
+        ? 'Data sintetis untuk demonstrasi'
+        : consumption.snapshot.dataMode === 'unavailable'
+          ? 'Gizi belum tersedia dari katalog'
+          : 'Snapshot gizi dari katalog',
     source: {
       label: consumption.source === 'manual' ? 'Catatan manual' : 'Konfirmasi dari foto',
       photoDeleted: consumption.source === 'photo_confirmation' && !consumption.photoAvailable,
@@ -60,11 +79,27 @@ export function getConsumptionDetailPresentation(consumption: ManualConsumption)
     attention: attentionPresentation(consumption),
     nutrients: nutrientDefinitions.map(([key, label, unit]) => {
       const coverage = consumption.snapshot.coverage[key];
+      const nutrientSourceIds = consumption.snapshot.components
+        .map((component) => component.nutrientSourceIds[key])
+        .filter((sourceId): sourceId is string => sourceId !== null);
+      const hasVisualSource = nutrientSourceIds.some((sourceId) => visualSourceIds.has(sourceId));
+      const hasCatalogSource = nutrientSourceIds.some((sourceId) => !visualSourceIds.has(sourceId));
       return {
         key,
         label,
         value: formatNutrient(consumption.snapshot.totals[key], unit),
         coverage: `${coverage.knownComponentCount} dari ${coverage.totalComponentCount} komponen`,
+        sourceLabel:
+          hasVisualSource && hasCatalogSource
+            ? 'Gabungan katalog dan estimasi visual VLM'
+            : hasVisualSource
+              ? 'Estimasi visual VLM'
+              : hasCatalogSource
+                ? 'Data katalog gizi'
+                : 'Sumber gizi belum tersedia',
+        sources: Array.from(
+          new Set(nutrientSourceIds.map((sourceId) => sourceNames.get(sourceId) ?? 'Sumber tidak tersedia'))
+        ),
       };
     }),
     components: consumption.snapshot.components.map((component) => {
@@ -80,6 +115,13 @@ export function getConsumptionDetailPresentation(consumption: ManualConsumption)
         portionBasis: portion.basis,
         grams: portion.grams,
         matchStatus: component.matchStatus,
+        nutritionLabel: Object.values(component.nutrientSourceIds).some(
+          (sourceId) => sourceId !== null && visualSourceIds.has(sourceId)
+        )
+          ? 'Estimasi visual VLM'
+          : component.matchStatus === 'matched'
+            ? 'Data katalog gizi'
+            : 'Nilai gizi belum tersedia',
       };
     }),
     attentions: consumption.snapshot.attentions.map((attention) => ({

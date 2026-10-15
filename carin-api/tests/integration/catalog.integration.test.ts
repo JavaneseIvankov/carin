@@ -40,7 +40,7 @@ function food(version: string, id: string, displayName: string, preparation: str
 
 function ai(version: string, foods: CatalogFood[], supported = false): Pick<AiClient, 'getCapabilities' | 'getCatalog'> {
   const manifest: Schemas['CapabilityManifest'] = {
-    contractVersion: '1.0.0',
+    contractVersion: '2.0.0',
     catalogVersion: version,
     nutritionDatasetVersion: `synthetic-nutrition-${version}`,
     ruleSetVersion: `synthetic-rules-${version}`,

@@ -35,7 +35,7 @@ describe('generated contract validation', () => {
   it('rejects unknown fields, wrong types, contract versions and malformed formats without mutation', () => {
     for (const patch of [
       { unknown: true },
-      { contractVersion: '2.0.0' },
+      { contractVersion: '1.0.0' },
       { computedAt: 'yesterday' },
       { operationId: 'invalid' },
       { profileVersion: '1' },

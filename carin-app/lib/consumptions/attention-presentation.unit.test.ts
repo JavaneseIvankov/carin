@@ -24,7 +24,7 @@ function record(
       catalogVersion: 'catalog-v3',
       components: [],
       computedAt: '2026-10-14T05:30:00.000Z',
-      contractVersion: '1.0.0',
+      contractVersion: '2.0.0',
       coverage: {
         energyKcal: { knownComponentCount: 1, totalComponentCount: 2 },
         carbohydrateG: { knownComponentCount: 1, totalComponentCount: 2 },
@@ -91,5 +91,76 @@ describe('consumption detail presentation', () => {
         })
       ).source
     ).toEqual({ label: 'Konfirmasi dari foto', photoDeleted: true });
+  });
+
+  it('keeps VLM estimate labels and sources in a saved photo consumption snapshot', () => {
+    const visual = record('available', { source: 'photo_confirmation' });
+    visual.snapshot.dataMode = 'real';
+    visual.snapshot.inputKind = 'photo';
+    visual.snapshot.components = [
+      {
+        id: 'component-1',
+        displayName: 'Nasi goreng',
+        catalogFoodId: null,
+        matchStatus: 'unmatched',
+        nutrients: {
+          energyKcal: 123,
+          carbohydrateG: null,
+          proteinG: null,
+          fatG: null,
+          fiberG: null,
+          sugarsG: null,
+          sodiumMg: null,
+        },
+        nutrientSourceIds: {
+          energyKcal: 'vlm-source',
+          carbohydrateG: null,
+          proteinG: null,
+          fatG: null,
+          fiberG: null,
+          sugarsG: null,
+          sodiumMg: null,
+        },
+        per100g: {
+          energyKcal: null,
+          carbohydrateG: null,
+          proteinG: null,
+          fatG: null,
+          fiberG: null,
+          sugarsG: null,
+          sodiumMg: null,
+        },
+        portion: {
+          basis: null,
+          grams: null,
+          origin: 'photo_estimate',
+          quantity: null,
+          servingId: null,
+          sourceId: null,
+          unit: null,
+        },
+        preparation: null,
+        sourceIds: ['vlm-source'],
+      },
+    ];
+    visual.snapshot.sources = [
+      {
+        id: 'vlm-source',
+        kind: 'model_estimate',
+        title: 'Estimasi visual VLM untuk porsi pada foto',
+        datasetVersion: 'vlm-estimate-v1',
+        itemRef: 'op-1/component-1',
+        url: null,
+      },
+    ];
+
+    const presentation = getConsumptionDetailPresentation(visual);
+    expect(presentation.hasVisualEstimates).toBe(true);
+    expect(presentation.dataLabel).toBe('Termasuk estimasi visual VLM');
+    expect(presentation.nutrients[0]).toMatchObject({
+      sourceLabel: 'Estimasi visual VLM',
+      sources: ['Estimasi visual VLM untuk porsi pada foto'],
+    });
+    expect(presentation.components[0]?.nutritionLabel).toBe('Estimasi visual VLM');
   });
 });

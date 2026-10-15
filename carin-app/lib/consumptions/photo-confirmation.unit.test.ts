@@ -42,7 +42,7 @@ const result = (fields: Partial<AnalysisResult> = {}): AnalysisResult =>
     catalogVersion: 'catalog-photo-v8',
     components: [],
     computedAt: '2026-10-14T04:00:00.000Z',
-    contractVersion: '1.0.0',
+    contractVersion: '2.0.0',
     coverage: {},
     dataMode: 'synthetic',
     inputKind: 'photo',

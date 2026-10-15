@@ -25,7 +25,7 @@ const profile = {
   smoking: null,
 };
 const result = await client.analyzePhoto({
-  contractVersion: '1.0.0',
+  contractVersion: '2.0.0',
   operationId: '123e4567-e89b-42d3-a456-426614174000',
   catalogVersion: 'synthetic-catalog-1',
   ruleSetVersion: 'synthetic-rules-1',

@@ -695,6 +695,11 @@ export default function AnalysisResultScreen() {
                           Sumber porsi: {component.portionSource}
                         </Text>
                       ) : null}
+                      {component.nutritionLabel === 'Estimasi visual VLM' ? (
+                        <Text variant="caption" className="text-muted-foreground">
+                          Estimasi gizi dari analisis visual AI
+                        </Text>
+                      ) : null}
                       {component.matchStatus !== 'matched' ? (
                         <View className="mt-0.5 flex-row items-center gap-1.5">
                           <Icon as={Info} size={13} className="text-muted-foreground" />
@@ -790,6 +795,15 @@ export default function AnalysisResultScreen() {
                 ) : null}
               </View>
 
+              {presentation.hasVisualEstimates ? (
+                <View className="rounded-[14px] bg-carin-butter/40 p-3">
+                  <Text variant="caption" className="text-foreground">
+                    Estimasi visual VLM sudah dihitung dalam total gizi. Nilainya merupakan
+                    perkiraan untuk porsi pada foto.
+                  </Text>
+                </View>
+              ) : null}
+
               <View className="flex-row gap-2.5">
                 <View className="flex-1 items-center gap-0.5 rounded-[14px] bg-carin-olive-soft p-2.5">
                   <Text variant="caption" className="font-semibold text-muted-foreground">
@@ -850,6 +864,9 @@ export default function AnalysisResultScreen() {
                         <Text className="font-medium text-foreground">{nutrient.label}</Text>
                         <Text variant="caption" className="text-muted-foreground">
                           Cakupan: {nutrient.coverage}
+                        </Text>
+                        <Text variant="caption" className="text-muted-foreground">
+                          {nutrient.sourceLabel}
                         </Text>
                         {nutrient.sources.length ? (
                           <Text variant="caption" className="text-[11px] text-muted-foreground">

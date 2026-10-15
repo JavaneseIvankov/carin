@@ -180,6 +180,8 @@ function validateSources(result: AnalysisResult, catalog: ValidationCatalog): Ma
         catalog.nutritionDatasetVersion,
         catalog.ruleSetVersion,
       ].includes(source.datasetVersion)) invalid();
+    } else if (source.kind === 'model_estimate') {
+      if (result.inputKind !== 'photo' || source.datasetVersion !== 'vlm-estimate-v1' || source.url !== null) invalid();
     } else if (result.dataMode === 'synthetic') {
       invalid();
     } else if (source.kind === 'health_rule') {
@@ -266,9 +268,7 @@ function validateComponent(
 ): void {
   let food: ValidationCatalog['foods'][number] | undefined;
   if (component.catalogFoodId === null) {
-    if (component.matchStatus === 'matched' || nutrientKeys.some((key) =>
-      component.per100g[key] !== null || component.nutrientSourceIds[key] !== null || component.nutrients[key] !== null,
-    )) invalid();
+    if (component.matchStatus === 'matched' || nutrientKeys.some((key) => component.per100g[key] !== null)) invalid();
   } else {
     food = catalog.foods.find(({ id }) => id === component.catalogFoodId);
     if (!food || component.matchStatus !== 'matched' || component.preparation !== food.preparation ||
@@ -286,6 +286,17 @@ function validateComponent(
   for (const key of nutrientKeys) {
     const per100g = component.per100g[key];
     const sourceId = component.nutrientSourceIds[key];
+    if (food === undefined) {
+      if (component.nutrients[key] === null) {
+        if (sourceId !== null) invalid();
+      } else {
+        const source = sourceId === null ? undefined : sources.get(sourceId);
+        if (result.inputKind !== 'photo' || !source || source.kind !== 'model_estimate' ||
+            source.itemRef !== `${result.operationId}/${component.id}` ||
+            !Number.isFinite(component.nutrients[key]) || component.nutrients[key]! < 0) invalid();
+      }
+      continue;
+    }
     const expected = per100g === null || sourceId === null || grams === null
       ? null
       : rounded(per100g * grams / 100);
@@ -319,7 +330,7 @@ function validateTotalsAndStatus(result: AnalysisResult): void {
 
   const allUnrecognized = result.components.every((component) => component.matchStatus !== 'matched');
   if (result.supportStatus === 'unrecognized') {
-    if (!allUnrecognized || nutrientKeys.some((key) => knownCounts[key] !== 0)) invalid();
+    if (!allUnrecognized) invalid();
   } else if (result.supportStatus === 'complete') {
     if (!result.components.every((component) => component.matchStatus === 'matched' && component.portion.grams !== null) ||
         coreNutrients.some((key) => knownCounts[key] !== result.components.length)) invalid();
@@ -379,7 +390,7 @@ export function validateAnalysisResult(
   expectation: AnalysisExpectation,
   catalog: ValidationCatalog,
 ): void {
-  if (result.contractVersion !== '1.0.0' || result.operationId !== expectation.operationId ||
+  if (result.contractVersion !== '2.0.0' || result.operationId !== expectation.operationId ||
       result.profileVersion !== expectation.profile.profileVersion ||
       result.catalogVersion !== expectation.catalogVersion || result.catalogVersion !== catalog.version ||
       result.nutritionDatasetVersion !== catalog.nutritionDatasetVersion ||

@@ -30,6 +30,7 @@ describe('MinIO request timeout', () => {
     request.emit('response', response);
 
     expect(callback).toHaveBeenCalledWith(response);
+    request.emit('close');
   });
 
   it('clears the deadline after the response body ends even if request close is delayed', () => {

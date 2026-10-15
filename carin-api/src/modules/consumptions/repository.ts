@@ -490,7 +490,7 @@ async function writeEvaluation(
         operationId,
         kind: 'consumption_evaluation',
         inputSnapshot: {
-          contractVersion: '1.0.0',
+          contractVersion: '2.0.0',
           inputKind: 'manual',
           catalogVersion: input.catalog.version.version,
           ruleSetVersion: input.catalog.version.ruleSetVersion,

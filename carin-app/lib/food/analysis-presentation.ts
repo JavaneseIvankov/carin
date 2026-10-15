@@ -40,6 +40,9 @@ export function getAnalysisPresentation(
   > = new Map()
 ) {
   const sourceNames = new Map(result.sources.map((source) => [source.id, source.title]));
+  const visualSourceIds = new Set(
+    result.sources.filter((source) => source.kind === 'model_estimate').map((source) => source.id)
+  );
   const supportLabel =
     result.supportStatus === 'complete'
       ? 'Hasil lengkap'
@@ -48,6 +51,11 @@ export function getAnalysisPresentation(
         : 'Makanan belum dapat dikenali';
 
   return {
+    hasVisualEstimates: result.components.some((component) =>
+      Object.values(component.nutrientSourceIds).some(
+        (sourceId) => sourceId !== null && visualSourceIds.has(sourceId)
+      )
+    ),
     supportLabel,
     dataLabel:
       result.dataMode === 'synthetic' ? 'Data sintetis untuk demonstrasi' : 'Estimasi analisis',
@@ -75,23 +83,40 @@ export function getAnalysisPresentation(
               ? `Perkiraan ${portion.grams} g`
               : null,
         matchStatus: component.matchStatus,
+        nutritionLabel: Object.values(component.nutrientSourceIds).some(
+          (sourceId) => sourceId !== null && visualSourceIds.has(sourceId)
+        )
+          ? 'Estimasi visual VLM'
+          : component.matchStatus === 'matched'
+            ? 'Data katalog gizi'
+            : 'Nilai gizi belum tersedia',
       };
     }),
     nutrients: nutrientDefinitions.map(([key, label, unit, digits]) => {
       const amount = result.totals[key];
       const coverage = result.coverage[key];
+      const nutrientSources = result.components
+        .map((component) => component.nutrientSourceIds[key])
+        .filter((sourceId): sourceId is string => sourceId !== null);
+      const hasVisualSource = nutrientSources.some((sourceId) => visualSourceIds.has(sourceId));
+      const hasCatalogSource = nutrientSources.some((sourceId) => !visualSourceIds.has(sourceId));
       return {
         key,
         label,
         unit,
         value: amount === null ? 'Belum tersedia' : `${amount.toFixed(digits)} ${unit}`,
         coverage: `${coverage.knownComponentCount} dari ${coverage.totalComponentCount} komponen`,
+        sourceLabel:
+          hasVisualSource && hasCatalogSource
+            ? 'Gabungan katalog dan estimasi visual VLM'
+            : hasVisualSource
+              ? 'Estimasi visual VLM'
+              : hasCatalogSource
+                ? 'Data katalog gizi'
+                : 'Sumber gizi belum tersedia',
         sources: Array.from(
           new Set(
-            result.components
-              .map((component) => component.nutrientSourceIds[key])
-              .filter((sourceId): sourceId is string => sourceId !== null)
-              .map((sourceId) => sourceNames.get(sourceId) ?? 'Sumber tidak tersedia')
+            nutrientSources.map((sourceId) => sourceNames.get(sourceId) ?? 'Sumber tidak tersedia')
           )
         ),
       };

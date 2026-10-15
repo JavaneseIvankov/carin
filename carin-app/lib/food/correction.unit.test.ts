@@ -66,7 +66,7 @@ const result: Result = {
     },
   ],
   computedAt: '2026-10-14T00:00:00.000Z',
-  contractVersion: '1.0.0',
+  contractVersion: '2.0.0',
   coverage: {
     energyKcal: { knownComponentCount: 1, totalComponentCount: 1 },
     carbohydrateG: { knownComponentCount: 1, totalComponentCount: 1 },

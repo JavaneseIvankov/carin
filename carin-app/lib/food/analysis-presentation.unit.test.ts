@@ -69,7 +69,7 @@ function result(overrides: Partial<Result> = {}): Result {
       },
     ],
     computedAt: '2026-10-14T00:00:00.000Z',
-    contractVersion: '1.0.0',
+    contractVersion: '2.0.0',
     coverage: {
       energyKcal: { knownComponentCount: 0, totalComponentCount: 1 },
       carbohydrateG: { knownComponentCount: 0, totalComponentCount: 1 },
@@ -119,6 +119,34 @@ function result(overrides: Partial<Result> = {}): Result {
 }
 
 describe('analysis presentation', () => {
+  it('labels visual VLM nutrients separately from catalog values', () => {
+    const visual = result({ dataMode: 'real' });
+    const component = visual.components[0]!;
+    component.nutrients.energyKcal = 320;
+    component.nutrientSourceIds.energyKcal = 'vlm-source';
+    component.sourceIds = ['vlm-source'];
+    visual.sources = [{
+      id: 'vlm-source',
+      kind: 'model_estimate',
+      title: 'Estimasi visual VLM untuk porsi pada foto',
+      datasetVersion: 'vlm-estimate-v1',
+      itemRef: `${visual.operationId}/${component.id}`,
+      url: null,
+    }];
+    visual.totals.energyKcal = 320;
+    visual.coverage.energyKcal.knownComponentCount = 1;
+
+    const presentation = getAnalysisPresentation(visual);
+
+    expect(presentation.hasVisualEstimates).toBe(true);
+    expect(presentation.components[0]?.nutritionLabel).toBe('Estimasi visual VLM');
+    expect(presentation.nutrients[0]).toMatchObject({
+      value: '320.0 kkal',
+      sourceLabel: 'Estimasi visual VLM',
+      sources: ['Estimasi visual VLM untuk porsi pada foto'],
+    });
+  });
+
   it('stops polling when backgrounded or after a terminal status', () => {
     expect(getAnalysisPollInterval('queued', 0, false)).toBe(false);
     expect(getAnalysisPollInterval('completed', 0, true)).toBe(false);

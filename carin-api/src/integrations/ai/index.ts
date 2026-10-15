@@ -38,7 +38,7 @@ export class AiAdapterError extends Error {
   }
 }
 
-const contractVersion = '1.0.0' as const;
+const contractVersion = '2.0.0' as const;
 const fixtureRoot = fileURLToPath(new URL('../../../fixtures/ai/', import.meta.url));
 const fixtureFiles = {
   complete: 'analysis-complete.json',
@@ -94,8 +94,19 @@ function validateResultProvenance(
   }
   const hasSyntheticSource = result.sources.some((source) => source.kind === 'synthetic');
   const hasSyntheticLabel = result.limitations.some((item) => item.code === 'SYNTHETIC_DATA');
+  const invalidVisualEstimateSource = result.sources.some((source) => {
+    if (source.kind !== 'model_estimate') return false;
+    const component = result.components.find(({ id }) => source.itemRef === `${result.operationId}/${id}`);
+    return result.inputKind !== 'photo' || source.datasetVersion !== 'vlm-estimate-v1' || source.url !== null ||
+      !component || component.catalogFoodId !== null || component.matchStatus === 'matched' ||
+      !component.sourceIds.includes(source.id) ||
+      !Object.entries(component.nutrientSourceIds).some(([key, id]) => id === source.id && component.nutrients[key as keyof typeof component.nutrients] !== null) ||
+      Object.values(component.per100g).some((value) => value !== null) ||
+      result.attentions.some((attention) => attention.sourceIds.includes(source.id));
+  });
   if (
     !sourceReferencesAreComplete(result) ||
+    invalidVisualEstimateSource ||
     (result.dataMode === 'synthetic' && (!hasSyntheticLabel || (result.supportStatus !== 'unrecognized' && !hasSyntheticSource))) ||
     (result.dataMode === 'real' && hasSyntheticSource)
   ) {
