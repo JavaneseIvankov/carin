@@ -125,14 +125,16 @@ describe('analysis presentation', () => {
     component.nutrients.energyKcal = 320;
     component.nutrientSourceIds.energyKcal = 'vlm-source';
     component.sourceIds = ['vlm-source'];
-    visual.sources = [{
-      id: 'vlm-source',
-      kind: 'model_estimate',
-      title: 'Estimasi visual VLM untuk porsi pada foto',
-      datasetVersion: 'vlm-estimate-v1',
-      itemRef: `${visual.operationId}/${component.id}`,
-      url: null,
-    }];
+    visual.sources = [
+      {
+        id: 'vlm-source',
+        kind: 'model_estimate',
+        title: 'Estimasi visual VLM untuk porsi pada foto',
+        datasetVersion: 'vlm-estimate-v1',
+        itemRef: `${visual.operationId}/${component.id}`,
+        url: null,
+      },
+    ];
     visual.totals.energyKcal = 320;
     visual.coverage.energyKcal.knownComponentCount = 1;
 
@@ -141,7 +143,7 @@ describe('analysis presentation', () => {
     expect(presentation.hasVisualEstimates).toBe(true);
     expect(presentation.components[0]?.nutritionLabel).toBe('Estimasi visual VLM');
     expect(presentation.nutrients[0]).toMatchObject({
-      value: '320.0 kkal',
+      value: '320 kkal',
       sourceLabel: 'Estimasi visual VLM',
       sources: ['Estimasi visual VLM untuk porsi pada foto'],
     });
@@ -183,7 +185,7 @@ describe('analysis presentation', () => {
 
   it('keeps null totals unavailable and labels unrecognized synthetic results', () => {
     const view = getAnalysisPresentation(result());
-    expect(view.supportLabel).toBe('Makanan belum dapat dikenali');
+    expect(view.supportLabel).toBe('Belum cocok dengan katalog');
     expect(view.dataLabel).toBe('Data sintetis untuk demonstrasi');
     expect(view.nutrients[0]).toMatchObject({
       value: 'Belum tersedia',
@@ -232,8 +234,12 @@ describe('analysis presentation', () => {
       partial,
       new Map([['condition-1', { displayName: 'Kondisi contoh', personalizationSupported: false }]])
     );
-    expect(view.supportLabel).toBe('Hasil sebagian');
-    expect(view.nutrients[0]).toMatchObject({ value: '210.0 kkal', coverage: '1 dari 2 komponen' });
+    expect(view.supportLabel).toBe('Sebagian cocok dengan katalog');
+    expect(view.nutrients[0]).toMatchObject({
+      value: '210 kkal',
+      coverage: '1 dari 2 komponen',
+      isPartial: true,
+    });
     expect(view.nutrients[0].sources).toEqual(['Data sintetis untuk demonstrasi']);
     expect(view.attentions[0]).toMatchObject({
       conditionLabel: 'Kondisi contoh',
@@ -283,5 +289,136 @@ describe('analysis presentation', () => {
     expect(getAnalysisPresentation(adjusted).attentions[0].adjustments).toEqual([
       'Nilai dikurangi sesuai profil.',
     ]);
+  });
+
+  it('keeps critical and allergen information visible without exposing every detail by default', () => {
+    const original = result({
+      limitations: [
+        {
+          code: 'ALLERGEN_UNVERIFIED',
+          message: 'Original allergen detail.',
+          critical: true,
+          componentIds: [],
+        },
+        {
+          code: 'RULE_ARTIFACT_UNAVAILABLE',
+          message: 'Internal rule artifact detail.',
+          critical: true,
+          componentIds: [],
+        },
+        {
+          code: 'FUTURE_CRITICAL_CODE',
+          message: 'A new critical warning must remain visible.',
+          critical: true,
+          componentIds: [],
+        },
+        {
+          code: 'OPTIONAL_DETAIL',
+          message: 'Supporting method detail.',
+          critical: false,
+          componentIds: [],
+        },
+      ],
+    });
+    const view = getAnalysisPresentation(original);
+    expect(view.criticalNotes).toEqual([
+      'Alergen belum terverifikasi.',
+      'Pertimbangan kesehatan personal belum tersedia.',
+      'A new critical warning must remain visible.',
+    ]);
+    expect(view.limitations).toEqual(original.limitations.map((item) => item.message));
+  });
+
+  it('does not hide repeated critical warnings with different meanings', () => {
+    const view = getAnalysisPresentation(
+      result({
+        limitations: [
+          {
+            code: 'FUTURE_CODE',
+            message: 'First important warning.',
+            critical: true,
+            componentIds: [],
+          },
+          {
+            code: 'FUTURE_CODE',
+            message: 'Another important warning.',
+            critical: true,
+            componentIds: [],
+          },
+        ],
+      })
+    );
+    expect(view.criticalNotes).toEqual(['First important warning.', 'Another important warning.']);
+  });
+
+  it('keeps an unverified-allergen warning visible even when it is not marked critical', () => {
+    const view = getAnalysisPresentation(
+      result({
+        limitations: [
+          {
+            code: 'ALLERGEN_UNVERIFIED',
+            message: 'Allergen detail.',
+            critical: false,
+            componentIds: [],
+          },
+        ],
+      })
+    );
+    expect(view.criticalNotes).toEqual(['Alergen belum terverifikasi.']);
+  });
+
+  it('preserves unknown critical codes that coincide with object property names', () => {
+    const view = getAnalysisPresentation(
+      result({
+        limitations: [
+          {
+            code: 'toString',
+            message: 'Important provider warning.',
+            critical: true,
+            componentIds: [],
+          },
+        ],
+      })
+    );
+    expect(view.criticalNotes).toEqual(['Important provider warning.']);
+  });
+
+  it('shows a single estimated portion without repeating the same gram amount', () => {
+    const original = result();
+    original.components[0].portion = {
+      ...original.components[0].portion,
+      quantity: 150,
+      unit: 'g',
+      grams: 150,
+      basis: 'Provider portion methodology.',
+    };
+    expect(getAnalysisPresentation(original).components[0]).toMatchObject({
+      summaryPortion: 'Sekitar 150 g',
+      portionBasis: 'Provider portion methodology.',
+      portionOriginLabel: 'Perkiraan dari foto',
+    });
+  });
+
+  it('keeps unknown portions and user-provided servings explicit', () => {
+    const original = result();
+    expect(getAnalysisPresentation(original).components[0].summaryPortion).toBe(
+      'Porsi belum tersedia'
+    );
+    original.components[0].portion = {
+      ...original.components[0].portion,
+      quantity: 1,
+      unit: 'serving',
+      origin: 'user_reported',
+    };
+    expect(getAnalysisPresentation(original).components[0].summaryPortion).toBe('1 porsi');
+  });
+
+  it('keeps demonstration data labeled even when it includes model estimates', () => {
+    const original = result();
+    original.components[0].nutrientSourceIds.energyKcal = 'visual';
+    original.sources = [{ ...original.sources[0], id: 'visual', kind: 'model_estimate' }];
+    expect(getAnalysisPresentation(original).estimateLabel).toBe('Data sintetis untuk demonstrasi');
+    original.dataMode = 'real';
+    expect(getAnalysisPresentation(original).estimateLabel).toBe('Estimasi dari foto');
   });
 });

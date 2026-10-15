@@ -2,6 +2,11 @@ import { BackButton } from '@/components/app/back-button';
 import { Button } from '@/components/ui/button';
 import { ScanDeletionControl } from '@/components/food/scan-deletion-control';
 import { PhotoThumbnail } from '@/components/food/photo-thumbnail';
+import {
+  AnalysisDisclosure,
+  AnalysisResultContent,
+} from '@/components/food/analysis-result-content';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from '@/components/ui/text';
 import { useAppRead, useAppRepository } from '@/lib/api/query';
 import type { components } from '@/lib/api/generated/app-api';
@@ -27,22 +32,17 @@ import {
 import { startAnalysisPolling } from '@/lib/food/analysis-polling';
 import { createScanActionState, createScanActions } from '@/lib/food/scan-actions';
 import { Icon } from '@/components/ui/icon';
-import {
-  AlertCircle,
-  Check,
-  ChevronDown,
-  ChevronUp,
-  Edit3,
-  Info,
-  RefreshCw,
-  ShieldCheck,
-  Utensils,
-} from 'lucide-react-native';
-import { cn } from '@/lib/utils';
+import { AlertCircle, Check, RefreshCw } from 'lucide-react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter, type Href } from 'expo-router';
-import * as Linking from 'expo-linking';
 import * as React from 'react';
-import { ActivityIndicator, AppState, Image, ScrollView, View } from 'react-native';
+import {
+  ActivityIndicator,
+  AppState,
+  Image,
+  ScrollView,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 import { cachePhotoUri, getCachedPhotoUri } from '@/lib/food/photo-media';
 
 const MASCOT = require('../../../assets/images/carin-mascot.png');
@@ -55,18 +55,14 @@ const statusText = {
   cancelled: 'Analisis dibatalkan',
 } as const;
 
-const attentionText = {
-  considerable: 'Perlu perhatian berdasarkan data tersedia',
-  needs_attention: 'Ada hal yang perlu diperhatikan',
-  insufficient_information: 'Informasi belum cukup untuk pertimbangan personal',
-} as const;
-
 type AnalysisActionSnapshot = {
   scan: components['schemas']['Scan'];
   latestJob: components['schemas']['AnalysisJob'];
 };
 
 export default function AnalysisResultScreen() {
+  const { width } = useWindowDimensions();
+  const pageGutter = width < 360 ? 16 : 20;
   const params = useLocalSearchParams<{
     id: string;
     photoUri?: string;
@@ -189,7 +185,6 @@ export default function AnalysisResultScreen() {
   const [focused, setFocused] = React.useState(true);
   const [retrying, setRetrying] = React.useState(false);
   const [retryError, setRetryError] = React.useState<string | null>(null);
-  const [nutrientsExpanded, setNutrientsExpanded] = React.useState(false);
   const pollStartedAt = React.useRef(0);
   const formattedTimestamp = React.useMemo(() => {
     const rawDate = job?.createdAt || actionScan?.createdAt;
@@ -429,34 +424,40 @@ export default function AnalysisResultScreen() {
   const presentation = result ? getAnalysisPresentation(result, conditionIndex) : null;
   const failure = getAnalysisFailurePresentation(job);
 
-  const energyNutrient = presentation?.nutrients.find((n) => n.key === 'energyKcal');
-  const carbNutrient = presentation?.nutrients.find((n) => n.key === 'carbohydrateG');
-  const proteinNutrient = presentation?.nutrients.find((n) => n.key === 'proteinG');
-  const fatNutrient = presentation?.nutrients.find((n) => n.key === 'fatG');
-
-  const foodTitle =
-    presentation?.components.length === 1
-      ? presentation.components[0].name
-      : presentation?.components.length
-        ? presentation.components.map((c) => c.name).join(', ')
-        : 'Hasil Analisis Makanan';
+  const needsRefresh =
+    job.status !== 'completed' ||
+    jobQuery.isError ||
+    jobQuery.data?.stale ||
+    latestResultQuery.isError ||
+    latestResultQuery.data?.stale ||
+    !consumptionActions?.primary;
+  const refreshResult = () => {
+    void refreshAnalysisReads({
+      refetchJob: jobQuery.refetch,
+      refreshActionSnapshot,
+      refetchLatestResult: actionScan?.latestResultId ? latestResultQuery.refetch : undefined,
+    });
+  };
 
   return (
-    <View className="flex-1 bg-background">
-      <ScrollView contentContainerClassName="gap-5 px-5 py-8">
+    <SafeAreaView className="flex-1 bg-background" edges={['top', 'left', 'right', 'bottom']}>
+      <ScrollView
+        contentContainerClassName="gap-5 pb-6 pt-3"
+        contentContainerStyle={{ paddingHorizontal: pageGutter }}
+        showsVerticalScrollIndicator={false}>
         <BackButton href={{ pathname: '/(tabs)/history', params: { tab: 'analysis' } }} />
         <View className="gap-2">
-          <View className="flex-row items-center gap-2.5">
-            <View className="h-9 w-9 items-center justify-center rounded-full bg-carin-olive-soft">
-              <Icon as={Utensils} size={20} className="text-primary" />
-            </View>
-            <Text variant="h1">Hasil Analisis Makanan</Text>
-          </View>
-          <Text variant="muted">{statusText[job.status]}</Text>
+          <Text variant="h1">Hasil analisis</Text>
+          {job.status !== 'completed' ? (
+            <Text variant="muted">{statusText[job.status]}</Text>
+          ) : null}
           {jobQuery.data?.stale ? (
             <Text variant="caption" className="text-muted-foreground">
               Status terakhir tersimpan ditampilkan. Muat ulang saat online.
             </Text>
+          ) : null}
+          {consumptionActions?.message ? (
+            <Text variant="muted">{consumptionActions.message}</Text>
           ) : null}
         </View>
 
@@ -598,337 +599,36 @@ export default function AnalysisResultScreen() {
         ) : null}
 
         {presentation && result ? (
-          <>
-            {/* Top Food Result Card with Photo Thumbnail or Butter Pebble */}
-            <View className="gap-3.5 rounded-[20px] border border-border bg-card p-5 shadow-sm">
-              <View className="flex-row items-center gap-3.5">
-                <PhotoThumbnail
-                  photoId={actionScan?.photoId ?? null}
-                  localUri={actionScan?.photoId === null ? null : effectivePhotoUri}
-                  accessibilityLabel={
-                    actionScan?.photoId === null
-                      ? 'Foto sumber telah dihapus'
-                      : 'Foto makanan yang dianalisis'
-                  }
-                  fallbackLabel={actionScan?.photoId === null ? 'Foto dihapus' : undefined}
-                />
-
-                <View className="flex-1 gap-1">
-                  <View className="flex-row items-center gap-2">
-                    <View className="rounded-full bg-carin-olive-soft px-2.5 py-0.5">
-                      <Text variant="caption" className="font-semibold text-primary">
-                        {presentation.supportLabel}
-                      </Text>
-                    </View>
-                  </View>
-                  <Text variant="h2" numberOfLines={2} className="leading-snug text-foreground">
-                    {foodTitle}
-                  </Text>
-                  {formattedTimestamp ? (
-                    <Text variant="caption" className="text-muted-foreground">
-                      {formattedTimestamp}
-                    </Text>
-                  ) : null}
-                  {actionScan?.photoId === null ? (
-                    <Text variant="caption" className="text-muted-foreground">
-                      Foto sumber telah dihapus
-                    </Text>
-                  ) : null}
-                </View>
-              </View>
-
-              {/* Attention status banner within top card */}
-              <View
-                className={cn(
-                  'flex-row items-center gap-2.5 rounded-[14px] p-3',
-                  presentation.overallAttention === 'insufficient_information'
-                    ? 'bg-carin-olive-soft/40'
-                    : 'bg-carin-peach/30'
-                )}>
-                <Icon as={ShieldCheck} size={18} className="text-foreground" />
-                <View className="flex-1">
-                  <Text variant="caption" className="font-bold text-foreground">
-                    {attentionText[presentation.overallAttention]}
-                  </Text>
-                </View>
-              </View>
-            </View>
-
-            <View className="gap-4 rounded-[20px] border border-border bg-card p-5 shadow-sm">
-              <View className="flex-row items-center justify-between">
-                <Text variant="h3">Rincian Komponen & Porsi</Text>
-                <View className="rounded-full bg-carin-olive-soft px-2.5 py-1">
-                  <Text variant="caption" className="font-semibold text-primary">
-                    {presentation.components.length} komponen
-                  </Text>
-                </View>
-              </View>
-
-              {presentation.components.length ? (
-                <View className="gap-2.5">
-                  {presentation.components.map((component) => (
-                    <View
-                      key={component.id}
-                      className="gap-1.5 rounded-[16px] border border-border/70 bg-background p-3.5">
-                      <View className="flex-row items-start justify-between gap-2">
-                        <Text className="flex-1 text-base font-bold text-foreground">
-                          {component.name}
-                        </Text>
-                        <View className="rounded-full bg-carin-olive-soft px-2.5 py-0.5">
-                          <Text variant="caption" className="font-semibold text-primary">
-                            {component.portion}
-                          </Text>
-                        </View>
-                      </View>
-                      {component.portionBasis ? (
-                        <Text variant="caption" className="text-muted-foreground">
-                          Dasar porsi: {component.portionBasis}
-                        </Text>
-                      ) : null}
-                      {component.grams ? (
-                        <Text variant="caption" className="text-muted-foreground">
-                          {component.grams}
-                        </Text>
-                      ) : null}
-                      {component.portionSource ? (
-                        <Text variant="caption" className="text-muted-foreground">
-                          Sumber porsi: {component.portionSource}
-                        </Text>
-                      ) : null}
-                      {component.nutritionLabel === 'Estimasi visual VLM' ? (
-                        <Text variant="caption" className="text-muted-foreground">
-                          Estimasi gizi dari analisis visual AI
-                        </Text>
-                      ) : null}
-                      {component.matchStatus !== 'matched' ? (
-                        <View className="mt-0.5 flex-row items-center gap-1.5">
-                          <Icon as={Info} size={13} className="text-muted-foreground" />
-                          <Text variant="caption" className="text-muted-foreground">
-                            Kecocokan makanan belum terverifikasi di katalog.
-                          </Text>
-                        </View>
-                      ) : null}
-                    </View>
-                  ))}
-                </View>
-              ) : (
-                <Text variant="muted">Nama makanan belum tersedia.</Text>
-              )}
-              <Text variant="caption" className="text-muted-foreground">
-                {presentation.dataLabel}
-              </Text>
-            </View>
-
-            <View
-              className={cn(
-                'gap-3.5 rounded-[20px] border p-5 shadow-sm',
-                presentation.overallAttention === 'insufficient_information'
-                  ? 'border-carin-olive-soft bg-carin-olive-soft/40'
-                  : 'border-carin-peach/70 bg-carin-peach/30'
-              )}>
-              <View className="flex-row items-center gap-2.5">
-                <View className="h-8 w-8 items-center justify-center rounded-full bg-card">
-                  <Icon as={ShieldCheck} size={18} className="text-foreground" />
-                </View>
-                <View className="flex-1">
-                  <Text variant="h3">Perhatian & Cakupan</Text>
-                  <Text className="text-sm font-semibold text-foreground">
-                    {attentionText[presentation.overallAttention]}
-                  </Text>
-                </View>
-              </View>
-              <Text variant="caption" className="text-muted-foreground">
-                Pertimbangan ini bersifat informatif berdasarkan data yang tersedia, bukan diagnosis
-                medis atau jaminan keamanan makanan.
-              </Text>
-
-              {presentation.attentions.map((attention, index) => (
-                <View
-                  key={`${attention.conditionId}-${index}`}
-                  className="gap-1.5 rounded-[14px] border border-border/50 bg-card/80 p-3.5">
-                  <Text className="font-semibold text-foreground">
-                    Pertimbangan terkait: {attention.conditionLabel}
-                  </Text>
-                  {attention.personalizationSupported === false ? (
-                    <Text variant="caption" className="text-muted-foreground">
-                      Kondisi ini belum didukung untuk personalisasi. Tidak ada aturan khusus yang
-                      ditambahkan.
-                    </Text>
-                  ) : null}
-                  <Text className="text-sm text-foreground">{attention.reason}</Text>
-                  {attention.adjustments.map((adjustment) => (
-                    <Text key={adjustment} variant="caption" className="text-muted-foreground">
-                      Penyesuaian: {adjustment}
-                    </Text>
-                  ))}
-                  {attention.limitations.map((limitation) => (
-                    <Text key={limitation} variant="caption" className="text-muted-foreground">
-                      Keterbatasan: {limitation}
-                    </Text>
-                  ))}
-                  {attention.sources.map((source) => (
-                    <Text key={source} variant="caption" className="text-muted-foreground">
-                      Sumber: {source}
-                    </Text>
-                  ))}
-                </View>
-              ))}
-
-              {result.attentions.length === 0 ? (
-                <Text variant="muted">
-                  Tidak ada aturan personal yang dapat diterapkan dari data tersedia. Tetap
-                  perhatikan kenyamanan tubuhmu.
-                </Text>
-              ) : null}
-            </View>
-
-            <View className="gap-4 rounded-[20px] border border-border bg-card p-5 shadow-sm">
-              <View className="flex-row items-center justify-between">
-                <Text variant="h3">Estimasi Gizi</Text>
-                {energyNutrient ? (
-                  <View className="items-end">
-                    <Text variant="metric">{energyNutrient.value}</Text>
-                    <Text variant="caption" className="text-muted-foreground">
-                      {energyNutrient.coverage}
-                    </Text>
-                  </View>
-                ) : null}
-              </View>
-
-              {presentation.hasVisualEstimates ? (
-                <View className="rounded-[14px] bg-carin-butter/40 p-3">
-                  <Text variant="caption" className="text-foreground">
-                    Estimasi visual VLM sudah dihitung dalam total gizi. Nilainya merupakan
-                    perkiraan untuk porsi pada foto.
-                  </Text>
-                </View>
-              ) : null}
-
-              <View className="flex-row gap-2.5">
-                <View className="flex-1 items-center gap-0.5 rounded-[14px] bg-carin-olive-soft p-2.5">
-                  <Text variant="caption" className="font-semibold text-muted-foreground">
-                    Karbohidrat
-                  </Text>
-                  <Text className="text-base font-bold text-foreground">
-                    {carbNutrient?.value ?? 'Belum tersedia'}
-                  </Text>
-                  <Text variant="caption" className="text-[10px] text-muted-foreground">
-                    {carbNutrient?.coverage ?? ''}
-                  </Text>
-                </View>
-                <View className="flex-1 items-center gap-0.5 rounded-[14px] bg-carin-olive-soft p-2.5">
-                  <Text variant="caption" className="font-semibold text-muted-foreground">
-                    Protein
-                  </Text>
-                  <Text className="text-base font-bold text-foreground">
-                    {proteinNutrient?.value ?? 'Belum tersedia'}
-                  </Text>
-                  <Text variant="caption" className="text-[10px] text-muted-foreground">
-                    {proteinNutrient?.coverage ?? ''}
-                  </Text>
-                </View>
-                <View className="flex-1 items-center gap-0.5 rounded-[14px] bg-carin-olive-soft p-2.5">
-                  <Text variant="caption" className="font-semibold text-muted-foreground">
-                    Lemak
-                  </Text>
-                  <Text className="text-base font-bold text-foreground">
-                    {fatNutrient?.value ?? 'Belum tersedia'}
-                  </Text>
-                  <Text variant="caption" className="text-[10px] text-muted-foreground">
-                    {fatNutrient?.coverage ?? ''}
-                  </Text>
-                </View>
-              </View>
-
-              <Button
-                variant="outline"
-                className="rounded-[16px]"
-                onPress={() => setNutrientsExpanded((prev) => !prev)}>
-                <Icon
-                  as={nutrientsExpanded ? ChevronUp : ChevronDown}
-                  size={16}
-                  className="mr-1.5 text-foreground"
-                />
-                <Text>
-                  {nutrientsExpanded ? 'Sembunyikan rincian gizi' : 'Lihat rincian gizi lengkap'}
-                </Text>
-              </Button>
-
-              {nutrientsExpanded ? (
-                <View className="gap-2 border-t border-border pt-3">
-                  {presentation.nutrients.map((nutrient) => (
-                    <View
-                      key={nutrient.key}
-                      className="flex-row items-start justify-between border-b border-border/40 py-2">
-                      <View className="flex-1 pr-2">
-                        <Text className="font-medium text-foreground">{nutrient.label}</Text>
-                        <Text variant="caption" className="text-muted-foreground">
-                          Cakupan: {nutrient.coverage}
-                        </Text>
-                        <Text variant="caption" className="text-muted-foreground">
-                          {nutrient.sourceLabel}
-                        </Text>
-                        {nutrient.sources.length ? (
-                          <Text variant="caption" className="text-[11px] text-muted-foreground">
-                            Sumber: {nutrient.sources.join(', ')}
-                          </Text>
-                        ) : null}
-                      </View>
-                      <Text className="font-semibold text-foreground">{nutrient.value}</Text>
-                    </View>
-                  ))}
-                </View>
-              ) : null}
-            </View>
-
-            <View className="gap-3 rounded-[20px] border border-border bg-card p-5 shadow-sm">
-              <Text variant="h3">Keterbatasan</Text>
-              {presentation.limitations.length ? (
-                presentation.limitations.map((limitation, index) => (
-                  <View key={`${index}-${limitation}`} className="flex-row items-start gap-2">
-                    <Text className="text-muted-foreground">•</Text>
-                    <Text className="flex-1 text-sm text-foreground">{limitation}</Text>
-                  </View>
-                ))
-              ) : (
-                <Text variant="muted">Tidak ada keterbatasan tambahan yang dilaporkan.</Text>
-              )}
-            </View>
-
-            <View className="gap-3 rounded-[20px] border border-border bg-card p-5 shadow-sm">
-              <Text variant="h3">Sumber Rujukan</Text>
-              {presentation.sources.map((source) => (
-                <View key={source.id} className="gap-1 border-b border-border/50 pb-3">
-                  <Text variant="large">{source.title}</Text>
-                  <Text variant="caption" className="text-muted-foreground">
-                    {source.kind} · {source.itemRef}
-                  </Text>
-                  {source.url ? (
-                    <Button
-                      className="min-h-11 self-start"
-                      variant="link"
-                      onPress={() => void Linking.openURL(source.url!)}>
-                      <Text>Lihat sumber</Text>
-                    </Button>
-                  ) : null}
-                </View>
-              ))}
-              {presentation.sources.length === 0 ? (
-                <Text variant="muted">Sumber belum tersedia.</Text>
-              ) : null}
-            </View>
-
-            <View className="gap-2 rounded-[18px] border border-carin-butter/60 bg-carin-butter/30 p-4">
-              <View className="flex-row items-center gap-2">
-                <Icon as={Info} size={18} className="text-foreground" />
-                <Text className="font-semibold text-foreground">Batas Analisis & Konsumsi</Text>
-              </View>
-              <Text variant="caption" className="text-foreground">
-                Hasil analisis foto ini tersimpan terpisah dan belum dicatat ke riwayat konsumsi
-                harianmu. Tekan “Sudah dikonsumsi” jika kamu sudah memakannya.
-              </Text>
-            </View>
-          </>
+          <AnalysisResultContent
+            key={result.operationId}
+            presentation={presentation}
+            timestamp={formattedTimestamp}
+            photoDeleted={actionScan?.photoId === null}
+            photo={
+              <PhotoThumbnail
+                photoId={actionScan?.photoId ?? null}
+                localUri={actionScan?.photoId === null ? null : effectivePhotoUri}
+                className="h-20 w-20 shrink-0"
+                accessibilityLabel={
+                  actionScan?.photoId === null
+                    ? 'Foto sumber telah dihapus'
+                    : 'Foto makanan yang dianalisis'
+                }
+                fallbackLabel={actionScan?.photoId === null ? 'Foto dihapus' : undefined}
+              />
+            }
+            onCorrect={
+              job.scanId
+                ? () =>
+                    router.push({
+                      pathname: '/food/correction/[id]',
+                      params: { id: job.scanId!, sourceJobId: job.id },
+                    })
+                : undefined
+            }
+            correctionDisabled={screenActions.correctionDisabled}
+            correctionIsActive={correctionIsActive}
+          />
         ) : null}
 
         {job.status === 'completed' && !result ? (
@@ -940,52 +640,14 @@ export default function AnalysisResultScreen() {
         ) : null}
 
         {job.scanId ? (
-          <View className="gap-3.5 rounded-[20px] border border-border bg-card p-5 shadow-sm">
-            <Text variant="h3">Tindakan Hasil</Text>
-
-            {consumptionActions?.primary ? (
-              <Button
-                variant="tactile"
-                onPress={() => router.push(consumptionActions.primary as unknown as Href)}
-                accessibilityLabel={consumptionActions.primary.label}>
-                <Icon as={Check} size={20} className="mr-2 text-primary-foreground" />
-                <Text>{consumptionActions.primary.label}</Text>
-              </Button>
-            ) : null}
-
-            {result ? (
-              <Button
-                variant="tactile-secondary"
-                disabled={screenActions.correctionDisabled}
-                onPress={() =>
-                  router.push({
-                    pathname: '/food/correction/[id]',
-                    params: { id: job.scanId!, sourceJobId: job.id },
-                  })
-                }
-                accessibilityLabel="Koreksi komponen atau porsi">
-                <Icon as={Edit3} size={18} className="mr-1.5 text-secondary-foreground" />
-                <Text>
-                  {correctionIsActive ? 'Koreksi sedang berjalan' : 'Koreksi komponen atau porsi'}
-                </Text>
-              </Button>
-            ) : null}
-
+          <AnalysisDisclosure title="Tindakan lainnya">
             {consumptionActions?.secondary ? (
               <Button
                 variant="outline"
-                className="rounded-[20px]"
                 onPress={() => router.push(consumptionActions.secondary as unknown as Href)}>
                 <Text>{consumptionActions.secondary.label}</Text>
               </Button>
             ) : null}
-
-            {consumptionActions?.message ? (
-              <Text variant="muted" className="text-xs">
-                {consumptionActions.message}
-              </Text>
-            ) : null}
-
             <ScanDeletionControl
               scanId={job.scanId}
               jobId={job.id}
@@ -994,26 +656,46 @@ export default function AnalysisResultScreen() {
                 router.replace({ pathname: '/(tabs)/history', params: { tab: 'analysis' } })
               }
             />
-          </View>
+            {!needsRefresh ? (
+              <Button variant="ghost" onPress={refreshResult} disabled={jobQuery.isFetching}>
+                <Icon as={RefreshCw} size={16} className="text-foreground" />
+                <Text>{jobQuery.isFetching ? 'Memuat…' : 'Muat status terbaru'}</Text>
+              </Button>
+            ) : null}
+          </AnalysisDisclosure>
         ) : null}
 
-        <Button
-          variant="outline"
-          className="rounded-[20px]"
-          onPress={() => {
-            void refreshAnalysisReads({
-              refetchJob: jobQuery.refetch,
-              refreshActionSnapshot,
-              refetchLatestResult: actionScan?.latestResultId
-                ? latestResultQuery.refetch
-                : undefined,
-            });
-          }}
-          disabled={jobQuery.isFetching}>
-          <Icon as={RefreshCw} size={16} className="mr-1.5 text-foreground" />
-          <Text>{jobQuery.isFetching ? 'Memuat…' : 'Muat status terbaru'}</Text>
-        </Button>
+        {needsRefresh ? (
+          <Button variant="outline" onPress={refreshResult} disabled={jobQuery.isFetching}>
+            <Icon as={RefreshCw} size={16} className="text-foreground" />
+            <Text>{jobQuery.isFetching ? 'Memuat…' : 'Muat status terbaru'}</Text>
+          </Button>
+        ) : null}
       </ScrollView>
-    </View>
+      {job.scanId && consumptionActions?.primary ? (
+        <View
+          className="gap-2 border-t border-border bg-background pb-2 pt-3"
+          style={{ paddingHorizontal: pageGutter }}>
+          <Button
+            variant="tactile"
+            onPress={() => router.push(consumptionActions.primary as unknown as Href)}
+            accessibilityLabel={consumptionActions.primary.label}>
+            {consumptionActions.primary.pathname === '/consumptions/from-scan/[scanId]' ? (
+              <Icon as={Check} size={20} className="text-primary-foreground" />
+            ) : null}
+            <Text>{consumptionActions.primary.label}</Text>
+          </Button>
+          {actionScan?.defaultConsumptionId ? (
+            <Text variant="caption" className="text-center text-muted-foreground">
+              Sudah masuk catatan konsumsi.
+            </Text>
+          ) : consumptionActions.primary.pathname === '/consumptions/from-scan/[scanId]' ? (
+            <Text variant="caption" className="text-center text-muted-foreground">
+              Belum masuk catatan konsumsi.
+            </Text>
+          ) : null}
+        </View>
+      ) : null}
+    </SafeAreaView>
   );
 }

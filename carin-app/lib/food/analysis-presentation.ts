@@ -23,6 +23,15 @@ const nutrientDefinitions = [
 
 const terminalStatuses = new Set<AnalysisJob['status']>(['completed', 'failed', 'cancelled']);
 
+const criticalNoteLabels: Readonly<Record<string, string>> = {
+  ALLERGEN_UNVERIFIED: 'Alergen belum terverifikasi.',
+  RULE_ARTIFACT_UNAVAILABLE: 'Pertimbangan kesehatan personal belum tersedia.',
+  NUTRITION_ARTIFACT_UNAVAILABLE: 'Nilai gizi belum terverifikasi.',
+  VLM_NUTRIENT_ESTIMATE: 'Nilai gizi belum terverifikasi.',
+  INCOMPLETE_PORTION: 'Sebagian porsi belum diketahui.',
+  VLM_NUTRITION_UNAVAILABLE: 'Sebagian nilai gizi belum tersedia.',
+};
+
 export function getAnalysisPollInterval(
   status: AnalysisJob['status'],
   elapsedMs: number,
@@ -45,18 +54,47 @@ export function getAnalysisPresentation(
   );
   const supportLabel =
     result.supportStatus === 'complete'
-      ? 'Hasil lengkap'
+      ? 'Cocok dengan katalog'
       : result.supportStatus === 'partial'
-        ? 'Hasil sebagian'
-        : 'Makanan belum dapat dikenali';
+        ? 'Sebagian cocok dengan katalog'
+        : 'Belum cocok dengan katalog';
+  const hasVisualEstimates = result.components.some((component) =>
+    Object.values(component.nutrientSourceIds).some(
+      (sourceId) => sourceId !== null && visualSourceIds.has(sourceId)
+    )
+  );
+  const hasCatalogValues = result.components.some((component) =>
+    Object.values(component.nutrientSourceIds).some(
+      (sourceId) => sourceId !== null && !visualSourceIds.has(sourceId)
+    )
+  );
 
   return {
-    hasVisualEstimates: result.components.some((component) =>
-      Object.values(component.nutrientSourceIds).some(
-        (sourceId) => sourceId !== null && visualSourceIds.has(sourceId)
+    hasVisualEstimates,
+    supportLabel,
+    estimateLabel:
+      result.dataMode === 'synthetic'
+        ? 'Data sintetis untuk demonstrasi'
+        : hasVisualEstimates && hasCatalogValues
+          ? 'Katalog & estimasi dari foto'
+          : hasVisualEstimates
+            ? 'Estimasi dari foto'
+            : hasCatalogValues
+              ? 'Data katalog gizi'
+              : 'Gizi belum tersedia',
+    criticalNotes: Array.from(
+      new Set(
+        result.limitations
+          .filter((limitation) => limitation.critical || limitation.code === 'ALLERGEN_UNVERIFIED')
+          .map((limitation) =>
+            limitation.code === 'UNRECOGNIZED_COMPONENT'
+              ? supportLabel
+              : Object.hasOwn(criticalNoteLabels, limitation.code)
+                ? criticalNoteLabels[limitation.code]
+                : limitation.message
+          )
       )
     ),
-    supportLabel,
     dataLabel:
       result.dataMode === 'synthetic' ? 'Data sintetis untuk demonstrasi' : 'Estimasi analisis',
     components: result.components.map((component) => {
@@ -68,11 +106,21 @@ export function getAnalysisPresentation(
       const portionSource = portion.sourceId
         ? (sourceNames.get(portion.sourceId) ?? 'Sumber porsi tidak tersedia')
         : null;
+      const knownPortion = quantityLabel ?? (portion.grams === null ? null : `${portion.grams} g`);
 
       return {
         id: component.id,
         name: component.displayName,
-        portion: quantityLabel ??
+        summaryPortion:
+          knownPortion === null
+            ? 'Porsi belum tersedia'
+            : portion.origin === 'photo_estimate'
+              ? `Sekitar ${knownPortion}`
+              : knownPortion,
+        portionOriginLabel:
+          portion.origin === 'photo_estimate' ? 'Perkiraan dari foto' : 'Takaran yang dilaporkan',
+        portion:
+          quantityLabel ??
           (portion.grams === null ? 'Porsi belum tersedia' : `Perkiraan ${portion.grams} g`),
         portionBasis: portion.basis,
         portionSource,
@@ -104,8 +152,12 @@ export function getAnalysisPresentation(
         key,
         label,
         unit,
-        value: amount === null ? 'Belum tersedia' : `${amount.toFixed(digits)} ${unit}`,
+        value:
+          amount === null
+            ? 'Belum tersedia'
+            : `${amount.toLocaleString('id-ID', { maximumFractionDigits: digits })} ${unit}`,
         coverage: `${coverage.knownComponentCount} dari ${coverage.totalComponentCount} komponen`,
+        isPartial: amount !== null && coverage.knownComponentCount < coverage.totalComponentCount,
         sourceLabel:
           hasVisualSource && hasCatalogSource
             ? 'Gabungan katalog dan estimasi visual VLM'

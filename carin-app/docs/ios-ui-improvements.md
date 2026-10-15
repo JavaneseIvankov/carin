@@ -148,3 +148,17 @@ Verification (from carin-app): Prettier, tsc --noEmit, component ESLint and vite
 ## Restore prior press feedback
 
 At the user's request, the elevated box-shadow experiment was reverted. The tonal button face, 4 dp lower border, press translation/scale and web hover lift are restored. Earlier safe-area, button-sizing and onboarding changes remain preserved.
+
+## Food analysis result recomposition
+
+Task / scope: Reduce reading density on the completed food-analysis page using the user-approved summary-first composition.
+
+Changes and affected files: `app/food/analysis/[id].tsx` retains orchestration and existing action resolvers, adds safe-area clearance, and places the consumption primary action outside the scroll view. `components/food/analysis-result-content.tsx` contains compact food/portion rows, a single important-notes block, energy/macros, and accessible inline disclosures for nutrition and provenance. Extra/deletion actions are collapsed; their confirmation flow is retained. Narrow screens and increased font scale use stacked rows. `lib/food/analysis-presentation.ts` now describes catalog matching accurately, labels estimated portions once, keeps partial coverage explicit, and preserves allergen/critical warnings while retaining original details. Corresponding unit cases cover unknown warning codes, synthetic labels, nulls, and coverage. Design and execution notes are in `docs/superpowers/specs/2026-10-15-analysis-result-recomposition-design.md` and the matching plan.
+
+Verification (from `carin-app/`): `pnpm run typecheck`, `pnpm run lint`, `pnpm run test:unit` passed (44 files, 330 tests). `pnpm exec vitest run lib/food/correction.integration.test.ts lib/consumptions/photo-confirmation-flow.integration.test.ts` passed (2 files, 34 tests). Changes formatted with Prettier. On the connected Samsung SM A505F / Android 11 / Expo Go SDK 57, agent-device confirmed compact rows, persistent consumption footer during scroll, nutrition disclosure opening/closing with coverage/source text, original detail/source availability, and additional-actions disclosure. No consumption or deletion was submitted.
+
+Unverified work / blockers: iOS, physical 320 dp layout, large system font rendering, and dark appearance have not been manually checked. The existing photo-thumbnail loading indicator was present before recomposition and remains visible in this device session; this change does not repair media loading. Loading/failure branches retain their previous presentation; correction/consumption state safeguards are covered by the existing integration checks.
+
+Next step: Review the recomposed result in Expo Go and refine the hierarchy if needed.
+
+Worktree state: Included in the user-requested recomposition commit on `feat/ios-ui-improvements`; ignored local real-AI configuration stays outside version control.
