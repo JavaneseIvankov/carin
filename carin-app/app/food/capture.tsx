@@ -451,7 +451,7 @@ export default function Capture() {
     <View className="flex-1 bg-black">
       <CameraView
         ref={cameraRef}
-        className="flex-1"
+        style={{ flex: 1 }}
         facing="back"
         enableTorch={torch}
       />
