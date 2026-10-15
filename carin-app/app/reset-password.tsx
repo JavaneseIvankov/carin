@@ -109,7 +109,7 @@ export default function ResetPasswordScreen() {
           </>
         ) : null}
         {!hasValidLink || submitError ? (
-          <Button onPress={() => router.replace('/(auth)/forgot-password' as Href)}>
+          <Button onPress={() => router.replace('/forgot-password' as Href)}>
             <Text>Minta tautan baru</Text>
           </Button>
         ) : null}

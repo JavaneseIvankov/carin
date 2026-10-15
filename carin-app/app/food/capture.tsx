@@ -6,13 +6,19 @@ import { useAppRead, useAppRepository, useAppWrite } from '@/lib/api/query';
 import { useAppData } from '@/lib/data/provider';
 import { getPhotoPermissionFallback } from '@/lib/food/permissions';
 import { cachePhotoUri, resolvePhotoMimeType } from '@/lib/food/photo-media';
-import { createScanActions, createScanActionState } from '@/lib/food/scan-actions';
+import { createPhotoUploadPayload, type PhotoUploadStage } from '@/lib/food/photo-upload';
+import {
+  createScanActions,
+  createScanActionState,
+  type ScanActionStage,
+} from '@/lib/food/scan-actions';
 import {
   createIdempotencyKey,
   createStableActionKey,
   getAiConsentStatus,
 } from '@/lib/profile/profile';
 import { cn } from '@/lib/utils';
+import { errorLogDetails, logAppEvent } from '@/lib/logging';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import * as Linking from 'expo-linking';
@@ -33,7 +39,7 @@ import {
   ZapOff,
 } from 'lucide-react-native';
 import * as React from 'react';
-import { ActivityIndicator, Image, Pressable, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Image, Platform, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type PhotoDraft = { id: string; uri: string; mimeType: string };
@@ -53,6 +59,7 @@ export default function Capture() {
   const saveConsent = useAppWrite('setAiConsent');
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const cameraRef = React.useRef<CameraView>(null);
+  const [cameraReady, setCameraReady] = React.useState(false);
   const [torch, setTorch] = React.useState(false);
   const [photo, setPhoto] = React.useState<PhotoDraft | null>(null);
   const [message, setMessage] = React.useState<string | null>(null);
@@ -61,6 +68,7 @@ export default function Capture() {
   );
   const [consentChecked, setConsentChecked] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
+  const [takingPhoto, setTakingPhoto] = React.useState(false);
   const [consentKeys] = React.useState(() => createStableActionKey());
   const [actionState] = React.useState(() => createScanActionState());
   const actions = React.useMemo(
@@ -69,6 +77,7 @@ export default function Capture() {
         ? createScanActions(
             {
               uploadPhoto: (input) => repository.write('uploadPhoto', input),
+              uploadPhotoFile: (input, file) => repository.uploadPhotoFile(input, file),
               createPhotoAnalysis: (input) => repository.write('createPhotoAnalysis', input),
               retryAnalysisJob: (input) => repository.write('retryAnalysisJob', input),
             },
@@ -130,15 +139,27 @@ export default function Capture() {
   };
 
   const takePhoto = async () => {
-    if (busy) return;
+    if (busy || takingPhoto) return;
+    const camera = cameraRef.current;
+    if (!cameraReady || !camera) {
+      setMessage('Kamera sedang disiapkan. Coba lagi sebentar.');
+      return;
+    }
+
+    setMessage(null);
+    setTakingPhoto(true);
     try {
-      const image = await cameraRef.current?.takePictureAsync({ quality: 0.9 });
+      const image = await camera.takePictureAsync({ quality: 0.9 });
       if (image?.uri) {
         setPhoto({ id: createIdempotencyKey(), uri: image.uri, mimeType: 'image/jpeg' });
         setTorch(false);
+      } else {
+        setMessage('Foto belum berhasil diambil. Silakan coba lagi.');
       }
     } catch {
       setMessage('Gagal mengambil foto. Silakan coba lagi.');
+    } finally {
+      setTakingPhoto(false);
     }
   };
 
@@ -152,12 +173,15 @@ export default function Capture() {
     if (!photo || !actions || busy) return;
     setMessage(null);
     setBusy(true);
+    let failureStage: 'refresh-consent' | PhotoUploadStage | ScanActionStage = 'refresh-consent';
     try {
       let isConsentActive = consentCurrent;
       if (!isConsentActive && consentChecked) {
         const latestLegal = await legalQuery.refetch();
         if (!latestLegal.isSuccess || latestLegal.data.stale) {
-          setMessage('Dokumen persetujuan terbaru belum dapat dimuat. Coba lagi sebelum menyetujui.');
+          setMessage(
+            'Dokumen persetujuan terbaru belum dapat dimuat. Coba lagi sebelum menyetujui.'
+          );
           setBusy(false);
           return;
         }
@@ -189,16 +213,28 @@ export default function Capture() {
         setMessage('Persetujuan pemrosesan AI versi terbaru diperlukan sebelum analisis dimulai.');
         return;
       }
-      const response = await fetch(photo.uri);
-      const blob = await response.blob();
-      const typedBlob = new Blob([blob], { type: photo.mimeType });
-      const job = await actions.start(typedBlob, photo.id, consentIsCurrent);
+      const typedBlob = await createPhotoUploadPayload(photo, {
+        platform: Platform.OS === 'web' ? 'web' : 'native',
+        onStage: (stage) => {
+          failureStage = stage;
+        },
+      });
+      const job = await actions.start(typedBlob, photo.id, consentIsCurrent, (stage) => {
+        failureStage = stage;
+      });
       cachePhotoUri(job.id, photo.uri);
       if (job.scanId) {
         cachePhotoUri(job.scanId, photo.uri);
       }
-      router.replace({ pathname: '/food/analysis/[id]', params: { id: job.id, photoUri: photo.uri } });
+      router.replace({
+        pathname: '/food/analysis/[id]',
+        params: { id: job.id, photoUri: photo.uri },
+      });
     } catch (error) {
+      logAppEvent('error', 'food.photo_analysis.start_failed', {
+        stage: failureStage,
+        ...errorLogDetails(error),
+      });
       setMessage(
         error instanceof Error && /persetujuan/i.test(error.message)
           ? 'Setujui pemrosesan AI versi terbaru sebelum analisis dimulai.'
@@ -223,7 +259,7 @@ export default function Capture() {
         {/* Top close button to quickly dismiss preview */}
         <View
           style={{ paddingTop: Math.max(insets.top, 16) }}
-          className="absolute top-0 left-0 right-0 z-10 flex-row items-center px-6">
+          className="absolute left-0 right-0 top-0 z-10 flex-row items-center px-6">
           <Pressable
             onPress={retakePhoto}
             disabled={busy}
@@ -245,7 +281,9 @@ export default function Capture() {
               <Button
                 variant="tactile"
                 onPress={analyze}
-                disabled={busy || connectivity === 'offline' || (!consentCurrent && !consentChecked)}
+                disabled={
+                  busy || connectivity === 'offline' || (!consentCurrent && !consentChecked)
+                }
                 accessibilityLabel="Analisis makanan sekarang">
                 {busy ? (
                   <ActivityIndicator color="white" />
@@ -280,8 +318,9 @@ export default function Capture() {
                   <Text variant="large">Persetujuan Pemrosesan AI</Text>
                 </View>
                 <Text variant="muted">
-                  Foto makanan akan diproses untuk menyiapkan estimasi porsi dan komponen gizi. Persetujuan
-                  ini terpisah dari syarat penggunaan dan dapat kamu sesuaikan kapan saja di Pengaturan.
+                  Foto makanan akan diproses untuk menyiapkan estimasi porsi dan komponen gizi.
+                  Persetujuan ini terpisah dari syarat penggunaan dan dapat kamu sesuaikan kapan
+                  saja di Pengaturan.
                 </Text>
 
                 <Pressable
@@ -303,9 +342,7 @@ export default function Capture() {
                   className="flex-row items-center gap-3 rounded-control border border-border/60 bg-muted/20 p-3 active:bg-muted/40">
                   <View
                     className={`h-5 w-5 items-center justify-center rounded border ${
-                      consentChecked
-                        ? 'border-primary bg-primary'
-                        : 'border-border/80 bg-card'
+                      consentChecked ? 'border-primary bg-primary' : 'border-border/80 bg-card'
                     }`}>
                     {consentChecked ? (
                       <Icon as={Check} size={14} className="text-primary-foreground" />
@@ -326,7 +363,9 @@ export default function Capture() {
                   <Icon as={Utensils} size={20} className="text-primary" />
                 </View>
                 <View className="flex-1">
-                  <Text className="font-semibold text-foreground">AI siap menganalisis makanan</Text>
+                  <Text className="font-semibold text-foreground">
+                    AI siap menganalisis makanan
+                  </Text>
                   <Text variant="caption" className="mt-0.5 text-muted-foreground">
                     Pastikan seluruh bagian makanan terlihat jelas di dalam piring.
                   </Text>
@@ -451,9 +490,13 @@ export default function Capture() {
     <View className="flex-1 bg-black">
       <CameraView
         ref={cameraRef}
-        className="flex-1"
+        style={{ flex: 1 }}
         facing="back"
         enableTorch={torch}
+        onCameraReady={() => setCameraReady(true)}
+        onMountError={({ message: errorMessage }) =>
+          setMessage(`Kamera gagal dimulai: ${errorMessage}`)
+        }
       />
 
       {/* Viewfinder Overlays */}
@@ -490,9 +533,9 @@ export default function Capture() {
 
         {/* Food framing guide: corner brackets + helper text */}
         <View pointerEvents="none" className="items-center justify-center px-8">
-          <View className="relative h-64 w-64 max-h-[75vw] max-w-[75vw] items-center justify-center">
-            <View className="absolute top-0 left-0 h-8 w-8 rounded-tl-2xl border-t-[3px] border-l-[3px] border-white/90" />
-            <View className="absolute top-0 right-0 h-8 w-8 rounded-tr-2xl border-t-[3px] border-r-[3px] border-white/90" />
+          <View className="relative h-64 max-h-[75vw] w-64 max-w-[75vw] items-center justify-center">
+            <View className="absolute left-0 top-0 h-8 w-8 rounded-tl-2xl border-l-[3px] border-t-[3px] border-white/90" />
+            <View className="absolute right-0 top-0 h-8 w-8 rounded-tr-2xl border-r-[3px] border-t-[3px] border-white/90" />
             <View className="absolute bottom-0 left-0 h-8 w-8 rounded-bl-2xl border-b-[3px] border-l-[3px] border-white/90" />
             <View className="absolute bottom-0 right-0 h-8 w-8 rounded-br-2xl border-b-[3px] border-r-[3px] border-white/90" />
           </View>
@@ -520,10 +563,14 @@ export default function Capture() {
             {/* Shutter button */}
             <Pressable
               onPress={() => void takePhoto()}
+              disabled={!cameraReady || takingPhoto}
               accessibilityRole="button"
-              accessibilityLabel="Ambil foto makanan"
-              className="h-20 w-20 items-center justify-center rounded-full border-4 border-white active:scale-95 shadow-lg">
-              <View className="h-16 w-16 rounded-full bg-white active:bg-white/80" />
+              accessibilityLabel={takingPhoto ? 'Mengambil foto' : 'Ambil foto makanan'}
+              accessibilityState={{ disabled: !cameraReady || takingPhoto }}
+              className="h-20 w-20 items-center justify-center rounded-full border-4 border-white shadow-lg active:scale-95 disabled:opacity-60">
+              <View className="h-16 w-16 items-center justify-center rounded-full bg-white">
+                {takingPhoto ? <ActivityIndicator color="#303526" /> : null}
+              </View>
             </Pressable>
 
             {/* Manual log button */}

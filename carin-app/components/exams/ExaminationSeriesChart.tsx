@@ -6,6 +6,7 @@ import {
   seriesAccessibleSummary,
 } from '@/lib/exams/model';
 import { cn } from '@/lib/utils';
+import { useColorScheme } from 'nativewind';
 import * as React from 'react';
 import { View } from 'react-native';
 import Svg, { Circle, Line, Polyline, Text as SvgText } from 'react-native-svg';
@@ -17,12 +18,6 @@ const LEFT = 32;
 const RIGHT = 320;
 const TOP = 20;
 const BOTTOM = 148;
-
-const metricColors: Record<string, string> = {
-  value: 'hsl(var(--primary))',
-  systolic: 'hsl(var(--primary))',
-  diastolic: '#4b6f96',
-};
 
 const metricBgClasses: Record<string, string> = {
   value: 'bg-primary',
@@ -100,6 +95,16 @@ export function computeYAxisTicks(values: number[]): number[] {
 }
 
 export function ExaminationSeriesChart({ series }: { series: ExamSeries }) {
+  const { colorScheme } = useColorScheme();
+  const palette =
+    colorScheme === 'dark'
+      ? { primary: '#C0D38E', border: '#494537', mutedForeground: '#D2CCB8', card: '#2D2A22' }
+      : { primary: '#506B35', border: '#E6E1D2', mutedForeground: '#55584B', card: '#FFFDF6' };
+  const metricColors: Record<string, string> = {
+    value: palette.primary,
+    systolic: palette.primary,
+    diastolic: '#4b6f96',
+  };
   const projected = projectSeries([series])[0];
   if (!projected) return null;
   const measurements = projected.points.flatMap((point) => point.measurements);
@@ -138,7 +143,7 @@ export function ExaminationSeriesChart({ series }: { series: ExamSeries }) {
                     y1={y}
                     x2={RIGHT}
                     y2={y}
-                    stroke="hsl(var(--border))"
+                    stroke={palette.border}
                     strokeDasharray="3 3"
                     strokeWidth="1"
                     opacity={0.6}
@@ -147,7 +152,7 @@ export function ExaminationSeriesChart({ series }: { series: ExamSeries }) {
                     x={LEFT - 4}
                     y={y + 3.5}
                     fontSize="10"
-                    fill="hsl(var(--muted-foreground))"
+                    fill={palette.mutedForeground}
                     textAnchor="end">
                     {tick}
                   </SvgText>
@@ -170,7 +175,7 @@ export function ExaminationSeriesChart({ series }: { series: ExamSeries }) {
                       key={`${metricKey}-${segmentIndex}`}
                       points={line.join(' ')}
                       fill="none"
-                      stroke={metricColors[metricKey] ?? 'hsl(var(--primary))'}
+                      stroke={metricColors[metricKey] ?? palette.primary}
                       strokeWidth="3"
                       strokeLinejoin="round"
                       strokeLinecap="round"
@@ -182,21 +187,21 @@ export function ExaminationSeriesChart({ series }: { series: ExamSeries }) {
               point.measurements.map((measurement) => {
                 const cx = xPosition(point.dateIndex, projected.dateCount);
                 const cy = getY(measurement.value);
-                const color = metricColors[measurement.key] ?? 'hsl(var(--primary))';
+                const color = metricColors[measurement.key] ?? palette.primary;
                 return (
                   <React.Fragment key={`${point.id}-${measurement.key}`}>
                     <Circle
                       cx={cx}
                       cy={cy}
                       r="6"
-                      fill="hsl(var(--card))"
+                      fill={palette.card}
                     />
                     <Circle
                       cx={cx}
                       cy={cy}
                       r="4"
                       fill={color}
-                      stroke="hsl(var(--card))"
+                      stroke={palette.card}
                       strokeWidth="1.5"
                     />
                   </React.Fragment>

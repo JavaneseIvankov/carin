@@ -1,5 +1,10 @@
 // Generated from specs/contracts/. Do not edit; run pnpm contracts:generate in carin-app.
 export const appOperations = {
+  completeOnboarding: {
+    method: 'POST',
+    path: '/api/v1/onboarding/complete',
+    contentType: null,
+  },
   correctScan: {
     method: 'POST',
     path: '/api/v1/scans/{id}/corrections',
@@ -88,6 +93,11 @@ export const appOperations = {
   getMe: {
     method: 'GET',
     path: '/api/v1/me',
+    contentType: null,
+  },
+  getOnboarding: {
+    method: 'GET',
+    path: '/api/v1/onboarding',
     contentType: null,
   },
   getPhotoView: {

@@ -36,6 +36,23 @@ services:
       - private
     restart: unless-stopped
 
+  minio-init:
+    build:
+      context: ../carin-api
+      dockerfile: Dockerfile
+    environment:
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_BUCKET: ${MINIO_BUCKET:-carin-dev}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?Set MINIO_ROOT_USER in infra/.env}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD in infra/.env}
+    depends_on:
+      minio:
+        condition: service_healthy
+    command: ["node", "dist/scripts/ensure-minio-bucket.js"]
+    networks:
+      - private
+    restart: "no"
+
   migrate:
     build:
       context: ../carin-api
@@ -74,7 +91,9 @@ services:
       migrate:
         condition: service_completed_successfully
       minio:
-        condition: service_started
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health/live').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
       interval: 10s
@@ -129,7 +148,9 @@ services:
       migrate:
         condition: service_completed_successfully
       minio:
-        condition: service_started
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
     command: ["node", "dist/worker.js"]
     networks:
       - private

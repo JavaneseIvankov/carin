@@ -132,7 +132,7 @@ describe('mobile auth route flows', () => {
     const parsed = parsePasswordResetLink('carin://auth/reset?token=private-token', 'carin-dev');
 
     expect(parsed).toEqual({ valid: false, reason: 'invalid-link' });
-    expect(decideAuthRoute('unauthenticated', ['(auth)', 'reset-password'])).toEqual({
+    expect(decideAuthRoute('unauthenticated', ['reset-password'])).toEqual({
       type: 'render',
     });
   });

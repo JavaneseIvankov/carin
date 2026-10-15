@@ -291,6 +291,40 @@ export type paths = {
     patch: operations['updateMe'];
     trace?: never;
   };
+  '/api/v1/onboarding': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get current account onboarding completion state */
+    get: operations['getOnboarding'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/onboarding/complete': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Mark current account onboarding complete */
+    post: operations['completeOnboarding'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/photos': {
     parameters: {
       query?: never;
@@ -921,6 +955,9 @@ export type components = {
     MeUpdate: {
       expectedRevision: number;
       timezone: string;
+    };
+    OnboardingState: {
+      completedAt: string | null;
     };
     Photo: {
       /** Format: date-time */
@@ -1832,6 +1869,50 @@ export interface operations {
       422: components['responses']['Error'];
       429: components['responses']['TooManyRequests'];
       503: components['responses']['Error'];
+      default: components['responses']['Error'];
+    };
+  };
+  getOnboarding: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['OnboardingState'];
+        };
+      };
+      401: components['responses']['Error'];
+      default: components['responses']['Error'];
+    };
+  };
+  completeOnboarding: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['OnboardingState'];
+        };
+      };
+      401: components['responses']['Error'];
       default: components['responses']['Error'];
     };
   };

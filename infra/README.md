@@ -68,9 +68,11 @@ email worker delivered it. The worker must be running with a verified sender
 and a working Resend key. Check delivery and the recipient inbox separately.
 
 Compose waits for PostgreSQL health, runs `node dist/db/migrate.js` once, and
-starts the API only after that migration service exits successfully. PostgreSQL
-and MinIO data live in named volumes and survive `down`/`up`. `docker compose
-down -v` deletes both volumes and all local development data.
+starts the API only after that migration and the MinIO bucket bootstrap succeed.
+The bootstrap uses MinIO root credentials only to ensure the configured private
+bucket exists; the API and worker receive only their configured service
+credentials. The MinIO data lives in a named volume and survives `down`/`up`.
+`docker compose down -v` deletes both volumes and all local development data.
 
 ## Reach the API from a device
 

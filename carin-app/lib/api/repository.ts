@@ -47,18 +47,37 @@ type Dependencies = {
   onUnauthorized: () => Promise<void>;
   isCurrentScope?: () => boolean;
   fetcher?: typeof fetch;
+  nativeFileUploader?: (
+    url: string,
+    uri: string,
+    options: {
+      method: string;
+      fieldName: string;
+      mimeType: string;
+      headers: Record<string, string>;
+    }
+  ) => Promise<Response>;
   getCookie?: () => Promise<string>;
   credentials?: RequestCredentials;
   baseUrl?: string;
 };
+
+export type NativePhotoFile = { uri: string; mimeType: string };
 
 export function createAppRepository(deps: Dependencies) {
   const fetcher = deps.fetcher ?? fetch;
   const generation = scopeGeneration(deps.storage, deps.scope);
   const assertCurrent = () =>
     assertCurrentScope(deps.storage, deps.scope, generation, deps.isCurrentScope);
-  async function send<O extends AppOperation>(name: O, input: AppRequestInput<O>) {
-    const request = prepareAppRequest(name, input);
+  async function send<O extends AppOperation>(
+    name: O,
+    input: AppRequestInput<O>,
+    nativePhotoFile?: NativePhotoFile
+  ) {
+    const requestInput = nativePhotoFile
+      ? ({ ...input, body: { file: new Blob([]) } } as AppRequestInput<O>)
+      : input;
+    const request = prepareAppRequest(name, requestInput);
     const requestId = Crypto.randomUUID();
     request.headers['x-request-id'] = requestId;
     if (request.method !== 'GET') requireOnline(deps.connectivity());
@@ -72,12 +91,23 @@ export function createAppRepository(deps: Dependencies) {
     });
     let response: Response;
     try {
-      response = await fetcher(`${deps.baseUrl ?? requireApiUrl()}${request.path}`, {
-        method: request.method,
-        headers: cookie ? { ...request.headers, Cookie: cookie } : request.headers,
-        body: request.body,
-        credentials: deps.credentials ?? 'omit',
-      });
+      const url = `${deps.baseUrl ?? requireApiUrl()}${request.path}`;
+      const headers = cookie ? { ...request.headers, Cookie: cookie } : request.headers;
+      if (nativePhotoFile && name === 'uploadPhoto' && deps.nativeFileUploader) {
+        response = await deps.nativeFileUploader(url, nativePhotoFile.uri, {
+          method: request.method,
+          fieldName: 'file',
+          mimeType: nativePhotoFile.mimeType,
+          headers,
+        });
+      } else {
+        response = await fetcher(url, {
+          method: request.method,
+          headers,
+          body: request.body,
+          credentials: deps.credentials ?? 'omit',
+        });
+      }
     } catch (error) {
       logAppEvent('error', 'api.request.failed', {
         requestId,
@@ -183,6 +213,14 @@ export function createAppRepository(deps: Dependencies) {
       input: AppRequestInput<O>
     ): Promise<AppResponse<O>> {
       return send(name, input);
+    },
+    async uploadPhotoFile(
+      input: Omit<AppRequestInput<'uploadPhoto'>, 'body'>,
+      file: NativePhotoFile
+    ): Promise<AppResponse<'uploadPhoto'>> {
+      return send('uploadPhoto', { ...input, body: { file: new Blob([]) } }, file) as Promise<
+        AppResponse<'uploadPhoto'>
+      >;
     },
   };
 }

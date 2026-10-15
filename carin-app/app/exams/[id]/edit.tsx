@@ -1,7 +1,8 @@
 import * as Crypto from 'expo-crypto';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
-import { View } from 'react-native';
+import { KeyboardAvoidingView, Platform, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { ServiceError } from '@/components/app/service-error';
 import { ExaminationForm } from '@/components/exams/ExaminationForm';
 import { BackButton } from '@/components/app/back-button';
@@ -121,57 +122,64 @@ export default function EditExamination() {
   const editFormProps = editSessionController.getFormProps(id, sessionSnapshot, {
     submissionDisabled: timezoneRead.submissionDisabled,
   });
-
-  return (
-    <View className="flex-1 bg-background">
-      <View className="gap-3 px-5 pt-5">
+  const pageHeader = (
+    <View className="gap-4">
+      <View className="gap-3">
         <BackButton href={{ pathname: '/exams/[id]', params: { id } }} />
         <Text variant="h2">Edit pemeriksaan</Text>
       </View>
-      <View className="mx-5 mt-4 gap-4">
-        {timezoneRead.status === 'error' && (
-          <ServiceError error={me.error} onRetry={() => void me.refetch()} />
-        )}
-        {sessionSnapshot.revisionConflict && (
-          <View
-            className="gap-3 rounded-summary border border-destructive/40 bg-card p-5"
-            accessibilityRole="alert">
-            <Text variant="large">Pemeriksaan berubah</Text>
-            <Text variant="muted">
-              Catatan di server sudah berubah sejak Anda membukanya. Perubahan di formulir tetap
-              tersimpan sampai Anda memilih untuk memuat ulang data terbaru.
+      {timezoneRead.status === 'error' && (
+        <ServiceError error={me.error} onRetry={() => void me.refetch()} />
+      )}
+      {sessionSnapshot.revisionConflict && (
+        <View
+          className="gap-3 rounded-summary border border-destructive/40 bg-card p-5"
+          accessibilityRole="alert">
+          <Text variant="large">Pemeriksaan berubah</Text>
+          <Text variant="muted">
+            Catatan di server sudah berubah sejak Anda membukanya. Perubahan di formulir tetap
+            tersimpan sampai Anda memilih untuk memuat ulang data terbaru.
+          </Text>
+          {!!sessionSnapshot.reloadError && (
+            <Text className="text-sm text-destructive">
+              {serviceErrorMessage(sessionSnapshot.reloadError)}
             </Text>
-            {!!sessionSnapshot.reloadError && (
-              <Text className="text-sm text-destructive">
-                {serviceErrorMessage(sessionSnapshot.reloadError)}
-              </Text>
-            )}
-            <Button
-              variant="outline"
-              disabled={sessionSnapshot.reloading}
-              onPress={() => void reloadCurrent()}>
-              <Text>
-                {sessionSnapshot.reloading ? 'Memuat data terbaru…' : 'Muat ulang data terbaru'}
-              </Text>
-            </Button>
-          </View>
-        )}
-      </View>
-      <ExaminationForm
-        key={editFormProps.key}
-        initialRecord={editFormProps.initialRecord}
-        timezone={timezone}
-        pending={update.isPending || sessionSnapshot.saving}
-        submissionDisabled={editFormProps.submissionDisabled}
-        submitLabel="Lanjut ke konfirmasi perubahan"
-        submitError={
-          update.error && !sessionSnapshot.revisionConflict
-            ? serviceErrorMessage(update.error)
-            : undefined
-        }
-        onDraftChange={resetDraft}
-        onSubmit={save}
-      />
+          )}
+          <Button
+            variant="outline"
+            disabled={sessionSnapshot.reloading}
+            onPress={() => void reloadCurrent()}>
+            <Text>
+              {sessionSnapshot.reloading ? 'Memuat data terbaru…' : 'Muat ulang data terbaru'}
+            </Text>
+          </Button>
+        </View>
+      )}
     </View>
+  );
+
+  return (
+    <SafeAreaView edges={['bottom']} className="flex-1 bg-background">
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <ExaminationForm
+          key={editFormProps.key}
+          header={pageHeader}
+          initialRecord={editFormProps.initialRecord}
+          timezone={timezone}
+          pending={update.isPending || sessionSnapshot.saving}
+          submissionDisabled={editFormProps.submissionDisabled}
+          submitLabel="Lanjut ke konfirmasi perubahan"
+          submitError={
+            update.error && !sessionSnapshot.revisionConflict
+              ? serviceErrorMessage(update.error)
+              : undefined
+          }
+          onDraftChange={resetDraft}
+          onSubmit={save}
+        />
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }

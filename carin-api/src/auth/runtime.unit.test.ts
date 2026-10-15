@@ -50,7 +50,10 @@ describe('Better Auth runtime', () => {
       database: { generateId: 'uuid' },
       disableOriginCheck: false,
     });
-    expect(runtime.auth.options.trustedOrigins).toEqual([trustedOrigin]);
+    expect(runtime.auth.options.trustedOrigins).toEqual([
+      trustedOrigin,
+      ...(appEnv === 'dev' ? ['exp://'] : []),
+    ]);
   });
 
   it('pins verification and reset links to the fixed HTTPS landing routes', () => {

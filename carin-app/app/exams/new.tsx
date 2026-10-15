@@ -1,7 +1,8 @@
 import * as Crypto from 'expo-crypto';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
-import { View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { ServiceError } from '@/components/app/service-error';
 import { ExaminationForm } from '@/components/exams/ExaminationForm';
 import { BackButton } from '@/components/app/back-button';
@@ -39,27 +40,29 @@ export default function NewExamination() {
       // Keep the same key so retrying the exact action is idempotent.
     }
   };
+  const pageHeader = (
+    <View className="gap-1">
+      <BackButton href="/(tabs)/exams" />
+      <Text variant="h2">Catat pemeriksaan</Text>
+      <Text variant="muted">Masukkan nilai persis seperti hasil pengukuran.</Text>
+    </View>
+  );
 
   return (
-    <View className="flex-1 bg-background pt-5">
-      <View className="mx-5 gap-1">
-        <BackButton href="/(tabs)/exams" />
-        <Text variant="h2">Catat pemeriksaan</Text>
-        <Text variant="muted">Masukkan nilai persis seperti hasil pengukuran.</Text>
-      </View>
-      {me.isPending && !timezone ? (
-        <View className="mx-5 mt-2">
-          <Text variant="muted">Memuat pengaturan akun…</Text>
-        </View>
-      ) : null}
-      <View className="flex-1">
-        {timezoneRead.status === 'error' && (
-          <View className="mx-5 mt-2">
-            <ServiceError error={me.error} onRetry={() => void me.refetch()} />
-          </View>
-        )}
-        {timezone && (
+    <SafeAreaView edges={['bottom']} className="flex-1 bg-background">
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        {timezone ? (
           <ExaminationForm
+            header={
+              <>
+                {pageHeader}
+                {timezoneRead.status === 'error' && (
+                  <ServiceError error={me.error} onRetry={() => void me.refetch()} />
+                )}
+              </>
+            }
             timezone={timezone}
             pending={create.isPending}
             submissionDisabled={timezoneRead.submissionDisabled}
@@ -67,8 +70,22 @@ export default function NewExamination() {
             onDraftChange={resetDraft}
             onSubmit={save}
           />
+        ) : (
+          <ScrollView
+            className="flex-1 bg-background"
+            contentContainerClassName="gap-5 px-5 pb-10 pt-5">
+            {pageHeader}
+            {me.isPending ? (
+              <View className="mt-2">
+                <Text variant="muted">Memuat pengaturan akun…</Text>
+              </View>
+            ) : null}
+            {timezoneRead.status === 'error' && (
+              <ServiceError error={me.error} onRetry={() => void me.refetch()} />
+            )}
+          </ScrollView>
         )}
-      </View>
-    </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }

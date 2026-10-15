@@ -158,7 +158,7 @@ describe('Better Auth registration boundary', () => {
     const response = await app.request('/api/auth/sign-up/email', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ name: 'Too Young', email, password: 'password123', birthDate: '2008-10-15', acceptedTermsVersion: current.terms.version, acceptedPrivacyVersion: current.privacy.version }),
+      body: JSON.stringify({ name: 'Too Young', email, password: 'password123', birthDate: '2009-10-15', acceptedTermsVersion: current.terms.version, acceptedPrivacyVersion: current.privacy.version }),
     });
     expect(response.status).toBeGreaterThanOrEqual(400);
     expect((await pool.query('SELECT id FROM "user" WHERE email=$1', [email])).rowCount).toBe(0);

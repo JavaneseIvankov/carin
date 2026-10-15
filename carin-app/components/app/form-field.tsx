@@ -81,11 +81,9 @@ export const FormField = React.forwardRef<TextInput, FormFieldProps>(function Fo
   );
 
   const containerBorderClass = error
-    ? isFocused
-      ? 'border-destructive ring-1 ring-destructive/20'
-      : 'border-destructive'
+    ? 'border-destructive'
     : isFocused
-      ? 'border-primary ring-1 ring-primary/20'
+      ? 'border-primary'
       : 'border-border';
 
   const containerHeightClass = props.multiline
@@ -111,7 +109,7 @@ export const FormField = React.forwardRef<TextInput, FormFieldProps>(function Fo
           props.editable === false && 'opacity-80'
         )}
       >
-        <View className="relative flex-1 justify-center h-full">
+        <View className={cn('relative flex-1 justify-center', !props.multiline && 'h-full')}>
           <Animated.View
             pointerEvents="none"
             style={{

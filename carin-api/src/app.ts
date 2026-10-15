@@ -21,6 +21,7 @@ import { registerScanRoutes, type ScanRouteDependencies } from './modules/scans/
 import { registerConsumptionRoutes, type ConsumptionRouteDependencies } from './modules/consumptions/routes.js';
 import { registerExaminationRoutes } from './modules/examinations/routes.js';
 import { registerDashboardRoutes, type DashboardRouteDependencies } from './modules/dashboard/routes.js';
+import { registerOnboardingRoutes } from './modules/onboarding/routes.js';
 import { isInternalHost, type AppConfig } from './config.js';
 
 export type RequestLog = {
@@ -149,6 +150,7 @@ export function createApp({
   if (account) {
     registerAccountRoutes(app, account);
     registerProfileRoutes(app, account);
+    registerOnboardingRoutes(app, account);
   }
   if (appLinkScheme) registerEmailLandingRoutes(app, appLinkScheme);
   if (examinations) registerExaminationRoutes(app, examinations);

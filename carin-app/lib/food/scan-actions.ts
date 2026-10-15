@@ -1,9 +1,14 @@
 import type { AppRequestInput } from '@/lib/api/contracts';
 import type { AppResponse } from '@/lib/api/repository';
 import { createStableActionKey } from '@/lib/profile/profile';
+import type { NativePhotoFile } from './photo-upload';
 
 export type ScanApi = {
   uploadPhoto(input: AppRequestInput<'uploadPhoto'>): Promise<AppResponse<'uploadPhoto'>>;
+  uploadPhotoFile?(
+    input: Omit<AppRequestInput<'uploadPhoto'>, 'body'>,
+    file: NativePhotoFile
+  ): Promise<AppResponse<'uploadPhoto'>>;
   createPhotoAnalysis(
     input: AppRequestInput<'createPhotoAnalysis'>
   ): Promise<AppResponse<'createPhotoAnalysis'>>;
@@ -11,6 +16,8 @@ export type ScanApi = {
     input: AppRequestInput<'retryAnalysisJob'>
   ): Promise<AppResponse<'retryAnalysisJob'>>;
 };
+
+export type ScanActionStage = 'upload-photo' | 'create-analysis-job';
 
 export function createScanActionState(makeKey?: () => string) {
   return {
@@ -30,7 +37,12 @@ export function createScanActions(
   state: ScanActionState = createScanActionState(makeKey)
 ) {
   return {
-    async start(photo: Blob, photoIdentity: string, consentIsCurrent: boolean) {
+    async start(
+      photo: Blob | NativePhotoFile,
+      photoIdentity: string,
+      consentIsCurrent: boolean,
+      onStage?: (stage: ScanActionStage) => void
+    ) {
       if (state.photoIdentity !== photoIdentity) {
         state.photoIdentity = photoIdentity;
         state.uploadedPhoto = null;
@@ -39,15 +51,20 @@ export function createScanActions(
       }
       if (!consentIsCurrent) throw new Error('Persetujuan pemrosesan AI versi terbaru diperlukan.');
       if (!state.uploadedPhoto) {
+        onStage?.('upload-photo');
         const uploadKey = state.uploadKeys.forPayload({ action: 'upload-photo' });
-        state.uploadedPhoto = await api.uploadPhoto({
-          headers: { 'Idempotency-Key': uploadKey },
-          body: { file: photo },
-        });
+        const input = { headers: { 'Idempotency-Key': uploadKey } };
+        if (photo instanceof Blob) {
+          state.uploadedPhoto = await api.uploadPhoto({ ...input, body: { file: photo } });
+        } else {
+          if (!api.uploadPhotoFile) throw new Error('Native photo upload is unavailable.');
+          state.uploadedPhoto = await api.uploadPhotoFile(input, photo);
+        }
         state.uploadKeys.clear();
       }
 
       const body = { photoId: state.uploadedPhoto.id };
+      onStage?.('create-analysis-job');
       const jobKey = state.jobKeys.forPayload(body);
       const job = await api.createPhotoAnalysis({
         headers: { 'Idempotency-Key': jobKey },

@@ -43,6 +43,12 @@ export const authOptions = {
       acceptedTermsVersion: { type: 'string', required: true, input: true, returned: false },
       acceptedPrivacyVersion: { type: 'string', required: true, input: true, returned: false },
       acceptedAt: { type: 'date', required: true, input: true, returned: false },
+      onboardingCompletedAt: {
+        type: 'date',
+        required: false,
+        input: false,
+        returned: false,
+      },
       deletionStatus: {
         type: 'string',
         required: true,

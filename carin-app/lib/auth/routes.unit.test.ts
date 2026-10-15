@@ -64,8 +64,8 @@ describe('auth route decisions', () => {
 
   it.each([
     ['auth', 'reset'],
-    ['(auth)', 'reset-password'],
-    ['(auth)', 'forgot-password'],
+    ['reset-password'],
+    ['forgot-password'],
   ])(
     'keeps the password-reset recovery route %j reachable for an authenticated user',
     (...segments) => {

@@ -112,6 +112,44 @@ describe('scan actions', () => {
     expect(calls).toEqual(['uploadPhoto', 'createPhotoAnalysis']);
   });
 
+  it('reports the upload and job stages before each request', async () => {
+    const stages: string[] = [];
+    const actions = createScanActions({
+      uploadPhoto: async () => ({ id: 'photo-1' }) as never,
+      createPhotoAnalysis: async () => ({ id: 'job-1' }) as never,
+      retryAnalysisJob: async () => ({ id: 'retry-1' }) as never,
+    });
+
+    await actions.start(new Blob(['photo']), 'photo-draft-1', true, (stage) => stages.push(stage));
+
+    expect(stages).toEqual(['upload-photo', 'create-analysis-job']);
+  });
+
+  it('uses the native file upload action for device photo URIs', async () => {
+    const uploadPhotoFile = vi.fn(async () => ({ id: 'photo-1' }) as never);
+    const uploadPhoto = vi.fn(async () => ({ id: 'wrong-path' }) as never);
+    const createPhotoAnalysis = vi.fn(async () => ({ id: 'job-1' }) as never);
+    const actions = createScanActions({
+      uploadPhoto,
+      uploadPhotoFile,
+      createPhotoAnalysis,
+      retryAnalysisJob: vi.fn(),
+    });
+
+    await actions.start(
+      { kind: 'native-file', uri: 'file:///cache/photo.jpg', mimeType: 'image/jpeg' },
+      'photo-draft-1',
+      true
+    );
+
+    expect(uploadPhotoFile).toHaveBeenCalledOnce();
+    expect(uploadPhoto).not.toHaveBeenCalled();
+    expect(createPhotoAnalysis).toHaveBeenCalledWith({
+      headers: { 'Idempotency-Key': expect.any(String) },
+      body: { photoId: 'photo-1' },
+    });
+  });
+
   it('keeps a retry key stable until the retry is acknowledged', async () => {
     const write = vi
       .fn()

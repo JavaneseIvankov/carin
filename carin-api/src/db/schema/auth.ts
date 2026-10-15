@@ -27,6 +27,7 @@ export const user = pgTable("user", {
   acceptedTermsVersion: text("accepted_terms_version").notNull(),
   acceptedPrivacyVersion: text("accepted_privacy_version").notNull(),
   acceptedAt: timestamp("accepted_at").notNull(),
+  onboardingCompletedAt: timestamp("onboarding_completed_at"),
   deletionStatus: text("deletion_status").default("active").notNull(),
   settingsRevision: integer("settings_revision").default(1).notNull(),
   timezone: text("timezone").default("Asia/Jakarta").notNull(),
