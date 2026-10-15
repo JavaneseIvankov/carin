@@ -7,6 +7,10 @@ import type { ChoiceOption } from '@/components/profile/choice-field';
 import { useAppRead, useAppWrite } from '@/lib/api/query';
 import { ApiError } from '@/lib/api/repository';
 import type { components } from '@/lib/api/generated/app-api';
+import { useOnboardingSession } from '@/components/onboarding/onboarding-session';
+import { useAuth } from '@/lib/auth/provider';
+import { resolvePostSignInDestination } from '@/lib/auth/routes';
+import { hasUnsavedProfileChanges } from '@/lib/onboarding/profile-actions';
 import {
   createIdempotencyKey,
   createOtherDiagnosisEntry,
@@ -94,12 +98,23 @@ function diagnosisSupportLabel(
 
 export default function HealthProfileScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ focus?: string | string[] }>();
+  const params = useLocalSearchParams<{
+    focus?: string | string[];
+    mode?: string | string[];
+    returnTo?: string | string[];
+  }>();
+  const { user } = useAuth();
+  const { allowDashboardForSession } = useOnboardingSession();
   const rawFocus = Array.isArray(params.focus) ? params.focus[0] : params.focus;
+  const rawMode = Array.isArray(params.mode) ? params.mode[0] : params.mode;
+  const rawReturnTo = Array.isArray(params.returnTo) ? null : params.returnTo;
+  const isOnboarding = rawMode === 'onboarding';
+  const returnTo = resolvePostSignInDestination(rawReturnTo) ?? '/(tabs)';
   const targetFocus = rawFocus ? getMissingFieldTarget(rawFocus)?.focus : undefined;
   const profileQuery = useAppRead('getProfile', {});
   const accountQuery = useAppRead('getMe', {});
   const updateProfile = useAppWrite('updateProfile');
+  const completeOnboarding = useAppWrite('completeOnboarding');
   const [conditionInput, setConditionInput] = React.useState('');
   const [debouncedConditionInput, setDebouncedConditionInput] = React.useState('');
   const conditionsQuery = useAppRead(
@@ -123,6 +138,8 @@ export default function HealthProfileScreen() {
   const [conflict, setConflict] = React.useState(false);
   const [conflictMessage, setConflictMessage] = React.useState<string | null>(null);
   const [saveError, setSaveError] = React.useState<string | null>(null);
+  const [completionError, setCompletionError] = React.useState<string | null>(null);
+  const [profileSavedForCompletion, setProfileSavedForCompletion] = React.useState(false);
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
   const [keyFactory] = React.useState(() => createStableActionKey());
   const scrollRef = React.useRef<ScrollView>(null);
@@ -155,9 +172,80 @@ export default function HealthProfileScreen() {
     []
   );
 
-  const skip = () => router.replace('/(tabs)' as Href);
   const conditionResults = conditionsQuery.data?.data ?? [];
   const unsupportedConditions = profile?.personalization.unsupportedConditions ?? [];
+
+  const finishOnboarding = async (profileWasSaved: boolean) => {
+    setCompletionError(null);
+    try {
+      await completeOnboarding.mutateAsync({});
+      router.replace(returnTo as Href);
+    } catch {
+      setProfileSavedForCompletion(profileWasSaved);
+      setCompletionError(
+        profileWasSaved
+          ? 'Profil tersimpan, tetapi langkah pengenalan belum tersimpan. Coba lagi atau lanjut ke Beranda.'
+          : 'Langkah pengenalan belum tersimpan. Coba lagi atau lanjut ke Beranda.'
+      );
+    }
+  };
+
+  const continueToDashboard = () => {
+    if (user?.id) allowDashboardForSession(user.id);
+    router.replace('/(tabs)' as Href);
+  };
+
+  const skip = () => {
+    if (!isOnboarding) {
+      router.replace('/(tabs)' as Href);
+      return;
+    }
+
+    const hasDraftChanges = hasUnsavedProfileChanges({
+      currentFields: profile?.fields ?? null,
+      draftFields: draft,
+      currentHeightCm: profile?.fields.heightCm ?? null,
+      currentWeightKg: profile?.fields.weightKg ?? null,
+      heightInput,
+      weightInput,
+      conditionInput,
+      pendingTextInputs: [otherCondition, familyCondition, familyRelation, allergyText],
+    });
+    const finishSkip = () => {
+      setProfileSavedForCompletion(false);
+      void finishOnboarding(false);
+    };
+    if (!hasDraftChanges) {
+      finishSkip();
+      return;
+    }
+
+    const title = 'Buang perubahan profil?';
+    const message = 'Perubahan yang belum disimpan akan hilang. Profil yang tersimpan tetap aman.';
+    if (Platform.OS === 'web') {
+      if (window.confirm(`${title}\n\n${message}`)) finishSkip();
+      return;
+    }
+    Alert.alert(title, message, [
+      { text: 'Kembali mengisi', style: 'cancel' },
+      { text: 'Buang draft & lanjut', style: 'destructive', onPress: finishSkip },
+    ]);
+  };
+
+  const completionRecovery = completionError ? (
+    <View className="gap-3 rounded-summary border border-destructive/40 bg-card p-4">
+      <Text accessibilityRole="alert">{completionError}</Text>
+      <Button
+        variant="outline"
+        onPress={() => void finishOnboarding(profileSavedForCompletion)}
+        disabled={completeOnboarding.isPending}>
+        <Text>{completeOnboarding.isPending ? 'Mencoba lagi…' : 'Coba lagi'}</Text>
+      </Button>
+      <Button variant="ghost" onPress={continueToDashboard}>
+        <Text>Lanjut ke Beranda</Text>
+      </Button>
+    </View>
+  ) : null;
 
   const patchFields = (patch: Partial<ProfileFields>) => {
     setDraft((current) => {
@@ -315,7 +403,10 @@ export default function HealthProfileScreen() {
       setHeightInput(result.fields.heightCm === null ? '' : String(result.fields.heightCm));
       setWeightInput(result.fields.weightKg === null ? '' : String(result.fields.weightKg));
       setConflict(false);
-      if (router.canGoBack()) router.back();
+      if (isOnboarding) {
+        setProfileSavedForCompletion(true);
+        await finishOnboarding(true);
+      } else if (router.canGoBack()) router.back();
       else router.replace('/(tabs)' as Href);
     } catch (error) {
       if (error instanceof ApiError && error.status === 409) {
@@ -348,7 +439,8 @@ export default function HealthProfileScreen() {
       <View className="flex-1 items-center justify-center gap-3 bg-background p-6">
         <ActivityIndicator accessibilityLabel="Memuat profil kesehatan" />
         <Text variant="muted">Memuat profil kesehatan…</Text>
-        <Button variant="outline" onPress={skip}>
+        {completionRecovery}
+        <Button variant="outline" onPress={skip} disabled={completeOnboarding.isPending}>
           <Text>Isi nanti</Text>
         </Button>
       </View>
@@ -360,7 +452,8 @@ export default function HealthProfileScreen() {
       <View className="flex-1 bg-background p-5">
         <Text variant="h3">Profil kesehatan</Text>
         <ServiceError error={profileQuery.error} onRetry={() => void profileQuery.refetch()} />
-        <Button variant="outline" onPress={skip}>
+        {completionRecovery}
+        <Button variant="outline" onPress={skip} disabled={completeOnboarding.isPending}>
           <Text>Isi nanti</Text>
         </Button>
       </View>
@@ -763,13 +856,25 @@ export default function HealthProfileScreen() {
             ) : null}
           </View>
         ) : null}
-        {saveError ? <ServiceError error={saveError} /> : null}
-        <Button variant="tactile" onPress={() => void save()} disabled={updateProfile.isPending}>
-          <Text>{updateProfile.isPending ? 'Menyimpan profil…' : 'Simpan profil'}</Text>
-        </Button>
-        <Button variant="outline" onPress={skip}>
-          <Text>Isi nanti</Text>
-        </Button>
+        {completionError ? (
+          completionRecovery
+        ) : (
+          <>
+            {saveError ? <ServiceError error={saveError} /> : null}
+            <Button
+              variant="tactile"
+              onPress={() => void save()}
+              disabled={updateProfile.isPending || completeOnboarding.isPending}>
+              <Text>{updateProfile.isPending ? 'Menyimpan profil…' : 'Simpan profil'}</Text>
+            </Button>
+            <Button
+              variant="outline"
+              onPress={skip}
+              disabled={updateProfile.isPending || completeOnboarding.isPending}>
+              <Text>Isi nanti</Text>
+            </Button>
+          </>
+        )}
         <Text variant="muted">
           Status diagnosis: {getKnowledgeStateLabel('diagnoses', fields.diagnoses.state)}
         </Text>

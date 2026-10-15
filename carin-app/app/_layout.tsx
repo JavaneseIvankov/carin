@@ -10,6 +10,7 @@ import { useColorScheme } from 'nativewind';
 import { AppDataProvider } from '@/lib/data/provider';
 import { AuthProvider } from '@/lib/auth/provider';
 import { AuthGate } from '@/components/auth/auth-gate';
+import { OnboardingSessionProvider } from '@/components/onboarding/onboarding-session';
 import type { ErrorBoundaryProps } from 'expo-router';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
@@ -48,9 +49,11 @@ export default function RootLayout() {
         <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
         <AppDataProvider>
           <AuthProvider>
-            <Stack screenOptions={{ headerShown: false }} />
-            <PortalHost />
-            <AuthGate />
+            <OnboardingSessionProvider>
+              <Stack screenOptions={{ headerShown: false }} />
+              <PortalHost />
+              <AuthGate />
+            </OnboardingSessionProvider>
           </AuthProvider>
         </AppDataProvider>
       </View>

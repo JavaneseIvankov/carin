@@ -9,23 +9,28 @@ import {
   type Href,
 } from 'expo-router';
 import { Text } from '@/components/ui/text';
+import { useAppRead } from '@/lib/api/query';
 import { useAuth } from '@/lib/auth/provider';
 import { decideAuthRoute } from '@/lib/auth/routes';
+import { useOnboardingSession } from '@/components/onboarding/onboarding-session';
+import { decideOnboardingRoute, onboardingGateStateFromQuery } from '@/lib/onboarding/routes';
 
 export function AuthRestorationState({
   error,
   onRetry,
   onSignIn,
+  loadingLabel = 'Memulihkan sesi',
   className = 'flex-1 items-center justify-center bg-background px-6',
 }: {
   error?: unknown;
   onRetry?: () => void;
   onSignIn?: () => void;
+  loadingLabel?: string;
   className?: string;
 }) {
   return (
     <View className={className}>
-      {error === undefined ? <ActivityIndicator accessibilityLabel="Memulihkan sesi" /> : null}
+      {error === undefined ? <ActivityIndicator accessibilityLabel={loadingLabel} /> : null}
       {error !== undefined ? (
         <View className="mt-4 items-center gap-3">
           <Text className="text-center text-muted-foreground">
@@ -48,30 +53,48 @@ export function AuthRestorationState({
 }
 
 export function AuthGate() {
-  const { status, error, retryRestoration, invalidateSession } = useAuth();
+  const { status, error, user, retryRestoration, invalidateSession } = useAuth();
+  const { isBypassed } = useOnboardingSession();
   const router = useRouter();
   const segments = useSegments();
   const pathname = usePathname();
-  const params = useGlobalSearchParams<{ next?: string | string[] }>();
+  const params = useGlobalSearchParams<{
+    next?: string | string[];
+    returnTo?: string | string[];
+  }>();
   const decision = decideAuthRoute(status, segments.map(String), pathname, params.next);
+  const onboardingQuery = useAppRead('getOnboarding', {}, { enabled: status === 'authenticated' });
+  const onboardingDecision = decideOnboardingRoute({
+    authStatus: status,
+    authDecision: decision,
+    state: onboardingGateStateFromQuery(onboardingQuery),
+    segments: segments.map(String),
+    pathname,
+    requestedDestination: params.returnTo ?? params.next,
+    userId: user?.id,
+    bypassedUserId: user?.id && isBypassed(user.id) ? user.id : null,
+  });
 
-  if (decision.type === 'render') return null;
-  const isLoading = decision.type === 'loading';
+  if (onboardingDecision.type === 'render') return null;
+  const authIsLoading = decision.type === 'loading';
   return (
     <>
       <AuthRestorationState
         className="absolute inset-0 z-50 flex-1 items-center justify-center bg-background px-6"
-        error={isLoading ? error : undefined}
-        onRetry={isLoading ? () => void retryRestoration() : undefined}
+        loadingLabel={authIsLoading ? 'Memulihkan sesi' : 'Memeriksa pengenalan Carin'}
+        error={authIsLoading ? error : undefined}
+        onRetry={authIsLoading ? () => void retryRestoration() : undefined}
         onSignIn={
-          isLoading && error !== undefined
+          authIsLoading && error !== undefined
             ? () => {
                 void invalidateSession().then(() => router.replace('/(auth)/sign-in'));
               }
             : undefined
         }
       />
-      {decision.type === 'redirect' ? <Redirect href={decision.href as Href} /> : null}
+      {onboardingDecision.type === 'redirect' ? (
+        <Redirect href={onboardingDecision.href as Href} />
+      ) : null}
     </>
   );
 }

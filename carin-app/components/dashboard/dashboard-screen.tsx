@@ -243,7 +243,7 @@ export function DashboardScreen() {
                   <Icon as={Utensils} className="text-primary" size={24} />
                 </View>
                 <Text variant="h3" className="text-center">
-                  Catatan pertamamu dimulai di sini.
+                  Belum ada catatan konsumsi hari ini.
                 </Text>
                 <Text className="text-center text-muted-foreground">
                   Catat yang sudah dimakan. Hasil foto masuk ke asupan setelah kamu mengonfirmasi
