@@ -41,7 +41,15 @@ import { useFocusEffect, useLocalSearchParams, useRouter, type Href } from 'expo
 import * as React from 'react';
 import { Icon } from '@/components/ui/icon';
 import { Camera, ChevronRight, Utensils } from 'lucide-react-native';
-import { ActivityIndicator, AppState, Pressable, ScrollView, View } from 'react-native';
+import {
+  ActivityIndicator,
+  AppState,
+  Pressable,
+  ScrollView,
+  View,
+  useWindowDimensions,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type HistoryTab = 'consumption' | 'analysis';
 const filters: { value: ConsumptionHistoryFilter; label: string }[] = [
@@ -52,6 +60,9 @@ const filters: { value: ConsumptionHistoryFilter; label: string }[] = [
 
 export default function History() {
   const router = useRouter();
+  const { width, fontScale } = useWindowDimensions();
+  const pageGutter = width < 360 ? 16 : 20;
+  const stackHeader = width < 360 || fontScale > 1.2;
   const { tab: tabParam } = useLocalSearchParams<{ tab?: string }>();
   const { connectivity, scope } = useAppData();
   const repository = useAppRepository();
@@ -236,17 +247,25 @@ export default function History() {
   });
 
   return (
-    <View className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-carin-olive-soft" edges={['top', 'left', 'right']}>
       <OnlineIndicator connectivity={connectivity} />
-      <ScrollView contentContainerClassName="gap-5 px-5 pb-10 pt-7">
-        <View className="flex-row items-start justify-between gap-4">
-          <View className="flex-1 gap-1">
+      <ScrollView
+        className="flex-1 bg-background"
+        contentInsetAdjustmentBehavior="never"
+        contentContainerClassName="gap-5 pb-10"
+        contentContainerStyle={{ paddingHorizontal: pageGutter }}
+        showsVerticalScrollIndicator={false}>
+        <View
+          className={`items-start gap-4 rounded-b-[28px] bg-carin-olive-soft pb-6 pt-4 ${stackHeader ? '' : 'flex-row justify-between'}`}
+          style={{ marginHorizontal: -pageGutter, paddingHorizontal: pageGutter }}>
+          <View className={stackHeader ? 'w-full gap-1' : 'min-w-0 flex-1 gap-1'}>
             <Text variant="h1">Riwayat</Text>
             <Text variant="muted">Konsumsi dan hasil analisis merupakan catatan yang berbeda.</Text>
           </View>
           <Button
             tactile
             size="sm"
+            className="min-h-11 shrink-0 self-start"
             onPress={() =>
               tab === 'consumption'
                 ? setIsCreateDrawerOpen(true)
@@ -594,10 +613,7 @@ export default function History() {
               </Text>
               <Text className="text-foreground">{serviceErrorMessage(draftLoadError)}</Text>
             </View>
-            <Button
-              variant="outline"
-              className="min-h-12 w-full"
-              onPress={closeCreateDrawer}>
+            <Button variant="outline" className="min-h-12 w-full" onPress={closeCreateDrawer}>
               <Text>Tutup</Text>
             </Button>
           </View>
@@ -635,6 +651,6 @@ export default function History() {
           </View>
         )}
       </Drawer>
-    </View>
+    </SafeAreaView>
   );
 }

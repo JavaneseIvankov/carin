@@ -49,7 +49,7 @@ export default function NewExamination() {
   );
 
   return (
-    <SafeAreaView edges={['bottom']} className="flex-1 bg-background">
+    <SafeAreaView edges={['top', 'right', 'bottom', 'left']} className="flex-1 bg-background">
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>

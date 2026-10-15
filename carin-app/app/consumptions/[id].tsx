@@ -11,6 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import * as React from 'react';
 import { ActivityIndicator, AppState, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ConsumptionDetailScreen() {
   const { id: routeId } = useLocalSearchParams<{ id: string }>();
@@ -114,7 +115,7 @@ export default function ConsumptionDetailScreen() {
   };
 
   return (
-    <View className="flex-1 bg-background">
+    <SafeAreaView edges={['top', 'right', 'bottom', 'left']} className="flex-1 bg-background">
       <OnlineIndicator connectivity={connectivity} />
       {consumptionQuery.isPending && !consumption ? (
         <View className="flex-1 items-center justify-center gap-3 bg-background p-8">
@@ -175,6 +176,6 @@ export default function ConsumptionDetailScreen() {
           </Button>
         </View>
       )}
-    </View>
+    </SafeAreaView>
   );
 }

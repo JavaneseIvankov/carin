@@ -79,9 +79,7 @@ function ChoiceGroup<T extends string>({
               accessibilityLabel={option.label}
               onPress={() => onChange(option.value)}
               className={`min-h-11 justify-center rounded-full border px-4 py-2 ${
-                selected
-                  ? 'border-primary bg-carin-olive-soft'
-                  : 'border-border bg-card'
+                selected ? 'border-primary bg-carin-olive-soft' : 'border-border bg-card'
               }`}>
               <Text className={selected ? 'font-semibold text-foreground' : 'text-foreground'}>
                 {option.label}
@@ -121,6 +119,12 @@ export function ExaminationForm({
   );
   const [preview, setPreview] = React.useState<ExaminationInput | null>(null);
   const { bottom: safeAreaBottom } = useSafeAreaInsets();
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const quickDates = [
+    { label: 'Hari ini', value: new Date().toISOString().slice(0, 10) },
+    { label: 'Kemarin', value: yesterday.toISOString().slice(0, 10) },
+  ];
 
   const update = <K extends keyof ExaminationFormValues>(
     key: K,
@@ -182,7 +186,7 @@ export function ExaminationForm({
                 placeholder="120"
               />
             </View>
-            <View className="pt-9 items-center justify-center">
+            <View className="items-center justify-center pt-9">
               <Text className="text-2xl font-bold text-muted-foreground">/</Text>
             </View>
             <View className="flex-1">
@@ -252,37 +256,29 @@ export function ExaminationForm({
           error={errors.measuredOn}
         />
         <View className="flex-row items-center gap-2 pt-0.5">
-          <Pressable
-            onPress={() => {
-              const today = new Date().toISOString().slice(0, 10);
-              update('measuredOn', today);
-            }}
-            className={cn(
-              'rounded-full border border-border/80 bg-muted/20 px-3 py-1 active:bg-muted/40',
-              values.measuredOn === new Date().toISOString().slice(0, 10) &&
-                'border-primary/40 bg-carin-olive-soft'
-            )}>
-            <Text
-              variant="caption"
-              className={cn(
-                'font-medium text-foreground',
-                values.measuredOn === new Date().toISOString().slice(0, 10) &&
-                  'font-semibold text-primary'
-              )}>
-              Hari ini
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={() => {
-              const d = new Date();
-              d.setDate(d.getDate() - 1);
-              update('measuredOn', d.toISOString().slice(0, 10));
-            }}
-            className="rounded-full border border-border/80 bg-muted/20 px-3 py-1 active:bg-muted/40">
-            <Text variant="caption" className="font-medium text-foreground">
-              Kemarin
-            </Text>
-          </Pressable>
+          {quickDates.map((option) => {
+            const selected = values.measuredOn === option.value;
+            return (
+              <Pressable
+                key={option.label}
+                accessibilityRole="button"
+                accessibilityState={{ selected }}
+                onPress={() => update('measuredOn', option.value)}
+                className={cn(
+                  'min-h-11 justify-center rounded-full border border-border/80 bg-muted/20 px-3 py-1 active:bg-muted/40',
+                  selected && 'border-primary/40 bg-carin-olive-soft'
+                )}>
+                <Text
+                  variant="caption"
+                  className={cn(
+                    'font-medium text-foreground',
+                    selected && 'font-semibold text-primary'
+                  )}>
+                  {option.label}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
         {errors.measuredOn && (
           <Text className="text-sm text-destructive" accessibilityRole="alert">
@@ -429,7 +425,9 @@ export function ExaminationForm({
             </View>
 
             <View className="items-center gap-1">
-              <Text variant="caption" className="font-semibold uppercase tracking-wider text-muted-foreground">
+              <Text
+                variant="caption"
+                className="font-semibold uppercase tracking-wider text-muted-foreground">
                 {recordTitle(preview)}
               </Text>
               {preview.type === 'pressure' ? (
@@ -437,9 +435,7 @@ export function ExaminationForm({
                   <Text className="text-4xl font-extrabold tracking-tight text-foreground">
                     {formatMeasurement(preview.systolic)} / {formatMeasurement(preview.diastolic)}
                   </Text>
-                  <Text className="text-xl font-semibold text-muted-foreground">
-                    mmHg
-                  </Text>
+                  <Text className="text-xl font-semibold text-muted-foreground">mmHg</Text>
                 </View>
               ) : (
                 <View className="flex-row items-baseline gap-2">
@@ -485,11 +481,11 @@ export function ExaminationForm({
                 </Text>
               </View>
               {preview.note ? (
-                <View className="mt-1 pt-2 border-t border-border/40">
+                <View className="mt-1 border-t border-border/40 pt-2">
                   <Text variant="caption" className="text-muted-foreground">
                     Catatan
                   </Text>
-                  <Text variant="body" className="text-foreground mt-0.5">
+                  <Text variant="body" className="mt-0.5 text-foreground">
                     {preview.note}
                   </Text>
                 </View>
@@ -497,14 +493,14 @@ export function ExaminationForm({
             </View>
 
             <View className="w-full rounded-xl bg-carin-olive-soft/40 p-3">
-              <Text variant="caption" className="text-foreground text-center">
+              <Text variant="caption" className="text-center text-foreground">
                 Angka ditampilkan sebagai catatan pengukuran, tanpa penilaian klinis otomatis.
               </Text>
             </View>
 
             {!!submitError && (
               <View className="w-full rounded-xl border border-destructive/20 bg-destructive/10 p-3">
-                <Text className="text-sm text-destructive text-center" accessibilityRole="alert">
+                <Text className="text-center text-sm text-destructive" accessibilityRole="alert">
                   {submitError}
                 </Text>
               </View>

@@ -37,6 +37,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { shouldShowDashboardNextAction, shouldStackDashboardActions } from '@/lib/dashboard/layout';
 
 const MASCOT = require('../../assets/images/carin-mascot.png');
@@ -120,14 +121,17 @@ export function DashboardScreen() {
   const energy = nutrient('energyKcal');
 
   return (
-    <View className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-carin-olive-soft" edges={['top', 'left', 'right']}>
       <OnlineIndicator connectivity={connectivity} />
       <ScrollView
         className="flex-1 bg-background"
-        contentContainerClassName="gap-5 pb-8 pt-4"
+        contentInsetAdjustmentBehavior="never"
+        contentContainerClassName="gap-5 pb-8"
         contentContainerStyle={{ paddingHorizontal: pageGutter }}
         showsVerticalScrollIndicator={false}>
-        <View className="gap-3">
+        <View
+          className="gap-3 rounded-b-[28px] bg-carin-olive-soft pb-6 pt-4"
+          style={{ marginHorizontal: -pageGutter, paddingHorizontal: pageGutter }}>
           <View className="flex-row items-center gap-1.5">
             <Icon as={Sprout} className="text-primary" size={20} />
             <Text variant="emphasis" className="text-primary">
@@ -138,7 +142,7 @@ export function DashboardScreen() {
             {dashboard ? formatDashboardDate(dashboard.date) : 'Hari ini'}
           </Text>
           <View className="min-h-[88px] flex-row items-center gap-2">
-            <View className="flex-1 gap-1.5 py-1">
+            <View className="min-w-0 flex-1 gap-1.5 py-1">
               <Text variant="h1">
                 {dashboard?.consumptionCount
                   ? 'Halo! Lihat catatanmu, yuk.'
@@ -150,21 +154,23 @@ export function DashboardScreen() {
                   : 'Satu makanan dulu juga boleh.'}
               </Text>
             </View>
-            <View className="relative h-[96px] w-[96px] items-center justify-center">
-              <Svg viewBox="0 0 100 100" className="h-[92px] w-[92px]">
-                <Path
-                  d="M46,14 C64,12 82,22 87,38 C92,54 86,72 75,84 C64,95 44,95 28,88 C12,81 6,62 10,44 C14,28 26,16 46,14 Z"
-                  fill={colorScheme === 'dark' ? '#5A5031' : '#F5E7A8'}
+            {!stackFoodActions ? (
+              <View className="relative h-[96px] w-[96px] shrink-0 items-center justify-center">
+                <Svg viewBox="0 0 100 100" className="h-[92px] w-[92px]">
+                  <Path
+                    d="M46,14 C64,12 82,22 87,38 C92,54 86,72 75,84 C64,95 44,95 28,88 C12,81 6,62 10,44 C14,28 26,16 46,14 Z"
+                    fill={colorScheme === 'dark' ? '#5A5031' : '#F5E7A8'}
+                  />
+                </Svg>
+                <Image
+                  source={MASCOT}
+                  resizeMode="contain"
+                  accessibilityLabel="Maskot Carin menyapa dan mengajak mulai mencatat"
+                  className="absolute"
+                  style={{ width: 102, height: 102, top: -5 }}
                 />
-              </Svg>
-              <Image
-                source={MASCOT}
-                resizeMode="contain"
-                accessibilityLabel="Maskot Carin menyapa dan mengajak mulai mencatat"
-                className="absolute"
-                style={{ width: 102, height: 102, top: -5 }}
-              />
-            </View>
+              </View>
+            ) : null}
           </View>
         </View>
 
@@ -411,6 +417,6 @@ export function DashboardScreen() {
           />
         ) : null}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
