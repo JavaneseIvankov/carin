@@ -1,3 +1,4 @@
+import { HeaderPattern } from '@/components/app/header-pattern';
 import { OnlineIndicator } from '@/components/app/online-indicator';
 import { serviceErrorMessage } from '@/components/app/presentation';
 import { ScanDeletionControl } from '@/components/food/scan-deletion-control';
@@ -257,8 +258,9 @@ export default function History() {
         contentContainerStyle={{ paddingHorizontal: pageGutter }}
         showsVerticalScrollIndicator={false}>
         <View
-          className={`items-start gap-4 rounded-b-[28px] bg-carin-olive-soft pb-6 pt-4 ${stackHeader ? '' : 'flex-row justify-between'}`}
+          className={`relative items-start gap-4 overflow-hidden rounded-b-[28px] bg-carin-olive-soft pb-6 pt-4 ${stackHeader ? '' : 'flex-row justify-between'}`}
           style={{ marginHorizontal: -pageGutter, paddingHorizontal: pageGutter }}>
+          <HeaderPattern />
           <View className={stackHeader ? 'w-full gap-1' : 'min-w-0 flex-1 gap-1'}>
             <Text variant="h1">Riwayat</Text>
             <Text variant="muted">Konsumsi dan hasil analisis merupakan catatan yang berbeda.</Text>

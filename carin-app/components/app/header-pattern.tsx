@@ -12,7 +12,7 @@ import { View } from 'react-native';
 
 const motifs = [Leaf, Apple, NotebookPen, HeartPulse, Carrot, Sprout, Utensils];
 
-export function ProfileHeaderPattern() {
+export function HeaderPattern() {
   return (
     <View
       pointerEvents="none"

@@ -1,3 +1,4 @@
+import { HeaderPattern } from '@/components/app/header-pattern';
 import { ServiceError } from '@/components/app/service-error';
 import { ReadState } from '@/components/app/read-state';
 import { Button } from '@/components/ui/button';
@@ -89,8 +90,9 @@ export default function Exams() {
         contentContainerStyle={{ paddingHorizontal: pageGutter }}
         showsVerticalScrollIndicator={false}>
         <View
-          className={`items-start gap-4 rounded-b-[28px] bg-carin-olive-soft pb-6 pt-4 ${stackHeader ? '' : 'flex-row justify-between'}`}
+          className={`relative items-start gap-4 overflow-hidden rounded-b-[28px] bg-carin-olive-soft pb-6 pt-4 ${stackHeader ? '' : 'flex-row justify-between'}`}
           style={{ marginHorizontal: -pageGutter, paddingHorizontal: pageGutter }}>
+          <HeaderPattern />
           <View className={stackHeader ? 'w-full gap-1' : 'min-w-0 flex-1 gap-1'}>
             <Text variant="h1">Pemeriksaan</Text>
             <Text variant="muted">Simpan hasil pengukuran untuk dilihat kembali.</Text>

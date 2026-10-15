@@ -1,17 +1,20 @@
 export const WELCOME_SLIDES = [
   {
     id: 'companion',
-    title: 'Kenali pola makanmu tanpa dihakimi',
+    title: 'Hai, selamat datang di Carin!',
+    illustrationLabel: 'Maskot Carin melambaikan tangan untuk menyambutmu',
     body: 'Catatan bisa membantumu melihat kembali apa yang sudah dimakan, dengan ritme yang nyaman.',
   },
   {
     id: 'food-paths',
     title: 'Foto sebelum makan, catat manual setelahnya',
+    illustrationLabel: 'Maskot Carin memotret sepiring makanan dengan ponsel',
     body: 'Pakai foto untuk melihat perkiraan. Catatan konsumsi tersimpan setelah kamu mengonfirmasi makanan yang sudah dimakan.',
   },
   {
     id: 'health-profile',
     title: 'Profil kesehatan tetap pilihanmu',
+    illustrationLabel: 'Maskot Carin berpakaian dokter membawa catatan kesehatan',
     body: 'Lengkapi yang kamu ketahui di langkah profil, atau pilih “Isi nanti”. Kamu bisa melengkapinya kapan saja.',
   },
 ] as const;

@@ -1,3 +1,4 @@
+import { HeaderPattern } from '@/components/app/header-pattern';
 import { OnlineIndicator } from '@/components/app/online-indicator';
 import { ReadState } from '@/components/app/read-state';
 import { ServiceError } from '@/components/app/service-error';
@@ -130,8 +131,9 @@ export function DashboardScreen() {
         contentContainerStyle={{ paddingHorizontal: pageGutter }}
         showsVerticalScrollIndicator={false}>
         <View
-          className="gap-3 rounded-b-[28px] bg-carin-olive-soft pb-6 pt-4"
+          className="relative gap-3 overflow-hidden rounded-b-[28px] bg-carin-olive-soft pb-6 pt-4"
           style={{ marginHorizontal: -pageGutter, paddingHorizontal: pageGutter }}>
+          <HeaderPattern />
           <View className="flex-row items-center gap-1.5">
             <Icon as={Sprout} className="text-primary" size={20} />
             <Text variant="emphasis" className="text-primary">

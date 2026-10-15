@@ -1,6 +1,6 @@
 import { ServiceError } from '@/components/app/service-error';
 import { MissingFieldActions } from '@/components/profile/missing-field-actions';
-import { ProfileHeaderPattern } from '@/components/profile/profile-header-pattern';
+import { HeaderPattern } from '@/components/app/header-pattern';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { useAuth } from '@/lib/auth/provider';
@@ -113,7 +113,7 @@ export default function ProfileScreen() {
         <View
           className="relative gap-5 overflow-hidden rounded-b-[28px] bg-carin-olive-soft pb-8 pt-4"
           style={{ marginHorizontal: -pageGutter, paddingHorizontal: pageGutter }}>
-          <ProfileHeaderPattern />
+          <HeaderPattern />
           <Text variant="label" className="text-primary">
             Profil
           </Text>

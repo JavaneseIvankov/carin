@@ -1,15 +1,21 @@
+import { HeaderPattern } from '@/components/app/header-pattern';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import {
   WELCOME_SLIDES,
   getNextWelcomeAction,
   getPreviousWelcomeIndex,
+  type WelcomeSlideId,
 } from '@/lib/onboarding/welcome-slides';
 import * as React from 'react';
 import { Image, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const MASCOT = require('../../assets/images/carin-mascot.png');
+const MASCOTS = {
+  companion: require('../../assets/images/carin-mascot.png'),
+  'food-paths': require('../../assets/images/carin-mascot-camera.png'),
+  'health-profile': require('../../assets/images/carin-mascot-doctor.png'),
+} satisfies Record<WelcomeSlideId, number>;
 
 export function WelcomeCarousel({ onStartProfile }: { onStartProfile: () => void }) {
   const [index, setIndex] = React.useState(0);
@@ -42,13 +48,15 @@ export function WelcomeCarousel({ onStartProfile }: { onStartProfile: () => void
           className="flex-1"
           contentContainerClassName="grow justify-center gap-5 pb-4"
           showsVerticalScrollIndicator={false}>
-          <View className="items-center justify-center rounded-summary bg-carin-butter px-5 py-4">
+          <View className="relative items-center justify-center overflow-hidden rounded-summary bg-carin-butter px-5 py-4">
+            <HeaderPattern />
             <Image
-              source={MASCOT}
+              key={slide.id}
+              source={MASCOTS[slide.id]}
               resizeMode="contain"
               accessibilityRole="image"
-              accessibilityLabel="Maskot Carin menemani pengenalan singkat"
-              style={{ width: 148, height: 148 }}
+              accessibilityLabel={slide.illustrationLabel}
+              style={{ width: 200, height: 200 }}
             />
           </View>
 
@@ -108,7 +116,9 @@ export function WelcomeCarousel({ onStartProfile }: { onStartProfile: () => void
             <Button
               variant="tactile"
               accessibilityRole="button"
-              accessibilityLabel={isLast ? 'Lanjut ke profil kesehatan' : 'Lanjut ke halaman berikutnya'}
+              accessibilityLabel={
+                isLast ? 'Lanjut ke profil kesehatan' : 'Lanjut ke halaman berikutnya'
+              }
               onPress={advance}
               className="min-w-36">
               <Text>{isLast ? 'Lanjut ke Profil' : 'Lanjut'}</Text>

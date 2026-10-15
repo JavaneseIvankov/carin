@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  WELCOME_SLIDES,
-  getNextWelcomeAction,
-  getPreviousWelcomeIndex,
-} from './welcome-slides';
+import { WELCOME_SLIDES, getNextWelcomeAction, getPreviousWelcomeIndex } from './welcome-slides';
 
 describe('welcome carousel', () => {
   it('introduces the companion, food entry timing, and optional health profile in order', () => {
@@ -12,6 +8,10 @@ describe('welcome carousel', () => {
       'food-paths',
       'health-profile',
     ]);
+    expect(WELCOME_SLIDES[0].title).toContain('selamat datang');
+    expect(WELCOME_SLIDES[0].illustrationLabel).toContain('melambaikan tangan');
+    expect(WELCOME_SLIDES[1].illustrationLabel).toContain('memotret');
+    expect(WELCOME_SLIDES[2].illustrationLabel).toContain('dokter');
     expect(WELCOME_SLIDES[1]?.title).toContain('sebelum makan');
     expect(WELCOME_SLIDES[1]?.body).toContain('mengonfirmasi');
     expect(WELCOME_SLIDES[2]?.body).toContain('Isi nanti');
