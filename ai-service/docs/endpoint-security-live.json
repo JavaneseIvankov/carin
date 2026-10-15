@@ -1,0 +1,86 @@
+{
+  "mode": "live-alibaba",
+  "image": "lefood-14.jpg",
+  "transport": "real local HTTP + fixture object storage + JPEG normalization",
+  "security_store": "memory (development only)",
+  "test_inference_quota_per_minute": 2,
+  "production_default_quota_per_minute": 10,
+  "target_provider_calls": 2,
+  "endpoints": [
+    {
+      "endpoint": "/internal/ai-service/a-model",
+      "status": 200,
+      "elapsed_seconds": 5.445,
+      "schema_valid": true,
+      "is_food": true,
+      "weight_g": 100.0
+    },
+    {
+      "endpoint": "/internal/ai-service/b-model",
+      "status": 200,
+      "elapsed_seconds": 2.596,
+      "schema_valid": true,
+      "is_food": true,
+      "weight_g": 175
+    }
+  ],
+  "checks": [
+    {
+      "check": "missing-key",
+      "status": 401,
+      "passed": true
+    },
+    {
+      "check": "invalid-key",
+      "status": 401,
+      "passed": true
+    },
+    {
+      "check": "invalid-host",
+      "status": 400,
+      "passed": true
+    },
+    {
+      "check": "body-limit",
+      "status": 413,
+      "passed": true
+    },
+    {
+      "check": "production-style-docs-disabled",
+      "status": 404,
+      "passed": true
+    },
+    {
+      "check": "shared-spam-quota",
+      "requests": 20,
+      "statuses": [
+        429,
+        429,
+        429,
+        429,
+        429,
+        429,
+        429,
+        429,
+        429,
+        429,
+        429,
+        429,
+        429,
+        429,
+        429,
+        429,
+        429,
+        429,
+        429,
+        429
+      ],
+      "extra_media_downloads": 0,
+      "passed": true
+    },
+    {
+      "check": "retired-aliases-removed",
+      "passed": true
+    }
+  ]
+}

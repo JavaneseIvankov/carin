@@ -198,7 +198,7 @@ describe('generated contract validation', () => {
   });
 
   it('compiles schemas for all declared operations and rejects unknown schema and operation IDs', () => {
-    expect(contractOperations()).toHaveLength(38);
+    expect(contractOperations()).toHaveLength(40);
     expect(() => validateSchema('ai.NotAContract', {})).toThrow('Unknown schema');
     expect(() => validateRequest('app.notAnOperation', {})).toThrow('Unknown operation');
     expect(() =>

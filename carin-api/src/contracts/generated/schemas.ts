@@ -1,6 +1,344 @@
 // Generated from specs/contracts/. Do not edit; run pnpm contracts:generate in carin-app.
 export const contracts = {
   operations: {
+    'ai.analyzeA1V1VariantA': {
+      method: 'post',
+      parameters: {
+        header: {
+          additionalProperties: false,
+          properties: {},
+          required: [],
+          type: 'object',
+        },
+        path: {
+          additionalProperties: false,
+          properties: {},
+          required: [],
+          type: 'object',
+        },
+        query: {
+          additionalProperties: false,
+          properties: {},
+          required: [],
+          type: 'object',
+        },
+      },
+      path: '/internal/ai-service/a-model',
+      request: {
+        content: {
+          'application/json': {
+            $ref: '#/$defs/ai.A1V1PhotoRequest',
+          },
+        },
+        required: true,
+      },
+      responses: {
+        '200': {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.A1V1Prediction',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
+        '400': {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.Error',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
+        '401': {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.Error',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
+        '408': {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.Error',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
+        '413': {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.Error',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
+        '415': {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.Error',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
+        '422': {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.Error',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
+        '429': {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.Error',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {
+              'retry-after': {
+                minimum: 1,
+                type: 'integer',
+              },
+            },
+            required: [],
+            type: 'object',
+          },
+        },
+        '503': {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.Error',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
+        default: {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.Error',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
+      },
+    },
+    'ai.analyzeA1V1VariantB': {
+      method: 'post',
+      parameters: {
+        header: {
+          additionalProperties: false,
+          properties: {},
+          required: [],
+          type: 'object',
+        },
+        path: {
+          additionalProperties: false,
+          properties: {},
+          required: [],
+          type: 'object',
+        },
+        query: {
+          additionalProperties: false,
+          properties: {},
+          required: [],
+          type: 'object',
+        },
+      },
+      path: '/internal/ai-service/b-model',
+      request: {
+        content: {
+          'application/json': {
+            $ref: '#/$defs/ai.A1V1PhotoRequest',
+          },
+        },
+        required: true,
+      },
+      responses: {
+        '200': {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.A1V1Prediction',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
+        '400': {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.Error',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
+        '401': {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.Error',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
+        '408': {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.Error',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
+        '413': {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.Error',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
+        '415': {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.Error',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
+        '422': {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.Error',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
+        '429': {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.Error',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {
+              'retry-after': {
+                minimum: 1,
+                type: 'integer',
+              },
+            },
+            required: [],
+            type: 'object',
+          },
+        },
+        '503': {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.Error',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
+        default: {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.Error',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
+      },
+    },
     'ai.analyzePhoto': {
       method: 'post',
       parameters: {
@@ -72,7 +410,46 @@ export const contracts = {
             type: 'object',
           },
         },
+        '408': {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.Error',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
         '409': {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.Error',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
+        '413': {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.Error',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
+        '415': {
           content: {
             'application/json': {
               $ref: '#/$defs/ai.Error',
@@ -403,7 +780,46 @@ export const contracts = {
             type: 'object',
           },
         },
+        '408': {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.Error',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
         '409': {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.Error',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
+        '413': {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.Error',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
+        '415': {
           content: {
             'application/json': {
               $ref: '#/$defs/ai.Error',
@@ -6162,6 +6578,150 @@ export const contracts = {
   },
   schema: {
     $defs: {
+      'ai.A1V1PhotoRequest': {
+        additionalProperties: false,
+        properties: {
+          image: {
+            $ref: '#/$defs/ai.ImageReference',
+          },
+        },
+        required: ['image'],
+        type: 'object',
+      },
+      'ai.A1V1Prediction': {
+        additionalProperties: false,
+        properties: {
+          apparent_volume_cm3: {
+            anyOf: [
+              {
+                minimum: 0,
+                type: 'number',
+              },
+              {
+                type: 'null',
+              },
+            ],
+          },
+          components: {
+            items: {
+              additionalProperties: false,
+              properties: {
+                mass_g: {
+                  anyOf: [
+                    {
+                      minimum: 0,
+                      type: 'number',
+                    },
+                    {
+                      type: 'null',
+                    },
+                  ],
+                },
+                name: {
+                  minLength: 1,
+                  type: 'string',
+                },
+              },
+              required: ['name', 'mass_g'],
+              type: 'object',
+            },
+            type: 'array',
+          },
+          container_diameter_cm: {
+            anyOf: [
+              {
+                minimum: 0,
+                type: 'number',
+              },
+              {
+                type: 'null',
+              },
+            ],
+          },
+          is_food: {
+            type: 'boolean',
+          },
+          limitations: {
+            items: {
+              type: 'string',
+            },
+            maxItems: 3,
+            type: 'array',
+          },
+          prediction: {
+            additionalProperties: false,
+            properties: {
+              carbohydrate_g: {
+                anyOf: [
+                  {
+                    minimum: 0,
+                    type: 'number',
+                  },
+                  {
+                    type: 'null',
+                  },
+                ],
+              },
+              energy_kcal: {
+                anyOf: [
+                  {
+                    minimum: 0,
+                    type: 'number',
+                  },
+                  {
+                    type: 'null',
+                  },
+                ],
+              },
+              fat_g: {
+                anyOf: [
+                  {
+                    minimum: 0,
+                    type: 'number',
+                  },
+                  {
+                    type: 'null',
+                  },
+                ],
+              },
+              protein_g: {
+                anyOf: [
+                  {
+                    minimum: 0,
+                    type: 'number',
+                  },
+                  {
+                    type: 'null',
+                  },
+                ],
+              },
+            },
+            required: ['energy_kcal', 'protein_g', 'carbohydrate_g', 'fat_g'],
+            type: 'object',
+          },
+          weight_g: {
+            anyOf: [
+              {
+                minimum: 0,
+                type: 'number',
+              },
+              {
+                type: 'null',
+              },
+            ],
+          },
+        },
+        required: [
+          'is_food',
+          'container_diameter_cm',
+          'apparent_volume_cm3',
+          'weight_g',
+          'components',
+          'prediction',
+          'limitations',
+        ],
+        type: 'object',
+      },
       'ai.AnalysisResult': {
         additionalProperties: false,
         properties: {
@@ -6746,6 +7306,26 @@ export const contracts = {
         required: ['error'],
         type: 'object',
       },
+      'ai.ImageReference': {
+        additionalProperties: false,
+        properties: {
+          downloadUrl: {
+            format: 'uri',
+            maxLength: 4096,
+            type: 'string',
+          },
+          mimeType: {
+            enum: ['image/jpeg', 'image/png'],
+            type: 'string',
+          },
+          sha256: {
+            pattern: '^[a-f0-9]{64}$',
+            type: 'string',
+          },
+        },
+        required: ['downloadUrl', 'mimeType', 'sha256'],
+        type: 'object',
+      },
       'ai.Limitation': {
         additionalProperties: false,
         properties: {
@@ -7097,23 +7677,7 @@ export const contracts = {
             $ref: '#/$defs/ai.ContractVersion',
           },
           image: {
-            additionalProperties: false,
-            properties: {
-              downloadUrl: {
-                format: 'uri',
-                type: 'string',
-              },
-              mimeType: {
-                enum: ['image/jpeg', 'image/png'],
-                type: 'string',
-              },
-              sha256: {
-                pattern: '^[a-f0-9]{64}$',
-                type: 'string',
-              },
-            },
-            required: ['downloadUrl', 'mimeType', 'sha256'],
-            type: 'object',
+            $ref: '#/$defs/ai.ImageReference',
           },
           operationId: {
             format: 'uuid',
