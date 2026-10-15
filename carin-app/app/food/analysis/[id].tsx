@@ -94,6 +94,7 @@ export default function AnalysisResultScreen() {
         ? createScanActions(
             {
               uploadPhoto: (input) => repository.write('uploadPhoto', input),
+              uploadPhotoFile: (input, file) => repository.uploadPhotoFile(input, file),
               createPhotoAnalysis: (input) => repository.write('createPhotoAnalysis', input),
               retryAnalysisJob: (input) => repository.write('retryAnalysisJob', input),
             },
@@ -313,7 +314,11 @@ export default function AnalysisResultScreen() {
                     className="h-8 w-8"
                     accessibilityLabel="Maskot Carin"
                   />
-                  <ActivityIndicator size="small" color="#506B35" accessibilityLabel="Menyiapkan analisis" />
+                  <ActivityIndicator
+                    size="small"
+                    color="#506B35"
+                    accessibilityLabel="Menyiapkan analisis"
+                  />
                   <Text variant="small" className="font-semibold text-primary">
                     Menyiapkan analisis…
                   </Text>
@@ -353,7 +358,11 @@ export default function AnalysisResultScreen() {
                 style={{ width: 64, height: 68 }}
               />
             </View>
-            <ActivityIndicator size="small" color="#506B35" accessibilityLabel="Memuat status analisis" />
+            <ActivityIndicator
+              size="small"
+              color="#506B35"
+              accessibilityLabel="Memuat status analisis"
+            />
             <Text variant="h2">Menyiapkan Hasil Analisis</Text>
             <Text variant="muted" className="text-center">
               Menghubungkan ke layanan analisis Carin. Tunggu sebentar…
@@ -377,9 +386,7 @@ export default function AnalysisResultScreen() {
           <Text accessibilityRole="alert" className="text-muted-foreground">
             Analisis belum dapat dimuat. Periksa koneksi lalu coba lagi.
           </Text>
-          <Button
-            variant="tactile"
-            onPress={() => void jobQuery.refetch()}>
+          <Button variant="tactile" onPress={() => void jobQuery.refetch()}>
             <Icon as={RefreshCw} size={18} className="mr-1.5 text-primary-foreground" />
             <Text>Coba muat lagi</Text>
           </Button>
@@ -399,7 +406,9 @@ export default function AnalysisResultScreen() {
             </View>
             <Text variant="h2">Hasil Analisis</Text>
           </View>
-          <Text className="text-muted-foreground">Analisis ini tidak ditemukan atau tidak dapat dibuka.</Text>
+          <Text className="text-muted-foreground">
+            Analisis ini tidak ditemukan atau tidak dapat dibuka.
+          </Text>
           <BackButton href={{ pathname: '/(tabs)/history', params: { tab: 'analysis' } }} />
         </View>
       </View>
@@ -469,7 +478,11 @@ export default function AnalysisResultScreen() {
                       className="h-8 w-8"
                       accessibilityLabel="Maskot Carin"
                     />
-                    <ActivityIndicator size="small" color="#506B35" accessibilityLabel={statusText[job.status]} />
+                    <ActivityIndicator
+                      size="small"
+                      color="#506B35"
+                      accessibilityLabel={statusText[job.status]}
+                    />
                     <Text variant="small" className="font-semibold text-primary">
                       {statusText[job.status]}
                     </Text>
@@ -488,7 +501,8 @@ export default function AnalysisResultScreen() {
               </View>
               <View className="bg-carin-olive-soft/40 p-3.5">
                 <Text variant="caption" className="text-center text-muted-foreground">
-                  Kamu dapat menunggu di halaman ini atau kembali nanti. Hasil analisis akan tersimpan di riwayat.
+                  Kamu dapat menunggu di halaman ini atau kembali nanti. Hasil analisis akan
+                  tersimpan di riwayat.
                 </Text>
               </View>
             </View>
@@ -511,7 +525,11 @@ export default function AnalysisResultScreen() {
                   style={{ width: 64, height: 68 }}
                 />
               </View>
-              <ActivityIndicator size="small" color="#506B35" accessibilityLabel={statusText[job.status]} />
+              <ActivityIndicator
+                size="small"
+                color="#506B35"
+                accessibilityLabel={statusText[job.status]}
+              />
               <View className="items-center gap-1.5">
                 <View className="rounded-full bg-carin-olive-soft px-3 py-1">
                   <Text variant="small" className="font-semibold text-primary">
@@ -519,7 +537,9 @@ export default function AnalysisResultScreen() {
                   </Text>
                 </View>
                 <Text variant="h2" className="text-center">
-                  {job.status === 'queued' ? 'Menunggu Antrean Analisis' : 'Menganalisis foto makanan…'}
+                  {job.status === 'queued'
+                    ? 'Menunggu Antrean Analisis'
+                    : 'Menganalisis foto makanan…'}
                 </Text>
                 <Text variant="muted" className="text-center">
                   Mengidentifikasi bahan, takaran porsi, dan perkiraan gizi.
@@ -527,7 +547,8 @@ export default function AnalysisResultScreen() {
               </View>
               <View className="rounded-[14px] bg-carin-olive-soft/40 p-3">
                 <Text variant="caption" className="text-center text-muted-foreground">
-                  Kamu dapat menunggu di halaman ini atau kembali nanti. Hasil analisis akan tersimpan di riwayat.
+                  Kamu dapat menunggu di halaman ini atau kembali nanti. Hasil analisis akan
+                  tersimpan di riwayat.
                 </Text>
               </View>
             </View>
@@ -548,10 +569,7 @@ export default function AnalysisResultScreen() {
             </View>
             <Text className="text-muted-foreground">{failure.message}</Text>
             {failure.retryable ? (
-              <Button
-                variant="tactile"
-                onPress={retry}
-                disabled={retrying}>
+              <Button variant="tactile" onPress={retry} disabled={retrying}>
                 {retrying ? (
                   <ActivityIndicator color="white" />
                 ) : (
@@ -572,7 +590,9 @@ export default function AnalysisResultScreen() {
 
         {job.status === 'cancelled' ? (
           <View className="rounded-[20px] border border-border bg-card p-5">
-            <Text className="text-muted-foreground">Analisis ini dibatalkan dan hasilnya tidak tersedia.</Text>
+            <Text className="text-muted-foreground">
+              Analisis ini dibatalkan dan hasilnya tidak tersedia.
+            </Text>
           </View>
         ) : null}
 
@@ -613,7 +633,7 @@ export default function AnalysisResultScreen() {
                       </Text>
                     </View>
                   </View>
-                  <Text variant="h2" numberOfLines={2} className="text-foreground leading-snug">
+                  <Text variant="h2" numberOfLines={2} className="leading-snug text-foreground">
                     {foodTitle}
                   </Text>
                   {formattedTimestamp ? (
@@ -720,7 +740,8 @@ export default function AnalysisResultScreen() {
                 </View>
               </View>
               <Text variant="caption" className="text-muted-foreground">
-                Pertimbangan ini bersifat informatif berdasarkan data yang tersedia, bukan diagnosis medis atau jaminan keamanan makanan.
+                Pertimbangan ini bersifat informatif berdasarkan data yang tersedia, bukan diagnosis
+                medis atau jaminan keamanan makanan.
               </Text>
 
               {presentation.attentions.map((attention, index) => (
@@ -732,7 +753,8 @@ export default function AnalysisResultScreen() {
                   </Text>
                   {attention.personalizationSupported === false ? (
                     <Text variant="caption" className="text-muted-foreground">
-                      Kondisi ini belum didukung untuk personalisasi. Tidak ada aturan khusus yang ditambahkan.
+                      Kondisi ini belum didukung untuk personalisasi. Tidak ada aturan khusus yang
+                      ditambahkan.
                     </Text>
                   ) : null}
                   <Text className="text-sm text-foreground">{attention.reason}</Text>
@@ -756,7 +778,8 @@ export default function AnalysisResultScreen() {
 
               {result.attentions.length === 0 ? (
                 <Text variant="muted">
-                  Tidak ada aturan personal yang dapat diterapkan dari data tersedia. Tetap perhatikan kenyamanan tubuhmu.
+                  Tidak ada aturan personal yang dapat diterapkan dari data tersedia. Tetap
+                  perhatikan kenyamanan tubuhmu.
                 </Text>
               ) : null}
             </View>
@@ -891,7 +914,8 @@ export default function AnalysisResultScreen() {
                 <Text className="font-semibold text-foreground">Batas Analisis & Konsumsi</Text>
               </View>
               <Text variant="caption" className="text-foreground">
-                Hasil analisis foto ini tersimpan terpisah dan belum dicatat ke riwayat konsumsi harianmu. Tekan “Sudah dikonsumsi” jika kamu sudah memakannya.
+                Hasil analisis foto ini tersimpan terpisah dan belum dicatat ke riwayat konsumsi
+                harianmu. Tekan “Sudah dikonsumsi” jika kamu sudah memakannya.
               </Text>
             </View>
           </>

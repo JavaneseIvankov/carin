@@ -111,11 +111,10 @@ async function collectBounded(stream: Readable): Promise<Buffer> {
   return Buffer.concat(chunks, size);
 }
 
-export function createMinioMediaObjectStore(config: MinioMediaConfig): MediaObjectStore {
-  const endpoint = parseMinioEndpoint(config.endpoint);
-  if (!config.bucket || !config.accessKey || !config.secretKey)
-    throw new Error('MinIO bucket and credentials are required');
-  const baseTransport = endpoint.protocol === 'https:' ? https : http;
+export function createMinioHttpTransport(
+  baseTransport: typeof http | typeof https,
+  timeoutMs = STORAGE_PUT_TIMEOUT_MS,
+): NonNullable<ClientOptions['transport']> {
   type RequestCallback = (response: http.IncomingMessage) => void;
   function boundedRequest(options: string | URL | http.RequestOptions, callback?: RequestCallback): http.ClientRequest;
   function boundedRequest(url: string | URL, options: http.RequestOptions, callback?: RequestCallback): http.ClientRequest;
@@ -130,13 +129,26 @@ export function createMinioMediaObjectStore(config: MinioMediaConfig): MediaObje
         : optionsOrCallback
           ? baseTransport.request(urlOrOptions, optionsOrCallback, callback)
           : baseTransport.request(urlOrOptions, callback)
-      : baseTransport.request(urlOrOptions, callback);
-    const deadline = setTimeout(() => request.destroy(new Error('MinIO operation timed out')), STORAGE_PUT_TIMEOUT_MS);
+      : typeof optionsOrCallback === 'function'
+        ? baseTransport.request(urlOrOptions, optionsOrCallback)
+        : baseTransport.request(urlOrOptions, callback);
+    const clearDeadline = () => clearTimeout(deadline);
+    const deadline = setTimeout(() => request.destroy(new Error('MinIO operation timed out')), timeoutMs);
     deadline.unref();
-    request.once('close', () => clearTimeout(deadline));
+    request.once('close', clearDeadline);
+    request.once('error', clearDeadline);
+    request.once('response', (response) => response.once('end', clearDeadline));
     return request;
   }
-  const transport: NonNullable<ClientOptions['transport']> = { request: boundedRequest };
+  return { request: boundedRequest };
+}
+
+export function createMinioMediaObjectStore(config: MinioMediaConfig): MediaObjectStore {
+  const endpoint = parseMinioEndpoint(config.endpoint);
+  if (!config.bucket || !config.accessKey || !config.secretKey)
+    throw new Error('MinIO bucket and credentials are required');
+  const baseTransport = endpoint.protocol === 'https:' ? https : http;
+  const transport = createMinioHttpTransport(baseTransport);
   const client = new MinioClient({
     endPoint: endpoint.hostname,
     port: endpoint.port,

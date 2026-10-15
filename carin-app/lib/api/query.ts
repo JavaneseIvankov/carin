@@ -1,5 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { File, UploadType } from 'expo-file-system';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { fetch as expoFetch } from 'expo/fetch';
 import * as React from 'react';
 import { Platform } from 'react-native';
 import { useAppData } from '@/lib/data/provider';
@@ -23,6 +25,23 @@ export function useAppRepository() {
             onUnauthorized: invalidateSession,
             getCookie: Platform.OS === 'web' ? undefined : () => authClient.getCookie(),
             credentials: Platform.OS === 'web' ? 'include' : 'omit',
+            fetcher: Platform.OS === 'web' ? undefined : (expoFetch as typeof fetch),
+            nativeFileUploader:
+              Platform.OS === 'web'
+                ? undefined
+                : async (url, uri, options) => {
+                    const result = await new File(uri).upload(url, {
+                      httpMethod: 'POST',
+                      uploadType: UploadType.MULTIPART,
+                      fieldName: options.fieldName,
+                      mimeType: options.mimeType,
+                      headers: options.headers,
+                    });
+                    return new Response(result.body, {
+                      status: result.status,
+                      headers: result.headers,
+                    });
+                  },
             isCurrentScope: (() => {
               const generation = scopeGeneration(AsyncStorage, scope);
               return () =>

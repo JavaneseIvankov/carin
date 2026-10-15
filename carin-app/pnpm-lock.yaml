@@ -50,6 +50,9 @@ importers:
       expo-crypto:
         specifier: ~56.0.5
         version: 56.0.5(expo@56.0.23)
+      expo-file-system:
+        specifier: ~56.0.11
+        version: 56.0.11(expo@56.0.23)(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.18)(react@19.2.3))
       expo-image-picker:
         specifier: ~56.0.25
         version: 56.0.25(expo@56.0.23)
@@ -6450,7 +6453,9 @@ snapshots:
       metro-runtime: 0.84.6
     transitivePeerDependencies:
       - '@babel/core'
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   '@react-native/normalize-colors@0.74.89': {}
 
