@@ -1,3 +1,4 @@
+import { BackButton } from '@/components/app/back-button';
 import { FormField } from '@/components/app/form-field';
 import { ServiceError } from '@/components/app/service-error';
 import { LegalCheckbox } from '@/components/auth/legal-checkbox';
@@ -164,6 +165,7 @@ export default function SettingsScreen() {
   if (!account && meQuery.error) {
     return (
       <View className="flex-1 gap-4 bg-background p-5">
+        <BackButton href="/(tabs)/profile" />
         <Text variant="h2">Pengaturan</Text>
         <ServiceError error={meQuery.error} onRetry={() => void meQuery.refetch()} />
       </View>
@@ -183,6 +185,7 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView className="flex-1 bg-background" contentContainerClassName="gap-5 px-5 pb-10 pt-7">
+      <BackButton href="/(tabs)/profile" />
       <View className="gap-2">
         <Text variant="h1">Pengaturan</Text>
         <Text variant="muted">Perubahan disimpan ke akun Anda saat server mengonfirmasi.</Text>

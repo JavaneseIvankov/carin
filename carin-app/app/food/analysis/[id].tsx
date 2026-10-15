@@ -1,3 +1,4 @@
+import { BackButton } from '@/components/app/back-button';
 import { Button } from '@/components/ui/button';
 import { ScanDeletionControl } from '@/components/food/scan-deletion-control';
 import { Text } from '@/components/ui/text';
@@ -382,12 +383,7 @@ export default function AnalysisResultScreen() {
             <Icon as={RefreshCw} size={18} className="mr-1.5 text-primary-foreground" />
             <Text>Coba muat lagi</Text>
           </Button>
-          <Button
-            variant="outline"
-            className="rounded-[20px]"
-            onPress={() => router.back()}>
-            <Text>Kembali</Text>
-          </Button>
+          <BackButton href={{ pathname: '/(tabs)/history', params: { tab: 'analysis' } }} />
         </View>
       </View>
     );
@@ -404,12 +400,7 @@ export default function AnalysisResultScreen() {
             <Text variant="h2">Hasil Analisis</Text>
           </View>
           <Text className="text-muted-foreground">Analisis ini tidak ditemukan atau tidak dapat dibuka.</Text>
-          <Button
-            variant="outline"
-            className="rounded-[20px]"
-            onPress={() => router.back()}>
-            <Text>Kembali</Text>
-          </Button>
+          <BackButton href={{ pathname: '/(tabs)/history', params: { tab: 'analysis' } }} />
         </View>
       </View>
     );
@@ -443,6 +434,7 @@ export default function AnalysisResultScreen() {
   return (
     <View className="flex-1 bg-background">
       <ScrollView contentContainerClassName="gap-5 px-5 py-8">
+        <BackButton href={{ pathname: '/(tabs)/history', params: { tab: 'analysis' } }} />
         <View className="gap-2">
           <View className="flex-row items-center gap-2.5">
             <View className="h-9 w-9 items-center justify-center rounded-full bg-carin-olive-soft">

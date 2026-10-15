@@ -1,3 +1,4 @@
+import { BackButton } from '@/components/app/back-button';
 import { Button } from '@/components/ui/button';
 import { FormField } from '@/components/app/form-field';
 import { Icon } from '@/components/ui/icon';
@@ -8,7 +9,7 @@ import { createDeletionActionState, createDeletionActions } from '@/lib/deletion
 import { useAuth } from '@/lib/auth/provider';
 import { useRouter, type Href } from 'expo-router';
 import * as React from 'react';
-import { AlertTriangle, ChevronLeft } from 'lucide-react-native';
+import { AlertTriangle } from 'lucide-react-native';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 
 const CONFIRMATION_TEXT = 'HAPUS AKUN';
@@ -59,13 +60,7 @@ export default function DeleteAccountScreen() {
       className="flex-1 bg-background"
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerClassName="gap-5 px-5 pb-10 pt-7">
-        <Button
-          variant="ghost"
-          className="min-h-11 self-start -ml-2 flex-row items-center gap-1"
-          onPress={() => router.back()}>
-          <Icon as={ChevronLeft} size={18} className="text-foreground" />
-          <Text>Kembali</Text>
-        </Button>
+        <BackButton href="/(tabs)/profile" />
 
         <View className="gap-2">
           <Text variant="h1">Hapus akun Carin</Text>

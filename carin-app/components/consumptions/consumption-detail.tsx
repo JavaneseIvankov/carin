@@ -1,3 +1,4 @@
+import { BackButton } from '@/components/app/back-button';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
@@ -8,7 +9,6 @@ import {
   type ManualConsumption,
 } from '@/lib/consumptions/consumption';
 import {
-  ArrowLeft,
   Camera,
   ChevronDown,
   ChevronUp,
@@ -65,13 +65,7 @@ export function ConsumptionDetail({
       showsVerticalScrollIndicator={false}>
       {/* Header & Provenance */}
       <View className="gap-3">
-        <Button
-          variant="ghost"
-          className="min-h-11 self-start px-0 -ml-1 flex-row items-center gap-1.5"
-          onPress={onBack}>
-          <Icon as={ArrowLeft} size={20} className="text-foreground" />
-          <Text>Kembali</Text>
-        </Button>
+        <BackButton onPress={onBack} />
 
         <View className="gap-1.5">
           <View className="flex-row items-center gap-2 flex-wrap">

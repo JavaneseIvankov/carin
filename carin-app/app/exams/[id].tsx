@@ -1,7 +1,8 @@
 import * as Crypto from 'expo-crypto';
-import { Link, useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
+import { BackButton } from '@/components/app/back-button';
 import { ReadState } from '@/components/app/read-state';
 import { ServiceError } from '@/components/app/service-error';
 import { ExaminationSeriesChart } from '@/components/exams/ExaminationSeriesChart';
@@ -50,10 +51,8 @@ export default function ExaminationDetail() {
   if (!item && examination.error) {
     return (
       <View className="flex-1 gap-4 bg-background p-5">
+        <BackButton href="/(tabs)/exams" />
         <ServiceError error={examination.error} onRetry={() => void examination.refetch()} />
-        <Button variant="outline" onPress={() => router.replace('/(tabs)/exams')}>
-          <Text>Kembali ke pemeriksaan</Text>
-        </Button>
       </View>
     );
   }
@@ -66,11 +65,7 @@ export default function ExaminationDetail() {
 
   return (
     <ScrollView className="flex-1 bg-background" contentContainerClassName="gap-5 p-5 pb-10">
-      <Link href="/(tabs)/exams" asChild>
-        <Pressable accessibilityRole="button" className="min-h-11 justify-center self-start px-0">
-          <Text className="font-medium text-primary">‹ Kembali ke pemeriksaan</Text>
-        </Pressable>
-      </Link>
+      <BackButton href="/(tabs)/exams" />
       {examination.data && (
         <ReadState
           updatedAt={examination.data.updatedAt}

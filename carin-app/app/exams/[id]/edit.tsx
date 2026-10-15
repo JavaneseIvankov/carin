@@ -4,6 +4,7 @@ import * as React from 'react';
 import { View } from 'react-native';
 import { ServiceError } from '@/components/app/service-error';
 import { ExaminationForm } from '@/components/exams/ExaminationForm';
+import { BackButton } from '@/components/app/back-button';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { useAppRead, useAppWrite } from '@/lib/api/query';
@@ -80,10 +81,8 @@ export default function EditExamination() {
   if (!item && timezoneRead.status === 'error') {
     return (
       <View className="flex-1 gap-4 bg-background p-5">
+        <BackButton href="/(tabs)/exams" />
         <ServiceError error={me.error} onRetry={() => void me.refetch()} />
-        <Button variant="outline" onPress={() => router.replace('/(tabs)/exams')}>
-          <Text>Kembali ke pemeriksaan</Text>
-        </Button>
       </View>
     );
   }
@@ -97,10 +96,8 @@ export default function EditExamination() {
   if (!item && examination.error) {
     return (
       <View className="flex-1 gap-4 bg-background p-5">
+        <BackButton href="/(tabs)/exams" />
         <ServiceError error={examination.error} onRetry={() => void examination.refetch()} />
-        <Button variant="outline" onPress={() => router.replace('/(tabs)/exams')}>
-          <Text>Kembali ke pemeriksaan</Text>
-        </Button>
       </View>
     );
   }
@@ -108,12 +105,8 @@ export default function EditExamination() {
   if (timezoneRead.status === 'error' && !timezone) {
     return (
       <View className="flex-1 gap-4 bg-background p-5">
+        <BackButton href={{ pathname: '/exams/[id]', params: { id } }} />
         <ServiceError error={me.error} onRetry={() => void me.refetch()} />
-        <Button
-          variant="outline"
-          onPress={() => router.replace({ pathname: '/exams/[id]', params: { id } })}>
-          <Text>Kembali ke detail</Text>
-        </Button>
       </View>
     );
   }
@@ -132,12 +125,7 @@ export default function EditExamination() {
   return (
     <View className="flex-1 bg-background">
       <View className="gap-3 px-5 pt-5">
-        <Button
-          variant="ghost"
-          className="self-start px-0"
-          onPress={() => router.replace({ pathname: '/exams/[id]', params: { id } })}>
-          <Text className="font-medium text-primary">‹ Kembali ke detail</Text>
-        </Button>
+        <BackButton href={{ pathname: '/exams/[id]', params: { id } }} />
         <Text variant="h2">Edit pemeriksaan</Text>
       </View>
       <View className="mx-5 mt-4 gap-4">

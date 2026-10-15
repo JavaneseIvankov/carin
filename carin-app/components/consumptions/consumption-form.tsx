@@ -1,6 +1,7 @@
 import { DatePickerField } from '@/components/app/date-picker-field';
 import { serviceErrorMessage } from '@/components/app/presentation';
 import { TimePickerField } from '@/components/app/time-picker-field';
+import { BackButton } from '@/components/app/back-button';
 import { Button } from '@/components/ui/button';
 import { Drawer } from '@/components/ui/drawer';
 import { Icon } from '@/components/ui/icon';
@@ -16,7 +17,7 @@ import {
 import { useFoodCatalogSearch } from '@/lib/consumptions/query';
 import { createIdempotencyKey } from '@/lib/profile/profile';
 import { cn } from '@/lib/utils';
-import { ArrowLeft, Pencil, Plus, Trash2 } from 'lucide-react-native';
+import { Pencil, Plus, Trash2 } from 'lucide-react-native';
 import * as React from 'react';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 import { FoodEditor } from './food-editor';
@@ -170,14 +171,7 @@ export function ConsumptionForm({
     <View className={cn(isDrawer ? 'gap-6 pb-6' : 'px-5 py-6 gap-6 pb-16')}>
       {!isDrawer ? (
         <View className="gap-2">
-          <Button
-            variant="ghost"
-            className="min-h-11 self-start px-0 -ml-1 flex-row items-center gap-1.5"
-            disabled={isSubmitting}
-            onPress={onBack}>
-            <Icon as={ArrowLeft} size={20} className="text-foreground" />
-            <Text>Kembali</Text>
-          </Button>
+          <BackButton disabled={isSubmitting} onPress={onBack} />
           <Text variant="h1">{title}</Text>
           <Text className="text-muted-foreground">{description}</Text>
           <View className="rounded-control bg-carin-olive-soft/50 px-3 py-2 mt-1">
@@ -188,7 +182,11 @@ export function ConsumptionForm({
         </View>
       ) : null}
 
-      <View className="gap-3 rounded-summary border border-border/70 bg-card p-4 sm:p-5">
+      <View
+        className={cn(
+          'gap-3 rounded-summary border border-border/70 p-4 sm:p-5',
+          isDrawer ? 'bg-transparent' : 'bg-card'
+        )}>
         <View className="flex-row items-center justify-between">
           <Text variant="h3">Waktu makan</Text>
           <View className="rounded-full bg-carin-olive-soft px-2.5 py-0.5">
@@ -344,7 +342,10 @@ export function ConsumptionForm({
             accessibilityLabel="Tambah makanan pertama"
             onPress={beginAdd}
             disabled={isSubmitting}
-            className="items-center justify-center rounded-summary border border-dashed border-border bg-card/60 p-6 gap-2 active:bg-carin-olive-soft/40">
+            className={cn(
+              'items-center justify-center rounded-summary border border-dashed border-border p-6 gap-2 active:bg-carin-olive-soft/40',
+              isDrawer ? 'bg-transparent' : 'bg-card/60'
+            )}>
             <View className="h-10 w-10 items-center justify-center rounded-full bg-carin-olive-soft">
               <Icon as={Plus} size={20} className="text-primary" />
             </View>
@@ -358,7 +359,10 @@ export function ConsumptionForm({
         {draft.components.map((component) => (
           <View
             key={component.id}
-            className="gap-3 rounded-summary border border-border/70 bg-card p-4 sm:p-5">
+            className={cn(
+              'gap-3 rounded-summary border border-border/70 p-4 sm:p-5',
+              isDrawer ? 'bg-transparent' : 'bg-card'
+            )}>
             <View className="flex-row items-start justify-between gap-2">
               <View className="flex-1 gap-1">
                 <Text variant="emphasis">{component.displayName}</Text>

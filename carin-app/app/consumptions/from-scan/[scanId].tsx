@@ -1,3 +1,4 @@
+import { BackButton } from '@/components/app/back-button';
 import { OnlineIndicator } from '@/components/app/online-indicator';
 import { serviceErrorMessage } from '@/components/app/presentation';
 import { ConsumptionForm } from '@/components/consumptions/consumption-form';
@@ -15,7 +16,7 @@ import {
 import { useAppData } from '@/lib/data/provider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useLocalSearchParams, useRouter, type Href } from 'expo-router';
-import { ArrowLeft, CheckCircle2 } from 'lucide-react-native';
+import { CheckCircle2 } from 'lucide-react-native';
 import * as React from 'react';
 import { ActivityIndicator, AppState, View } from 'react-native';
 
@@ -245,13 +246,7 @@ export default function PhotoConsumptionConfirmation() {
       ) : (
         <View className="flex-1 gap-5 bg-background p-6">
           <View className="gap-2">
-            <Button
-              variant="ghost"
-              className="min-h-11 self-start px-0 -ml-1 flex-row items-center gap-1.5"
-              onPress={goBack}>
-              <Icon as={ArrowLeft} size={20} className="text-foreground" />
-              <Text>Kembali</Text>
-            </Button>
+            <BackButton onPress={goBack} />
             <Text variant="h1">
               {snapshot.availability === 'open_existing'
                 ? 'Konsumsi sudah dicatat'

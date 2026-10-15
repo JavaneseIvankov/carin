@@ -139,24 +139,45 @@ export default function ProfileScreen() {
               : `Terakhir diperbarui ${profile.updatedAt ? new Date(profile.updatedAt).toLocaleString('id-ID') : '—'}.`}
           </Text>
         </View>
-        <View className="gap-2 rounded-compact bg-muted/20 p-3">
-          <View className="flex-row items-center justify-between py-1 border-b border-border/40">
-            <Text variant="caption" className="text-muted-foreground">Diagnosis</Text>
+        <View className="gap-2.5 rounded-compact bg-muted/20 p-3.5">
+          <View className="gap-0.5 pb-2.5 border-b border-border/40">
+            <Text variant="caption" className="text-xs text-muted-foreground">
+              Diagnosis
+            </Text>
             <Text className="text-sm font-semibold text-foreground">
               {getKnowledgeStateLabel('diagnoses', profile.fields.diagnoses.state)}
             </Text>
+            {profile.fields.diagnoses.entries?.length > 0 ? (
+              <Text variant="caption" className="text-muted-foreground mt-0.5">
+                {profile.fields.diagnoses.entries.map((e) => e.label).join(', ')}
+              </Text>
+            ) : null}
           </View>
-          <View className="flex-row items-center justify-between py-1 border-b border-border/40">
-            <Text variant="caption" className="text-muted-foreground">Riwayat keluarga</Text>
+          <View className="gap-0.5 pb-2.5 border-b border-border/40">
+            <Text variant="caption" className="text-xs text-muted-foreground">
+              Riwayat keluarga
+            </Text>
             <Text className="text-sm font-semibold text-foreground">
               {getKnowledgeStateLabel('familyHistory', profile.fields.familyHistory.state)}
             </Text>
+            {profile.fields.familyHistory.entries?.length > 0 ? (
+              <Text variant="caption" className="text-muted-foreground mt-0.5">
+                {profile.fields.familyHistory.entries.map((e) => e.label).join(', ')}
+              </Text>
+            ) : null}
           </View>
-          <View className="flex-row items-center justify-between py-1">
-            <Text variant="caption" className="text-muted-foreground">Alergi/pantangan</Text>
+          <View className="gap-0.5 pt-0.5">
+            <Text variant="caption" className="text-xs text-muted-foreground">
+              Alergi dan pantangan
+            </Text>
             <Text className="text-sm font-semibold text-foreground">
               {getKnowledgeStateLabel('allergies', profile.fields.allergies.state)}
             </Text>
+            {profile.fields.allergies.entries?.length > 0 ? (
+              <Text variant="caption" className="text-muted-foreground mt-0.5">
+                {profile.fields.allergies.entries.join(', ')}
+              </Text>
+            ) : null}
           </View>
         </View>
         {profile.personalization.unsupportedConditions.length > 0 ? (

@@ -35,6 +35,7 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 import { shouldShowDashboardNextAction, shouldStackDashboardActions } from '@/lib/dashboard/layout';
 
 const MASCOT = require('../../assets/images/carin-mascot.png');
@@ -147,12 +148,19 @@ export function DashboardScreen() {
                   : 'Satu makanan dulu juga boleh.'}
               </Text>
             </View>
-            <View className="h-[88px] w-[88px] items-center justify-center rounded-full bg-carin-butter">
+            <View className="relative h-[96px] w-[96px] items-center justify-center">
+              <Svg viewBox="0 0 100 100" className="h-[92px] w-[92px]">
+                <Path
+                  d="M46,14 C64,12 82,22 87,38 C92,54 86,72 75,84 C64,95 44,95 28,88 C12,81 6,62 10,44 C14,28 26,16 46,14 Z"
+                  fill="hsl(var(--carin-butter))"
+                />
+              </Svg>
               <Image
                 source={MASCOT}
                 resizeMode="contain"
                 accessibilityLabel="Maskot Carin menyapa dan mengajak mulai mencatat"
-                style={{ width: 80, height: 80 }}
+                className="absolute"
+                style={{ width: 102, height: 102, top: -5 }}
               />
             </View>
           </View>

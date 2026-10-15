@@ -1,3 +1,4 @@
+import { BackButton } from '@/components/app/back-button';
 import { ServiceError } from '@/components/app/service-error';
 import { LegalContent } from '@/components/legal/legal-content';
 import { Button } from '@/components/ui/button';
@@ -6,7 +7,7 @@ import { useAppRead } from '@/lib/api/query';
 import { getLegalRegistryState } from '@/lib/profile/profile';
 import type { components } from '@/lib/api/generated/app-api';
 import type { LegalDocument } from '@/lib/auth/legal';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { ActivityIndicator, ScrollView, View } from 'react-native';
 
 type DocumentKey = 'terms' | 'privacy' | 'ai-processing';
@@ -22,7 +23,6 @@ function selectDocument(
 }
 
 export default function LegalDocumentScreen() {
-  const router = useRouter();
   const params = useLocalSearchParams<{ document?: string | string[] }>();
   const documentKey = Array.isArray(params.document) ? params.document[0] : params.document;
   const validKey = (['terms', 'privacy', 'ai-processing'] as string[]).includes(documentKey ?? '')
@@ -60,11 +60,9 @@ export default function LegalDocumentScreen() {
   if (!document) {
     return (
       <View className="flex-1 gap-4 bg-background p-5">
+        <BackButton />
         <Text variant="h2">Dokumen tidak ditemukan</Text>
         <Text variant="muted">Pilih dokumen melalui halaman profil atau pengaturan.</Text>
-        <Button variant="outline" onPress={() => router.back()}>
-          <Text>Kembali</Text>
-        </Button>
       </View>
     );
   }
@@ -72,6 +70,7 @@ export default function LegalDocumentScreen() {
   return (
     <View className="flex-1 bg-background">
       <View className="gap-2 border-b border-border px-5 pb-4 pt-7">
+        <BackButton />
         <Text variant="h2">{document.title}</Text>
         {legalRegistryState === 'stale' ? (
           <Text variant="muted">Dokumen tersimpan dari cache dan mungkin bukan versi terbaru.</Text>
@@ -97,9 +96,6 @@ export default function LegalDocumentScreen() {
             <Text>{legalQuery.isFetching ? 'Memuat versi terbaru…' : 'Muat versi terbaru'}</Text>
           </Button>
         ) : null}
-        <Button variant="outline" size="sm" onPress={() => router.back()}>
-          <Text>Kembali</Text>
-        </Button>
       </View>
       <ScrollView
         accessibilityLabel={`${document.title}, versi ${document.version}`}

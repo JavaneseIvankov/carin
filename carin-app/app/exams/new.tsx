@@ -4,7 +4,7 @@ import * as React from 'react';
 import { View } from 'react-native';
 import { ServiceError } from '@/components/app/service-error';
 import { ExaminationForm } from '@/components/exams/ExaminationForm';
-import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/app/back-button';
 import { Text } from '@/components/ui/text';
 import { useAppRead, useAppWrite } from '@/lib/api/query';
 import { serviceErrorMessage } from '@/components/app/presentation';
@@ -43,12 +43,7 @@ export default function NewExamination() {
   return (
     <View className="flex-1 bg-background pt-5">
       <View className="mx-5 gap-1">
-        <Button
-          variant="ghost"
-          className="self-start px-0"
-          onPress={() => router.replace('/(tabs)/exams')}>
-          <Text className="font-medium text-primary">‹ Kembali ke pemeriksaan</Text>
-        </Button>
+        <BackButton href="/(tabs)/exams" />
         <Text variant="h2">Catat pemeriksaan</Text>
         <Text variant="muted">Masukkan nilai persis seperti hasil pengukuran.</Text>
       </View>

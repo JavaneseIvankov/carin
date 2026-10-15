@@ -1,3 +1,4 @@
+import { BackButton } from '@/components/app/back-button';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { ComponentPortionEditor } from '@/components/food/component-portion-editor';
@@ -470,11 +471,9 @@ export default function FoodCorrectionScreen() {
   if (!sourceJobId || !scanId) {
     return (
       <View className="flex-1 gap-4 bg-background p-6">
+        <BackButton />
         <Text variant="h2">Koreksi makanan</Text>
         <Text accessibilityRole="alert">Referensi hasil koreksi tidak lengkap.</Text>
-        <Button className="min-h-12" variant="outline" onPress={() => router.back()}>
-          <Text>Kembali</Text>
-        </Button>
       </View>
     );
   }
@@ -590,6 +589,7 @@ export default function FoodCorrectionScreen() {
   return (
     <View className="flex-1 bg-background">
       <ScrollView contentContainerClassName="gap-5 px-5 py-8">
+        <BackButton onPress={returnToOldResult} />
         <View className="gap-2">
           <View className="flex-row items-center gap-2.5">
             <View className="h-9 w-9 items-center justify-center rounded-full bg-carin-olive-soft">
