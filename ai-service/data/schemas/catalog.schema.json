@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://carin.invalid/ai-data/catalog.schema.json",
+  "title": "Versioned internal food catalog",
+  "type": "object", "additionalProperties": false,
+  "required": ["artifactVersion", "catalogVersion", "foods"],
+  "properties": {
+    "artifactVersion": {"type": "string", "minLength": 1},
+    "catalogVersion": {"type": "string", "minLength": 1},
+    "foods": {"type": "array", "items": {"$ref": "#/$defs/food"}}
+  },
+  "$defs": {
+    "nutrients": {
+      "type": "object", "additionalProperties": false,
+      "required": ["energyKcal", "carbohydrateG", "proteinG", "fatG", "fiberG", "sugarsG", "sodiumMg"],
+      "properties": {
+        "energyKcal": {"type": ["number", "null"], "minimum": 0},
+        "carbohydrateG": {"type": ["number", "null"], "minimum": 0},
+        "proteinG": {"type": ["number", "null"], "minimum": 0},
+        "fatG": {"type": ["number", "null"], "minimum": 0},
+        "fiberG": {"type": ["number", "null"], "minimum": 0},
+        "sugarsG": {"type": ["number", "null"], "minimum": 0},
+        "sodiumMg": {"type": ["number", "null"], "minimum": 0}
+      }
+    },
+    "food": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "displayName", "aliases", "preparation", "per100g", "servings", "nutrientSourceIds"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "displayName": {"type": "string", "minLength": 1},
+        "aliases": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "preparation": {"type": ["string", "null"]},
+        "per100g": {"$ref": "#/$defs/nutrients"},
+        "servings": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["id", "label", "grams", "sourceId"], "properties": {"id": {"type": "string", "minLength": 1}, "label": {"type": "string", "minLength": 1}, "grams": {"type": "number", "exclusiveMinimum": 0}, "sourceId": {"type": "string", "minLength": 1}}}},
+        "nutrientSourceIds": {"type": "object", "additionalProperties": false, "required": ["energyKcal", "carbohydrateG", "proteinG", "fatG", "fiberG", "sugarsG", "sodiumMg"], "properties": {"energyKcal": {"type": ["string", "null"]}, "carbohydrateG": {"type": ["string", "null"]}, "proteinG": {"type": ["string", "null"]}, "fatG": {"type": ["string", "null"]}, "fiberG": {"type": ["string", "null"]}, "sugarsG": {"type": ["string", "null"]}, "sodiumMg": {"type": ["string", "null"]}}}
+      }
+    }
+  }
+}

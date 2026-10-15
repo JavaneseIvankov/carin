@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://carin.invalid/ai-data/source.schema.json",
+  "title": "Internal source provenance record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "kind", "title", "datasetVersion", "itemRef", "url", "license", "basis", "synthetic"],
+  "properties": {
+    "id": {"type": "string", "minLength": 1},
+    "kind": {"enum": ["nutrition", "portion", "health_rule", "synthetic"]},
+    "title": {"type": "string", "minLength": 1},
+    "datasetVersion": {"type": "string", "minLength": 1},
+    "itemRef": {"type": "string", "minLength": 1, "description": "Exact item/record reference in cited source."},
+    "url": {"type": ["string", "null"], "format": "uri"},
+    "license": {
+      "type": "object", "additionalProperties": false, "required": ["name", "url"],
+      "properties": {"name": {"type": "string", "minLength": 1}, "url": {"type": ["string", "null"], "format": "uri"}}
+    },
+    "basis": {"type": "string", "minLength": 1, "description": "Nutrient, portion, or rule basis represented by this source record."},
+    "synthetic": {"type": "boolean"}
+  }
+}

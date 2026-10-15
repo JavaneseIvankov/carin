@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://carin.invalid/ai-data/capability-manifest.schema.json",
+  "title": "Internal capability manifest with publication gate",
+  "type": "object", "additionalProperties": false,
+  "required": ["artifactVersion", "publicationStatus", "contractVersion", "catalogVersion", "nutritionDatasetVersion", "ruleSetVersion", "conditions", "supportedPhotoFoodIds", "nutrients", "dataMode", "publishedAt"],
+  "properties": {
+    "artifactVersion": {"type": "string", "minLength": 1},
+    "publicationStatus": {"enum": ["unpublished", "published"]},
+    "contractVersion": {"type": "string", "minLength": 1},
+    "catalogVersion": {"type": "string", "minLength": 1},
+    "nutritionDatasetVersion": {"type": "string", "minLength": 1},
+    "ruleSetVersion": {"type": "string", "minLength": 1},
+    "conditions": {"type": "array", "items": {"$ref": "rule-set.schema.json#/definitions/Condition"}},
+    "supportedPhotoFoodIds": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "nutrients": {"type": "array", "items": {"enum": ["energyKcal", "carbohydrateG", "proteinG", "fatG", "fiberG", "sugarsG", "sodiumMg"]}, "uniqueItems": true},
+    "dataMode": {"enum": ["real", "synthetic"]},
+    "publishedAt": {"type": "string", "format": "date-time"}
+  }
+}

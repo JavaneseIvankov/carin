@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://carin.invalid/ai-data/rule-set.schema.json",
+  "title": "Versioned internal health rule set",
+  "type": "object", "additionalProperties": false,
+  "required": ["artifactVersion", "ruleSetVersion", "catalogVersion", "nutritionDatasetVersion", "conditions", "rules"],
+  "properties": {
+    "artifactVersion": {"type": "string", "minLength": 1},
+    "ruleSetVersion": {"type": "string", "minLength": 1},
+    "catalogVersion": {"type": "string", "minLength": 1},
+    "nutritionDatasetVersion": {"type": "string", "minLength": 1},
+    "conditions": {"type": "array", "items": {"$ref": "#/definitions/Condition"}},
+    "rules": {"type": "array", "items": {"$ref": "rule.schema.json"}}
+  },
+  "definitions": {
+    "Condition": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "displayName", "personalizationSupported", "requiredProfileFields", "requiredNutrients", "supportedAgeMinimum", "supportedAgeMaximum"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "displayName": {"type": "string", "minLength": 1},
+        "personalizationSupported": {"type": "boolean"},
+        "requiredProfileFields": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "requiredNutrients": {"type": "array", "items": {"enum": ["energyKcal", "carbohydrateG", "proteinG", "fatG", "fiberG", "sugarsG", "sodiumMg"]}},
+        "supportedAgeMinimum": {"type": ["integer", "null"], "minimum": 0},
+        "supportedAgeMaximum": {"type": ["integer", "null"], "minimum": 0}
+      }
+    }
+  }
+}

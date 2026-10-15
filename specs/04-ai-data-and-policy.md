@@ -17,12 +17,15 @@ mengesahkan nilai gizi atau threshold klinis. Service implementation mengikuti
 | Pemeriksaan | Tekanan darah, gula darah, kolesterol: pencatatan/grafik backend; tidak ditafsirkan AI P0 |
 | Kandidat makanan uji | Nasi putih dan ayam goreng dari contoh PRD; tim AI menambah variasi cara saji/komponen yang memiliki sumber |
 
-Candidate bukan supported list. Service real harus menerbitkan capability manifest
-dan katalog dengan dataset/rule version, supported food IDs, condition IDs,
-required profile fields dan nutrient coverage. Label kondisi yang bisa dicari
-tidak otomatis menjadi rule yang didukung. Jika belum ada acuan yang disetujui,
-manifest personal support kosong dan service mengembalikan perhatian tidak
-tersedia; tim tidak boleh menyebut personalisasi P0 selesai.
+Candidate bukan supported list. Service harus menerbitkan capability manifest
+dan katalog dengan dataset/rule version, supported photo food IDs, condition IDs,
+required profile fields dan nutrient coverage. Setiap supported rule menyatakan
+rule ID, condition ID, dan citation sources yang tepat; backend menyimpan manifest
+versi itu dan menolak klaim yang tidak cocok persis. Manifest tanpa daftar rule
+menyatakan tidak ada health-rule output yang boleh dipublikasikan. Label kondisi
+yang bisa dicari tidak otomatis menjadi rule yang didukung. Jika belum ada acuan
+yang disetujui, manifest personal support kosong dan service mengembalikan
+perhatian tidak tersedia; tim tidak boleh menyebut personalisasi P0 selesai.
 
 Sebelum demo real AI, tim AI/data wajib menyediakan: catalog foods dan takarannya;
 source per nutrient; source/rule per supported condition; contoh hasil nyata;

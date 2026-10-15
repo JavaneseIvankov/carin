@@ -6,7 +6,7 @@ import { Platform, Text as RNText, type Role } from 'react-native';
 
 const textVariants = cva(
   cn(
-    'text-foreground text-base',
+    'text-sm leading-5 text-foreground',
     Platform.select({
       web: 'select-text',
     })
@@ -16,24 +16,27 @@ const textVariants = cva(
       variant: {
         default: '',
         h1: cn(
-          'text-center text-4xl font-extrabold tracking-tight',
-          Platform.select({ web: 'scroll-m-20 text-balance' })
+          'text-[24px] font-bold leading-[30px] tracking-tight',
+          Platform.select({ web: 'text-balance' })
         ),
-        h2: cn(
-          'border-border border-b pb-2 text-3xl font-semibold tracking-tight',
-          Platform.select({ web: 'scroll-m-20 first:mt-0' })
+        h2: cn('text-lg font-bold leading-6', Platform.select({ web: 'text-balance' })),
+        h3: 'text-base font-semibold leading-[22px]',
+        h4: 'text-sm font-semibold leading-5',
+        p: 'mt-3 text-sm leading-5',
+        blockquote: cn(
+          'mt-4 border-l-2 border-border pl-3 italic',
+          Platform.select({ web: 'sm:pl-6' })
         ),
-        h3: cn('text-2xl font-semibold tracking-tight', Platform.select({ web: 'scroll-m-20' })),
-        h4: cn('text-xl font-semibold tracking-tight', Platform.select({ web: 'scroll-m-20' })),
-        p: 'mt-3 leading-7 sm:mt-6',
-        blockquote: 'mt-4 border-l-2 pl-3 italic sm:mt-6 sm:pl-6',
-        code: cn(
-          'bg-muted relative rounded px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold'
-        ),
-        lead: 'text-muted-foreground text-xl',
-        large: 'text-lg font-semibold',
-        small: 'text-sm font-medium leading-none',
-        muted: 'text-muted-foreground text-sm',
+        code: 'relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold',
+        lead: 'text-base font-medium leading-[22px]',
+        large: 'text-base font-semibold leading-[22px]',
+        small: 'text-xs font-semibold leading-4',
+        muted: 'text-sm leading-5 text-muted-foreground',
+        metric: 'text-[26px] font-extrabold leading-8 tracking-tight',
+        emphasis: 'text-base font-semibold leading-[22px]',
+        body: 'text-sm leading-5',
+        label: 'text-xs font-semibold leading-4',
+        caption: 'text-xs leading-4',
       },
     },
     defaultVariants: {
