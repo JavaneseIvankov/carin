@@ -19,7 +19,8 @@ Carin is an AI-powered personal health and nutrition tracking ecosystem develope
 - **Node.js**: >= 22.12.0 (recommended: Node.js 24)
 - **pnpm**: 10.33.0
 - **Docker & Docker Compose**: v2+
-- **Python**: 3.14 (for specs contract validation)
+- **Python**: 3.14 (for specs contract validation) and 3.12 (for `ai-service`)
+- **uv**: >= 0.5.0 (for running and developing `ai-service` and model experiments)
 
 ---
 
@@ -81,6 +82,35 @@ EXPO_PUBLIC_ENV=development
 EXPO_PUBLIC_API_URL=http://localhost:3000
 ```
 
+#### C. (Optional) Real AI Service (`ai-service/.env`)
+By default, the backend runs in `AI_MODE=fixture` using synthetic analysis data without external AI dependencies. If you want to connect the backend worker to the real multimodal AI service:
+
+1. Copy the AI service environment template:
+```sh
+cp ai-service/.env.example ai-service/.env
+```
+2. Configure credentials in `ai-service/.env`:
+```env
+# Shared key between the backend worker and this AI service
+AI_SERVICE_KEY=your-secure-internal-key
+
+# Alibaba Model Studio credentials
+DASHSCOPE_API_KEY=your-dashscope-api-key
+VLM_BASE_URL=https://your-workspace.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1
+VLM_MODEL=qwen3.7-flash-2026-07-15
+VLM_FALLBACK_MODEL=qwen3.7-flash
+
+# MinIO endpoint allowed for photo downloads
+MEDIA_ALLOWED_HOSTS=minio:9000
+```
+3. Update `infra/.env` to point the worker to the real service:
+```env
+AI_MODE=real
+AI_SERVICE_KEY=your-secure-internal-key
+AI_SERVICE_URL=http://host.docker.internal:8000
+AI_SERVICE_ALLOWED_HOSTS=host.docker.internal,ai-service
+```
+
 ---
 
 ### 2. Start the Backend Infrastructure
@@ -118,9 +148,24 @@ From the interactive Expo terminal:
 
 ---
 
+### 4. (Optional) Start the Real AI Service
+
+If you configured `AI_MODE=real` in step 1C:
+
+```sh
+cd ai-service
+uv sync --all-groups
+uv run uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1
+```
+
+- Interactive OpenAPI Swagger documentation is available at `http://127.0.0.1:8000/docs`.
+- Every internal endpoint requires the `X-Carin-Service-Key` header matching `AI_SERVICE_KEY`.
+
+---
+
 ## Running Verification & Tests
 
-Run test suites and typechecks across the workspace:
+Run test suites, contract checks, and typechecks across the workspace:
 
 ```sh
 # Carin API checks
@@ -140,9 +185,19 @@ pnpm run lint
 pnpm run test:unit
 pnpm run test:integration
 
+# Contract synchronization and verification
+# (Run whenever modifying specs/contracts/ to regenerate TypeScript wire contracts)
+pnpm run contracts:generate
+pnpm run contracts:check
+
 # OpenAPI contract and synthetic fixture validation
 cd ..
 python -m venv .venv
 .venv/bin/python -m pip install -r specs/requirements-contracts.txt
 .venv/bin/python specs/validate-contracts.py
+
+# (Optional) Real AI Service tests
+cd ai-service
+uv sync --all-groups
+uv run pytest
 ```
