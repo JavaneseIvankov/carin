@@ -475,6 +475,72 @@ export const contracts = {
         },
       },
     },
+    'app.completeOnboarding': {
+      method: 'post',
+      parameters: {
+        header: {
+          additionalProperties: false,
+          properties: {},
+          required: [],
+          type: 'object',
+        },
+        path: {
+          additionalProperties: false,
+          properties: {},
+          required: [],
+          type: 'object',
+        },
+        query: {
+          additionalProperties: false,
+          properties: {},
+          required: [],
+          type: 'object',
+        },
+      },
+      path: '/api/v1/onboarding/complete',
+      request: null,
+      responses: {
+        '200': {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/app.OnboardingState',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
+        '401': {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.Error',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
+        default: {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.Error',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
+      },
+    },
     'app.correctScan': {
       method: 'post',
       parameters: {
@@ -3400,6 +3466,72 @@ export const contracts = {
           },
         },
         '503': {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.Error',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
+        default: {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/ai.Error',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
+      },
+    },
+    'app.getOnboarding': {
+      method: 'get',
+      parameters: {
+        header: {
+          additionalProperties: false,
+          properties: {},
+          required: [],
+          type: 'object',
+        },
+        path: {
+          additionalProperties: false,
+          properties: {},
+          required: [],
+          type: 'object',
+        },
+        query: {
+          additionalProperties: false,
+          properties: {},
+          required: [],
+          type: 'object',
+        },
+      },
+      path: '/api/v1/onboarding',
+      request: null,
+      responses: {
+        '200': {
+          content: {
+            'application/json': {
+              $ref: '#/$defs/app.OnboardingState',
+            },
+          },
+          headers: {
+            additionalProperties: false,
+            properties: {},
+            required: [],
+            type: 'object',
+          },
+        },
+        '401': {
           content: {
             'application/json': {
               $ref: '#/$defs/ai.Error',
@@ -8675,6 +8807,24 @@ export const contracts = {
           },
         },
         required: ['expectedRevision', 'timezone'],
+        type: 'object',
+      },
+      'app.OnboardingState': {
+        additionalProperties: false,
+        properties: {
+          completedAt: {
+            anyOf: [
+              {
+                format: 'date-time',
+                type: 'string',
+              },
+              {
+                type: 'null',
+              },
+            ],
+          },
+        },
+        required: ['completedAt'],
         type: 'object',
       },
       'app.Photo': {

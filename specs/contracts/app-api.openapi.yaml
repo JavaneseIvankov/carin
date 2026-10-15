@@ -1311,6 +1311,36 @@ paths:
           $ref: "#/components/responses/Error"
         default:
           $ref: "#/components/responses/Error"
+  "/api/v1/onboarding":
+    get:
+      operationId: "getOnboarding"
+      summary: "Get current account onboarding completion state"
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/OnboardingState"
+        "401":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  "/api/v1/onboarding/complete":
+    post:
+      operationId: "completeOnboarding"
+      summary: "Mark current account onboarding complete"
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/OnboardingState"
+        "401":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
   "/api/v1/account-deletion":
     post:
       operationId: "deleteAccount"
@@ -2555,6 +2585,16 @@ components:
         accessRevoked:
           const: true
       required: ["status", "acceptedAt", "accessRevoked"]
+    OnboardingState:
+      type: "object"
+      additionalProperties: false
+      properties:
+        completedAt:
+          anyOf:
+            - type: "string"
+              format: "date-time"
+            - type: "null"
+      required: ["completedAt"]
     Health:
       type: "object"
       additionalProperties: false
