@@ -8,8 +8,16 @@ import {
   type WelcomeSlideId,
 } from '@/lib/onboarding/welcome-slides';
 import * as React from 'react';
-import { Image, ScrollView, View } from 'react-native';
+import { ActivityIndicator, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, {
+  FadeInLeft,
+  FadeInRight,
+  ReduceMotion,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 const MASCOTS = {
   companion: require('../../assets/images/carin-mascot.png'),
@@ -17,16 +25,63 @@ const MASCOTS = {
   'health-profile': require('../../assets/images/carin-mascot-doctor.png'),
 } satisfies Record<WelcomeSlideId, number>;
 
+function MascotLayer({
+  slide,
+  active,
+  onLoad,
+  onError,
+}: {
+  slide: (typeof WELCOME_SLIDES)[number];
+  active: boolean;
+  onLoad: () => void;
+  onError: () => void;
+}) {
+  const opacity = useSharedValue(active ? 1 : 0);
+  React.useEffect(() => {
+    opacity.value = withTiming(active ? 1 : 0, {
+      duration: 220,
+      reduceMotion: ReduceMotion.System,
+    });
+  }, [active, opacity]);
+  const style = useAnimatedStyle(() => ({ opacity: opacity.value }));
+
+  return (
+    <Animated.Image
+      source={MASCOTS[slide.id]}
+      resizeMode="contain"
+      fadeDuration={0}
+      accessible={active}
+      accessibilityRole="image"
+      accessibilityLabel={slide.illustrationLabel}
+      accessibilityElementsHidden={!active}
+      importantForAccessibility={active ? 'auto' : 'no-hide-descendants'}
+      onLoad={onLoad}
+      onError={onError}
+      style={[{ position: 'absolute', width: 200, height: 200 }, style]}
+    />
+  );
+}
+
 export function WelcomeCarousel({ onStartProfile }: { onStartProfile: () => void }) {
   const [index, setIndex] = React.useState(0);
+  const [direction, setDirection] = React.useState<'next' | 'previous' | null>(null);
+  const [loaded, setLoaded] = React.useState<Partial<Record<WelcomeSlideId, boolean>>>({});
+  const [failed, setFailed] = React.useState<Partial<Record<WelcomeSlideId, boolean>>>({});
+  const [attempts, setAttempts] = React.useState<Partial<Record<WelcomeSlideId, number>>>({});
   const slide = WELCOME_SLIDES[index] ?? WELCOME_SLIDES[0];
   const isFirst = index === 0;
   const isLast = index === WELCOME_SLIDES.length - 1;
+  const nextSlide = WELCOME_SLIDES[index + 1];
+  const waitingForNextImage = Boolean(nextSlide && !loaded[nextSlide.id]);
 
   const advance = () => {
+    if (waitingForNextImage) return;
     const action = getNextWelcomeAction(index);
     if (action.type === 'profile') onStartProfile();
-    else setIndex(action.index);
+    else {
+      setDirection('next');
+      setIndex(action.index);
+    }
   };
 
   return (
@@ -50,24 +105,63 @@ export function WelcomeCarousel({ onStartProfile }: { onStartProfile: () => void
           showsVerticalScrollIndicator={false}>
           <View className="relative items-center justify-center overflow-hidden rounded-summary bg-carin-butter px-5 py-4">
             <HeaderPattern />
-            <Image
-              key={slide.id}
-              source={MASCOTS[slide.id]}
-              resizeMode="contain"
-              accessibilityRole="image"
-              accessibilityLabel={slide.illustrationLabel}
-              style={{ width: 200, height: 200 }}
-            />
+            <View style={{ width: 200, height: 200 }}>
+              {WELCOME_SLIDES.map((item) => (
+                <MascotLayer
+                  key={`${item.id}-${attempts[item.id] ?? 0}`}
+                  slide={item}
+                  active={item.id === slide.id}
+                  onLoad={() => setLoaded((current) => ({ ...current, [item.id]: true }))}
+                  onError={() => setFailed((current) => ({ ...current, [item.id]: true }))}
+                />
+              ))}
+              {!loaded[slide.id] && !failed[slide.id] ? (
+                <View className="absolute inset-0 items-center justify-center">
+                  <ActivityIndicator accessibilityLabel="Memuat ilustrasi Carin" />
+                </View>
+              ) : null}
+            </View>
           </View>
-
-          <View className="gap-3">
-            <Text variant="h1" className="text-center">
-              {slide.title}
-            </Text>
-            <Text variant="lead" className="text-center text-muted-foreground">
-              {slide.body}
-            </Text>
-          </View>
+          {Object.values(failed).some(Boolean) ? (
+            <View className="gap-2" accessibilityRole="alert">
+              <Text variant="muted" className="text-center">
+                Ilustrasi belum dapat dimuat. Coba lagi atau lewati pengantar.
+              </Text>
+              <Button
+                variant="outline"
+                onPress={() => {
+                  setAttempts((current) => {
+                    const next = { ...current };
+                    for (const item of WELCOME_SLIDES) {
+                      if (failed[item.id]) next[item.id] = (current[item.id] ?? 0) + 1;
+                    }
+                    return next;
+                  });
+                  setFailed({});
+                }}>
+                <Text>Muat ulang ilustrasi</Text>
+              </Button>
+            </View>
+          ) : null}
+          <Animated.View
+            key={slide.id}
+            entering={
+              direction
+                ? (direction === 'next' ? FadeInRight : FadeInLeft)
+                    .duration(220)
+                    .reduceMotion(ReduceMotion.System)
+                : undefined
+            }
+            style={{ gap: 20 }}>
+            <View className="gap-3">
+              <Text variant="h1" className="text-center">
+                {slide.title}
+              </Text>
+              <Text variant="lead" className="text-center text-muted-foreground">
+                {slide.body}
+              </Text>
+            </View>
+          </Animated.View>
 
           <View
             className="flex-row items-center justify-center gap-2 py-1"
@@ -110,7 +204,10 @@ export function WelcomeCarousel({ onStartProfile }: { onStartProfile: () => void
               accessibilityRole="button"
               accessibilityLabel="Kembali ke halaman sebelumnya"
               disabled={isFirst}
-              onPress={() => setIndex(getPreviousWelcomeIndex(index))}>
+              onPress={() => {
+                setDirection('previous');
+                setIndex(getPreviousWelcomeIndex(index));
+              }}>
               <Text>Kembali</Text>
             </Button>
             <Button
@@ -120,6 +217,7 @@ export function WelcomeCarousel({ onStartProfile }: { onStartProfile: () => void
                 isLast ? 'Lanjut ke profil kesehatan' : 'Lanjut ke halaman berikutnya'
               }
               onPress={advance}
+              disabled={waitingForNextImage}
               className="min-w-36">
               <Text>{isLast ? 'Lanjut ke Profil' : 'Lanjut'}</Text>
             </Button>

@@ -33,3 +33,23 @@ Next step: Reload Expo Go; inspect header patterns and advance/back through all 
 Worktree state: Uncommitted on `feat/ios-ui-improvements`. Preserve the existing unrelated local change in `infra/.env.example`; do not commit secrets.
 
 Final asset verification: Both generated PNGs are 1254 × 1254 RGBA with alpha ranging from 0 to 255 (actual transparency). The active Metro iOS bundle returned HTTP 200 and includes both camera and doctor asset references. Both outputs were visually inspected against the original mascot. Final generated files are `assets/images/carin-mascot-camera.png` and `assets/images/carin-mascot-doctor.png`; the original waving asset remains unchanged.
+
+## Onboarding slide transitions
+
+Task / scope: Make onboarding slide changes smoother.
+
+Changes: `components/onboarding/welcome-carousel.tsx` animates the illustration and copy together with a 220 ms directional fade/slide when Lanjut or Kembali changes the slide. Forward and backward navigation use opposite directions. Native Reanimated transitions respect the system Reduce Motion setting. Footer controls remain stationary, and navigation/skip behavior is unchanged. There is no looping or automatic mascot movement.
+
+Verification (from `carin-app/`): Prettier, `tsc --noEmit`, ESLint on the changed component, and `vitest run lib/onboarding/welcome-slides.unit.test.ts` passed (3 tests). Physical iPhone animation smoothness and Reduce Motion still need device review.
+
+Worktree state: Animation change is uncommitted; preserve unrelated infra env changes.
+
+## Preload and preserve mascot layers
+
+Task / scope: Avoid mascot-image blinking during onboarding slide changes.
+
+Changes: All three native image layers mount together when onboarding opens, starting asset loading/decoding before navigation. The layers stay mounted across slide changes and crossfade over 220 ms using Reanimated with system Reduce Motion support. Android's default image fade is disabled. Only the active image is exposed to accessibility. Lanjut waits for the next image's onLoad event, with retry and skip available on asset failure. The illustration panel remains stable while the text keeps its directional transition.
+
+Verification (from `carin-app/`): Prettier, `tsc --noEmit`, ESLint on `components/onboarding/welcome-carousel.tsx`, and `vitest run lib/onboarding/welcome-slides.unit.test.ts` passed (3 navigation/copy tests). The Metro iOS bundle returned 200 and includes MascotLayer. `git diff --check` passed. These checks do not verify native decode timing or visual smoothness; cold-load, repeated forward/back, network failure/retry and Reduce Motion need iPhone review.
+
+Worktree state: This change and the preceding slide-animation change are uncommitted; unrelated infra env settings remain preserved.
