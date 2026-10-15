@@ -54,14 +54,15 @@ export function decideAuthRoute(
   if (status === 'loading') return { type: 'loading' };
   if (segments[0] === 'index') return { type: 'render' };
 
+  const resetFlowRoute =
+    (segments[0] === 'auth' && segments[1] === 'reset') ||
+    segments[0] === 'reset-password' ||
+    segments[0] === 'forgot-password';
+  if (resetFlowRoute) return { type: 'render' };
+
   const inAuthRoutes = segments[0] === '(auth)' || segments[0] === 'auth';
   if (inAuthRoutes) {
     if (status !== 'authenticated') return { type: 'render' };
-    const resetFlowRoute =
-      (segments[0] === 'auth' && segments[1] === 'reset') ||
-      (segments[0] === '(auth)' &&
-        (segments[1] === 'reset-password' || segments[1] === 'forgot-password'));
-    if (resetFlowRoute) return { type: 'render' };
     const destination =
       segments[1] === 'sign-in' ? resolvePostSignInDestination(requestedDestination) : null;
     return { type: 'redirect', href: destination ?? APP_ROUTE };

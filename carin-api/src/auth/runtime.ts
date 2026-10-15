@@ -92,11 +92,18 @@ export function createAuthRuntime({
     }
   };
 
+  // Expo Go sends its own exp:// origin. The Expo auth plugin normally adds
+  // this only when NODE_ENV is development, but the dev API container runs
+  // with NODE_ENV=production, so key this exception to the explicit app env.
+  const effectiveTrustedOrigins = appEnv === 'dev'
+    ? [...new Set([...trustedOrigins, 'exp://'])]
+    : trustedOrigins;
+
   const auth = betterAuth({
     ...authOptions,
     baseURL,
     secret,
-    trustedOrigins,
+    trustedOrigins: effectiveTrustedOrigins,
     advanced: { ...authOptions.advanced, cookiePrefix: `carin-${appEnv}`, disableOriginCheck: false },
     database: createAuthDatabaseAdapter(db),
     emailVerification: {

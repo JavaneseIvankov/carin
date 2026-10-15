@@ -196,7 +196,7 @@ export function Drawer({
 
               {/* Scrollable content */}
               <ScrollView
-                className="flex-1 bg-card"
+                className="bg-card"
                 contentContainerClassName={cn('p-5', contentContainerClassName)}
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}>

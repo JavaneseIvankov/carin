@@ -18,6 +18,7 @@ import {
 import { useDashboard } from '@/lib/dashboard/use-dashboard';
 import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
+import { useColorScheme } from 'nativewind';
 import {
   CalendarDays,
   Camera,
@@ -99,6 +100,7 @@ function RecurringAttentionItem({
 export function DashboardScreen() {
   const router = useRouter();
   const { connectivity } = useAppData();
+  const { colorScheme } = useColorScheme();
   const dashboardQuery = useDashboard();
   const dashboard = dashboardQuery.data?.data;
   const intake = dashboard ? getDailyIntakeSummary(dashboard) : null;
@@ -152,7 +154,7 @@ export function DashboardScreen() {
               <Svg viewBox="0 0 100 100" className="h-[92px] w-[92px]">
                 <Path
                   d="M46,14 C64,12 82,22 87,38 C92,54 86,72 75,84 C64,95 44,95 28,88 C12,81 6,62 10,44 C14,28 26,16 46,14 Z"
-                  fill="hsl(var(--carin-butter))"
+                  fill={colorScheme === 'dark' ? '#5A5031' : '#F5E7A8'}
                 />
               </Svg>
               <Image

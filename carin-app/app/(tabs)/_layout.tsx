@@ -6,6 +6,11 @@ import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { nextSheetOpen, type ShellAction } from '@/lib/navigation';
+import { useAuth } from '@/lib/auth/provider';
+import { useOnboardingSession } from '@/components/onboarding/onboarding-session';
+import { useAppRead } from '@/lib/api/query';
+import { onboardingGateStateFromQuery } from '@/lib/onboarding/routes';
+import { getRootRouteAccess } from '@/lib/auth/root-route-access';
 
 const items = [
   { name: 'index', label: 'Beranda', icon: House },
@@ -16,11 +21,12 @@ const items = [
 
 type BarProps = Parameters<NonNullable<React.ComponentProps<typeof Tabs>['tabBar']>>[0];
 
-function AppTabBar({ state, navigation }: BarProps) {
+function AppTabBar({ state, navigation, canAccessFullApp }: BarProps & { canAccessFullApp: boolean }) {
   const [sheetOpen, setSheetOpen] = React.useState(false);
   const sheetAction = (action: ShellAction) => setSheetOpen((open) => nextSheetOpen(open, action));
   const router = useRouter();
   const { bottom } = useSafeAreaInsets();
+  const visibleItems = canAccessFullApp ? items : items.slice(0, 1);
   const navigateAction = (href: '/food/capture' | '/consumptions/new') => {
     sheetAction('close-sheet');
     router.push(href);
@@ -34,7 +40,7 @@ function AppTabBar({ state, navigation }: BarProps) {
           paddingBottom: Math.max(bottom, 8),
           overflow: 'visible',
         }}>
-        {items.map((item, index) => {
+        {visibleItems.map((item, index) => {
           const selected = state.routes[state.index]?.name === item.name;
           return (
             <React.Fragment key={item.name}>
@@ -92,15 +98,28 @@ function AppTabBar({ state, navigation }: BarProps) {
 }
 
 export default function TabsLayout() {
+  const { status, user } = useAuth();
+  const { isBypassed } = useOnboardingSession();
+  const onboardingQuery = useAppRead('getOnboarding', {}, { enabled: status === 'authenticated' });
+  const access = getRootRouteAccess(
+    status,
+    onboardingGateStateFromQuery(onboardingQuery),
+    Boolean(user?.id && isBypassed(user.id))
+  );
+
   return (
     <Tabs
       backBehavior="history"
       screenOptions={{ headerShown: false }}
-      tabBar={(props) => <AppTabBar {...props} />}>
-      <Tabs.Screen name="index" options={{ title: 'Beranda' }} />
-      <Tabs.Screen name="history" options={{ title: 'Riwayat' }} />
-      <Tabs.Screen name="exams" options={{ title: 'Pemeriksaan' }} />
-      <Tabs.Screen name="profile" options={{ title: 'Profil' }} />
+      tabBar={(props) => <AppTabBar {...props} canAccessFullApp={access.authenticated} />}>
+      <Tabs.Protected guard={access.dashboard}>
+        <Tabs.Screen name="index" options={{ title: 'Beranda' }} />
+      </Tabs.Protected>
+      <Tabs.Protected guard={access.authenticated}>
+        <Tabs.Screen name="history" options={{ title: 'Riwayat' }} />
+        <Tabs.Screen name="exams" options={{ title: 'Pemeriksaan' }} />
+        <Tabs.Screen name="profile" options={{ title: 'Profil' }} />
+      </Tabs.Protected>
     </Tabs>
   );
 }

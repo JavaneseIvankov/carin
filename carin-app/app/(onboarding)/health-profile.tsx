@@ -35,6 +35,7 @@ import {
   View,
   type LayoutChangeEvent,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const MASCOT = require('../../assets/images/carin-mascot.png');
 
@@ -473,7 +474,7 @@ export default function HealthProfileScreen() {
       <ScrollView
         ref={scrollRef}
         keyboardShouldPersistTaps="handled"
-        contentContainerClassName="gap-5 px-5 pb-10 pt-4">
+        contentContainerClassName="gap-5 px-5 pb-5 pt-4">
         {/* Top bar with instant skip (explicitly optional invariant) */}
         <View className="flex-row items-center justify-between pt-1">
           <View className="flex-row items-center gap-1.5">
@@ -856,6 +857,13 @@ export default function HealthProfileScreen() {
             ) : null}
           </View>
         ) : null}
+        <Text variant="muted">
+          Status diagnosis: {getKnowledgeStateLabel('diagnoses', fields.diagnoses.state)}
+        </Text>
+      </ScrollView>
+      <SafeAreaView
+        edges={['bottom']}
+        className="gap-2 border-t border-border bg-background px-5 pb-3 pt-3">
         {completionError ? (
           completionRecovery
         ) : (
@@ -875,10 +883,7 @@ export default function HealthProfileScreen() {
             </Button>
           </>
         )}
-        <Text variant="muted">
-          Status diagnosis: {getKnowledgeStateLabel('diagnoses', fields.diagnoses.state)}
-        </Text>
-      </ScrollView>
+      </SafeAreaView>
     </View>
   );
 }

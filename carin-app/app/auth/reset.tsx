@@ -25,7 +25,7 @@ export default function ResetLinkBridge() {
     if (!parsedLink.valid) return;
 
     router.replace({
-      pathname: '/(auth)/reset-password',
+      pathname: '/reset-password',
       params: { token: parsedLink.token },
     } as Href);
   }, [linkingUrl, parsedLink, router]);
@@ -36,7 +36,7 @@ export default function ResetLinkBridge() {
         title="Tautan tidak berlaku"
         description="Tautan pengaturan ulang tidak lengkap atau tidak cocok dengan lingkungan aplikasi ini.">
         <View className="gap-3">
-          <Button onPress={() => router.replace('/(auth)/forgot-password' as Href)}>
+          <Button onPress={() => router.replace('/forgot-password' as Href)}>
             <Text>Minta tautan baru</Text>
           </Button>
           <Button variant="outline" onPress={() => router.replace('/(auth)/sign-in' as Href)}>
@@ -55,7 +55,7 @@ export default function ResetLinkBridge() {
         <Text className="text-center text-muted-foreground" accessibilityRole="text">
           Jika layar ini tidak berubah, minta tautan pengaturan ulang yang baru.
         </Text>
-        <Button onPress={() => router.replace('/(auth)/forgot-password' as Href)}>
+          <Button onPress={() => router.replace('/forgot-password' as Href)}>
           <Text>Minta tautan baru</Text>
         </Button>
       </View>

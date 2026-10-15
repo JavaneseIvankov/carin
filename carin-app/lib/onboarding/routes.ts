@@ -50,8 +50,8 @@ function safeDestination(value: string | string[] | undefined): string | null {
 function isPasswordResetRoute(segments: readonly string[]): boolean {
   return (
     (segments[0] === 'auth' && segments[1] === 'reset') ||
-    (segments[0] === '(auth)' &&
-      (segments[1] === 'reset-password' || segments[1] === 'forgot-password'))
+    segments[0] === 'reset-password' ||
+    segments[0] === 'forgot-password'
   );
 }
 

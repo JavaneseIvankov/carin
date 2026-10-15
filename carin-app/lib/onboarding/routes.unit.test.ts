@@ -130,7 +130,7 @@ describe('decideOnboardingRoute', () => {
       )
     ).toEqual({ type: 'redirect', href: '/(auth)/sign-in' });
 
-    const resetSegments = ['(auth)', 'reset-password'];
+    const resetSegments = ['reset-password'];
     expect(
       decideOnboardingRoute(
         input({

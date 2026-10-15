@@ -118,7 +118,7 @@ export default function SignInScreen() {
         <Button variant="tactile" disabled={isSubmitting} onPress={() => void submit()}>
           <Text>{isSubmitting ? 'Memeriksa…' : 'Masuk'}</Text>
         </Button>
-        <Button variant="link" onPress={() => router.push('/(auth)/forgot-password' as Href)}>
+        <Button variant="link" onPress={() => router.push('/forgot-password' as Href)}>
           <Text>Lupa kata sandi?</Text>
         </Button>
         <View className="flex-row items-center justify-center gap-1">

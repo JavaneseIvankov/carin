@@ -15,6 +15,7 @@ import { Drawer } from '@/components/ui/drawer';
 import { Icon } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
 import { FlaskConical, HeartPulse } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type GlucoseContext = Extract<ExaminationInput, { type: 'glucose' }>['context'];
 type CholesterolSubtype = Extract<ExaminationInput, { type: 'cholesterol' }>['subtype'];
@@ -95,6 +96,7 @@ function ChoiceGroup<T extends string>({
 
 export function ExaminationForm({
   initialRecord,
+  header,
   timezone,
   pending = false,
   submissionDisabled = false,
@@ -104,6 +106,7 @@ export function ExaminationForm({
   onSubmit,
 }: {
   initialRecord?: ExaminationInput;
+  header?: React.ReactNode;
   timezone: string;
   pending?: boolean;
   submissionDisabled?: boolean;
@@ -117,6 +120,7 @@ export function ExaminationForm({
     {}
   );
   const [preview, setPreview] = React.useState<ExaminationInput | null>(null);
+  const { bottom: safeAreaBottom } = useSafeAreaInsets();
 
   const update = <K extends keyof ExaminationFormValues>(
     key: K,
@@ -138,8 +142,10 @@ export function ExaminationForm({
   return (
     <ScrollView
       className="flex-1 bg-background"
-      contentContainerClassName="gap-5 p-5 pb-10"
+      contentContainerClassName="gap-5 p-5"
+      contentContainerStyle={{ paddingBottom: Math.max(safeAreaBottom + 24, 48) }}
       keyboardShouldPersistTaps="handled">
+      {header}
       <ChoiceGroup
         label="Jenis pemeriksaan"
         value={values.type}
@@ -369,6 +375,7 @@ export function ExaminationForm({
         multiline
         numberOfLines={3}
         textAlignVertical="top"
+        style={{ minHeight: 96 }}
         placeholder="Contoh: hasil dari kunjungan rutin"
         className="min-h-24"
       />
