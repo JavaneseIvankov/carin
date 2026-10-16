@@ -55,5 +55,57 @@ describe('scan history', () => {
     expect(getScanHistoryPresentation(scan, null).statusLabel).toBe(
       'Status analisis tidak tersedia'
     );
+    expect(getScanHistoryPresentation(scan, null).quickAction).toBeNull();
+  });
+
+  it('uses the latest completed result to name the food and offer confirmation', () => {
+    const currentScan = { ...scan, latestResultId: 'result-1', revision: 1 };
+    const job = {
+      id: 'job-1',
+      scanId: 'scan-1',
+      targetType: 'scan',
+      targetId: 'scan-1',
+      targetRevision: 1,
+      status: 'completed',
+      resultId: 'result-1',
+      result: {
+        components: [
+          { displayName: 'Mi goreng' },
+          { displayName: 'Telur mata sapi' },
+          { displayName: 'Susu putih' },
+        ],
+      },
+    } as Job;
+
+    expect(getScanHistoryPresentation(currentScan, job)).toMatchObject({
+      title: 'Mi goreng · Telur mata sapi +1',
+      quickAction: 'confirm',
+    });
+    expect(
+      getScanHistoryPresentation({ ...currentScan, defaultConsumptionId: 'consumption-1' }, job)
+        .quickAction
+    ).toBe('open_existing');
+  });
+
+  it('does not offer confirmation for an incomplete or stale result', () => {
+    const currentScan = { ...scan, latestResultId: 'result-1', revision: 2 };
+    const job = {
+      id: 'job-1',
+      scanId: 'scan-1',
+      targetType: 'scan',
+      targetId: 'scan-1',
+      targetRevision: 1,
+      status: 'completed',
+      resultId: 'result-1',
+      result: { components: [{ displayName: 'Mi goreng' }] },
+    } as Job;
+
+    expect(getScanHistoryPresentation(currentScan, job).quickAction).toBeNull();
+    expect(getScanHistoryPresentation(currentScan, { ...job, status: 'processing' })).toMatchObject(
+      {
+        title: 'Analisis foto',
+        quickAction: null,
+      }
+    );
   });
 });

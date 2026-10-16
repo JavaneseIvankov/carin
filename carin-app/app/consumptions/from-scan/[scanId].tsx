@@ -163,7 +163,7 @@ export default function PhotoConsumptionConfirmation() {
         commitSnapshot(owner, next);
         if (next.savedId) {
           void owner.finalizeSaved(next.savedId).then(() => {
-            if (routeGuard.isActive(owner)) openConsumption(next.savedId!);
+            if (routeGuard.isActive(owner)) returnToAnalysisHistory();
           });
         }
       }
@@ -180,8 +180,16 @@ export default function PhotoConsumptionConfirmation() {
     );
   };
 
-  const openConsumption = (id: string) => {
-    router.replace({ pathname: '/consumptions/[id]', params: { id } } as Href);
+  const openAnalysisResult = () => {
+    if (!snapshot.scan) return;
+    router.replace({
+      pathname: '/food/analysis/[id]',
+      params: { id: snapshot.scan.latestJobId },
+    });
+  };
+
+  const returnToAnalysisHistory = () => {
+    router.replace({ pathname: '/(tabs)/history', params: { tab: 'analysis' } });
   };
 
   const startNewOccurrence = () => {
@@ -270,8 +278,8 @@ export default function PhotoConsumptionConfirmation() {
                   <Button
                     variant="tactile"
                     className="min-h-12 w-full"
-                    onPress={() => openConsumption(snapshot.scan!.defaultConsumptionId!)}>
-                    <Text>Buka catatan konsumsi</Text>
+                    onPress={openAnalysisResult}>
+                    <Text>Buka hasil analisis</Text>
                   </Button>
                   <Button
                     variant="outline"
@@ -309,8 +317,8 @@ export default function PhotoConsumptionConfirmation() {
                   <Button
                     variant="tactile"
                     className="min-h-12 w-full"
-                    onPress={() => openConsumption(snapshot.scan!.defaultConsumptionId!)}>
-                    <Text>Buka catatan konsumsi</Text>
+                    onPress={openAnalysisResult}>
+                    <Text>Buka hasil analisis</Text>
                   </Button>
                 ) : null}
 
@@ -319,8 +327,8 @@ export default function PhotoConsumptionConfirmation() {
                 snapshot.latestJob?.status === 'completed' ? (
                   <View className="gap-2">
                     <Text variant="caption" className="text-muted-foreground">
-                      Draft lama tetap tersimpan sampai Anda memilih mengganti makanan dan porsi dari
-                      hasil terbaru.
+                      Draft lama tetap tersimpan sampai Anda memilih mengganti makanan dan porsi
+                      dari hasil terbaru.
                     </Text>
                     <Button
                       variant="outline"

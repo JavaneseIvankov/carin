@@ -2,6 +2,7 @@ import { BackButton } from '@/components/app/back-button';
 import { Button } from '@/components/ui/button';
 import { ScanDeletionControl } from '@/components/food/scan-deletion-control';
 import { PhotoThumbnail } from '@/components/food/photo-thumbnail';
+import { AnalysisConsumptionStatus } from '@/components/food/analysis-consumption-status';
 import {
   AnalysisDisclosure,
   AnalysisResultContent,
@@ -604,6 +605,16 @@ export default function AnalysisResultScreen() {
             presentation={presentation}
             timestamp={formattedTimestamp}
             photoDeleted={actionScan?.photoId === null}
+            consumptionStatus={
+              actionScan?.defaultConsumptionId && actionScan.id === job.scanId ? (
+                <AnalysisConsumptionStatus
+                  key={actionScan.defaultConsumptionId}
+                  consumptionId={actionScan.defaultConsumptionId}
+                  scanId={actionScan.id}
+                  resultId={job.resultId}
+                />
+              ) : undefined
+            }
             photo={
               <PhotoThumbnail
                 photoId={actionScan?.photoId ?? null}
@@ -672,7 +683,9 @@ export default function AnalysisResultScreen() {
           </Button>
         ) : null}
       </ScrollView>
-      {job.scanId && consumptionActions?.primary ? (
+      {job.scanId &&
+      consumptionActions?.primary &&
+      consumptionActions.primary.pathname !== '/consumptions/[id]' ? (
         <View
           className="gap-2 border-t border-border bg-background pb-2 pt-3"
           style={{ paddingHorizontal: pageGutter }}>

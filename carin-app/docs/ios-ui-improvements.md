@@ -162,3 +162,59 @@ Unverified work / blockers: iOS, physical 320 dp layout, large system font rende
 Next step: Review the recomposed result in Expo Go and refine the hierarchy if needed.
 
 Worktree state: Included in the user-requested recomposition commit on `feat/ios-ui-improvements`; ignored local real-AI configuration stays outside version control.
+
+## History analysis item recomposition
+
+Task / scope: Make photo analyses recognizable and keep consumption and deletion actions accessible in the History analysis tab.
+
+Changes and affected files: `app/(tabs)/history.tsx` now shows the latest result's food names beside a larger thumbnail, date, job status, and consumption state. The main row opens the result. A compact `Sudah dikonsumsi` action opens the existing confirmation form only when the latest result passes its availability guard; saved consumptions show `Lihat catatan`. `components/food/scan-deletion-control.tsx` supports a three-dot trigger in History that opens a deletion option and then the existing confirmation; the detail-page delete trigger is unchanged. `lib/food/history.ts` derives the preview and quick action from the latest job and scan state. The repeated explanatory sentence above the list was removed. No API contract changed.
+
+Verification (from `carin-app/`): Prettier on the four changed source/test files, `pnpm run typecheck`, targeted ESLint and `pnpm exec vitest run lib/food/history.unit.test.ts` passed (10 tests). `git diff --check` passed. On Samsung SM A505F / Android 11 / Expo Go SDK 57 through Tailscale Metro, agent-device showed the new food-name card and thumbnail, opened the three-dot menu and deletion confirmation, canceled it, opened the consumption confirmation form, and returned to History without submitting consumption or deletion.
+
+Unverified work / blockers: iOS, narrow layouts, large system fonts, dark appearance, and already-consumed list items have not been visually checked on a device.
+
+Next step: Review the item on iPhone and with additional scans, including completed and failed jobs.
+
+Worktree state: Uncommitted on `feat/ios-ui-improvements`. Preserve ignored local service credentials and existing database data.
+
+## Consumption form spacing correction
+
+Task / scope: Remove the excessive outer space visible on the photo-to-consumption confirmation screen after opening it from History.
+
+Changes and affected files: `components/consumptions/consumption-form.tsx` no longer applies a second 20 dp horizontal and 24 dp vertical padding to its full-page form body. The enclosing ScrollView remains responsible for page padding. Drawer rendering retains its previous spacing. This shared form also serves other full-page consumption routes.
+
+Verification (from `carin-app/`): `pnpm run typecheck`, targeted ESLint and Prettier passed; `git diff --check` passed. Agent-device compared the before and after layout on Samsung SM A505F / Android 11 / Expo Go SDK 57: the header and card align with one page gutter, and the form remains readable. No consumption was submitted.
+
+Unverified work / blockers: The other full-page consumption routes and iOS have not been visually checked after this spacing correction.
+
+Next step: Review the confirmation form on iPhone and check a manual consumption form for consistent gutters.
+
+Worktree state: Uncommitted with the History analysis-item changes; preserve both sets of edits.
+
+## Return to analysis history after photo confirmation
+
+Task / scope: Return to History > Analisis after a photo-based consumption is successfully saved.
+
+Changes and affected files: `app/consumptions/from-scan/[scanId].tsx` now replaces the confirmation route with `/(tabs)/history?tab=analysis` after the server acknowledges the save and local draft finalization completes. Opening an already-saved consumption from its existing route remains unchanged.
+
+Verification (from `carin-app/`): `pnpm run typecheck`, targeted ESLint and Prettier passed. The route change was not exercised by submitting the form on the user's account, because that would create a real consumption record.
+
+Unverified work / blockers: End-to-end post-submit navigation remains unverified on device.
+
+Next step: Confirm once in a disposable account or during the user's next real confirmation; expect History > Analisis.
+
+Worktree state: Uncommitted with the History analysis-item and spacing changes.
+
+## Consumption time within photo analysis
+
+Task / scope: Show recorded consumption time in Hasil Analisis and remove the redundant Detail Konsumsi navigation from the photo-analysis flow.
+
+Changes and affected files: History's saved-scan action now says `Lihat hasil` and opens the latest analysis. `components/food/analysis-consumption-status.tsx` reads the linked consumption and displays its actual consumedAt in the record's timezone, with loading/error/cache states and a note when the displayed analysis differs from the recorded source version. `analysis-result-content.tsx` places this information below the photo identity. `app/food/analysis/[id].tsx` suppresses the consumption-detail footer for already-recorded scans. The confirmation route's already-recorded/conflict actions also open Hasil Analisis. The consumption detail route remains available from the consumption-history tab for managing saved records; no data or API contract was removed. This supersedes the earlier `Lihat catatan` action described above.
+
+Verification: Typecheck and targeted ESLint passed from `carin-app/`; changed sources formatted with Prettier. On Samsung SM A505F / Android 11 / Expo Go SDK 57, agent-device opened `Lihat hasil` from the already-consumed scan and showed its recorded date/time and Asia/Jakarta timezone in Hasil Analisis. The dedicated-detail footer was absent. No record was created, edited or deleted during this check.
+
+Unverified work / blockers: iOS and cached/error presentations were not visually exercised.
+
+Next step: Review the consumption timestamp's placement in Hasil Analisis.
+
+Worktree state: Included with the preceding History, spacing and return-navigation changes in the user-requested commit on `feat/ios-ui-improvements`.

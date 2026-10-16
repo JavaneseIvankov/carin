@@ -168,13 +168,13 @@ export function ConsumptionForm({
   };
 
   const formBody = (
-    <View className={cn(isDrawer ? 'gap-6 pb-6' : 'px-5 py-6 gap-6 pb-16')}>
+    <View className={cn(isDrawer ? 'gap-6 pb-6' : 'gap-6')}>
       {!isDrawer ? (
         <View className="gap-2">
           <BackButton disabled={isSubmitting} onPress={onBack} />
           <Text variant="h1">{title}</Text>
           <Text className="text-muted-foreground">{description}</Text>
-          <View className="rounded-control bg-carin-olive-soft/50 px-3 py-2 mt-1">
+          <View className="mt-1 rounded-control bg-carin-olive-soft/50 px-3 py-2">
             <Text variant="caption" className="text-muted-foreground">
               Draft tersimpan otomatis di perangkat. Pengiriman memerlukan koneksi internet.
             </Text>
@@ -190,7 +190,7 @@ export function ConsumptionForm({
         <View className="flex-row items-center justify-between">
           <Text variant="h3">Waktu makan</Text>
           <View className="rounded-full bg-carin-olive-soft px-2.5 py-0.5">
-            <Text variant="caption" className="text-primary font-medium">
+            <Text variant="caption" className="font-medium text-primary">
               {timeZone}
             </Text>
           </View>
@@ -343,14 +343,14 @@ export function ConsumptionForm({
             onPress={beginAdd}
             disabled={isSubmitting}
             className={cn(
-              'items-center justify-center rounded-summary border border-dashed border-border p-6 gap-2 active:bg-carin-olive-soft/40',
+              'items-center justify-center gap-2 rounded-summary border border-dashed border-border p-6 active:bg-carin-olive-soft/40',
               isDrawer ? 'bg-transparent' : 'bg-card/60'
             )}>
             <View className="h-10 w-10 items-center justify-center rounded-full bg-carin-olive-soft">
               <Icon as={Plus} size={20} className="text-primary" />
             </View>
             <Text className="font-semibold text-foreground">Belum ada makanan</Text>
-            <Text variant="caption" className="text-muted-foreground text-center">
+            <Text variant="caption" className="text-center text-muted-foreground">
               Ketuk di sini untuk menambahkan makanan yang sudah Anda konsumsi.
             </Text>
           </Pressable>
@@ -366,17 +366,17 @@ export function ConsumptionForm({
             <View className="flex-row items-start justify-between gap-2">
               <View className="flex-1 gap-1">
                 <Text variant="emphasis">{component.displayName}</Text>
-                <View className="flex-row items-center gap-1.5 flex-wrap">
+                <View className="flex-row flex-wrap items-center gap-1.5">
                   <View
                     className={cn(
-                      'rounded-full px-2.5 py-0.5 self-start',
+                      'self-start rounded-full px-2.5 py-0.5',
                       component.catalogFoodId ? 'bg-carin-olive-soft' : 'bg-muted'
                     )}>
                     <Text
                       variant="caption"
                       className={
                         component.catalogFoodId
-                          ? 'text-primary font-medium'
+                          ? 'font-medium text-primary'
                           : 'text-muted-foreground'
                       }>
                       {component.catalogFoodId ? 'Cocok katalog' : 'Makanan lain'}
@@ -392,7 +392,7 @@ export function ConsumptionForm({
               </View>
             </View>
 
-            <View className="flex-row gap-2 pt-1 border-t border-border/50">
+            <View className="flex-row gap-2 border-t border-border/50 pt-1">
               <Button
                 variant="outline"
                 size="sm"

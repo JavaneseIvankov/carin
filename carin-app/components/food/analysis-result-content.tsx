@@ -69,6 +69,7 @@ export function AnalysisResultContent({
   correctionDisabled,
   correctionIsActive,
   photoDeleted,
+  consumptionStatus,
 }: {
   presentation: Presentation;
   photo: React.ReactNode;
@@ -77,6 +78,7 @@ export function AnalysisResultContent({
   correctionDisabled: boolean;
   correctionIsActive: boolean;
   photoDeleted: boolean;
+  consumptionStatus?: React.ReactNode;
 }) {
   const { width, fontScale } = useWindowDimensions();
   const stackMacros = width < 360 || fontScale > 1.2;
@@ -113,6 +115,8 @@ export function AnalysisResultContent({
           ) : null}
         </View>
       </View>
+
+      {consumptionStatus}
 
       <View className="gap-2">
         <Text variant="h2">Makanan & porsi</Text>

@@ -1,0 +1,77 @@
+import { ServiceError } from '@/components/app/service-error';
+import { Text } from '@/components/ui/text';
+import { useAppRead } from '@/lib/api/query';
+import { useFocusEffect } from 'expo-router';
+import * as React from 'react';
+import { AppState, View } from 'react-native';
+
+export function AnalysisConsumptionStatus({
+  consumptionId,
+  scanId,
+  resultId,
+}: {
+  consumptionId: string;
+  scanId: string;
+  resultId: string | null;
+}) {
+  const query = useAppRead('getConsumption', { path: { id: consumptionId } });
+  const refetch = query.refetch;
+  useFocusEffect(
+    React.useCallback(() => {
+      void refetch();
+    }, [refetch])
+  );
+  React.useEffect(() => {
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') void refetch();
+    });
+    return () => subscription.remove();
+  }, [refetch]);
+
+  const consumption = query.data?.data;
+  const matching = consumption?.scanId === scanId ? consumption : null;
+  const date = matching ? new Date(matching.consumedAt) : null;
+
+  return (
+    <View className="gap-1 border-b border-border pb-4">
+      <Text variant="label">Waktu konsumsi tercatat</Text>
+      {matching && date ? (
+        <>
+          <Text>
+            {date.toLocaleDateString('id-ID', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+              timeZone: matching.timezone,
+            })}
+            {' · '}
+            {date.toLocaleTimeString('id-ID', {
+              hour: '2-digit',
+              minute: '2-digit',
+              timeZone: matching.timezone,
+            })}
+          </Text>
+          <Text variant="caption" className="text-muted-foreground">
+            {matching.timezone}
+          </Text>
+          {query.data?.stale || query.error ? (
+            <Text variant="caption" className="text-muted-foreground">
+              Waktu terakhir tersimpan ditampilkan.
+            </Text>
+          ) : null}
+          {resultId && matching.sourceAnalysisResultId !== resultId ? (
+            <Text variant="caption" className="text-muted-foreground">
+              Konsumsi dicatat dari versi hasil analisis yang berbeda.
+            </Text>
+          ) : null}
+        </>
+      ) : query.isPending ? (
+        <Text variant="muted">Memuat waktu konsumsi…</Text>
+      ) : query.error ? (
+        <ServiceError error={query.error} onRetry={() => void refetch()} />
+      ) : (
+        <Text variant="muted">Waktu konsumsi belum dapat ditampilkan.</Text>
+      )}
+    </View>
+  );
+}

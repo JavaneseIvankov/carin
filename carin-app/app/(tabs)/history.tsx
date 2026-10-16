@@ -460,42 +460,32 @@ export default function History() {
           </View>
         ) : (
           <View className="gap-3">
-            <Text variant="muted">Analisis foto belum berarti makanan sudah dimakan.</Text>
             {scans.length ? (
               scans.map((scan, index) => {
                 const jobQuery = jobQueries[index];
                 const presentation = getScanHistoryPresentation(scan, jobQuery?.data?.data ?? null);
+                const dateLabel = new Date(scan.createdAt).toLocaleDateString('id-ID', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric',
+                });
                 return (
                   <View
                     key={scan.id}
-                    className="gap-3 rounded-summary border border-border/60 bg-card p-4">
-                    <View className="flex-row items-start justify-between gap-2">
-                      <View className="flex-1 gap-0.5">
-                        <Text variant="h4" className="font-bold text-foreground">
-                          Analisis foto
-                        </Text>
-                        <Text variant="caption" className="text-muted-foreground">
-                          {new Date(scan.createdAt).toLocaleDateString('id-ID', {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric',
-                          })}
-                        </Text>
-                      </View>
-                      <View className="rounded-full bg-carin-olive-soft px-2.5 py-0.5">
-                        <Text className="text-xs font-semibold text-foreground">
-                          {jobQuery?.isPending ? 'Memuat status…' : presentation.statusLabel}
-                        </Text>
-                      </View>
-                    </View>
-                    {jobQuery?.data?.data.status === 'failed' && jobQuery.data.data.error ? (
-                      <Text variant="caption" className="text-destructive">
-                        {jobQuery.data.data.error.message}
-                      </Text>
-                    ) : null}
-                    <View className="flex-row items-center gap-3">
+                    className="overflow-hidden rounded-summary border border-border/60 bg-card">
+                    <Pressable
+                      className="min-h-28 flex-row items-center gap-3 p-4 active:bg-accent/30"
+                      accessibilityRole="button"
+                      accessibilityLabel={`Buka analisis ${presentation.title}, ${dateLabel}, ${presentation.statusLabel}, ${presentation.consumptionLabel}`}
+                      onPress={() =>
+                        router.push({
+                          pathname: '/food/analysis/[id]',
+                          params: { id: scan.latestJobId },
+                        } as Href)
+                      }>
                       <PhotoThumbnail
                         photoId={scan.photoId}
+                        className="h-20 w-20"
                         accessibilityLabel={
                           scan.photoId === null
                             ? 'Foto sumber telah dihapus'
@@ -503,55 +493,76 @@ export default function History() {
                         }
                         fallbackLabel={scan.photoId === null ? 'Foto dihapus' : undefined}
                       />
-                      <View className="flex-1 gap-1">
-                        <Text variant="muted">{presentation.consumptionLabel}</Text>
-                        {scan.photoId === null ? (
-                          <Text variant="caption" className="text-muted-foreground">
-                            Foto sumber telah dihapus
-                          </Text>
-                        ) : null}
-                      </View>
-                    </View>
-                    {jobQuery?.error ? (
-                      <ServiceError
-                        error={jobQuery.error}
-                        onRetry={() => void jobQuery.refetch()}
-                      />
-                    ) : null}
-                    <View className="gap-2 pt-1">
-                      <Button
-                        variant="outline"
-                        className="min-h-12"
-                        disabled={!!jobQuery?.error}
-                        onPress={() =>
-                          router.push({
-                            pathname: '/food/analysis/[id]',
-                            params: { id: scan.latestJobId },
-                          } as Href)
-                        }>
-                        <Text>
-                          {jobQuery?.data?.data.status === 'failed'
-                            ? 'Buka analisis dan coba lagi'
-                            : 'Buka analisis'}
+                      <View className="min-w-0 flex-1 gap-1">
+                        <Text variant="h4" className="font-bold text-foreground" numberOfLines={2}>
+                          {presentation.title}
                         </Text>
-                      </Button>
-                      {scan.defaultConsumptionId ? (
+                        <Text variant="caption" className="text-muted-foreground">
+                          {dateLabel}
+                        </Text>
+                        <Text
+                          variant="caption"
+                          className={
+                            jobQuery?.data?.data.status === 'failed'
+                              ? 'font-medium text-destructive'
+                              : 'font-medium text-foreground'
+                          }>
+                          {jobQuery?.isPending ? 'Memuat status…' : presentation.statusLabel}
+                        </Text>
+                        <Text variant="caption" className="text-muted-foreground">
+                          {presentation.consumptionLabel}
+                        </Text>
+                      </View>
+                      <Icon as={ChevronRight} size={18} className="text-muted-foreground" />
+                    </Pressable>
+                    {jobQuery?.data?.data.status === 'failed' && jobQuery.data.data.error ? (
+                      <Text variant="caption" className="px-4 pb-2 text-destructive">
+                        {jobQuery.data.data.error.message}
+                      </Text>
+                    ) : null}
+                    {jobQuery?.error ? (
+                      <View className="px-4 pb-2">
+                        <ServiceError
+                          error={jobQuery.error}
+                          onRetry={() => void jobQuery.refetch()}
+                        />
+                      </View>
+                    ) : null}
+                    <View className="min-h-12 flex-row items-center justify-between border-t border-border/50 px-4 py-0.5">
+                      {presentation.quickAction === 'confirm' ? (
                         <Button
-                          variant="outline"
-                          className="min-h-12"
+                          variant="link"
+                          size="sm"
+                          className="min-h-11 px-0"
                           onPress={() =>
                             router.push({
-                              pathname: '/consumptions/[id]',
-                              params: { id: scan.defaultConsumptionId! },
+                              pathname: '/consumptions/from-scan/[scanId]',
+                              params: { scanId: scan.id },
                             } as Href)
                           }>
-                          <Text>Buka catatan konsumsi</Text>
+                          <Text>Sudah dikonsumsi</Text>
                         </Button>
-                      ) : null}
+                      ) : presentation.quickAction === 'open_existing' ? (
+                        <Button
+                          variant="link"
+                          size="sm"
+                          className="min-h-11 px-0"
+                          onPress={() =>
+                            router.push({
+                              pathname: '/food/analysis/[id]',
+                              params: { id: scan.latestJobId },
+                            } as Href)
+                          }>
+                          <Text>Lihat hasil</Text>
+                        </Button>
+                      ) : (
+                        <View />
+                      )}
                       <ScanDeletionControl
                         scanId={scan.id}
                         jobId={scan.latestJobId}
                         photoId={scan.photoId}
+                        trigger="overflow"
                       />
                     </View>
                   </View>
