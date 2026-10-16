@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "carin",
+    "name": "Carin",
     "slug": "carin",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,13 +9,17 @@
     "userInterfaceStyle": "automatic",
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.carin.app",
+      "buildNumber": "1"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
+        "backgroundColor": "#07362a"
+      },
+      "package": "com.carin.app",
+      "versionCode": 1
     },
     "web": {
       "bundler": "metro",
@@ -29,7 +33,7 @@
         {
           "image": "./assets/images/splash.png",
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#07362a"
         }
       ],
       "expo-status-bar",
