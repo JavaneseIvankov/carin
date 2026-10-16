@@ -57,7 +57,9 @@ export function getConsumptionDetailPresentation(consumption: ManualConsumption)
       .filter((source) => source.kind === 'model_estimate')
       .map((source) => source.id)
   );
-  const sourceNames = new Map(consumption.snapshot.sources.map((source) => [source.id, source.title]));
+  const sourceNames = new Map(
+    consumption.snapshot.sources.map((source) => [source.id, source.title])
+  );
   const hasVisualEstimates = consumption.snapshot.components.some((component) =>
     Object.values(component.nutrientSourceIds).some(
       (sourceId) => sourceId !== null && visualSourceIds.has(sourceId)
@@ -98,12 +100,19 @@ export function getConsumptionDetailPresentation(consumption: ManualConsumption)
                 ? 'Data katalog gizi'
                 : 'Sumber gizi belum tersedia',
         sources: Array.from(
-          new Set(nutrientSourceIds.map((sourceId) => sourceNames.get(sourceId) ?? 'Sumber tidak tersedia'))
+          new Set(
+            nutrientSourceIds.map(
+              (sourceId) => sourceNames.get(sourceId) ?? 'Sumber tidak tersedia'
+            )
+          )
         ),
       };
     }),
     components: consumption.snapshot.components.map((component) => {
       const portion = component.portion;
+      const photoScale = consumption.snapshot.photoPortionScales?.find(
+        (scale) => scale.componentId === component.id
+      );
       const portionLabel =
         portion.quantity !== null && portion.unit !== null
           ? `${portion.quantity} ${portion.unit === 'serving' ? 'takaran' : 'g'}`
@@ -114,6 +123,8 @@ export function getConsumptionDetailPresentation(consumption: ManualConsumption)
         portion: portionLabel,
         portionBasis: portion.basis,
         grams: portion.grams,
+        photoPortionFactor: photoScale?.factor ?? null,
+        photoSourceGrams: photoScale?.sourceGrams ?? null,
         matchStatus: component.matchStatus,
         nutritionLabel: Object.values(component.nutrientSourceIds).some(
           (sourceId) => sourceId !== null && visualSourceIds.has(sourceId)

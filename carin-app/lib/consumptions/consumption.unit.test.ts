@@ -9,6 +9,7 @@ import {
   formatNutrient,
   localDateTimeToIso,
   mapManualComponent,
+  parsePhotoPortionFraction,
   parsePortionQuantity,
   removeManualComponent,
   upsertManualComponent,
@@ -258,5 +259,15 @@ describe('nutrient presentation', () => {
     expect(formatNutrient(null, 'g')).toBe('Belum tersedia');
     expect(formatNutrient(0, 'g')).toBe('0 g');
     expect(formatNutrient(12.5, 'g')).toBe('12,5 g');
+  });
+});
+
+describe('photo portion fraction', () => {
+  it('accepts positive fractions through 100 and rejects invalid or excessive values', () => {
+    expect(parsePhotoPortionFraction('0,5')).toEqual({ value: 0.5 });
+    expect(parsePhotoPortionFraction('100')).toEqual({ value: 100 });
+    expect(parsePhotoPortionFraction('0')).toHaveProperty('error');
+    expect(parsePhotoPortionFraction('100,1')).toHaveProperty('error');
+    expect(parsePhotoPortionFraction('abc')).toHaveProperty('error');
   });
 });

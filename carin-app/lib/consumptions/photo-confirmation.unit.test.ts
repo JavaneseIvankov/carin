@@ -244,6 +244,67 @@ describe('photo confirmation draft mapping', () => {
     });
   });
 
+  it('carries an explicit pictured-portion fraction for unmatched VLM estimates', () => {
+    const estimate = result({
+      components: [
+        resultComponent('visual-rice', {
+          catalogFoodId: null,
+          preparation: null,
+          matchStatus: 'unmatched',
+          portion: {
+            basis: null,
+            grams: null,
+            origin: 'photo_estimate',
+            quantity: null,
+            servingId: null,
+            sourceId: null,
+            unit: null,
+          },
+          nutrientSourceIds: {
+            energyKcal: 'vlm-source',
+            carbohydrateG: null,
+            proteinG: null,
+            fatG: null,
+            fiberG: null,
+            sugarsG: null,
+            sodiumMg: null,
+          },
+        }),
+      ],
+      sources: [
+        {
+          id: 'vlm-source',
+          kind: 'model_estimate',
+          title: 'Visual estimate',
+          datasetVersion: 'vlm-v1',
+          itemRef: 'visual-rice',
+          url: null,
+        },
+      ],
+    });
+    const mapped = createPhotoConfirmationDraft(
+      estimate,
+      new Date('2026-10-14T05:30:00.000Z'),
+      'Asia/Jakarta'
+    );
+    mapped.components[0]!.photoPortionFraction = '0,5';
+
+    const input = buildPhotoConsumptionInput(mapped, {
+      scanId: 'scan-1',
+      resultId: 'result-1',
+      occurrence: 'default_confirmation',
+      timeZone: 'Asia/Jakarta',
+    });
+
+    expect(mapped.components[0]).toMatchObject({
+      photoEstimated: true,
+      photoPortionFraction: '0,5',
+    });
+    expect('error' in input ? input : input.value.components[0]).toMatchObject({
+      photoPortionFraction: 0.5,
+    });
+  });
+
   it('keeps a zero estimate known so payload validation can reject it', () => {
     const mapped = createPhotoConfirmationDraft(
       result({

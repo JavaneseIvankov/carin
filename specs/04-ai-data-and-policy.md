@@ -70,6 +70,13 @@ health rules, attention, or personalized assessment. Manual input and
 recalculation remain catalog-only. Backend rejects outputs that violate the
 schema, provenance, or catalog math.
 
+Konfirmasi konsumsi foto boleh membawa estimasi `model_estimate` dari komponen
+hasil foto yang sama dan tidak berubah ke snapshot konsumsi immutable. Server
+menskalakannya dengan rasio gram sumber/aktual atau fraksi porsi eksplisit,
+mempertahankan provenance visual dan status unmatched/unrecognized. Nilai ini
+boleh berkontribusi pada asupan dan coverage nutrisi, tetapi tidak pernah menjadi
+bukti untuk evaluasi personal atau aturan kesehatan.
+
 Recalculation tidak perlu foto ulang. Pakai komponen dan portion terbaru, profil
 snapshot yang dikirim, dan catalog/rule versions yang diminta. Foto tidak menjadi
 syarat recalculation manual. Unknown food/portion tetap menghasilkan partial

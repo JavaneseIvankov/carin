@@ -48,6 +48,22 @@ const catalogFood: ConsumptionCatalogFood = {
   servings: [{ id: 'bowl-100g', grams: 100, sourceId: 'fixture-nutrition' }],
 };
 
+const visualSource: Ai['Source'] = {
+  id: 'vlm-estimate-1', kind: 'model_estimate', title: 'Visual estimate',
+  datasetVersion: 'vlm-v1', itemRef: 'photo-component-1', url: null,
+};
+const visualResult = {
+  inputKind: 'photo', sources: [visualSource], components: [{
+    id: '00000000-0000-4000-8000-000000000001', displayName: 'Rice', catalogFoodId: null,
+    preparation: null, matchStatus: 'unrecognized',
+    portion: { quantity: null, unit: null, servingId: null, grams: null, origin: 'photo_estimate', basis: null, sourceId: null },
+    nutrients: { energyKcal: 320, carbohydrateG: 42, proteinG: 9, fatG: 12, fiberG: 1.5, sugarsG: 14, sodiumMg: null },
+    sourceIds: [visualSource.id],
+    nutrientSourceIds: { energyKcal: visualSource.id, carbohydrateG: visualSource.id, proteinG: visualSource.id, fatG: visualSource.id, fiberG: visualSource.id, sugarsG: visualSource.id, sodiumMg: null },
+    per100g: { energyKcal: null, carbohydrateG: null, proteinG: null, fatG: null, fiberG: null, sugarsG: null, sodiumMg: null },
+  }],
+} as Ai['AnalysisResult'];
+
 function build(components: Ai['ComponentInput'][], catalogFoods: ConsumptionCatalogFood[] = [catalogFood]) {
   return buildConsumptionNutritionSnapshot({
     operationId: '00000000-0000-4000-8000-000000000099',
@@ -148,5 +164,51 @@ describe('deterministic consumption nutrition snapshot', () => {
     expect(result.components[0]?.nutrients.energyKcal).toBeNull();
     expect(result.totals.energyKcal).toBeNull();
     expect(result.limitations.map(({ code }) => code)).toContain('unmatched_food');
+  });
+
+  it('scales matching photo estimates by actual grams while retaining visual provenance', () => {
+    const sourceResult = {
+      ...visualResult,
+      components: visualResult.components.map((item) => ({
+        ...item, portion: { ...item.portion, quantity: 200, unit: 'g', grams: 200 },
+      })),
+    } as Ai['AnalysisResult'];
+    const result = buildConsumptionNutritionSnapshot({
+      operationId: '00000000-0000-4000-8000-000000000099', computedAt: '2026-10-14T00:00:00.000Z',
+      profileVersion: 3, catalogVersion: 'fixture-catalog-v1', nutritionDatasetVersion: 'fixture-nutrition-v1',
+      ruleSetVersion: 'fixture-rules-v1', dataMode: 'synthetic',
+      components: [{ ...component({ catalogFoodId: null, preparation: null, portion: { kind: 'known', quantity: 100, unit: 'g' } }) }],
+      catalogFoods: [], sourceResult,
+    });
+    expect(result.components[0]?.nutrients.energyKcal).toBe(160);
+    expect(result.components[0]?.per100g.energyKcal).toBeNull();
+    expect(result.components[0]?.nutrientSourceIds.energyKcal).toBe(visualSource.id);
+    expect(result.components[0]?.matchStatus).toBe('unrecognized');
+    expect(result.supportStatus).toBe('unrecognized');
+  });
+
+  it('uses an explicit fraction when source grams are unknown and preserves null values', () => {
+    const result = buildConsumptionNutritionSnapshot({
+      operationId: '00000000-0000-4000-8000-000000000099', computedAt: '2026-10-14T00:00:00.000Z',
+      profileVersion: 3, catalogVersion: 'fixture-catalog-v1', nutritionDatasetVersion: 'fixture-nutrition-v1',
+      ruleSetVersion: 'fixture-rules-v1', dataMode: 'synthetic',
+      components: [{ ...component({ catalogFoodId: null, preparation: null, portion: { kind: 'unknown' } }), photoPortionFraction: 0.25 }],
+      catalogFoods: [], sourceResult: visualResult,
+    });
+    expect(result.components[0]?.nutrients.energyKcal).toBe(80);
+    expect(result.components[0]?.nutrients.sodiumMg).toBeNull();
+    expect(result.photoPortionScales?.[0]).toMatchObject({ factor: 0.25, sourceGrams: null });
+  });
+
+  it('does not reuse visual estimates after the food identity changes', () => {
+    const result = buildConsumptionNutritionSnapshot({
+      operationId: '00000000-0000-4000-8000-000000000099', computedAt: '2026-10-14T00:00:00.000Z',
+      profileVersion: 3, catalogVersion: 'fixture-catalog-v1', nutritionDatasetVersion: 'fixture-nutrition-v1',
+      ruleSetVersion: 'fixture-rules-v1', dataMode: 'synthetic',
+      components: [{ ...component({ displayName: 'Brown rice', catalogFoodId: null, preparation: null, portion: { kind: 'unknown' } }), photoPortionFraction: 1 }],
+      catalogFoods: [], sourceResult: visualResult,
+    });
+    expect(result.components[0]?.nutrients.energyKcal).toBeNull();
+    expect(result.photoPortionScales).toEqual([]);
   });
 });

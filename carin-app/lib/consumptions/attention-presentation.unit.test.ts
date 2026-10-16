@@ -153,6 +153,9 @@ describe('consumption detail presentation', () => {
         url: null,
       },
     ];
+    visual.snapshot.photoPortionScales = [
+      { componentId: 'component-1', factor: 0.5, sourceGrams: null },
+    ];
 
     const presentation = getConsumptionDetailPresentation(visual);
     expect(presentation.hasVisualEstimates).toBe(true);
@@ -162,5 +165,9 @@ describe('consumption detail presentation', () => {
       sources: ['Estimasi visual VLM untuk porsi pada foto'],
     });
     expect(presentation.components[0]?.nutritionLabel).toBe('Estimasi visual VLM');
+    expect(presentation.components[0]).toMatchObject({
+      photoPortionFactor: 0.5,
+      photoSourceGrams: null,
+    });
   });
 });

@@ -3,6 +3,7 @@ import {
   formatLocalDateTime,
   localDateTimeToIso,
   mapManualComponent,
+  parsePhotoPortionFraction,
   type ManualConsumptionDraft,
   type ManualFoodComponentDraft,
 } from './consumption';
@@ -13,7 +14,10 @@ type AnalysisResult = components['schemas']['ai__AnalysisResult'];
 type AnalysisComponent = components['schemas']['ai__ComponentResult'];
 type PhotoConsumptionInput = components['schemas']['ConsumptionCreate'];
 
-function mapPhotoComponent(component: AnalysisComponent): ManualFoodComponentDraft {
+function mapPhotoComponent(
+  component: AnalysisComponent,
+  modelEstimateSourceIds: ReadonlySet<string>
+): ManualFoodComponentDraft {
   const { portion } = component;
   let editablePortion: ManualFoodComponentDraft['portion'] = { kind: 'unknown' };
 
@@ -32,12 +36,23 @@ function mapPhotoComponent(component: AnalysisComponent): ManualFoodComponentDra
     };
   }
 
+  const photoEstimated = Object.values(component.nutrientSourceIds).some(
+    (sourceId) => sourceId !== null && modelEstimateSourceIds.has(sourceId)
+  );
+
   return {
     id: component.id,
     displayName: component.displayName,
     catalogFoodId: component.matchStatus === 'matched' ? component.catalogFoodId : null,
     preparation: component.preparation,
     portion: editablePortion,
+    ...(photoEstimated
+      ? {
+          photoEstimated: true,
+          photoSourceGrams: portion.grams,
+          photoPortionFraction: '1',
+        }
+      : {}),
   };
 }
 
@@ -47,11 +62,16 @@ export function createPhotoConfirmationDraft(
   timeZone: string
 ): ManualConsumptionDraft {
   const local = formatLocalDateTime(instant, timeZone);
+  const modelEstimateSourceIds = new Set(
+    result.sources.filter((source) => source.kind === 'model_estimate').map(({ id }) => id)
+  );
   return {
     consumedDate: local.date,
     consumedTime: local.time,
     catalogVersion: result.catalogVersion,
-    components: result.components.map(mapPhotoComponent),
+    components: result.components.map((component) =>
+      mapPhotoComponent(component, modelEstimateSourceIds)
+    ),
     activeComponent: null,
     editingComponentId: null,
   };
@@ -79,6 +99,17 @@ export function buildPhotoConsumptionInput(
   const mappedComponents = draft.components.map(mapManualComponent);
   const invalidComponent = mappedComponents.find((component) => 'error' in component);
   if (invalidComponent && 'error' in invalidComponent) return invalidComponent;
+  const photoComponents = mappedComponents.map((mapped, index) => {
+    if ('error' in mapped) throw new Error('Validated component unexpectedly failed.');
+    const draftComponent = draft.components[index]!;
+    if (!draftComponent.photoEstimated || draftComponent.catalogFoodId !== null)
+      return mapped.value;
+    const fraction = parsePhotoPortionFraction(draftComponent.photoPortionFraction ?? '1');
+    if ('error' in fraction) return fraction;
+    return { ...mapped.value, photoPortionFraction: fraction.value };
+  });
+  const invalidFraction = photoComponents.find((component) => 'error' in component);
+  if (invalidFraction && 'error' in invalidFraction) return invalidFraction;
 
   return {
     value: {
@@ -88,9 +119,9 @@ export function buildPhotoConsumptionInput(
       occurrence: input.occurrence,
       consumedAt: consumedAt.value,
       timezone: input.timeZone,
-      components: mappedComponents.map((component) => {
+      components: photoComponents.map((component) => {
         if ('error' in component) throw new Error('Validated component unexpectedly failed.');
-        return component.value;
+        return component;
       }),
       catalogVersion: draft.catalogVersion.trim(),
     },

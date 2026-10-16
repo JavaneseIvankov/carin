@@ -8518,6 +8518,57 @@ export const contracts = {
         ],
         type: 'object',
       },
+      'app.ConsumptionComponentInput': {
+        additionalProperties: false,
+        description:
+          'Consumption input. photoPortionFraction is required only when an unchanged unmatched photo estimate cannot be scaled from known gram values; 1 means the full pictured portion.',
+        properties: {
+          catalogFoodId: {
+            anyOf: [
+              {
+                maxLength: 500,
+                minLength: 1,
+                type: 'string',
+              },
+              {
+                type: 'null',
+              },
+            ],
+          },
+          displayName: {
+            maxLength: 500,
+            minLength: 1,
+            type: 'string',
+          },
+          id: {
+            format: 'uuid',
+            type: 'string',
+          },
+          photoPortionFraction: {
+            description:
+              'Fraction of the pictured photo estimate consumed, used only when source and actual grams are not both known.',
+            exclusiveMinimum: 0,
+            maximum: 100,
+            type: 'number',
+          },
+          portion: {
+            $ref: '#/$defs/ai.PortionInput',
+          },
+          preparation: {
+            anyOf: [
+              {
+                maxLength: 500,
+                type: 'string',
+              },
+              {
+                type: 'null',
+              },
+            ],
+          },
+        },
+        required: ['id', 'displayName', 'catalogFoodId', 'preparation', 'portion'],
+        type: 'object',
+      },
       'app.ConsumptionCreate': {
         additionalProperties: false,
         properties: {
@@ -8530,7 +8581,7 @@ export const contracts = {
           },
           components: {
             items: {
-              $ref: '#/$defs/ai.ComponentInput',
+              $ref: '#/$defs/app.ConsumptionComponentInput',
             },
             maxItems: 30,
             minItems: 1,
@@ -8674,6 +8725,38 @@ export const contracts = {
             enum: ['considerable', 'needs_attention', 'insufficient_information'],
             type: 'string',
           },
+          photoPortionScales: {
+            description:
+              'Optional immutable scale factors used to adapt original photo estimates to consumed portions.',
+            items: {
+              additionalProperties: false,
+              properties: {
+                componentId: {
+                  format: 'uuid',
+                  type: 'string',
+                },
+                factor: {
+                  exclusiveMinimum: 0,
+                  maximum: 100,
+                  type: 'number',
+                },
+                sourceGrams: {
+                  anyOf: [
+                    {
+                      exclusiveMinimum: 0,
+                      type: 'number',
+                    },
+                    {
+                      type: 'null',
+                    },
+                  ],
+                },
+              },
+              required: ['componentId', 'factor', 'sourceGrams'],
+              type: 'object',
+            },
+            type: 'array',
+          },
           profileVersion: {
             minimum: 0,
             type: 'integer',
@@ -8730,7 +8813,7 @@ export const contracts = {
           },
           components: {
             items: {
-              $ref: '#/$defs/ai.ComponentInput',
+              $ref: '#/$defs/app.ConsumptionComponentInput',
             },
             maxItems: 30,
             minItems: 1,

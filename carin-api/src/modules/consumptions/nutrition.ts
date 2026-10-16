@@ -5,7 +5,8 @@ import { validateSchema } from '../../contracts/validation.js';
 type Ai = components['schemas'];
 type AnalysisResult = Ai['AnalysisResult'];
 type ConsumptionSnapshot = AppComponents['schemas']['ConsumptionSnapshot'];
-type ComponentInput = Ai['ComponentInput'];
+type ComponentInput = AppComponents['schemas']['ConsumptionComponentInput'];
+type ComponentScale = NonNullable<ConsumptionSnapshot['photoPortionScales']>[number];
 type Nutrients = Ai['Nutrients'];
 type Source = Ai['Source'];
 type NutrientSources = Ai['NutrientSources'];
@@ -40,10 +41,11 @@ export type ConsumptionNutritionInput = {
   dataMode: 'real' | 'synthetic' | 'unavailable';
   components: ComponentInput[];
   catalogFoods: ConsumptionCatalogFood[];
+  sourceResult?: AnalysisResult | null;
 };
 
 export class ConsumptionCatalogInputError extends Error {
-  constructor(readonly reason: 'food_unavailable' | 'selection_mismatch' | 'serving_unavailable' | 'serving_source_unavailable') {
+  constructor(readonly reason: 'food_unavailable' | 'selection_mismatch' | 'serving_unavailable' | 'serving_source_unavailable' | 'photo_portion_fraction_required') {
     super(reason);
   }
 }
@@ -175,7 +177,8 @@ function componentResult(
   foods: Map<string, ConsumptionCatalogFood>,
   sources: Map<string, Source>,
   limitations: Ai['Limitation'][],
-): Ai['ComponentResult'] {
+  sourceResult?: AnalysisResult | null,
+): { result: Ai['ComponentResult']; scale: ComponentScale | null } {
   const food = component.catalogFoodId ? foods.get(component.catalogFoodId) : undefined;
   if (component.catalogFoodId && !food) throw new ConsumptionCatalogInputError('food_unavailable');
   if (food && (food.displayName !== component.displayName || food.preparation !== component.preparation)) {
@@ -183,11 +186,53 @@ function componentResult(
   }
 
   const actual = actualPortion(component, food);
+  const visualComponent = sourceResult?.inputKind === 'photo'
+    ? sourceResult.components.find(({ id }) => id === component.id)
+    : undefined;
+  const modelSourceIds = new Set((sourceResult?.sources ?? [])
+    .filter(({ kind }) => kind === 'model_estimate').map(({ id }) => id));
+  const visualIdentityMatches = Boolean(visualComponent &&
+    (visualComponent.matchStatus === 'unmatched' || visualComponent.matchStatus === 'unrecognized') &&
+    visualComponent.displayName === component.displayName &&
+    visualComponent.catalogFoodId === component.catalogFoodId &&
+    visualComponent.preparation === component.preparation);
+  const visualNutrientSourceIds = emptyNutrientSources();
+  if (visualIdentityMatches && visualComponent) {
+    for (const key of nutrientKeys) {
+      const id = visualComponent.nutrientSourceIds[key];
+      if (id && modelSourceIds.has(id)) visualNutrientSourceIds[key] = id;
+    }
+  }
+  const hasVisualNutrients = nutrientKeys.some((key) => visualNutrientSourceIds[key] !== null);
+  let scale: ComponentScale | null = null;
   const per100g = food ? food.per100g : emptyNutrients();
   const nutrientSourceIds = food ? food.nutrientSourceIds : emptyNutrientSources();
   const nutrients = emptyNutrients();
   if (!food) {
     addLimitation(limitations, 'unmatched_food', 'No catalog nutrition source is available for this component.', [component.id]);
+    if (hasVisualNutrients && visualComponent) {
+      const sourceGrams = visualComponent.portion.grams;
+      const actualGrams = actual.grams;
+      const ratio = sourceGrams !== null && actualGrams !== null && Number.isFinite(sourceGrams) && sourceGrams > 0
+        ? actualGrams / sourceGrams
+        : null;
+      const fraction = component.photoPortionFraction;
+      const factor = ratio ?? fraction;
+      if (factor === undefined || !Number.isFinite(factor) || factor <= 0 || factor > 100) {
+        throw new ConsumptionCatalogInputError('photo_portion_fraction_required');
+      }
+      for (const key of nutrientKeys) {
+        const sourceId = visualNutrientSourceIds[key];
+        const estimate = visualComponent.nutrients[key];
+        if (sourceId) {
+          nutrients[key] = estimate === null ? null : rounded(estimate * factor);
+          nutrientSourceIds[key] = sourceId;
+          const source = sourceResult?.sources.find(({ id }) => id === sourceId);
+          if (source) sources.set(source.id, source);
+        }
+      }
+      scale = { componentId: component.id, factor: rounded(factor), sourceGrams };
+    }
     if (component.portion.kind === 'known' && component.portion.unit === 'serving') {
       addLimitation(limitations, 'serving_size_unavailable', 'The serving size cannot be converted without matching catalog data.', [component.id]);
     }
@@ -211,21 +256,23 @@ function componentResult(
 
   const sourceIds = food
     ? [ ...new Set([ ...food.sourceRefs.map(({ id }) => id), ...(actual.sourceId ? [actual.sourceId] : []) ]) ].sort()
-    : [];
+    : [...new Set(Object.values(nutrientSourceIds).filter((id): id is string => id !== null))].sort();
   for (const source of food?.sourceRefs ?? []) sources.set(source.id, source);
 
-  return {
+  return { result: {
     id: component.id,
     displayName: component.displayName,
     catalogFoodId: food?.id ?? null,
     preparation: component.preparation,
-    matchStatus: food ? 'matched' : 'unmatched',
+    matchStatus: food ? 'matched' : visualIdentityMatches && visualComponent
+      ? visualComponent.matchStatus
+      : 'unmatched',
     portion: actual.portion,
     nutrients,
     sourceIds,
     nutrientSourceIds,
-    per100g,
-  };
+    per100g: food ? per100g : emptyNutrients(),
+  }, scale };
 }
 
 /** Build the immutable nutrition view from user-selected inputs and versioned catalog facts. */
@@ -233,8 +280,10 @@ export function buildConsumptionNutritionSnapshot(input: ConsumptionNutritionInp
   const foods = new Map(input.catalogFoods.map((food) => [food.id, food]));
   const sources = new Map<string, Source>();
   const limitations: Ai['Limitation'][] = [];
-  const resultComponents = input.components.map((component) =>
-    componentResult(component, foods, sources, limitations));
+  const componentResults = input.components.map((component) =>
+    componentResult(component, foods, sources, limitations, input.sourceResult));
+  const resultComponents = componentResults.map(({ result }) => result);
+  const photoPortionScales = componentResults.flatMap(({ scale }) => scale ? [scale] : []);
   const totals = Object.fromEntries(nutrientKeys.map((key) => [
     key,
     sumKnown(resultComponents.map((component) => component.nutrients[key])),
@@ -246,13 +295,13 @@ export function buildConsumptionNutritionSnapshot(input: ConsumptionNutritionInp
       totalComponentCount: resultComponents.length,
     },
   ])) as Ai['NutrientCoverage'];
-  const knownNutrients = nutrientKeys.some((key) => totals[key] !== null);
-  const complete = resultComponents.every((component) => nutrientKeys.every((key) => component.nutrients[key] !== null));
+  const complete = resultComponents.length > 0 && resultComponents.every((component) => component.matchStatus === 'matched' && nutrientKeys.every((key) => component.nutrients[key] !== null));
+  const anyMatched = resultComponents.some((component) => component.matchStatus === 'matched');
   const snapshot: ConsumptionSnapshot = {
     contractVersion: '2.0.0',
     operationId: input.operationId,
-    inputKind: 'manual',
-    supportStatus: complete ? 'complete' : knownNutrients ? 'partial' : 'unrecognized',
+    inputKind: input.sourceResult?.inputKind === 'photo' ? 'photo' : 'manual',
+    supportStatus: complete ? 'complete' : anyMatched ? 'partial' : 'unrecognized',
     overallAttention: 'insufficient_information',
     profileVersion: input.profileVersion,
     catalogVersion: input.catalogVersion,
@@ -260,6 +309,7 @@ export function buildConsumptionNutritionSnapshot(input: ConsumptionNutritionInp
     ruleSetVersion: input.ruleSetVersion,
     computedAt: input.computedAt,
     components: resultComponents,
+    photoPortionScales,
     totals,
     coverage,
     attentions: [],

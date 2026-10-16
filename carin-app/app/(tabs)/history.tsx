@@ -231,6 +231,27 @@ export default function History() {
   });
   const consumptions = getConsumptionHistoryItems(consumptionQuery.data?.pages);
   const scans = getScanHistoryItems(scanQuery.data?.pages);
+  const photoScanQueries = useQueries({
+    queries: consumptions.flatMap((item) =>
+      item.source === 'photo_confirmation' && item.photoAvailable && item.scanId
+        ? [
+            {
+              queryKey: scope
+                ? scopeKey(scope, 'getScan', { path: { id: item.scanId } })
+                : ['carin', 'no-session', 'getScan', item.scanId],
+              queryFn: () => repository!.read('getScan', { path: { id: item.scanId! } }),
+              enabled: !!repository && tab === 'consumption',
+              networkMode: 'always' as const,
+            },
+          ]
+        : []
+    ),
+  });
+  const photoScans = new Map(
+    photoScanQueries.flatMap((query) =>
+      query.data ? [[query.data.data.id, query.data.data] as const] : []
+    )
+  );
   const jobQueries = useQueries({
     queries: scans.map((scan) => ({
       queryKey: scope
@@ -351,10 +372,11 @@ export default function History() {
                 const foods = item.snapshot.components
                   .slice(0, 2)
                   .map((component) => component.displayName);
+                const photoId = item.scanId ? (photoScans.get(item.scanId)?.photoId ?? null) : null;
                 return (
                   <Pressable
                     key={item.id}
-                    className="min-h-16 gap-2.5 rounded-summary border border-border/60 bg-card p-4 active:bg-accent/30"
+                    className="min-h-28 flex-row items-center gap-3 rounded-summary border border-border/60 bg-card p-4 active:bg-accent/30"
                     accessibilityRole="button"
                     accessibilityLabel={`Buka catatan ${foods.join(', ') || 'konsumsi'} tanggal ${local.date}`}
                     onPress={() =>
@@ -363,37 +385,40 @@ export default function History() {
                         params: { id: item.id },
                       } as Href)
                     }>
-                    <View className="flex-row items-start justify-between gap-2">
-                      <Text variant="h4" className="flex-1 font-bold text-foreground">
-                        {foods.join(' · ') || 'Catatan konsumsi'}
+                    {item.source === 'photo_confirmation' ? (
+                      <PhotoThumbnail
+                        photoId={photoId}
+                        className="h-20 w-20"
+                        accessibilityLabel="Foto makanan pada catatan konsumsi"
+                        fallbackLabel={item.photoAvailable ? 'Memuat foto' : 'Foto dihapus'}
+                      />
+                    ) : (
+                      <View className="h-20 w-20 items-center justify-center rounded-[16px] border border-border/70 bg-carin-butter/60">
+                        <Icon as={Utensils} size={22} className="text-primary" />
+                      </View>
+                    )}
+                    <View className="min-w-0 flex-1 gap-1">
+                      <Text variant="h4" className="font-bold text-foreground" numberOfLines={2}>
+                        {foods.join(' · ') || 'Catatan makan'}
                       </Text>
-                      <View className="flex-row items-center gap-1">
-                        <Text variant="caption" className="text-muted-foreground">
-                          {local.time}
-                        </Text>
-                        <Icon as={ChevronRight} size={16} className="text-muted-foreground" />
-                      </View>
-                    </View>
-                    <Text variant="caption" className="text-muted-foreground">
-                      {local.date} ({item.timezone})
-                    </Text>
-                    <View className="flex-row flex-wrap items-center gap-1.5 pt-0.5">
-                      <View className="rounded-full bg-carin-olive-soft px-2.5 py-0.5">
-                        <Text className="text-xs font-semibold text-foreground">
-                          {item.source === 'manual' ? 'Catatan manual' : 'Konfirmasi dari foto'}
-                        </Text>
-                      </View>
+                      <Text variant="caption" className="text-muted-foreground">
+                        {local.date} · {local.time}
+                      </Text>
+                      <Text variant="caption" className="font-medium text-foreground">
+                        {item.source === 'manual' ? 'Catatan manual' : 'Dimakan · dari hasil foto'}
+                      </Text>
                       {attention ? (
-                        <View className="rounded-full bg-muted/80 px-2.5 py-0.5">
-                          <Text className="text-xs text-muted-foreground">{attention}</Text>
-                        </View>
+                        <Text variant="caption" className="text-muted-foreground" numberOfLines={1}>
+                          {attention}
+                        </Text>
                       ) : null}
                       {item.source === 'photo_confirmation' && !item.photoAvailable ? (
-                        <View className="rounded-full bg-destructive/10 px-2.5 py-0.5">
-                          <Text className="text-xs text-destructive">Foto sumber dihapus</Text>
-                        </View>
+                        <Text variant="caption" className="text-muted-foreground">
+                          Foto sumber dihapus
+                        </Text>
                       ) : null}
                     </View>
+                    <Icon as={ChevronRight} size={18} className="text-muted-foreground" />
                   </Pressable>
                 );
               })

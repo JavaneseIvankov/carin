@@ -66,6 +66,7 @@ export function evaluatePersonalizationEligibility(
 
   let supported = false;
   const manifestConditions = new Map(input.manifest.conditions.map((condition) => [condition.id, condition]));
+  const sourceKinds = new Map(input.snapshot.sources.map((source) => [source.id, source.kind]));
   for (const conditionId of input.profile.conditionIds) {
     const condition = manifestConditions.get(conditionId);
     if (!condition?.personalizationSupported) {
@@ -95,13 +96,20 @@ export function evaluatePersonalizationEligibility(
 
     const hasRequiredFields = hasRequiredProfileFields(input.profile, condition.requiredProfileFields);
     const missingNutrients = condition.requiredNutrients.filter((nutrient) => {
-      const coverage = input.snapshot.coverage[nutrient];
-      return coverage.totalComponentCount === 0 || coverage.knownComponentCount !== coverage.totalComponentCount;
+      return input.snapshot.components.length === 0 || input.snapshot.components.some((component) => {
+        const sourceId = component.nutrientSourceIds[nutrient];
+        const sourceKind = sourceId ? sourceKinds.get(sourceId) : undefined;
+        return component.nutrients[nutrient] === null || (sourceKind !== 'nutrition' && sourceKind !== 'synthetic');
+      });
     });
     if (!hasRequiredFields || missingNutrients.length) {
       const missingComponents = missingNutrients.length
         ? input.snapshot.components.filter((component) =>
-            missingNutrients.some((nutrient) => component.nutrients[nutrient] === null),
+            missingNutrients.some((nutrient) => {
+              const sourceId = component.nutrientSourceIds[nutrient];
+              const sourceKind = sourceId ? sourceKinds.get(sourceId) : undefined;
+              return component.nutrients[nutrient] === null || (sourceKind !== 'nutrition' && sourceKind !== 'synthetic');
+            }),
           ).map(({ id }) => id)
         : [];
       limitations.push(limitation(

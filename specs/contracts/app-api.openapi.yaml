@@ -2099,7 +2099,7 @@ components:
         components:
           type: "array"
           items:
-            $ref: "./ai-service.openapi.yaml#/components/schemas/ComponentInput"
+            $ref: "#/components/schemas/ConsumptionComponentInput"
           minItems: 1
           maxItems: 30
         catalogVersion:
@@ -2108,6 +2108,37 @@ components:
           maxLength: 500
           description: "Immutable catalog version used for food/serving selection. Corrections use the source result version. 'unavailable' allowed only for manual unmatched input with no catalog."
       required: ["source", "scanId", "sourceAnalysisResultId", "occurrence", "consumedAt", "timezone", "components", "catalogVersion"]
+    ConsumptionComponentInput:
+      type: "object"
+      additionalProperties: false
+      description: "Consumption input. photoPortionFraction is required only when an unchanged unmatched photo estimate cannot be scaled from known gram values; 1 means the full pictured portion."
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        displayName:
+          type: "string"
+          minLength: 1
+          maxLength: 500
+        catalogFoodId:
+          anyOf:
+            - type: "string"
+              minLength: 1
+              maxLength: 500
+            - type: "null"
+        preparation:
+          anyOf:
+            - type: "string"
+              maxLength: 500
+            - type: "null"
+        portion:
+          $ref: "./ai-service.openapi.yaml#/components/schemas/PortionInput"
+        photoPortionFraction:
+          type: "number"
+          exclusiveMinimum: 0
+          maximum: 100
+          description: "Fraction of the pictured photo estimate consumed, used only when source and actual grams are not both known."
+      required: ["id", "displayName", "catalogFoodId", "preparation", "portion"]
     ConsumptionUpdate:
       type: "object"
       additionalProperties: false
@@ -2125,7 +2156,7 @@ components:
         components:
           type: "array"
           items:
-            $ref: "./ai-service.openapi.yaml#/components/schemas/ComponentInput"
+            $ref: "#/components/schemas/ConsumptionComponentInput"
           minItems: 1
           maxItems: 30
         catalogVersion:
@@ -2237,6 +2268,26 @@ components:
         profileVersion:
           type: "integer"
           minimum: 0
+        photoPortionScales:
+          type: "array"
+          description: "Optional immutable scale factors used to adapt original photo estimates to consumed portions."
+          items:
+            type: "object"
+            additionalProperties: false
+            properties:
+              componentId:
+                type: "string"
+                format: "uuid"
+              factor:
+                type: "number"
+                exclusiveMinimum: 0
+                maximum: 100
+              sourceGrams:
+                anyOf:
+                  - type: "number"
+                    exclusiveMinimum: 0
+                  - type: "null"
+            required: ["componentId", "factor", "sourceGrams"]
         ruleSetVersion:
           type: "string"
           minLength: 1

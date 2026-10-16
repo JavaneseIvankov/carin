@@ -226,9 +226,7 @@ export function FoodEditor({
               disabled={disabled}
               onPress={() => {
                 const servingId =
-                  (portion.kind === 'known' &&
-                    portion.unit === 'serving' &&
-                    portion.servingId) ||
+                  (portion.kind === 'known' && portion.unit === 'serving' && portion.servingId) ||
                   selectedFood.servings[0]?.id;
                 if (servingId) {
                   onChange({
@@ -249,6 +247,38 @@ export function FoodEditor({
             </Button>
           ) : null}
         </View>
+
+        {component.photoEstimated &&
+        component.catalogFoodId === null &&
+        (component.photoSourceGrams === null ||
+          component.photoSourceGrams === undefined ||
+          portion.kind === 'unknown' ||
+          portion.unit !== 'g') ? (
+          <View className="gap-2 rounded-compact bg-carin-olive-soft/50 p-3.5">
+            <FormField
+              label="Porsi dibanding foto"
+              hint="1 = porsi di foto · 0,5 = setengah · 2 = dua kali"
+              unit="×"
+              unitBadge
+              keyboardType="decimal-pad"
+              value={component.photoPortionFraction ?? '1'}
+              onChangeText={(photoPortionFraction) =>
+                onChange({ ...component, photoPortionFraction })
+              }
+              editable={!disabled}
+              placeholder="Contoh: 1"
+            />
+            <Text variant="caption" className="text-muted-foreground">
+              Nilai gizi visual akan diskalakan dari porsi foto yang dipilih.
+            </Text>
+          </View>
+        ) : component.photoEstimated &&
+          component.photoSourceGrams !== null &&
+          component.photoSourceGrams !== undefined ? (
+          <Text variant="caption" className="text-muted-foreground">
+            Estimasi visual diskalakan dari {component.photoSourceGrams} g sesuai gram yang dicatat.
+          </Text>
+        ) : null}
 
         {portion.kind === 'known' && portion.unit === 'serving' ? (
           <View className="gap-3 pt-1">
@@ -286,7 +316,7 @@ export function FoodEditor({
                     onChange({ ...component, portion: { ...portion, quantity: String(next) } });
                   }}
                   accessibilityLabel="Kurangi porsi 0.25"
-                  className="h-12 w-12 rounded-control p-0 items-center justify-center">
+                  className="h-12 w-12 items-center justify-center rounded-control p-0">
                   <Text className="text-xl font-bold text-foreground">−</Text>
                 </Button>
                 <Button
@@ -300,7 +330,7 @@ export function FoodEditor({
                     onChange({ ...component, portion: { ...portion, quantity: String(next) } });
                   }}
                   accessibilityLabel="Tambah porsi 0.25"
-                  className="h-12 w-12 rounded-control p-0 items-center justify-center">
+                  className="h-12 w-12 items-center justify-center rounded-control p-0">
                   <Text className="text-xl font-bold text-foreground">+</Text>
                 </Button>
               </View>
@@ -399,7 +429,7 @@ export function FoodEditor({
                     onChange({ ...component, portion: { ...portion, quantity: String(next) } });
                   }}
                   accessibilityLabel="Kurangi 25 gram"
-                  className="h-12 px-3 rounded-control items-center justify-center">
+                  className="h-12 items-center justify-center rounded-control px-3">
                   <Text className="text-sm font-bold text-foreground">−25g</Text>
                 </Button>
                 <Button
@@ -413,7 +443,7 @@ export function FoodEditor({
                     onChange({ ...component, portion: { ...portion, quantity: String(next) } });
                   }}
                   accessibilityLabel="Tambah 25 gram"
-                  className="h-12 px-3 rounded-control items-center justify-center">
+                  className="h-12 items-center justify-center rounded-control px-3">
                   <Text className="text-sm font-bold text-foreground">+25g</Text>
                 </Button>
               </View>

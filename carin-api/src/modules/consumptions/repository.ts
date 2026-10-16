@@ -46,6 +46,8 @@ type ConsumptionView = App['Consumption'];
 type ConsumptionPage = App['ConsumptionPage'];
 type ConsumptionCreate = App['ConsumptionCreate'];
 type ConsumptionUpdate = App['ConsumptionUpdate'];
+type ConsumptionComponentInput = App['ConsumptionComponentInput'];
+type AiComponentInput = Ai['ComponentInput'];
 type Transaction = Parameters<Parameters<Database['transaction']>[0]>[0];
 
 export class ConsumptionError extends Error {
@@ -224,7 +226,7 @@ type LoadedCatalog = {
 async function loadCatalog(
   tx: Transaction,
   versionName: string,
-  components: Ai['ComponentInput'][],
+  components: ConsumptionComponentInput[],
   allowUnavailable: boolean,
 ): Promise<LoadedCatalog> {
   if (versionName === 'unavailable') {
@@ -299,16 +301,35 @@ async function loadCatalog(
 }
 
 function validateConsumptionComponents(
-  components: Ai['ComponentInput'][],
+  components: ConsumptionComponentInput[],
   sourceResult: AnalysisResult | null,
 ): void {
   if (!components.length || components.length > 30 || new Set(components.map(({ id }) => id)).size !== components.length) {
     throw new ConsumptionError('invalid_input');
   }
   if (sourceResult) {
-    const sourceIds = new Set(sourceResult.components.map(({ id }) => id));
-    if (components.some(({ id }) => !sourceIds.has(id))) throw new ConsumptionError('invalid_input');
+    const sourceComponents = new Map(sourceResult.components.map((component) => [component.id, component]));
+    if (components.some((component) => {
+      const source = sourceComponents.get(component.id);
+      if (!source) return true;
+      if (component.photoPortionFraction === undefined) return false;
+      return (source.matchStatus !== 'unmatched' && source.matchStatus !== 'unrecognized') ||
+        source.displayName !== component.displayName || source.catalogFoodId !== component.catalogFoodId ||
+        source.preparation !== component.preparation;
+    })) throw new ConsumptionError('invalid_input');
+  } else if (components.some((component) => component.photoPortionFraction !== undefined)) {
+    throw new ConsumptionError('invalid_input');
   }
+}
+
+function toAiComponentInputs(components: ConsumptionComponentInput[]): AiComponentInput[] {
+  return components.map(({ id, displayName, catalogFoodId, preparation, portion }) => ({
+    id,
+    displayName,
+    catalogFoodId,
+    preparation,
+    portion,
+  }));
 }
 
 function createCanonicalInput(input: ConsumptionCreate, consumedAt: Date): Record<string, unknown> {
@@ -434,7 +455,7 @@ async function writeEvaluation(
     generation: number;
     profileSnapshotId: string;
     profile: ProfileContext;
-    components: Ai['ComponentInput'][];
+    components: AiComponentInput[];
     snapshot: { id: string; snapshot: ConsumptionSnapshot };
     catalog: LoadedCatalog;
     sourceResultId: string | null;
@@ -685,7 +706,7 @@ export async function createConsumption(
         currentProfile: profile,
         catalogVersion: input.body.catalogVersion,
         ruleSetVersion: source.result.ruleSetVersion,
-        components: input.body.components,
+        components: toAiComponentInputs(input.body.components),
       }));
     const profileSnapshotId = reuse
       ? source!.profileRow.id
@@ -702,6 +723,7 @@ export async function createConsumption(
       dataMode: snapshotMode(catalog),
       components: input.body.components,
       catalogFoods: catalog.foods,
+      sourceResult: source?.result ?? null,
     });
     const snapshot = reuse && source
       ? preservePhotoEvaluation(nutritionSnapshot, source.result)
@@ -740,7 +762,7 @@ export async function createConsumption(
       generation: 1,
       profileSnapshotId,
       profile,
-      components: input.body.components,
+      components: toAiComponentInputs(input.body.components),
       snapshot: { id: snapshotId, snapshot },
       catalog,
       sourceResultId: source?.resultRow.id ?? null,
@@ -905,7 +927,6 @@ export async function updateConsumption(
     if (!sourceSnapshot) throw new ConsumptionError('not_found');
 
     const catalog = await loadCatalog(tx, input.body.catalogVersion, input.body.components, target.source === 'manual');
-    validateConsumptionComponents(input.body.components, null);
     const [storedProfile] = await tx.select().from(healthProfile)
       .where(eq(healthProfile.userId, input.userId)).limit(1);
     const profile = profileView(account, storedProfile, now);
@@ -913,13 +934,14 @@ export async function updateConsumption(
     const source = target.source === 'photo_confirmation' && target.sourceAnalysisResultId
       ? await loadExistingAttentionSource(tx, input.userId, target.sourceAnalysisResultId)
       : null;
+    validateConsumptionComponents(input.body.components, source?.result ?? null);
     const reuse = Boolean(consentGranted && source && canReusePhotoAttention({
       sourceResult: source.result,
       sourceProfile: source.profile,
       currentProfile: profile,
       catalogVersion: input.body.catalogVersion,
       ruleSetVersion: source.result.ruleSetVersion,
-      components: input.body.components,
+      components: toAiComponentInputs(input.body.components),
     }));
     const profileSnapshotId = reuse
       ? source!.profileRow.id
@@ -939,6 +961,7 @@ export async function updateConsumption(
       dataMode: snapshotMode(catalog),
       components: input.body.components,
       catalogFoods: catalog.foods,
+      sourceResult: source?.result ?? null,
     });
     const snapshot = reuse && source
       ? preservePhotoEvaluation(nutritionSnapshot, source.result)
@@ -959,7 +982,7 @@ export async function updateConsumption(
       generation,
       profileSnapshotId,
       profile,
-      components: input.body.components,
+      components: toAiComponentInputs(input.body.components),
       snapshot: { id: snapshotId, snapshot },
       catalog,
       sourceResultId: source?.resultRow.id ?? null,

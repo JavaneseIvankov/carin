@@ -6,6 +6,9 @@ export type ManualFoodComponentDraft = {
   displayName: string;
   catalogFoodId: string | null;
   preparation: string | null;
+  photoEstimated?: boolean;
+  photoSourceGrams?: number | null;
+  photoPortionFraction?: string;
   portion:
     | { kind: 'unknown' }
     | { kind: 'known'; quantity: string; unit: 'g' }
@@ -83,6 +86,13 @@ export function parsePortionQuantity(raw: string): { value: number } | { error: 
   if (!Number.isFinite(value)) return { error: 'Masukkan angka porsi yang valid.' };
   if (value <= 0) return { error: 'Jumlah porsi harus lebih besar dari 0.' };
   return { value };
+}
+
+export function parsePhotoPortionFraction(raw: string): { value: number } | { error: string } {
+  const parsed = parsePortionQuantity(raw);
+  if ('error' in parsed) return { error: 'Masukkan porsi foto yang valid, lebih besar dari 0.' };
+  if (parsed.value > 100) return { error: 'Porsi foto maksimal 100 kali porsi pada foto.' };
+  return parsed;
 }
 
 export function mapManualComponent(

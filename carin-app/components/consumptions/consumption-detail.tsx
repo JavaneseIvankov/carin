@@ -2,6 +2,8 @@ import { BackButton } from '@/components/app/back-button';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
+import { PhotoThumbnail } from '@/components/food/photo-thumbnail';
+import { useAppRead } from '@/lib/api/query';
 import { getConsumptionDetailPresentation } from '@/lib/consumptions/attention-presentation';
 import {
   formatLocalDateTime,
@@ -17,6 +19,7 @@ import {
   RefreshCw,
   Sparkles,
   Trash2,
+  Utensils,
 } from 'lucide-react-native';
 import * as React from 'react';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
@@ -51,6 +54,20 @@ export function ConsumptionDetail({
   const [otherNutrientsExpanded, setOtherNutrientsExpanded] = React.useState(false);
   const presentation = getConsumptionDetailPresentation(consumption);
   const localTime = formatLocalDateTime(new Date(consumption.consumedAt), consumption.timezone);
+  const sourceScanQuery = useAppRead(
+    'getScan',
+    { path: { id: consumption.scanId ?? '' } },
+    {
+      enabled:
+        consumption.source === 'photo_confirmation' &&
+        consumption.photoAvailable &&
+        !!consumption.scanId,
+    }
+  );
+  const foodTitle =
+    presentation.components.length === 1
+      ? presentation.components[0]!.name
+      : `${presentation.components.length} makanan dicatat`;
 
   const energy = presentation.nutrients.find((n) => n.key === 'energyKcal');
   const macroKeys = ['carbohydrateG', 'proteinG', 'fatG'];
@@ -63,56 +80,66 @@ export function ConsumptionDetail({
     <ScrollView
       contentContainerClassName="gap-5 px-5 pb-12 pt-6"
       showsVerticalScrollIndicator={false}>
-      {/* Header & Provenance */}
+      {/* Header follows the analysis detail identity and provenance hierarchy. */}
       <View className="gap-3">
         <BackButton onPress={onBack} />
 
-        <View className="gap-1.5">
-          <View className="flex-row items-center gap-2 flex-wrap">
-            <View className="flex-row items-center gap-1.5 rounded-full bg-carin-olive-soft px-3 py-1">
-              <Icon
-                as={consumption.source === 'photo_confirmation' ? Camera : ClipboardPlus}
-                size={14}
-                className="text-primary"
-              />
-              <Text variant="caption" className="font-semibold text-primary">
-                {presentation.source.label}
-              </Text>
+        <View className="flex-row items-start gap-4">
+          {consumption.source === 'photo_confirmation' ? (
+            <PhotoThumbnail
+              photoId={sourceScanQuery.data?.data.photoId ?? null}
+              className="h-20 w-20"
+              accessibilityLabel="Foto sumber catatan makan"
+              fallbackLabel={presentation.source.photoDeleted ? 'Foto dihapus' : 'Memuat foto'}
+            />
+          ) : (
+            <View className="h-20 w-20 items-center justify-center rounded-[16px] border border-border/70 bg-carin-butter/60">
+              <Icon as={Utensils} size={22} className="text-primary" />
             </View>
-            <View className="rounded-full bg-muted px-2.5 py-1">
-              <Text variant="caption" className="text-muted-foreground">
-                Revisi {consumption.revision}
-              </Text>
+          )}
+          <View className="min-w-0 flex-1 gap-1.5">
+            <View className="flex-row flex-wrap items-center gap-2">
+              <View className="flex-row items-center gap-1.5 rounded-full bg-carin-olive-soft px-3 py-1">
+                <Icon
+                  as={consumption.source === 'photo_confirmation' ? Camera : ClipboardPlus}
+                  size={14}
+                  className="text-primary"
+                />
+                <Text variant="caption" className="font-semibold text-primary">
+                  {presentation.source.label}
+                </Text>
+              </View>
+              <View className="rounded-full bg-muted px-2.5 py-1">
+                <Text variant="caption" className="text-muted-foreground">
+                  Revisi {consumption.revision}
+                </Text>
+              </View>
             </View>
-          </View>
-
-          <Text variant="h1" className="mt-1">
-            Detail konsumsi
-          </Text>
-          <Text variant="caption" className="text-muted-foreground">
-            {localTime.date} pukul {localTime.time} ({consumption.timezone})
-          </Text>
-
-          {presentation.source.photoDeleted ? (
+            <Text variant="h2">{foodTitle || 'Catatan makan'}</Text>
             <Text variant="caption" className="text-muted-foreground">
-              Foto sumber telah dihapus.
+              Dimakan {localTime.date} · {localTime.time} ({consumption.timezone})
             </Text>
-          ) : null}
-
-          {isStale ? (
-            <View className="rounded-control bg-carin-butter/60 px-3 py-2 mt-1">
-              <Text variant="caption" className="text-foreground">
-                Data terakhir tersimpan ditampilkan. Muat ulang saat online.
+            {presentation.source.photoDeleted ? (
+              <Text variant="caption" className="text-muted-foreground">
+                Foto sumber telah dihapus.
               </Text>
-            </View>
-          ) : null}
+            ) : null}
+          </View>
         </View>
+
+        {isStale ? (
+          <View className="mt-1 rounded-control bg-carin-butter/60 px-3 py-2">
+            <Text variant="caption" className="text-foreground">
+              Data terakhir tersimpan ditampilkan. Muat ulang saat online.
+            </Text>
+          </View>
+        ) : null}
       </View>
 
       {/* Hero Summary Card: Energy & Macros */}
       <View className="gap-4 rounded-summary border border-border/70 bg-card p-4 sm:p-5">
         <View className="gap-0.5">
-          <Text variant="h3">Estimasi gizi tersimpan</Text>
+          <Text variant="h3">Gizi untuk porsi ini</Text>
           <Text variant="caption" className="text-muted-foreground">
             {presentation.dataLabel}
           </Text>
@@ -130,44 +157,40 @@ export function ConsumptionDetail({
                 </Text>
               ) : (
                 <>
-                  <Text className="text-[44px] font-bold tracking-tight leading-none text-foreground">
+                  <Text className="text-[44px] font-bold leading-none tracking-tight text-foreground">
                     {energy.value.replace(/ kkal$/, '')}
                   </Text>
-                  <Text className="text-base font-semibold text-muted-foreground">
-                    kkal
-                  </Text>
+                  <Text className="text-base font-semibold text-muted-foreground">kkal</Text>
                 </>
               )}
             </View>
             <Text variant="caption" className="text-muted-foreground">
               Cakupan {energy.coverage}
             </Text>
-              {energy.sourceLabel === 'Estimasi visual VLM' ||
-              energy.sourceLabel === 'Gabungan katalog dan estimasi visual VLM' ? (
-                <Text variant="caption" className="text-muted-foreground">
-                  {energy.sourceLabel}
-                </Text>
-              ) : null}
+            {energy.sourceLabel === 'Estimasi visual VLM' ||
+            energy.sourceLabel === 'Gabungan katalog dan estimasi visual VLM' ? (
+              <Text variant="caption" className="text-muted-foreground">
+                {energy.sourceLabel}
+              </Text>
+            ) : null}
           </View>
         ) : null}
 
         {/* 3-column macro cards */}
         <View className="flex-row gap-2">
           {macroNutrients.map((macro) => (
-            <View
-              key={macro.key}
-              className="flex-1 rounded-[14px] bg-carin-olive-soft p-2.5 gap-1">
-              <Text className="text-[11px] font-medium text-muted-foreground leading-tight">
+            <View key={macro.key} className="flex-1 gap-1 rounded-[14px] bg-carin-olive-soft p-2.5">
+              <Text className="text-[11px] font-medium leading-tight text-muted-foreground">
                 {macro.label}
               </Text>
-              <Text className="text-[18px] font-bold text-foreground leading-tight">
+              <Text className="text-[18px] font-bold leading-tight text-foreground">
                 {macro.value}
               </Text>
-              <Text className="text-[11px] text-muted-foreground leading-tight">
+              <Text className="text-[11px] leading-tight text-muted-foreground">
                 {macro.coverage}
               </Text>
               {macro.sourceLabel.includes('visual VLM') ? (
-                <Text className="text-[10px] text-muted-foreground leading-tight">
+                <Text className="text-[10px] leading-tight text-muted-foreground">
                   {macro.sourceLabel}
                 </Text>
               ) : null}
@@ -177,16 +200,14 @@ export function ConsumptionDetail({
 
         {/* Collapsible micro nutrients */}
         {otherNutrients.length > 0 ? (
-          <View className="border-t border-border/70 pt-2 gap-2">
+          <View className="gap-2 border-t border-border/70 pt-2">
             <Pressable
               className="min-h-11 flex-row items-center justify-between py-1"
               accessibilityRole="button"
               accessibilityLabel="Zat gizi lainnya: serat, gula, dan natrium"
               accessibilityState={{ expanded: otherNutrientsExpanded }}
               onPress={() => setOtherNutrientsExpanded((prev) => !prev)}>
-              <Text className="text-sm font-medium text-foreground">
-                Serat, gula, dan natrium
-              </Text>
+              <Text className="text-sm font-medium text-foreground">Serat, gula, dan natrium</Text>
               <Icon
                 as={otherNutrientsExpanded ? ChevronUp : ChevronDown}
                 size={18}
@@ -223,7 +244,7 @@ export function ConsumptionDetail({
       {/* Component Breakdown List */}
       <View className="gap-3 rounded-summary border border-border/70 bg-card p-4 sm:p-5">
         <View className="flex-row items-center justify-between">
-          <Text variant="h3">Makanan dan porsi aktual</Text>
+          <Text variant="h3">Yang dicatat dimakan</Text>
           <View className="rounded-full bg-carin-olive-soft px-2.5 py-0.5">
             <Text variant="caption" className="font-medium text-primary">
               {presentation.components.length} komponen
@@ -234,14 +255,12 @@ export function ConsumptionDetail({
         {presentation.components.length ? (
           <View className="gap-2.5 pt-1">
             {presentation.components.map((component) => (
-              <View
-                key={component.id}
-                className="gap-1.5 rounded-compact bg-muted/40 p-3.5">
+              <View key={component.id} className="gap-1.5 rounded-compact bg-muted/40 p-3.5">
                 <View className="flex-row items-start justify-between gap-2">
                   <Text variant="emphasis" className="flex-1 text-foreground">
                     {component.name}
                   </Text>
-                  <View className="rounded-full bg-card px-2.5 py-0.5 border border-border/60">
+                  <View className="rounded-full border border-border/60 bg-card px-2.5 py-0.5">
                     <Text variant="caption" className="font-semibold text-foreground">
                       {component.portion}
                     </Text>
@@ -254,6 +273,18 @@ export function ConsumptionDetail({
                   </Text>
                 ) : null}
 
+                {component.photoPortionFactor !== null ? (
+                  <Text variant="caption" className="text-muted-foreground">
+                    Porsi estimasi foto ×{' '}
+                    {new Intl.NumberFormat('id-ID', { maximumFractionDigits: 3 }).format(
+                      component.photoPortionFactor
+                    )}
+                    {component.photoSourceGrams !== null
+                      ? ` · sumber ${formatNutrient(component.photoSourceGrams, 'g')}`
+                      : ''}
+                  </Text>
+                ) : null}
+
                 {component.portionBasis ? (
                   <Text variant="caption" className="text-muted-foreground">
                     Dasar porsi: {component.portionBasis}
@@ -261,7 +292,7 @@ export function ConsumptionDetail({
                 ) : null}
 
                 {component.matchStatus !== 'matched' ? (
-                  <View className="self-start rounded-md bg-carin-butter/60 px-2 py-0.5 mt-0.5">
+                  <View className="mt-0.5 self-start rounded-md bg-carin-butter/60 px-2 py-0.5">
                     <Text variant="caption" className="text-foreground">
                       Makanan lain · belum cocok dengan katalog
                     </Text>
@@ -289,7 +320,7 @@ export function ConsumptionDetail({
           <Text variant="h3">Perhatian personal</Text>
         </View>
 
-        <Text variant="large" className="text-foreground font-semibold">
+        <Text variant="large" className="font-semibold text-foreground">
           {presentation.attention.title}
         </Text>
 
@@ -302,16 +333,14 @@ export function ConsumptionDetail({
           </View>
         ) : null}
 
-        <Text className="text-muted-foreground">
-          {presentation.attention.message}
-        </Text>
+        <Text className="text-muted-foreground">{presentation.attention.message}</Text>
 
         {presentation.attention.available ? (
           <View className="gap-3 pt-1">
             {presentation.attentions.map((attention) => (
               <View
                 key={attention.id}
-                className="gap-2 rounded-compact bg-carin-olive-soft/40 p-3.5 border border-border/50">
+                className="gap-2 rounded-compact border border-border/50 bg-carin-olive-soft/40 p-3.5">
                 <Text className="font-semibold text-foreground">{attention.reason}</Text>
                 {attention.adjustments.length > 0 ? (
                   <View className="gap-1">

@@ -116,7 +116,12 @@ export function ConsumptionForm({
       displayName: name,
       ...(name === active.displayName
         ? {}
-        : { catalogFoodId: null, preparation: null, portion: { kind: 'unknown' as const } }),
+        : {
+            catalogFoodId: null,
+            preparation: null,
+            portion: { kind: 'unknown' as const },
+            photoEstimated: false,
+          }),
     });
   };
 
@@ -141,7 +146,12 @@ export function ConsumptionForm({
     updateDraft({
       ...draft,
       catalogVersion: catalogPage?.catalogVersion ?? draft.catalogVersion,
-      activeComponent: unmatched,
+      activeComponent: {
+        ...unmatched,
+        photoEstimated: active.photoEstimated,
+        photoSourceGrams: active.photoSourceGrams,
+        photoPortionFraction: active.photoPortionFraction,
+      },
     });
     setValidationError(null);
   };
@@ -389,6 +399,11 @@ export function ConsumptionForm({
                     {portionLabel(component)}
                   </Text>
                 </View>
+                {component.photoEstimated && component.catalogFoodId === null ? (
+                  <Text variant="caption" className="text-muted-foreground">
+                    Estimasi visual · ×{component.photoPortionFraction ?? '1'} porsi foto
+                  </Text>
+                ) : null}
               </View>
             </View>
 

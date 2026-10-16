@@ -155,6 +155,19 @@ gunakan komponen hasil terbaru yang dipilih; perubahan porsi aktual dihitung
 ulang, tidak menyalin total sebelum perubahan. Jenis/cara saji baru wajib
 menggunakan food ID/sumber baru atau null.
 
+Untuk komponen unmatched/unrecognized dari hasil foto yang sama, server boleh
+membawa estimasi per komponen dengan provenance `model_estimate` ke snapshot
+konsumsi. Jika gram sumber dan gram aktual tersedia, server menerapkan rasionya;
+jika tidak, input harus menyertakan `photoPortionFraction` positif (1 berarti
+seluruh porsi pada foto). Nilai yang null tetap null dan hasil tidak pernah
+diubah menjadi nilai per 100 g. Perubahan nama, makanan katalog, atau cara saji
+membatalkan pemakaian estimasi foto tersebut. Snapshot mencatat faktor yang
+diterapkan. Estimasi visual tidak mendukung status katalog atau evaluasi personal.
+
+Analisis dan konsumsi memiliki lifecycle terpisah: analisis tidak membuat catatan
+konsumsi. Satu hasil analisis dapat terkait dengan nol atau beberapa kejadian
+konsumsi. Dashboard asupan hanya menjumlahkan snapshot konsumsi aktif.
+
 Save consumption atomik dan dapat berhasil meskipun AI tidak tersedia. Bila profil,
 consent, dan data mendukung, server menjadwalkan evaluation job terhadap snapshot
 input/profil/acuan pada save tersebut. Attention state `pending`; result sah

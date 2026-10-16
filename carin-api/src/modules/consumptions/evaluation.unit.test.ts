@@ -133,6 +133,31 @@ describe('consumption personal evaluation eligibility', () => {
     expect(noRule.limitations.map(({ code }) => code)).toContain('unsupported_condition');
   });
 
+  it('does not treat model estimates as evidence for personal evaluation', () => {
+    const visualSnapshot = {
+      ...photoResult,
+      sources: [...photoResult.sources, {
+        id: 'visual-estimate', kind: 'model_estimate' as const, title: 'Visual estimate',
+        datasetVersion: 'vlm-v1', itemRef: 'photo-component', url: null,
+      }],
+      components: photoResult.components.map((item, index) => ({
+        ...item,
+        nutrientSourceIds: index === 0
+          ? { ...item.nutrientSourceIds, energyKcal: 'visual-estimate' }
+          : item.nutrientSourceIds,
+      })),
+    };
+    const result = evaluatePersonalizationEligibility({
+      profile,
+      snapshot: visualSnapshot,
+      manifest: manifest([], ['energyKcal']),
+      consentGranted: true,
+      catalogReady: true,
+    });
+    expect(result.eligible).toBe(false);
+    expect(result.limitations.map(({ code }) => code)).toContain('missing_evaluation_data');
+  });
+
   it('allows reuse only when source result, actual portion, catalog, and frozen profile agree', () => {
     const components: Ai['ComponentInput'][] = [sourceComponent()];
     const input = {

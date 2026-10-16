@@ -748,10 +748,21 @@ export type components = {
       /** Format: date-time */
       updatedAt: string;
     };
+    /** @description Consumption input. photoPortionFraction is required only when an unchanged unmatched photo estimate cannot be scaled from known gram values; 1 means the full pictured portion. */
+    ConsumptionComponentInput: {
+      catalogFoodId: string | null;
+      displayName: string;
+      /** Format: uuid */
+      id: string;
+      /** @description Fraction of the pictured photo estimate consumed, used only when source and actual grams are not both known. */
+      photoPortionFraction?: number;
+      portion: components['schemas']['ai__PortionInput'];
+      preparation: string | null;
+    };
     ConsumptionCreate: {
       /** @description Immutable catalog version used for food/serving selection. Corrections use the source result version. 'unavailable' allowed only for manual unmatched input with no catalog. */
       catalogVersion: string;
-      components: components['schemas']['ai__ComponentInput'][];
+      components: components['schemas']['ConsumptionComponentInput'][];
       /** Format: date-time */
       consumedAt: string;
       /** @enum {string} */
@@ -788,6 +799,13 @@ export type components = {
       operationId: string;
       /** @enum {string} */
       overallAttention: 'considerable' | 'needs_attention' | 'insufficient_information';
+      /** @description Optional immutable scale factors used to adapt original photo estimates to consumed portions. */
+      photoPortionScales?: {
+        /** Format: uuid */
+        componentId: string;
+        factor: number;
+        sourceGrams: number | null;
+      }[];
       profileVersion: number;
       ruleSetVersion: string;
       sources: components['schemas']['ai__Source'][];
@@ -798,7 +816,7 @@ export type components = {
     ConsumptionUpdate: {
       /** @description Immutable catalog version used for food/serving selection. Corrections use the source result version. 'unavailable' allowed only for manual unmatched input with no catalog. */
       catalogVersion: string;
-      components: components['schemas']['ai__ComponentInput'][];
+      components: components['schemas']['ConsumptionComponentInput'][];
       /** Format: date-time */
       consumedAt: string;
       expectedRevision: number;
