@@ -376,6 +376,95 @@ async def test_vlm_estimation_failure_preserves_recognition_and_null_nutrients(c
     assert any(item["code"] == "VLM_NUTRITION_UNAVAILABLE" for item in result["limitations"])
 
 
+@pytest.mark.parametrize("mode", ["unconfigured", "synthetic-demo"])
+async def test_photo_single_call_exposes_seven_nutrients_without_overwriting_catalog(client, monkeypatch, mode):
+    monkeypatch.setenv("AI_CATALOG_MODE", mode)
+    body = photo_request()
+    if mode == "synthetic-demo":
+        body.update(catalogVersion="synthetic-live-catalog-2", ruleSetVersion="synthetic-live-rules-1")
+    observation = {
+        "isFood": True, "containerDiameterCm": 22, "apparentVolumeCm3": 220,
+        "components": [{
+            "displayName": "nasi goreng", "preparation": "digoreng", "estimatedMassGrams": 180,
+            "estimatedNutrients": {"energyKcal": 320, "carbohydrateG": 42, "proteinG": 9, "fatG": 12,
+                                   "fiberG": 2, "sugarsG": 3, "sodiumMg": 650},
+        }],
+    }
+    # Both proposals have the same name: identity must follow component order, not name.
+    observation["components"][0]["displayName"] = "nasi putih"
+    second = json.loads(json.dumps(observation["components"][0]))
+    second["estimatedMassGrams"] = 90
+    second["estimatedNutrients"] = {key: value / 2 for key, value in second["estimatedNutrients"].items()}
+    observation["components"].append(second)
+    requests = []
+
+    def handler(request):
+        requests.append(json.loads(request.content))
+        return httpx.Response(200, json={"choices": [{
+            "finish_reason": "stop", "message": {"content": json.dumps(observation)},
+        }]})
+
+    async def fake_fetch(image, settings):
+        return NormalizedImage(b"normalized-photo")
+
+    monkeypatch.setattr(main, "fetch_and_normalize", fake_fetch)
+    main.app.state.vlm_client_factory = lambda settings: VLMClient(settings, transport=httpx.MockTransport(handler))
+    response = await client.post("/internal/v1/analyses", headers=HEADERS, json=body)
+    assert response.status_code == 200
+    result = response.json()
+    validate_payload("AnalysisResult", result)
+    assert len(requests) == 1
+    assert all(value is not None for value in result["totals"].values())
+    assert all(coverage == {"knownComponentCount": 2, "totalComponentCount": 2} for coverage in result["coverage"].values())
+    if mode == "unconfigured":
+        assert result["components"][0]["nutrients"]["energyKcal"] == 320
+        assert result["components"][1]["nutrients"]["energyKcal"] == 160
+        assert result["totals"]["energyKcal"] == 480
+        assert result["totals"]["sodiumMg"] == 975
+        assert result["totals"]["sugarsG"] == 4.5
+        assert all(source["kind"] == "model_estimate" for source in result["sources"])
+        for component in result["components"]:
+            assert set(component["per100g"].values()) == {None}
+            assert len(component["sourceIds"]) == 1
+            assert set(component["nutrientSourceIds"].values()) == set(component["sourceIds"])
+        assert result["components"][0]["sourceIds"] != result["components"][1]["sourceIds"]
+    else:
+        assert result["totals"]["energyKcal"] == 405  # synthetic rice 150 kcal/100 g x 270 g
+        assert not any(source["kind"] == "model_estimate" for source in result["sources"])
+    assert result["overallAttention"] == "insufficient_information"  # unchanged shared contract
+    assert "estimatedNutrients" not in result["components"][0]
+    assert "containerDiameterCm" not in result
+
+
+async def test_inline_estimates_survive_failure_for_other_components(client, monkeypatch):
+    nutrients = {"energyKcal": 320, "carbohydrateG": 42, "proteinG": 9, "fatG": 12,
+                 "fiberG": 2, "sugarsG": 3, "sodiumMg": 650}
+
+    class FakeVLM:
+        async def observe(self, data, mime_type):
+            return FoodObservation.model_validate({"isFood": True, "components": [
+                {"displayName": "nasi goreng", "estimatedMassGrams": 180, "estimatedNutrients": nutrients},
+                {"displayName": "lauk", "estimatedMassGrams": 30},
+            ]})
+
+        async def estimate_component_nutrients(self, data, mime_type, components):
+            assert len(components) == 1
+            assert components[0]["displayName"] == "lauk"
+            raise ServiceError(503, "MODEL_FAILURE", "provider unavailable", retryable=True)
+
+    async def fake_fetch(image, settings):
+        return NormalizedImage(b"normalized-photo")
+
+    monkeypatch.setattr(main, "fetch_and_normalize", fake_fetch)
+    main.app.state.vlm_client_factory = lambda settings: FakeVLM()
+    response = await client.post("/internal/v1/analyses", headers=HEADERS, json=photo_request())
+    assert response.status_code == 200
+    result = response.json()
+    assert result["totals"] == nutrients
+    assert result["coverage"]["energyKcal"] == {"knownComponentCount": 1, "totalComponentCount": 2}
+    assert result["components"][1]["nutrients"]["energyKcal"] is None
+
+
 async def test_recalculation_preserves_portion_but_never_invents_nutrients(client):
     response = await client.post("/internal/v1/recalculations", headers=HEADERS, json=recalc_request())
     assert response.status_code == 200
@@ -567,7 +656,16 @@ async def test_vlm_fallback_receives_only_image_and_fixed_food_prompt():
             return httpx.Response(404, json={"error": "model snapshot unavailable"})
         return httpx.Response(
             200,
-            json={"choices": [{"message": {"content": '{"isFood":true,"components":[{"displayName":"nasi","preparation":null,"estimatedMassGrams":120}]}'} }]},
+            json={"choices": [{"finish_reason": "stop", "message": {"content": json.dumps({
+                "isFood": True, "containerDiameterCm": 20, "apparentVolumeCm3": 150,
+                "components": [{
+                    "displayName": "nasi", "preparation": None, "estimatedMassGrams": 120,
+                    "estimatedNutrients": {
+                        "energyKcal": 156, "carbohydrateG": 34, "proteinG": 3,
+                        "fatG": 0.3, "fiberG": 0.5, "sugarsG": 0.1, "sodiumMg": 2,
+                    },
+                }],
+            })}}]},
         )
 
     settings = Settings(
@@ -586,8 +684,10 @@ async def test_vlm_fallback_receives_only_image_and_fixed_food_prompt():
     for body in requests:
         assert "profile" not in body
         serialized = json.dumps(body).lower()
-        assert "energykcal" not in serialized
-        assert "carbohydrateg" not in serialized
+        assert "energykcal" in serialized
+        assert "carbohydrateg" in serialized
+        assert body["response_format"]["json_schema"]["strict"] is True
+        assert body["enable_thinking"] is False
         assert body["messages"][1]["content"][1]["image_url"]["url"].startswith("data:image/jpeg;base64,")
 
 

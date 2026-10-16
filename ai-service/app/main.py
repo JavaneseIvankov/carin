@@ -243,20 +243,34 @@ async def analyze_photo(request: Request, settings: Settings = Depends(require_s
     )
     unmatched = [component for component in result["components"] if component["catalogFoodId"] is None]
     if observation.is_food and unmatched:
+        # Component order is preserved by photo_result, including repeated food names.
+        inline_estimates = {
+            component["id"]: proposal.estimated_nutrients.model_dump(by_alias=True)
+            for component, proposal in zip(result["components"], observation.components, strict=True)
+            if component["catalogFoodId"] is None and proposal.estimated_nutrients is not None
+        }
+        estimates = dict(inline_estimates)
+        estimates_applied = False
+        remaining = [component for component in unmatched if component["id"] not in estimates]
         try:
-            estimate = getattr(provider_client, "estimate_component_nutrients", None)
-            if not callable(estimate):
-                raise ServiceError(503, "MODEL_FAILURE", "Estimasi gizi visual tidak tersedia.", retryable=True)
-            estimates = await estimate(
-                normalized.data,
-                normalized.mime_type,
-                [{
-                    "id": component["id"],
-                    "displayName": component["displayName"],
-                    "estimatedMassGrams": component["portion"]["grams"],
-                } for component in unmatched],
-            )
+            if remaining:
+                estimate = getattr(provider_client, "estimate_component_nutrients", None)
+                if not callable(estimate):
+                    raise ServiceError(503, "MODEL_FAILURE", "Estimasi gizi visual tidak tersedia.", retryable=True)
+                extra = await estimate(
+                    normalized.data,
+                    normalized.mime_type,
+                    [{
+                        "id": component["id"],
+                        "displayName": component["displayName"],
+                        "estimatedMassGrams": component["portion"]["grams"],
+                    } for component in remaining],
+                )
+                if set(extra) != {component["id"] for component in remaining}:
+                    raise ValueError("VLM estimate IDs do not match the remaining components")
+                estimates.update(extra)
             apply_visual_estimates(result, estimates)
+            estimates_applied = True
         except ServiceError as exc:
             logger.warning(
                 "visual nutrition estimate unavailable requestId=%s code=%s status=%s",
@@ -272,6 +286,12 @@ async def analyze_photo(request: Request, settings: Settings = Depends(require_s
                 type(exc).__name__,
             )
             visual_estimation_failure(result, [component["id"] for component in unmatched])
+        if inline_estimates and not estimates_applied:
+            # A failed legacy fallback must not discard already-valid inline values.
+            apply_visual_estimates(result, {
+                component["id"]: inline_estimates.get(component["id"], dict.fromkeys(result["totals"]))
+                for component in unmatched
+            })
     _validate_response("AnalysisResult", result)
     return JSONResponse(result)
 

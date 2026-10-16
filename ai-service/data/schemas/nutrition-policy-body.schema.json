@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://carin.invalid/ai-data/nutrition-policy-body.schema.json",
+  "title": "Draft nutrition policy definition; not an executable rule engine",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["kind", "executionStatus", "enabled", "ruleType", "applicability", "requiredContextFields", "contextPredicates", "contextAvailability", "dataQuality", "reference", "calculation", "output", "onCriticalMissing", "onConflict", "adjustmentEffects", "conflictsWith", "prohibitedActions"],
+  "properties": {
+    "kind": {"const": "nutrition_policy_v1"},
+    "executionStatus": {"const": "draft_not_executable"},
+    "enabled": {"const": false},
+    "ruleType": {"enum": ["nutrient_context", "coverage_guard", "qualitative_education", "qualitative_caution", "behavior_context"]},
+    "applicability": {
+      "type": "object", "additionalProperties": false,
+      "required": ["mode", "conditionId", "ageMinimum", "ageMaximum", "ageScopeReason", "allRequiredContextMustBePresent"],
+      "properties": {
+        "mode": {"enum": ["general", "reported_condition", "reported_allergy"]},
+        "conditionId": {"type": "string", "minLength": 1},
+        "ageMinimum": {"const": 18}, "ageMaximum": {"const": 50},
+        "ageScopeReason": {"type": "string", "minLength": 1},
+        "allRequiredContextMustBePresent": {"const": true}
+      }
+    },
+    "requiredContextFields": {"$ref": "#/$defs/strings"},
+    "contextPredicates": {
+      "type": "array", "items": {
+        "type": "object", "additionalProperties": false, "required": ["field", "operator"],
+        "properties": {
+          "field": {"type": "string", "minLength": 1},
+          "operator": {"enum": ["is_true", "non_empty", "nonnegative_number", "positive_number"]}
+        }
+      }
+    },
+    "contextAvailability": {"enum": ["requires_context_not_in_current_wire_contract", "current_wire_plus_reviewed_catalog_provenance"]},
+    "dataQuality": {
+      "type": "object", "additionalProperties": false,
+      "required": ["reviewedCatalogAndRuleRequired", "reviewedSourcesRequired", "estimatedNutrientPolicy", "missingNutrientPolicy", "ambiguousFoodPolicy", "portionUncertaintyMustBeExposed", "unknownProfileMustNotMeanNoCondition"],
+      "properties": {
+        "reviewedCatalogAndRuleRequired": {"const": true},
+        "reviewedSourcesRequired": {"const": true},
+        "estimatedNutrientPolicy": {"const": "insufficient_information_for_any_dependent_personal_rule"},
+        "missingNutrientPolicy": {"const": "insufficient_information"},
+        "ambiguousFoodPolicy": {"const": "insufficient_information"},
+        "portionUncertaintyMustBeExposed": {"const": true},
+        "unknownProfileMustNotMeanNoCondition": {"const": true}
+      }
+    },
+    "reference": {
+      "type": ["object", "null"], "additionalProperties": false,
+      "required": ["value", "unit", "window", "bound", "purpose"],
+      "properties": {
+        "nutrient": {"type": "string", "minLength": 1},
+        "value": {"type": "number", "exclusiveMinimum": 0},
+        "unit": {"enum": ["mg", "g", "percent_energy", "hours"]},
+        "window": {"enum": ["day", "meal_to_lying_down"]},
+        "bound": {"enum": ["less_than", "at_least"]},
+        "purpose": {"enum": ["general_population_context_only", "not_computable_from_total_sugars", "nighttime_or_lying_down_symptoms_only"]}
+      }
+    },
+    "calculation": {
+      "type": ["object", "null"], "additionalProperties": false,
+      "required": ["operation", "numerator", "denominator", "multiplier", "resultUse"],
+      "properties": {
+        "operation": {"const": "percent_of_general_daily_reference"},
+        "numerator": {"type": "string", "minLength": 1},
+        "denominator": {"type": "number", "exclusiveMinimum": 0},
+        "multiplier": {"const": 100},
+        "resultUse": {"const": "context_only_not_a_per_meal_cutoff"}
+      }
+    },
+    "output": {
+      "type": "object", "additionalProperties": false,
+      "required": ["mode", "positiveSuitabilityAllowed", "clinicalPredictionAllowed", "defaultPersonalTargetAllowed", "sourceIdsRequired", "templateOnlyOrConstrainedParaphrase"],
+      "properties": {
+        "mode": {"enum": ["insufficient_information", "scoped_context"]},
+        "positiveSuitabilityAllowed": {"const": false},
+        "clinicalPredictionAllowed": {"const": false},
+        "defaultPersonalTargetAllowed": {"const": false},
+        "sourceIdsRequired": {"const": true},
+        "templateOnlyOrConstrainedParaphrase": {"const": true}
+      }
+    },
+    "onCriticalMissing": {"const": "insufficient_information"},
+    "onConflict": {"const": "suppress_conflicting_adjustments_keep_scoped_facts"},
+    "adjustmentEffects": {"$ref": "#/$defs/strings"},
+    "conflictsWith": {"$ref": "#/$defs/strings"},
+    "prohibitedActions": {
+      "type": "array", "uniqueItems": true, "minItems": 6,
+      "items": {"enum": ["diagnose_from_profile_or_labs", "interpret_blood_test_values", "change_or_dose_medication", "guarantee_allergen_absence", "invent_universal_per_meal_limits", "count_unconfirmed_photo_as_consumed"]}
+    }
+  },
+  "$defs": {"strings": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}}}
+}

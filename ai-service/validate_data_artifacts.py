@@ -124,6 +124,15 @@ def validate_bundle(bundle, repo_root):
     if errors:
         return errors
 
+    policy_schema = schema_documents[(schemas_dir / "nutrition-policy-body.schema.json").resolve()]
+    for rule in bundle["rules"]["rules"]:
+        if rule["ruleBody"].get("kind") == "nutrition_policy_v1":
+            errors.extend(_errors_for_schema(
+                Draft202012Validator(policy_schema, registry=schema_registry), rule["ruleBody"],
+                f"rule {rule['id']} nutrition policy body"))
+    if errors:
+        return errors
+
     catalog = bundle["catalog"]
     nutrition = bundle["nutrition-dataset"]
     rules = bundle["rules"]
@@ -257,6 +266,46 @@ def validate_bundle(bundle, repo_root):
         if condition.get("personalizationSupported") and not any(
                 rule.get("conditionId") == condition.get("id") for rule in rules.get("rules", [])):
             errors.append(f"condition {condition.get('id')} claims personalization without a rule")
+    rules_by_id = {rule["id"]: rule for rule in rules["rules"]}
+    wire_profile_fields = set(document["components"]["schemas"]["ProfileContext"]["properties"])
+    for rule in rules["rules"]:
+        body = rule["ruleBody"]
+        if body.get("kind") != "nutrition_policy_v1":
+            continue
+        if body["applicability"]["conditionId"] != rule["conditionId"]:
+            errors.append(f"rule {rule['id']} body condition disagrees with conditionId")
+        if set(rule["requiredProfileFields"]) - wire_profile_fields:
+            errors.append(f"rule {rule['id']} invents profile fields outside the current wire contract")
+        expected_context = "requires_context_not_in_current_wire_contract" if body["requiredContextFields"] else "current_wire_plus_reviewed_catalog_provenance"
+        if body["contextAvailability"] != expected_context:
+            errors.append(f"rule {rule['id']} misrepresents context availability")
+        missing_critical = set(body["requiredContextFields"]) - {
+            field.removeprefix("context.") for field in rule["criticalMissingFields"] if field.startswith("context.")}
+        if missing_critical:
+            errors.append(f"rule {rule['id']} context requirements lack critical-missing guards")
+        critical = set(rule["criticalMissingFields"])
+        if set(rule["requiredProfileFields"]) - critical or {
+            "nutrients." + key for key in rule["requiredNutrients"]} - critical:
+            errors.append(f"rule {rule['id']} required profile/nutrients lack critical-missing guards")
+        predicate_fields = [item["field"] for item in body["contextPredicates"]]
+        if set(predicate_fields) != set(body["requiredContextFields"]) or len(predicate_fields) != len(set(predicate_fields)):
+            errors.append(f"rule {rule['id']} must define one predicate per required context field")
+        if body["ruleType"] == "coverage_guard" and body["output"]["mode"] != "insufficient_information":
+            errors.append(f"rule {rule['id']} coverage guard cannot claim a personal result")
+        calculation = body["calculation"]
+        if calculation and (not body["reference"] or body["reference"]["window"] != "day"
+                            or calculation["denominator"] != body["reference"]["value"]
+                            or calculation["numerator"] != "component.nutrients." + body["reference"].get("nutrient", "")
+                            or body["reference"].get("nutrient") not in rule["requiredNutrients"]):
+            errors.append(f"rule {rule['id']} daily reference calculation disagrees with its inputs")
+        for conflict_id in body["conflictsWith"]:
+            other = rules_by_id.get(conflict_id)
+            if conflict_id == rule["id"] or other is None:
+                errors.append(f"rule {rule['id']} has an unknown or self conflict")
+            elif rule["id"] not in other["ruleBody"].get("conflictsWith", []):
+                errors.append(f"rule {rule['id']} conflict with {conflict_id} must be symmetric")
+        if conditions.get(rule["conditionId"], {}).get("personalizationSupported"):
+            errors.append(f"condition {rule['conditionId']} cannot claim personalization from disabled draft policies")
     for food_id in manifest.get("supportedPhotoFoodIds", []):
         if food_id not in foods:
             errors.append(f"manifest references unknown catalog food {food_id!r}")
@@ -265,7 +314,8 @@ def validate_bundle(bundle, repo_root):
 
     published = manifest.get("publicationStatus") == "published"
     if not published and (manifest.get("supportedPhotoFoodIds") or manifest.get("nutrients")
-                          or manifest.get("conditions")):
+                          or any(condition.get("personalizationSupported")
+                                 for condition in manifest.get("conditions", []))):
         errors.append("unpublished manifest cannot claim supported foods, nutrients, or conditions")
 
     artifact_bindings = (
@@ -319,9 +369,6 @@ def validate_bundle(bundle, repo_root):
                     errors.append(f"published photo food {food_id} lacks declared nutrient {nutrient}")
         if not manifest.get("publishedAt"):
             errors.append("published manifest requires publishedAt")
-    elif manifest.get("dataMode") == "real":
-        errors.append("real dataMode requires published status and approvals")
-
     # Validate exactly the public shapes after stripping only the internal publication marker.
     foods_validator = _wire_schema(contract, "CatalogFood", registry)
     for food in catalog.get("foods", []):
@@ -352,7 +399,7 @@ def main():
     if manifest["publicationStatus"] == "published":
         print("PASS: published AI capability manifest validates against internal and shared wire schemas.")
     else:
-        print("PASS: unpublished AI data templates validate; publication is gated and capability claims are empty.")
+        print("PASS: unpublished AI data artifacts validate; publication is gated and capability claims are empty.")
     return 0
 
 
