@@ -67,13 +67,14 @@ export function getConsumptionDetailPresentation(consumption: ManualConsumption)
   );
   return {
     hasVisualEstimates,
-    dataLabel: hasVisualEstimates
-      ? 'Termasuk estimasi visual VLM'
-      : consumption.snapshot.dataMode === 'synthetic'
-        ? 'Data sintetis untuk demonstrasi'
-        : consumption.snapshot.dataMode === 'unavailable'
-          ? 'Gizi belum tersedia dari katalog'
-          : 'Snapshot gizi dari katalog',
+    dataLabel:
+      consumption.snapshot.dataMode === 'synthetic'
+        ? 'Data demonstrasi'
+        : hasVisualEstimates
+          ? 'Estimasi dari foto'
+          : consumption.snapshot.dataMode === 'unavailable'
+            ? 'Gizi belum tersedia'
+            : 'Data katalog gizi',
     source: {
       label: consumption.source === 'manual' ? 'Catatan manual' : 'Konfirmasi dari foto',
       photoDeleted: consumption.source === 'photo_confirmation' && !consumption.photoAvailable,
@@ -90,12 +91,15 @@ export function getConsumptionDetailPresentation(consumption: ManualConsumption)
         key,
         label,
         value: formatNutrient(consumption.snapshot.totals[key], unit),
-        coverage: `${coverage.knownComponentCount} dari ${coverage.totalComponentCount} komponen`,
+        isPartial:
+          consumption.snapshot.totals[key] !== null &&
+          coverage.knownComponentCount < coverage.totalComponentCount,
+        coverage: `${coverage.knownComponentCount} dari ${coverage.totalComponentCount} makanan`,
         sourceLabel:
           hasVisualSource && hasCatalogSource
-            ? 'Gabungan katalog dan estimasi visual VLM'
+            ? 'Gabungan katalog dan estimasi foto'
             : hasVisualSource
-              ? 'Estimasi visual VLM'
+              ? 'Estimasi dari foto'
               : hasCatalogSource
                 ? 'Data katalog gizi'
                 : 'Sumber gizi belum tersedia',
@@ -115,8 +119,10 @@ export function getConsumptionDetailPresentation(consumption: ManualConsumption)
       );
       const portionLabel =
         portion.quantity !== null && portion.unit !== null
-          ? `${portion.quantity} ${portion.unit === 'serving' ? 'takaran' : 'g'}`
-          : 'Porsi tidak diketahui';
+          ? formatNutrient(portion.quantity, portion.unit === 'serving' ? 'takaran' : 'g')
+          : photoScale
+            ? `${new Intl.NumberFormat('id-ID', { maximumFractionDigits: 3 }).format(photoScale.factor)} porsi foto`
+            : 'Porsi belum diketahui';
       return {
         id: component.id,
         name: component.displayName,
@@ -129,7 +135,7 @@ export function getConsumptionDetailPresentation(consumption: ManualConsumption)
         nutritionLabel: Object.values(component.nutrientSourceIds).some(
           (sourceId) => sourceId !== null && visualSourceIds.has(sourceId)
         )
-          ? 'Estimasi visual VLM'
+          ? 'Estimasi dari foto'
           : component.matchStatus === 'matched'
             ? 'Data katalog gizi'
             : 'Nilai gizi belum tersedia',

@@ -67,7 +67,7 @@ describe('consumption detail presentation', () => {
     expect(presentation.attention.title).toBe(label);
     expect(presentation.nutrients.find((item) => item.key === 'energyKcal')).toMatchObject({
       value: '123 kkal',
-      coverage: '1 dari 2 komponen',
+      coverage: '1 dari 2 makanan',
     });
     expect(presentation.nutrients.find((item) => item.key === 'carbohydrateG')?.value).toBe(
       'Belum tersedia'
@@ -80,6 +80,19 @@ describe('consumption detail presentation', () => {
       message: 'Pertimbangan ini memakai snapshot catatan saat disimpan.',
       available: true,
     });
+  });
+
+  it('only flags coverage beside a value when some foods are missing', () => {
+    const consumption = record('available');
+    let presentation = getConsumptionDetailPresentation(consumption);
+    expect(presentation.nutrients.find((item) => item.key === 'energyKcal')?.isPartial).toBe(true);
+    expect(presentation.nutrients.find((item) => item.key === 'carbohydrateG')?.isPartial).toBe(
+      false
+    );
+
+    consumption.snapshot.coverage.energyKcal.knownComponentCount = 2;
+    presentation = getConsumptionDetailPresentation(consumption);
+    expect(presentation.nutrients.find((item) => item.key === 'energyKcal')?.isPartial).toBe(false);
   });
 
   it('labels a photo-backed consumption whose source photo has been removed', () => {
@@ -159,15 +172,19 @@ describe('consumption detail presentation', () => {
 
     const presentation = getConsumptionDetailPresentation(visual);
     expect(presentation.hasVisualEstimates).toBe(true);
-    expect(presentation.dataLabel).toBe('Termasuk estimasi visual VLM');
+    expect(presentation.dataLabel).toBe('Estimasi dari foto');
     expect(presentation.nutrients[0]).toMatchObject({
-      sourceLabel: 'Estimasi visual VLM',
+      sourceLabel: 'Estimasi dari foto',
       sources: ['Estimasi visual VLM untuk porsi pada foto'],
     });
-    expect(presentation.components[0]?.nutritionLabel).toBe('Estimasi visual VLM');
+    expect(presentation.components[0]?.nutritionLabel).toBe('Estimasi dari foto');
     expect(presentation.components[0]).toMatchObject({
       photoPortionFactor: 0.5,
       photoSourceGrams: null,
+      portion: '0,5 porsi foto',
     });
+
+    visual.snapshot.dataMode = 'synthetic';
+    expect(getConsumptionDetailPresentation(visual).dataLabel).toBe('Data demonstrasi');
   });
 });
