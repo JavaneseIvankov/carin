@@ -3,10 +3,13 @@ import {
   demoCredentialConfigurationMessage,
   parseDemoSeedEnvironment,
 } from '../demo/api-client.js';
-import { createDemoSeedDatabase, runDemoSeed } from '../demo/seed.js';
+import { createDemoSeedDatabase, parseDemoSeedOptions, runDemoSeed } from '../demo/seed.js';
 
 function safeFailure(error: unknown): string {
   if (error instanceof DemoApiError) return error.message;
+  if (error instanceof Error && error.message === 'DEMO_SEED_ARGUMENT_INVALID') {
+    return 'Flag tidak dikenal. Gunakan node dist/scripts/demo-seed.js [--skip-photo-analysis].';
+  }
   if (error instanceof Error && /^DEMO_[A-Z0-9_:-]+$/.test(error.message)) return error.message;
   return 'DEMO_SEED_FAILED';
 }
@@ -14,6 +17,7 @@ function safeFailure(error: unknown): string {
 async function main(): Promise<void> {
   let database: ReturnType<typeof createDemoSeedDatabase> | undefined;
   try {
+    const options = parseDemoSeedOptions(process.argv.slice(2));
     const credentialsMessage = demoCredentialConfigurationMessage(process.env);
     if (credentialsMessage) {
       console.error(credentialsMessage);
@@ -22,7 +26,7 @@ async function main(): Promise<void> {
     }
     const env = parseDemoSeedEnvironment(process.env);
     database = createDemoSeedDatabase(env.databaseUrl);
-    const result = await runDemoSeed(env, database.db);
+    const result = await runDemoSeed(env, database.db, options);
     console.log(JSON.stringify({ status: 'complete', ...result }));
   } catch (error) {
     console.error(safeFailure(error));

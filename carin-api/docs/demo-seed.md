@@ -13,7 +13,11 @@ portions and nutrition remain unavailable when the catalog cannot support them.
 Photo analyses use the six supplied JPEGs and the normal private upload and worker
 path. Their result and source descriptions come from the real provider response;
 the seeder rejects fixture or synthetic provenance and does not add a showcase
-label to analysis results.
+label to analysis results. By default, the seed command runs these analyses now
+and stores the results for the showcase account. Use `--skip-photo-analysis` to
+seed profile, examinations, and manual meals without submitting the six photos.
+This flag only affects the seed command; normal in-app photo analysis remains
+available on demand.
 
 ## Prerequisites
 
@@ -51,6 +55,10 @@ The API image contains the compiled seeder and migration commands:
 node dist/db/migrate.js
 node dist/scripts/demo-seed.js
 ```
+
+To omit photo uploads and AI jobs for this seed run, use
+`node dist/scripts/demo-seed.js --skip-photo-analysis`. The command summary
+reports `photoAnalysis: "real"` or `photoAnalysis: "skipped"`.
 
 For the local Compose stack, the API container already has database access and
 can call its own API at `http://127.0.0.1:3000`:

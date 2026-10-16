@@ -1,5 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { assertRealAnalysisResult, nextPollDelayMs } from './seed.js';
+import { assertRealAnalysisResult, nextPollDelayMs, parseDemoSeedOptions } from './seed.js';
+
+describe('demo seed options', () => {
+  it('runs real photo analysis by default and can skip it explicitly', () => {
+    expect(parseDemoSeedOptions([])).toEqual({ analyzePhotos: true });
+    expect(parseDemoSeedOptions(['--skip-photo-analysis'])).toEqual({ analyzePhotos: false });
+  });
+
+  it('rejects unsupported command-line options', () => {
+    expect(() => parseDemoSeedOptions(['--unknown'])).toThrow('DEMO_SEED_ARGUMENT_INVALID');
+  });
+});
 
 describe('real analysis gate', () => {
   it('accepts real model output and preserves its unrecognized support status', () => {

@@ -34,14 +34,22 @@ export function nextPollDelayMs(attempt: number, retryAfter?: string | null): nu
 }
 
 type JsonRecord = Record<string, unknown>;
+export type DemoSeedOptions = { analyzePhotos: boolean };
 type DemoSeedSummary = {
   profile: 'updated' | 'unchanged';
   onboarding: 'completed' | 'already_complete';
+  photoAnalysis: 'real' | 'skipped';
   examinations: number;
   consumptions: number;
   photos: number;
   realAnalyses: number;
 };
+
+export function parseDemoSeedOptions(args: string[]): DemoSeedOptions {
+  if (args.length === 0) return { analyzePhotos: true };
+  if (args.length === 1 && args[0] === '--skip-photo-analysis') return { analyzePhotos: false };
+  throw new Error('DEMO_SEED_ARGUMENT_INVALID');
+}
 
 function hashPayload(value: unknown): string {
   return createHash('sha256').update(JSON.stringify(value)).digest('hex');
@@ -166,9 +174,10 @@ async function seedPhoto(
 export async function runDemoSeed(
   env: DemoSeedEnvironment,
   db: Database,
+  options: DemoSeedOptions = { analyzePhotos: true },
   fetchImpl?: typeof fetch,
 ): Promise<DemoSeedSummary> {
-  assertApiPreconditions(env.appEnv, env.aiMode);
+  assertApiPreconditions(env.appEnv, options.analyzePhotos ? env.aiMode : undefined);
   const api = await signInDemoAccount({
     baseUrl: env.baseUrl,
     email: env.email,
@@ -191,6 +200,7 @@ export async function runDemoSeed(
   const summary: DemoSeedSummary = {
     profile: 'unchanged',
     onboarding: onboarding.completedAt ? 'already_complete' : 'completed',
+    photoAnalysis: options.analyzePhotos ? 'real' : 'skipped',
     examinations: 0,
     consumptions: 0,
     photos: 0,
@@ -236,21 +246,23 @@ export async function runDemoSeed(
     summary.consumptions++;
   }
 
-  const photoDirectory = new URL('../../fixtures/demo/', import.meta.url);
-  const photos = await loadPhotoPlans(photoDirectory);
-  for (const photo of photos) {
-    const analysisKey = `analysis:${photo.seedKey}`;
-    const analysis = await reserveSeedResource(db, String(me.id), {
-      seedKey: analysisKey, resourceKind: 'analysis', payloadHash: photo.sha256,
-    });
-    if (analysis.state === 'complete') {
+  if (options.analyzePhotos) {
+    const photoDirectory = new URL('../../fixtures/demo/', import.meta.url);
+    const photos = await loadPhotoPlans(photoDirectory);
+    for (const photo of photos) {
+      const analysisKey = `analysis:${photo.seedKey}`;
+      const analysis = await reserveSeedResource(db, String(me.id), {
+        seedKey: analysisKey, resourceKind: 'analysis', payloadHash: photo.sha256,
+      });
+      if (analysis.state === 'complete') {
+        summary.photos++;
+        summary.realAnalyses++;
+        continue;
+      }
+      await seedPhoto(db, api, String(me.id), photo, 'v1');
       summary.photos++;
       summary.realAnalyses++;
-      continue;
     }
-    await seedPhoto(db, api, String(me.id), photo, 'v1');
-    summary.photos++;
-    summary.realAnalyses++;
   }
   return summary;
 }
