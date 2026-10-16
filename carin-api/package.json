@@ -11,6 +11,7 @@
     "build": "tsc -p tsconfig.build.json",
     "test:ai-fixture-runtime": "pnpm run build && node scripts/smoke-ai-fixtures.mjs",
     "catalog:sync": "pnpm run build && node dist/catalog/import-cli.js",
+    "demo:seed": "pnpm run build && node dist/scripts/demo-seed.js",
     "start": "node dist/index.js",
     "start:email-worker": "node dist/email-worker.js",
     "start:worker": "node dist/worker.js",
