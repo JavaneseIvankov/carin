@@ -1,4 +1,4 @@
-"""Tests for fail-closed AI data artifact validation. All values are synthetic."""
+"""Tests for fail-closed AI data artifact validation."""
 
 import copy
 import hashlib
@@ -17,6 +17,9 @@ validator = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(validator)
 
 NUTRIENTS = ("energyKcal", "carbohydrateG", "proteinG", "fatG", "fiberG", "sugarsG", "sodiumMg")
+CURRENT = validator.load_bundle(ROOT / "data")
+DATASET_VERSION = CURRENT["nutrition-dataset"]["datasetVersion"]
+RULE_VERSION = CURRENT["rules"]["ruleSetVersion"]
 
 
 def synthetic_source(kind="synthetic", source_id="source.synthetic-test"):
@@ -24,8 +27,7 @@ def synthetic_source(kind="synthetic", source_id="source.synthetic-test"):
         "id": source_id,
         "kind": kind,
         "title": "Synthetic test source; not evidence",
-        "datasetVersion": ("rules-unpublished-0.1.0" if kind == "health_rule"
-                           else "nutrition-unpublished-0.1.0"),
+        "datasetVersion": RULE_VERSION if kind == "health_rule" else DATASET_VERSION,
         "itemRef": "test-only synthetic value",
         "url": "https://example.invalid/synthetic-test",
         "license": {"name": "test-only synthetic", "url": None},
@@ -49,7 +51,7 @@ def synthetic_food():
 def synthetic_rule():
     return {
         "id": "rule.synthetic-test",
-        "version": "rules-unpublished-0.1.0",
+        "version": RULE_VERSION,
         "conditionId": "condition.synthetic-test",
         "requiredProfileFields": [],
         "requiredNutrients": [],
@@ -69,7 +71,7 @@ def placeholder_real_source(url):
         "id": "source.invalid-citation-test",
         "kind": "nutrition",
         "title": "Test placeholder for citation URL validation",
-        "datasetVersion": "nutrition-unpublished-0.1.0",
+        "datasetVersion": DATASET_VERSION,
         "itemRef": "test-only placeholder; no nutrition data",
         "url": url,
         "license": {"name": "test-only placeholder", "url": None},
@@ -92,14 +94,20 @@ class ValidateDataArtifactsTests(unittest.TestCase):
     def setUp(self):
         self.bundle = validator.load_bundle(ROOT / "data")
 
-    def test_unpublished_empty_templates_are_valid_and_support_nothing(self):
+    def test_unpublished_real_candidate_data_is_valid_but_claims_nothing(self):
         report = validator.validate_bundle(self.bundle, ROOT.parent)
 
         self.assertEqual(report, [])
+        self.assertGreater(len(self.bundle["catalog"]["foods"]), 0)
+        self.assertGreater(len(self.bundle["nutrition-dataset"]["sources"]), 0)
         self.assertEqual(self.bundle["capability-manifest"]["supportedPhotoFoodIds"], [])
-        self.assertEqual(self.bundle["capability-manifest"]["conditions"], [])
-        self.assertEqual(self.bundle["capability-manifest"]["dataMode"], "synthetic")
+        self.assertTrue(all(not c["personalizationSupported"]
+                            for c in self.bundle["capability-manifest"]["conditions"]))
+        self.assertEqual(self.bundle["capability-manifest"]["nutrients"], [])
+        self.assertEqual(self.bundle["capability-manifest"]["dataMode"], "real")
         self.assertEqual(self.bundle["capability-manifest"]["publicationStatus"], "unpublished")
+        self.assertTrue(all(source["synthetic"] is False
+                            for source in self.bundle["nutrition-dataset"]["sources"]))
 
     def test_rejects_manifest_food_reference_missing_from_catalog(self):
         bad = copy.deepcopy(self.bundle)
@@ -148,7 +156,7 @@ class ValidateDataArtifactsTests(unittest.TestCase):
         food = synthetic_food()
         food["per100g"]["energyKcal"] = 123.5
         food["nutrientSourceIds"]["energyKcal"] = source["id"]
-        staged["nutrition-dataset"]["sources"] = [source]
+        staged["nutrition-dataset"]["sources"].append(source)
         staged["catalog"]["foods"] = [food]
 
         self.assertEqual(validator.validate_bundle(staged, ROOT.parent), [])
@@ -293,7 +301,7 @@ class ValidateDataArtifactsTests(unittest.TestCase):
         second["id"] = "food.synthetic-two"
         first["servings"] = [{"id": "serving.bowl", "label": "Bowl", "grams": 100, "sourceId": source["id"]}]
         second["servings"] = [{"id": "serving.bowl", "label": "Bowl", "grams": 200, "sourceId": source["id"]}]
-        good["nutrition-dataset"]["sources"] = [source]
+        good["nutrition-dataset"]["sources"].append(source)
         good["catalog"]["foods"] = [first, second]
 
         self.assertEqual(validator.validate_bundle(good, ROOT.parent), [])

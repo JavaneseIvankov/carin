@@ -255,7 +255,7 @@ def photo_result(
     limitations: list[dict[str, Any]] = [
         {
             "code": "NUTRITION_ARTIFACT_UNAVAILABLE",
-            "message": "Katalog dan sumber gizi T31 belum dipasang; service tidak menghitung atau menebak nilai gizi.",
+            "message": "Katalog gizi belum dipasang; angka gizi yang tersedia berasal dari estimasi VLM dan bukan nilai katalog terverifikasi.",
             "componentIds": [item["id"] for item in results],
             "critical": True,
         },

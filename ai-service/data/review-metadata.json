@@ -1,11 +1,3329 @@
 {
   "schemaVersion": "1.0.0",
   "artifacts": {
-    "catalog": {"status": "draft", "reviewer": null, "approvedAt": null, "approvalId": null, "boundVersion": null, "contentSha256": null},
-    "nutrition-dataset": {"status": "draft", "reviewer": null, "approvedAt": null, "approvalId": null, "boundVersion": null, "contentSha256": null},
-    "rules": {"status": "draft", "reviewer": null, "approvedAt": null, "approvalId": null, "boundVersion": null, "contentSha256": null},
-    "capability-manifest": {"status": "draft", "reviewer": null, "approvedAt": null, "approvalId": null, "boundVersion": null, "contentSha256": null},
-    "sources": {},
-    "rulesById": {}
+    "catalog": {
+      "status": "draft",
+      "reviewer": null,
+      "approvedAt": null,
+      "approvalId": null,
+      "boundVersion": null,
+      "contentSha256": null
+    },
+    "nutrition-dataset": {
+      "status": "draft",
+      "reviewer": null,
+      "approvedAt": null,
+      "approvalId": null,
+      "boundVersion": null,
+      "contentSha256": null
+    },
+    "rules": {
+      "status": "draft",
+      "reviewer": null,
+      "approvedAt": null,
+      "approvalId": null,
+      "boundVersion": null,
+      "contentSha256": null
+    },
+    "capability-manifest": {
+      "status": "draft",
+      "reviewer": null,
+      "approvedAt": null,
+      "approvalId": null,
+      "boundVersion": null,
+      "contentSha256": null
+    },
+    "sources": {
+      "smiling-idn-mie-ayam": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-sop-daging-sapi": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-soto-daging-sapi": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-soto-ayam": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-mangga-gedong-gadung": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-bubur-nasi": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-nasi-goreng": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-nasi-tim": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-nasi-putih": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-nasi-uduk": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-nasi-jagung-kering": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-kacang-tanah-tanpa-kulit": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-tempe-kedelai-murni": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-tahu": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-tahu-goreng": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-telur-ayam": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-ikan-mas-bumbu-kuning": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-ikan-mas-pepes": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-ikan-asin-asap": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-ikan-kembung-goreng-resep": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-hati-ayam": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-sayur-sop-ayam": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-daging-ayam": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-daging-ayam-goreng": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-dendeng-sapi": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-daging-sapi": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-ikan-teri": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-ikan-pindang": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-bayam-rebus": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-sayur-bayam": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-tumis-bayam": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "smiling-idn-tumis-kangkung": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "src-tkpsi-beras-mentah": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "src-tkpsi-jagung-segar": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "src-tkpsi-kentang": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "src-tkpsi-ubi-jalar": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "src-tkpsi-talas": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "src-tkpsi-sagu": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "src-tkpsi-ikan-lele": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "src-tkpsi-ikan-bandeng": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "src-tkpsi-ikan-mujair": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "src-tkpsi-ikan-tongkol": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "src-tkpsi-ikan-kembung": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "src-tkpsi-ikan-tuna": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "src-tkpsi-tomat": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "src-tkpsi-bayam-segar": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "src-tkpsi-kangkung-segar": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "src-tkpsi-wortel": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "src-tkpsi-kacang-kedelai": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "src-tkpsi-pisang": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "src-tkpsi-pepaya": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "guideline-who-diet": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "guideline-kemkes-ggl": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "guideline-dash": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "guideline-diabetes": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "guideline-prediabetes": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "guideline-lipids": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "guideline-weight": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "guideline-gout": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "guideline-ckd": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "guideline-gerd": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "guideline-constipation": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "guideline-iron": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "guideline-allergy": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "guideline-heart": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-27510531-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-27510601-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-27510605-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-27510661-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-27510160-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-27510215-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-27510371-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-27540146-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-27540152-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-27550000-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-41901010-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-41901020-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-27564060-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-24198731-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-71401030-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-71401031-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-71401010-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-71401020-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-71401039-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-71401050-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58106220-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58106225-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58106230-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58106233-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58106320-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58106325-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58106550-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58106555-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58106560-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58106620-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58106625-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58106720-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58106725-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58109015-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58109100-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-56130000-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-56132990-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58146221-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58146321-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58146341-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58146361-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58146381-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58146401-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58146421-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58146441-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58145111-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58130014-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58130310-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-51166000-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-51166200-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-53520100-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-53521110-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-55100050-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-55200100-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-55300050-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-56112000-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-56113000-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-56117090-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58136120-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58136130-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58136150-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58136160-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58407034-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58407038-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58407042-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58407046-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58407052-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58407056-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58151180-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58151200-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58151220-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58151230-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58151420-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58151440-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-58151450-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "fndds-75502520-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-01038-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-01039-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-01041-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-01042-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-01044-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-01047-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-01048-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-01049-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-01188-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-01053-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-01127-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-01128-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-01129-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-01130-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-01057-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-01198-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-01189-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-01058-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-01199-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-01190-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-01201-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-01194-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-01200-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-01192-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-01060-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-01202-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-18053-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-18054-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-18040-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-18001-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-18018-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-18020-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-18002-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-18012-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-18030-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-18031-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-10416-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mext-18039-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mfds-d303-168000000-0001-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mfds-d303-168310000-0001-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mfds-d303-172310000-0001-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mfds-d303-144180000-0001-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mfds-d303-144280000-0001-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mfds-d303-148140000-0001-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mfds-d303-148470000-0001-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mfds-d303-148050000-0001-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mfds-d303-174500000-0001-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mfds-d110-492000000-0001-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mfds-d110-467000000-0001-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mfds-d310-467330000-0001-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mfds-d301-018000000-0002-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mfds-d101-007000000-0001-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mfds-d306-266000000-0001-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mfds-d106-275000000-0001-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mfds-d303-151000000-0001-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mfds-d303-146000000-0001-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mfds-d303-147110000-0001-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mfds-d303-147210000-0001-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mfds-d303-147330000-0001-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mfds-d303-147340000-0001-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mfds-d303-164400000-0001-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "mfds-d303-172040000-0001-nutrition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-lele-fiberg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-lele-carbohydrateg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-bandeng-fiberg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-bandeng-carbohydrateg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-mujair-fiberg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-mujair-carbohydrateg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-tongkol-fiberg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-tongkol-carbohydrateg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-kembung-fiberg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-kembung-carbohydrateg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-tuna-fiberg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-tuna-carbohydrateg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-kangkung-segar-fiberg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-kangkung-segar-carbohydrateg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-mie-ayam-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-sop-daging-sapi-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-soto-daging-sapi-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-soto-ayam-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-mangga-gedong-gadung-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-bubur-nasi-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-nasi-goreng-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-nasi-tim-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-nasi-putih-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-nasi-uduk-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-nasi-jagung-kering-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-kacang-tanah-tanpa-kulit-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-tempe-kedelai-murni-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-tahu-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-tahu-goreng-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-telur-ayam-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-ikan-mas-bumbu-kuning-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-ikan-mas-pepes-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-ikan-asin-asap-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-ikan-kembung-goreng-resep-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-hati-ayam-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-sayur-sop-ayam-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-daging-ayam-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-daging-ayam-goreng-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-dendeng-sapi-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-daging-sapi-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-ikan-teri-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-ikan-pindang-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-bayam-rebus-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-sayur-bayam-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-tumis-bayam-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-tumis-kangkung-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-beras-mentah-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-jagung-segar-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-kentang-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ubi-jalar-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-talas-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-sagu-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-lele-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-bandeng-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-mujair-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-tongkol-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-kembung-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-tuna-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-tomat-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-bayam-segar-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-kangkung-segar-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-wortel-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-kacang-kedelai-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-pisang-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-pepaya-sodiummg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-mie-ayam-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-sop-daging-sapi-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-soto-daging-sapi-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-soto-ayam-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-mangga-gedong-gadung-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-bubur-nasi-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-nasi-goreng-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-nasi-tim-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-nasi-putih-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-nasi-uduk-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-nasi-jagung-kering-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-kacang-tanah-tanpa-kulit-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-tempe-kedelai-murni-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-tahu-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-tahu-goreng-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-telur-ayam-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-ikan-mas-bumbu-kuning-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-ikan-mas-pepes-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-ikan-asin-asap-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-ikan-kembung-goreng-resep-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-hati-ayam-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-sayur-sop-ayam-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-daging-ayam-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-daging-ayam-goreng-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-dendeng-sapi-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-daging-sapi-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-ikan-teri-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-ikan-pindang-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-bayam-rebus-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-sayur-bayam-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-tumis-bayam-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-idn-tumis-kangkung-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-beras-mentah-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-jagung-segar-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-kentang-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ubi-jalar-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-talas-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-sagu-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-lele-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-bandeng-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-mujair-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-tongkol-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-kembung-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-tuna-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-tomat-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-bayam-segar-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-kangkung-segar-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-wortel-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-kacang-kedelai-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-pisang-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-pepaya-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-01038-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-01039-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-01041-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-01042-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-01044-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-01047-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-01048-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-01049-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-01188-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-01053-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-01127-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-01128-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-01129-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-01130-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-01057-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-01198-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-01189-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-01058-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-01199-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-01190-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-01201-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-01194-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-01200-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-01192-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-01060-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-01202-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-18053-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-18054-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-18040-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-18001-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-18018-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-18020-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-18002-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-18012-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-18030-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-18031-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-10416-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-mext-18039-sugarsg": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-beras-mentah-energykcal": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-jagung-segar-energykcal": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-kentang-energykcal": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ubi-jalar-energykcal": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-talas-energykcal": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-sagu-energykcal": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-lele-energykcal": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-bandeng-energykcal": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-mujair-energykcal": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-tongkol-energykcal": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-kembung-energykcal": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-ikan-tuna-energykcal": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-tomat-energykcal": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-bayam-segar-energykcal": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-kangkung-segar-energykcal": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-wortel-energykcal": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-kacang-kedelai-energykcal": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-pisang-energykcal": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "completion-tkpsi-pepaya-energykcal": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      }
+    },
+    "rulesById": {
+      "rule.general-sodium-context": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.general-fiber-context": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.general-free-sugar-definition": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.general-fat-quality": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.general-food-variety": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.general-energy-context": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.general-macro-literacy": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.hypertension-sodium-context": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.hypertension-condiment-choice": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.hypertension-potassium-salt-guard": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.diabetes-carbohydrate-context": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.diabetes-sugar-only-guard": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.diabetes-plate-options": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.prediabetes-carbohydrate-context": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.prediabetes-food-pattern": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.lipids-saturated-fat-guard": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.lipids-preparation-choice": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.weight-energy-plan-guard": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.weight-portion-options": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.gout-confirmed-organ-meat": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.gout-purine-guard": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.gout-drink-context": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.ckd-sodium-plan-guard": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.ckd-protein-plan-guard": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.ckd-minerals-fluid-guard": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.gerd-personal-trigger": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.gerd-bedtime-context": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.constipation-fiber-context": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.constipation-fluid-context": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.anemia-iron-guard": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.anemia-food-pairing": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.allergy-confirmed-ingredient": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.allergy-photo-uncertainty": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.heart-sodium-context": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      },
+      "rule.heart-fat-type-guard": {
+        "status": "draft",
+        "reviewer": null,
+        "approvedAt": null,
+        "approvalId": null,
+        "boundVersion": null,
+        "contentSha256": null
+      }
+    }
   }
 }

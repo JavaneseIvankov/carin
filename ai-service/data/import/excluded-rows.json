@@ -1,0 +1,34 @@
+[
+  {
+    "source": "mfds",
+    "code": "D403-172000000-0001",
+    "displayName": "Jjamppong restoran",
+    "originalName": "짬뽕",
+    "category": "korea-mfds",
+    "reason": "Official detail page reports 100mL, not 100g. No measured density available; cannot populate per100g."
+  },
+  {
+    "source": "mfds",
+    "code": "D403-173000000-0001",
+    "displayName": "Jjolmyeon restoran",
+    "originalName": "쫄면",
+    "category": "korea-mfds",
+    "reason": "Official detail page reports 100mL, not 100g. No measured density available; cannot populate per100g."
+  },
+  {
+    "source": "mfds",
+    "code": "D403-169000000-0001",
+    "displayName": "Janchi guksu restoran",
+    "originalName": "잔치국수",
+    "category": "korea-mfds",
+    "reason": "Official detail page reports 100mL, not 100g. No measured density available; cannot populate per100g."
+  },
+  {
+    "source": "mfds",
+    "code": "D412-587000000-0001",
+    "displayName": "Dakgangjeong restoran",
+    "originalName": "닭강정",
+    "category": "korea-mfds",
+    "reason": "Official detail page reports 100mL, not 100g. No measured density available; cannot populate per100g."
+  }
+]

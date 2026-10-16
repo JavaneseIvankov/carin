@@ -1,0 +1,968 @@
+[
+  {
+    "source": "fndds",
+    "code": "27510531",
+    "displayName": "Burger sapi fast food, 1 patty kecil",
+    "originalName": "Hamburger, from fast food, 1 small patty",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "27510601",
+    "displayName": "Burger sapi fast food, 1 patty sedang",
+    "originalName": "Hamburger, from fast food, 1 medium patty",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "27510605",
+    "displayName": "Burger sapi fast food, 1 patty besar",
+    "originalName": "Hamburger, from fast food, 1 large patty",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "27510661",
+    "displayName": "Double burger sapi fast food, 2 patty kecil",
+    "originalName": "Double hamburger, from fast food, 2 small patties",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "27510160",
+    "displayName": "Cheeseburger fast food, 1 patty kecil",
+    "originalName": "Cheeseburger, from fast food, 1 small patty",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "27510215",
+    "displayName": "Cheeseburger fast food, 1 patty sedang",
+    "originalName": "Cheeseburger, from fast food, 1 medium patty",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "27510371",
+    "displayName": "Double cheeseburger fast food, 2 patty kecil",
+    "originalName": "Double cheeseburger, from fast food, 2 small patties",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "27540146",
+    "displayName": "Burger ayam fillet goreng fast food",
+    "originalName": "Chicken fillet sandwich, fried, from fast food",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "27540152",
+    "displayName": "Burger ayam fillet panggang fast food",
+    "originalName": "Chicken fillet sandwich, grilled, from fast food",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "27550000",
+    "displayName": "Burger ikan goreng fast food",
+    "originalName": "Fish sandwich, fried, from fast food",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "41901010",
+    "displayName": "Burger sayuran dengan roti",
+    "originalName": "Veggie burger, on bun",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "41901020",
+    "displayName": "Burger sayuran dengan roti dan keju",
+    "originalName": "Veggie burger, on bun, with cheese",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "27564060",
+    "displayName": "Hot dog sapi dengan roti putih",
+    "originalName": "Hot dog sandwich, beef, on white bun",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "24198731",
+    "displayName": "Chicken nuggets fast food",
+    "originalName": "Chicken nuggets, from fast food",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "71401030",
+    "displayName": "French fries fast food",
+    "originalName": "Potato, french fries, fast food",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "71401031",
+    "displayName": "French fries restoran",
+    "originalName": "Potato, french fries, restaurant",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "71401010",
+    "displayName": "Kentang segar digoreng",
+    "originalName": "Potato, french fries, from fresh, fried",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "71401020",
+    "displayName": "Kentang beku dipanggang",
+    "originalName": "Potato, french fries, from frozen, baked",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "71401039",
+    "displayName": "French fries dengan keju, fast food atau restoran",
+    "originalName": "Potato, french fries, with cheese, fast food / restaurant",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "71401050",
+    "displayName": "French fries dengan chili dan keju, fast food atau restoran",
+    "originalName": "Potato, french fries, with chili and cheese, fast food / restaurant",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "58106220",
+    "displayName": "Pizza keju restoran, thin crust",
+    "originalName": "Pizza, cheese, from restaurant or fast food, thin crust",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "58106225",
+    "displayName": "Pizza keju restoran, medium crust",
+    "originalName": "Pizza, cheese, from restaurant or fast food, medium crust",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "58106230",
+    "displayName": "Pizza keju restoran, thick crust",
+    "originalName": "Pizza, cheese, from restaurant or fast food, thick crust",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "58106233",
+    "displayName": "Pizza keju stuffed crust",
+    "originalName": "Pizza, cheese, stuffed crust",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "58106320",
+    "displayName": "Pizza keju dan sayuran restoran, thin crust",
+    "originalName": "Pizza, cheese, with vegetables, from restaurant or fast food, thin crust",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "58106325",
+    "displayName": "Pizza keju dan sayuran restoran, medium crust",
+    "originalName": "Pizza, cheese, with vegetables, from restaurant or fast food, medium crust",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "58106550",
+    "displayName": "Pizza pepperoni restoran, thin crust",
+    "originalName": "Pizza with pepperoni, from restaurant or fast food, thin crust",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "58106555",
+    "displayName": "Pizza pepperoni restoran, medium crust",
+    "originalName": "Pizza with pepperoni, from restaurant or fast food,  medium crust",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "58106560",
+    "displayName": "Pizza pepperoni restoran, thick crust",
+    "originalName": "Pizza with pepperoni, from restaurant or fast food, thick crust",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "58106620",
+    "displayName": "Pizza daging selain pepperoni restoran, thin crust",
+    "originalName": "Pizza with meat other than pepperoni, from restaurant or fast food, thin crust",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "58106625",
+    "displayName": "Pizza daging selain pepperoni restoran, medium crust",
+    "originalName": "Pizza with meat other than pepperoni, from restaurant or fast food, medium crust",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "58106720",
+    "displayName": "Pizza daging dan sayuran restoran, thin crust",
+    "originalName": "Pizza with meat and vegetables, from restaurant or fast food, thin crust",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "58106725",
+    "displayName": "Pizza daging dan sayuran restoran, medium crust",
+    "originalName": "Pizza with meat and vegetables, from restaurant or fast food, medium crust",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "58109015",
+    "displayName": "Pizza keju gandum utuh, thin crust",
+    "originalName": "Pizza, cheese, whole wheat thin crust",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "58109100",
+    "displayName": "Pizza keju gluten-free, thin crust",
+    "originalName": "Pizza, cheese, gluten-free thin crust",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "56130000",
+    "displayName": "Pasta matang tanpa saus",
+    "originalName": "Pasta, cooked",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "56132990",
+    "displayName": "Pasta gandum utuh matang tanpa saus",
+    "originalName": "Pasta, whole grain, cooked",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "58146221",
+    "displayName": "Pasta saus tomat, restoran",
+    "originalName": "Pasta with tomato-based sauce, restaurant",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "58146321",
+    "displayName": "Pasta saus tomat dan daging, restoran",
+    "originalName": "Pasta with tomato-based sauce and meat, restaurant",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "58146341",
+    "displayName": "Pasta saus tomat dan unggas, restoran",
+    "originalName": "Pasta with tomato-based sauce and poultry, restaurant",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "58146361",
+    "displayName": "Pasta saus tomat dan seafood, restoran",
+    "originalName": "Pasta with tomato-based sauce and seafood, restaurant",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "58146381",
+    "displayName": "Pasta saus krim, restoran",
+    "originalName": "Pasta with cream sauce, restaurant",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "58146401",
+    "displayName": "Pasta saus krim dan daging, restoran",
+    "originalName": "Pasta with cream sauce and meat, restaurant",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "58146421",
+    "displayName": "Pasta saus krim dan unggas, restoran",
+    "originalName": "Pasta with cream sauce and poultry, restaurant",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "58146441",
+    "displayName": "Pasta saus krim dan seafood, restoran",
+    "originalName": "Pasta with cream sauce and seafood, restaurant",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "58145111",
+    "displayName": "Macaroni and cheese, restoran",
+    "originalName": "Macaroni or noodles with cheese, from restaurant",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "58130014",
+    "displayName": "Lasagna daging, restoran",
+    "originalName": "Lasagna with meat, from restaurant",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "58130310",
+    "displayName": "Lasagna tanpa daging",
+    "originalName": "Lasagna, meatless",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "51166000",
+    "displayName": "Croissant polos",
+    "originalName": "Croissant",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "51166200",
+    "displayName": "Croissant cokelat",
+    "originalName": "Croissant, chocolate",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "53520100",
+    "displayName": "Donat tipe cake polos",
+    "originalName": "Doughnut, cake type, plain",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "53521110",
+    "displayName": "Donat tipe yeast",
+    "originalName": "Doughnut, yeast type",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "55100050",
+    "displayName": "Pancake polos, fast food atau restoran",
+    "originalName": "Pancakes, plain, fast food / restaurant",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "55200100",
+    "displayName": "Waffle polos, fast food atau restoran",
+    "originalName": "Waffle, plain, fast food / restaurant",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "55300050",
+    "displayName": "French toast, fast food atau restoran",
+    "originalName": "French toast, fast food / restaurant",
+    "category": "western"
+  },
+  {
+    "source": "fndds",
+    "code": "56112000",
+    "displayName": "Mi matang tanpa saus",
+    "originalName": "Noodles, cooked",
+    "category": "asian-fndds"
+  },
+  {
+    "source": "fndds",
+    "code": "56113000",
+    "displayName": "Mi gandum utuh matang tanpa saus",
+    "originalName": "Noodles, whole grain, cooked",
+    "category": "asian-fndds"
+  },
+  {
+    "source": "fndds",
+    "code": "56117090",
+    "displayName": "Mi beras matang tanpa saus",
+    "originalName": "Rice noodles, cooked",
+    "category": "asian-fndds"
+  },
+  {
+    "source": "fndds",
+    "code": "58136120",
+    "displayName": "Lo mein tanpa daging",
+    "originalName": "Lo mein, meatless",
+    "category": "asian-fndds"
+  },
+  {
+    "source": "fndds",
+    "code": "58136130",
+    "displayName": "Lo mein udang",
+    "originalName": "Lo mein, with shrimp",
+    "category": "asian-fndds"
+  },
+  {
+    "source": "fndds",
+    "code": "58136150",
+    "displayName": "Lo mein sapi",
+    "originalName": "Lo mein, with beef",
+    "category": "asian-fndds"
+  },
+  {
+    "source": "fndds",
+    "code": "58136160",
+    "displayName": "Lo mein ayam",
+    "originalName": "Lo mein, with chicken",
+    "category": "asian-fndds"
+  },
+  {
+    "source": "fndds",
+    "code": "58407034",
+    "displayName": "Ramen bowl, komposisi tidak dirinci (rujukan AS)",
+    "originalName": "Ramen bowl, NFS",
+    "category": "asian-fndds"
+  },
+  {
+    "source": "fndds",
+    "code": "58407038",
+    "displayName": "Ramen bowl dengan sapi (rujukan AS)",
+    "originalName": "Ramen bowl with beef",
+    "category": "asian-fndds"
+  },
+  {
+    "source": "fndds",
+    "code": "58407042",
+    "displayName": "Ramen bowl dengan ayam (rujukan AS)",
+    "originalName": "Ramen bowl with chicken",
+    "category": "asian-fndds"
+  },
+  {
+    "source": "fndds",
+    "code": "58407046",
+    "displayName": "Ramen bowl dengan ikan (rujukan AS)",
+    "originalName": "Ramen bowl with fish",
+    "category": "asian-fndds"
+  },
+  {
+    "source": "fndds",
+    "code": "58407052",
+    "displayName": "Ramen bowl vegetarian (rujukan AS)",
+    "originalName": "Ramen bowl, vegetarian",
+    "category": "asian-fndds"
+  },
+  {
+    "source": "fndds",
+    "code": "58407056",
+    "displayName": "Ramen bowl dengan daging dan telur (rujukan AS)",
+    "originalName": "Ramen bowl with meat and egg",
+    "category": "asian-fndds"
+  },
+  {
+    "source": "fndds",
+    "code": "58151180",
+    "displayName": "Sushi roll California (rujukan AS)",
+    "originalName": "Sushi roll, California",
+    "category": "asian-fndds"
+  },
+  {
+    "source": "fndds",
+    "code": "58151200",
+    "displayName": "Sushi roll salmon (rujukan AS)",
+    "originalName": "Sushi roll, salmon",
+    "category": "asian-fndds"
+  },
+  {
+    "source": "fndds",
+    "code": "58151220",
+    "displayName": "Sushi roll tuna (rujukan AS)",
+    "originalName": "Sushi roll tuna",
+    "category": "asian-fndds"
+  },
+  {
+    "source": "fndds",
+    "code": "58151230",
+    "displayName": "Sushi roll sayuran (rujukan AS)",
+    "originalName": "Sushi roll, vegetable",
+    "category": "asian-fndds"
+  },
+  {
+    "source": "fndds",
+    "code": "58151420",
+    "displayName": "Sushi topping salmon (rujukan AS)",
+    "originalName": "Sushi, topped with salmon",
+    "category": "asian-fndds"
+  },
+  {
+    "source": "fndds",
+    "code": "58151440",
+    "displayName": "Sushi topping tuna (rujukan AS)",
+    "originalName": "Sushi, topped with tuna",
+    "category": "asian-fndds"
+  },
+  {
+    "source": "fndds",
+    "code": "58151450",
+    "displayName": "Sushi topping telur (rujukan AS)",
+    "originalName": "Sushi, topped with egg",
+    "category": "asian-fndds"
+  },
+  {
+    "source": "fndds",
+    "code": "75502520",
+    "displayName": "Kimchi (rujukan AS)",
+    "originalName": "Kimchi",
+    "category": "asian-fndds"
+  },
+  {
+    "source": "mext",
+    "code": "01038",
+    "displayName": "Udon segar mentah",
+    "originalName": "こむぎ　［うどん・そうめん類］　うどん　生",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "01039",
+    "displayName": "Udon segar direbus, tanpa kuah",
+    "originalName": "こむぎ　［うどん・そうめん類］　うどん　ゆで",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "01041",
+    "displayName": "Udon kering, belum dimasak",
+    "originalName": "こむぎ　［うどん・そうめん類］　干しうどん　乾",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "01042",
+    "displayName": "Udon dari mi kering, direbus tanpa kuah",
+    "originalName": "こむぎ　［うどん・そうめん類］　干しうどん　ゆで",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "01044",
+    "displayName": "Somen atau hiyamugi direbus, tanpa kuah",
+    "originalName": "こむぎ　［うどん・そうめん類］　そうめん・ひやむぎ　ゆで",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "01047",
+    "displayName": "Mi chuka mentah, bahan mi ramen",
+    "originalName": "こむぎ　［中華めん類］　中華めん　生",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "01048",
+    "displayName": "Mi chuka direbus, tanpa kuah atau topping ramen",
+    "originalName": "こむぎ　［中華めん類］　中華めん　ゆで",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "01049",
+    "displayName": "Mi chuka dikukus, tanpa saus",
+    "originalName": "こむぎ　［中華めん類］　蒸し中華めん　蒸し中華めん",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "01188",
+    "displayName": "Mi chuka kukus ditumis",
+    "originalName": "こむぎ　［中華めん類］　蒸し中華めん  ソテー",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "01053",
+    "displayName": "Okinawa soba direbus, tanpa kuah",
+    "originalName": "こむぎ　［中華めん類］　沖縄そば　ゆで",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "01127",
+    "displayName": "Soba segar mentah",
+    "originalName": "そば　そば　生",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "01128",
+    "displayName": "Soba segar direbus, tanpa kuah",
+    "originalName": "そば　そば　ゆで",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "01129",
+    "displayName": "Soba kering, belum dimasak",
+    "originalName": "そば　干しそば　乾",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "01130",
+    "displayName": "Soba dari mi kering direbus, tanpa kuah",
+    "originalName": "そば　干しそば　ゆで",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "01057",
+    "displayName": "Mi instan digoreng, kering beserta bumbu",
+    "originalName": "こむぎ　［即席めん類］　即席中華めん　油揚げ　乾　（添付調味料等を含むもの）",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "01198",
+    "displayName": "Mi instan digoreng, dimasak beserta bumbu dan kuah",
+    "originalName": "こむぎ　［即席めん類］　即席中華めん　油揚げ　調理後全体　（添付調味料等を含むもの）",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "01189",
+    "displayName": "Mi instan digoreng lalu direbus, tanpa bumbu",
+    "originalName": "こむぎ　［即席めん類］　即席中華めん　油揚げ　ゆで　（添付調味料等を含まないもの）",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "01058",
+    "displayName": "Mi instan non-fried, kering beserta bumbu",
+    "originalName": "こむぎ　［即席めん類］　即席中華めん　非油揚げ　乾　（添付調味料等を含むもの）",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "01199",
+    "displayName": "Mi instan non-fried, dimasak beserta bumbu dan kuah",
+    "originalName": "こむぎ　［即席めん類］　即席中華めん　非油揚げ　調理後全体　（添付調味料等を含むもの）",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "01190",
+    "displayName": "Mi instan non-fried direbus, tanpa bumbu",
+    "originalName": "こむぎ　［即席めん類］　即席中華めん　非油揚げ　ゆで　（添付調味料等を含まないもの）",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "01201",
+    "displayName": "Mi cup shio goreng, siap makan beserta kuah",
+    "originalName": "こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　塩味　調理後全体　（添付調味料等を含むもの）",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "01194",
+    "displayName": "Mi cup shio goreng, matang dengan kuah ditinggalkan",
+    "originalName": "こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　塩味　調理後のめん　（スープを残したもの）",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "01200",
+    "displayName": "Mi cup shoyu goreng, siap makan beserta kuah",
+    "originalName": "こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　しょうゆ味　調理後全体　（添付調味料等を含むもの）",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "01192",
+    "displayName": "Mi cup shoyu goreng, matang dengan kuah ditinggalkan",
+    "originalName": "こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　しょうゆ味　調理後のめん　（スープを残したもの）",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "01060",
+    "displayName": "Yakisoba instan cup, kering beserta bumbu",
+    "originalName": "こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　焼きそば　乾　（添付調味料等を含むもの）",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "01202",
+    "displayName": "Yakisoba instan cup, dimasak beserta bumbu",
+    "originalName": "こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　焼きそば　調理後全体　（添付調味料等を含むもの）",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "18053",
+    "displayName": "Okonomiyaki siap saji",
+    "originalName": "和風料理　その他　お好み焼き",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "18054",
+    "displayName": "Karaage ayam siap saji",
+    "originalName": "和風料理　その他　とりから揚げ",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "18040",
+    "displayName": "Kari ayam Jepang, saus dan isi tanpa nasi",
+    "originalName": "洋風料理　カレー類　チキンカレー",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "18001",
+    "displayName": "Kari sapi Jepang, saus dan isi tanpa nasi",
+    "originalName": "洋風料理　カレー類　ビーフカレー",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "18018",
+    "displayName": "Korokke kentang siap saji",
+    "originalName": "洋風料理　コロッケ類　ポテトコロッケ",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "18020",
+    "displayName": "Ebi fry siap saji",
+    "originalName": "洋風料理　フライ類　えびフライ",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "18002",
+    "displayName": "Gyoza siap saji",
+    "originalName": "中国料理　点心類　ぎょうざ",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "18012",
+    "displayName": "Shumai siap saji",
+    "originalName": "中国料理　点心類　しゅうまい",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "18030",
+    "displayName": "Isian oyakodon, tanpa nasi",
+    "originalName": "和風料理　煮物類　親子丼の具",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "18031",
+    "displayName": "Isian gyumeshi atau gyudon, tanpa nasi",
+    "originalName": "和風料理　煮物類　牛飯の具",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "10416",
+    "displayName": "Tempura udang vannamei",
+    "originalName": "＜えび・かに類＞　（えび類）　バナメイえび　養殖　天ぷら",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mext",
+    "code": "18039",
+    "displayName": "Namul tauge (rujukan Jepang)",
+    "originalName": "韓国料理　和え物類　もやしのナムル",
+    "category": "japan-mext"
+  },
+  {
+    "source": "mfds",
+    "code": "D303-168000000-0001",
+    "displayName": "Jajangmyeon restoran",
+    "originalName": "자장면",
+    "category": "korea-mfds"
+  },
+  {
+    "source": "mfds",
+    "code": "D303-168310000-0001",
+    "displayName": "Samseon jajangmyeon seafood restoran",
+    "originalName": "자장면_삼선",
+    "category": "korea-mfds"
+  },
+  {
+    "source": "mfds",
+    "code": "D303-172310000-0001",
+    "displayName": "Samseon jjamppong seafood restoran",
+    "originalName": "짬뽕_삼선",
+    "category": "korea-mfds"
+  },
+  {
+    "source": "mfds",
+    "code": "D303-144180000-0001",
+    "displayName": "Mul naengmyeon restoran",
+    "originalName": "냉면_물냉면",
+    "category": "korea-mfds"
+  },
+  {
+    "source": "mfds",
+    "code": "D303-144280000-0001",
+    "displayName": "Bibim naengmyeon restoran",
+    "originalName": "냉면_비빔냉면",
+    "category": "korea-mfds"
+  },
+  {
+    "source": "mfds",
+    "code": "D303-148140000-0001",
+    "displayName": "Ramyeon restoran",
+    "originalName": "라면_라면만",
+    "category": "korea-mfds"
+  },
+  {
+    "source": "mfds",
+    "code": "D303-148470000-0001",
+    "displayName": "Ramyeon keju restoran",
+    "originalName": "라면_치즈",
+    "category": "korea-mfds"
+  },
+  {
+    "source": "mfds",
+    "code": "D303-148050000-0001",
+    "displayName": "Ramyeon kimchi restoran",
+    "originalName": "라면_김치",
+    "category": "korea-mfds"
+  },
+  {
+    "source": "mfds",
+    "code": "D303-174500000-0001",
+    "displayName": "Kalguksu seafood restoran",
+    "originalName": "칼국수_해물",
+    "category": "korea-mfds"
+  },
+  {
+    "source": "mfds",
+    "code": "D110-492000000-0001",
+    "displayName": "Japchae rumahan",
+    "originalName": "잡채",
+    "category": "korea-mfds"
+  },
+  {
+    "source": "mfds",
+    "code": "D110-467000000-0001",
+    "displayName": "Tteokbokki rumahan",
+    "originalName": "떡볶이",
+    "category": "korea-mfds"
+  },
+  {
+    "source": "mfds",
+    "code": "D310-467330000-0001",
+    "displayName": "Tteokbokki keju restoran",
+    "originalName": "떡볶이_치즈",
+    "category": "korea-mfds"
+  },
+  {
+    "source": "mfds",
+    "code": "D301-018000000-0002",
+    "displayName": "Bibimbap restoran",
+    "originalName": "비빔밥",
+    "category": "korea-mfds"
+  },
+  {
+    "source": "mfds",
+    "code": "D101-007000000-0001",
+    "displayName": "Gimbap rumahan",
+    "originalName": "김밥",
+    "category": "korea-mfds"
+  },
+  {
+    "source": "mfds",
+    "code": "D306-266000000-0001",
+    "displayName": "Kimchi jjigae restoran",
+    "originalName": "김치찌개",
+    "category": "korea-mfds"
+  },
+  {
+    "source": "mfds",
+    "code": "D106-275000000-0001",
+    "displayName": "Doenjang jjigae rumahan",
+    "originalName": "된장찌개",
+    "category": "korea-mfds"
+  },
+  {
+    "source": "mfds",
+    "code": "D303-151000000-0001",
+    "displayName": "Manduguk restoran",
+    "originalName": "만두국",
+    "category": "korea-mfds"
+  },
+  {
+    "source": "mfds",
+    "code": "D303-146000000-0001",
+    "displayName": "Tteok manduguk restoran",
+    "originalName": "떡만두국",
+    "category": "korea-mfds"
+  },
+  {
+    "source": "mfds",
+    "code": "D303-147110000-0001",
+    "displayName": "Tonkotsu ramen restoran (rujukan Korea)",
+    "originalName": "라멘_돈코츠라멘",
+    "category": "korea-mfds"
+  },
+  {
+    "source": "mfds",
+    "code": "D303-147210000-0001",
+    "displayName": "Miso ramen restoran (rujukan Korea)",
+    "originalName": "라멘_미소라멘",
+    "category": "korea-mfds"
+  },
+  {
+    "source": "mfds",
+    "code": "D303-147330000-0001",
+    "displayName": "Shoyu ramen restoran (rujukan Korea)",
+    "originalName": "라멘_소유라멘",
+    "category": "korea-mfds"
+  },
+  {
+    "source": "mfds",
+    "code": "D303-147340000-0001",
+    "displayName": "Shio ramen restoran (rujukan Korea)",
+    "originalName": "라멘_시오라멘",
+    "category": "korea-mfds"
+  },
+  {
+    "source": "mfds",
+    "code": "D303-164400000-0001",
+    "displayName": "Udon kuah gaya Jepang restoran (rujukan Korea)",
+    "originalName": "우동_일식",
+    "category": "korea-mfds"
+  },
+  {
+    "source": "mfds",
+    "code": "D303-172040000-0001",
+    "displayName": "Jjamppong tiram restoran",
+    "originalName": "짬뽕_굴",
+    "category": "korea-mfds"
+  }
+]

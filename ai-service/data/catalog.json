@@ -1,5 +1,5071 @@
 {
   "artifactVersion": "1.0.0-draft",
-  "catalogVersion": "catalog-unpublished-0.1.0",
-  "foods": []
+  "catalogVersion": "catalog-draft-0.4.0",
+  "foods": [
+    {
+      "id": "idn-mie-ayam",
+      "displayName": "Mie ayam",
+      "aliases": [
+        "noodle, with chicken"
+      ],
+      "preparation": "noodle, with chicken",
+      "per100g": {
+        "energyKcal": 105.3,
+        "carbohydrateG": 10.5,
+        "proteinG": 6.2,
+        "fatG": 3.9,
+        "fiberG": 1.7,
+        "sugarsG": 1.37,
+        "sodiumMg": 279.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-mie-ayam",
+        "carbohydrateG": "smiling-idn-mie-ayam",
+        "proteinG": "smiling-idn-mie-ayam",
+        "fatG": "smiling-idn-mie-ayam",
+        "fiberG": "smiling-idn-mie-ayam",
+        "sugarsG": "completion-idn-mie-ayam-sugarsg",
+        "sodiumMg": "completion-idn-mie-ayam-sodiummg"
+      }
+    },
+    {
+      "id": "idn-sop-daging-sapi",
+      "displayName": "Sop daging sapi",
+      "aliases": [
+        "beef and vegetable soup [R]"
+      ],
+      "preparation": "beef and vegetable soup [R]",
+      "per100g": {
+        "energyKcal": 50.5,
+        "carbohydrateG": 5.3,
+        "proteinG": 5.8,
+        "fatG": 0.5,
+        "fiberG": 0.8,
+        "sugarsG": 1.44,
+        "sodiumMg": 391.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-sop-daging-sapi",
+        "carbohydrateG": "smiling-idn-sop-daging-sapi",
+        "proteinG": "smiling-idn-sop-daging-sapi",
+        "fatG": "smiling-idn-sop-daging-sapi",
+        "fiberG": "smiling-idn-sop-daging-sapi",
+        "sugarsG": "completion-idn-sop-daging-sapi-sugarsg",
+        "sodiumMg": "completion-idn-sop-daging-sapi-sodiummg"
+      }
+    },
+    {
+      "id": "idn-soto-daging-sapi",
+      "displayName": "Soto daging sapi",
+      "aliases": [
+        "beef soup, traditional [R]"
+      ],
+      "preparation": "beef soup, traditional [R]",
+      "per100g": {
+        "energyKcal": 48.9,
+        "carbohydrateG": 5.3,
+        "proteinG": 5.8,
+        "fatG": 0.5,
+        "fiberG": 0.0,
+        "sugarsG": 1.44,
+        "sodiumMg": 249.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-soto-daging-sapi",
+        "carbohydrateG": "smiling-idn-soto-daging-sapi",
+        "proteinG": "smiling-idn-soto-daging-sapi",
+        "fatG": "smiling-idn-soto-daging-sapi",
+        "fiberG": "smiling-idn-soto-daging-sapi",
+        "sugarsG": "completion-idn-soto-daging-sapi-sugarsg",
+        "sodiumMg": "completion-idn-soto-daging-sapi-sodiummg"
+      }
+    },
+    {
+      "id": "idn-soto-ayam",
+      "displayName": "Soto ayam",
+      "aliases": [
+        "chicken soup, traditional [R]"
+      ],
+      "preparation": "chicken soup, traditional [R]",
+      "per100g": {
+        "energyKcal": 106.8,
+        "carbohydrateG": 8.7,
+        "proteinG": 7.4,
+        "fatG": 4.6,
+        "fiberG": 0.5,
+        "sugarsG": 2.37,
+        "sodiumMg": 249.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-soto-ayam",
+        "carbohydrateG": "smiling-idn-soto-ayam",
+        "proteinG": "smiling-idn-soto-ayam",
+        "fatG": "smiling-idn-soto-ayam",
+        "fiberG": "smiling-idn-soto-ayam",
+        "sugarsG": "completion-idn-soto-ayam-sugarsg",
+        "sodiumMg": "completion-idn-soto-ayam-sodiummg"
+      }
+    },
+    {
+      "id": "idn-mangga-gedong-gadung",
+      "displayName": "Mangga gedong/gadung",
+      "aliases": [
+        "mango"
+      ],
+      "preparation": "mango",
+      "per100g": {
+        "energyKcal": 54.8,
+        "carbohydrateG": 11.2,
+        "proteinG": 0.7,
+        "fatG": 0.2,
+        "fiberG": 2.7,
+        "sugarsG": 10.21,
+        "sodiumMg": 2.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-mangga-gedong-gadung",
+        "carbohydrateG": "smiling-idn-mangga-gedong-gadung",
+        "proteinG": "smiling-idn-mangga-gedong-gadung",
+        "fatG": "smiling-idn-mangga-gedong-gadung",
+        "fiberG": "smiling-idn-mangga-gedong-gadung",
+        "sugarsG": "completion-idn-mangga-gedong-gadung-sugarsg",
+        "sodiumMg": "completion-idn-mangga-gedong-gadung-sodiummg"
+      }
+    },
+    {
+      "id": "idn-bubur-nasi",
+      "displayName": "bubur nasi",
+      "aliases": [
+        "rice porridge"
+      ],
+      "preparation": "rice porridge",
+      "per100g": {
+        "energyKcal": 70.5,
+        "carbohydrateG": 16.0,
+        "proteinG": 1.3,
+        "fatG": 0.1,
+        "fiberG": 0.2,
+        "sugarsG": 0.04,
+        "sodiumMg": 234.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-bubur-nasi",
+        "carbohydrateG": "smiling-idn-bubur-nasi",
+        "proteinG": "smiling-idn-bubur-nasi",
+        "fatG": "smiling-idn-bubur-nasi",
+        "fiberG": "smiling-idn-bubur-nasi",
+        "sugarsG": "completion-idn-bubur-nasi-sugarsg",
+        "sodiumMg": "completion-idn-bubur-nasi-sodiummg"
+      }
+    },
+    {
+      "id": "idn-nasi-goreng",
+      "displayName": "Nasi goreng",
+      "aliases": [
+        "rice, fried"
+      ],
+      "preparation": "rice, fried",
+      "per100g": {
+        "energyKcal": 178.0,
+        "carbohydrateG": 24.6,
+        "proteinG": 2.6,
+        "fatG": 7.4,
+        "fiberG": 1.3,
+        "sugarsG": 0.47,
+        "sodiumMg": 361.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-nasi-goreng",
+        "carbohydrateG": "smiling-idn-nasi-goreng",
+        "proteinG": "smiling-idn-nasi-goreng",
+        "fatG": "smiling-idn-nasi-goreng",
+        "fiberG": "smiling-idn-nasi-goreng",
+        "sugarsG": "completion-idn-nasi-goreng-sugarsg",
+        "sodiumMg": "completion-idn-nasi-goreng-sodiummg"
+      }
+    },
+    {
+      "id": "idn-nasi-tim",
+      "displayName": "Nasi tim",
+      "aliases": [
+        "rice, steamed"
+      ],
+      "preparation": "rice, steamed",
+      "per100g": {
+        "energyKcal": 114.0,
+        "carbohydrateG": 25.7,
+        "proteinG": 2.2,
+        "fatG": 0.2,
+        "fiberG": 0.3,
+        "sugarsG": 0.06,
+        "sodiumMg": 0.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-nasi-tim",
+        "carbohydrateG": "smiling-idn-nasi-tim",
+        "proteinG": "smiling-idn-nasi-tim",
+        "fatG": "smiling-idn-nasi-tim",
+        "fiberG": "smiling-idn-nasi-tim",
+        "sugarsG": "completion-idn-nasi-tim-sugarsg",
+        "sodiumMg": "completion-idn-nasi-tim-sodiummg"
+      }
+    },
+    {
+      "id": "idn-nasi-putih",
+      "displayName": "Nasi putih",
+      "aliases": [
+        "rice, white, cooked"
+      ],
+      "preparation": "rice, white, cooked",
+      "per100g": {
+        "energyKcal": 173.9,
+        "carbohydrateG": 39.8,
+        "proteinG": 3.0,
+        "fatG": 0.3,
+        "fiberG": 0.0,
+        "sugarsG": 0.07,
+        "sodiumMg": 1.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-nasi-putih",
+        "carbohydrateG": "smiling-idn-nasi-putih",
+        "proteinG": "smiling-idn-nasi-putih",
+        "fatG": "smiling-idn-nasi-putih",
+        "fiberG": "smiling-idn-nasi-putih",
+        "sugarsG": "completion-idn-nasi-putih-sugarsg",
+        "sodiumMg": "completion-idn-nasi-putih-sodiummg"
+      }
+    },
+    {
+      "id": "idn-nasi-uduk",
+      "displayName": "Nasi uduk",
+      "aliases": [
+        "rice, white, cooked in coconut milk"
+      ],
+      "preparation": "rice, white, cooked in coconut milk",
+      "per100g": {
+        "energyKcal": 234.5,
+        "carbohydrateG": 42.0,
+        "proteinG": 3.8,
+        "fatG": 5.3,
+        "fiberG": 1.8,
+        "sugarsG": 5.28,
+        "sodiumMg": 182.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-nasi-uduk",
+        "carbohydrateG": "smiling-idn-nasi-uduk",
+        "proteinG": "smiling-idn-nasi-uduk",
+        "fatG": "smiling-idn-nasi-uduk",
+        "fiberG": "smiling-idn-nasi-uduk",
+        "sugarsG": "completion-idn-nasi-uduk-sugarsg",
+        "sodiumMg": "completion-idn-nasi-uduk-sodiummg"
+      }
+    },
+    {
+      "id": "idn-nasi-jagung-kering",
+      "displayName": "nasi jagung",
+      "aliases": [
+        "corn rice (dry)"
+      ],
+      "preparation": "corn rice (dry)",
+      "per100g": {
+        "energyKcal": 373.7,
+        "carbohydrateG": 82.7,
+        "proteinG": 5.5,
+        "fatG": 0.1,
+        "fiberG": 10.0,
+        "sugarsG": 0.71,
+        "sodiumMg": 35.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-nasi-jagung-kering",
+        "carbohydrateG": "smiling-idn-nasi-jagung-kering",
+        "proteinG": "smiling-idn-nasi-jagung-kering",
+        "fatG": "smiling-idn-nasi-jagung-kering",
+        "fiberG": "smiling-idn-nasi-jagung-kering",
+        "sugarsG": "completion-idn-nasi-jagung-kering-sugarsg",
+        "sodiumMg": "completion-idn-nasi-jagung-kering-sodiummg"
+      }
+    },
+    {
+      "id": "idn-kacang-tanah-tanpa-kulit",
+      "displayName": "Kacang tanah tanpa kulit",
+      "aliases": [
+        "peanut"
+      ],
+      "preparation": "peanut",
+      "per100g": {
+        "energyKcal": 605.0,
+        "carbohydrateG": 23.6,
+        "proteinG": 26.9,
+        "fatG": 44.2,
+        "fiberG": 2.6,
+        "sugarsG": 6.91,
+        "sodiumMg": 31.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-kacang-tanah-tanpa-kulit",
+        "carbohydrateG": "smiling-idn-kacang-tanah-tanpa-kulit",
+        "proteinG": "smiling-idn-kacang-tanah-tanpa-kulit",
+        "fatG": "smiling-idn-kacang-tanah-tanpa-kulit",
+        "fiberG": "smiling-idn-kacang-tanah-tanpa-kulit",
+        "sugarsG": "completion-idn-kacang-tanah-tanpa-kulit-sugarsg",
+        "sodiumMg": "completion-idn-kacang-tanah-tanpa-kulit-sodiummg"
+      }
+    },
+    {
+      "id": "idn-tempe-kedelai-murni",
+      "displayName": "Tempe kedele murni",
+      "aliases": [
+        "tempeh (fermented soybean)"
+      ],
+      "preparation": "tempeh (fermented soybean)",
+      "per100g": {
+        "energyKcal": 219.2,
+        "carbohydrateG": 13.5,
+        "proteinG": 20.8,
+        "fatG": 8.8,
+        "fiberG": 1.4,
+        "sugarsG": 3.28,
+        "sodiumMg": 9.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-tempe-kedelai-murni",
+        "carbohydrateG": "smiling-idn-tempe-kedelai-murni",
+        "proteinG": "smiling-idn-tempe-kedelai-murni",
+        "fatG": "smiling-idn-tempe-kedelai-murni",
+        "fiberG": "smiling-idn-tempe-kedelai-murni",
+        "sugarsG": "completion-idn-tempe-kedelai-murni-sugarsg",
+        "sodiumMg": "completion-idn-tempe-kedelai-murni-sodiummg"
+      }
+    },
+    {
+      "id": "idn-tahu",
+      "displayName": "Tahu",
+      "aliases": [
+        "tofu"
+      ],
+      "preparation": "tofu",
+      "per100g": {
+        "energyKcal": 89.3,
+        "carbohydrateG": 0.8,
+        "proteinG": 10.9,
+        "fatG": 4.7,
+        "fiberG": 0.1,
+        "sugarsG": 0.27,
+        "sodiumMg": 2.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-tahu",
+        "carbohydrateG": "smiling-idn-tahu",
+        "proteinG": "smiling-idn-tahu",
+        "fatG": "smiling-idn-tahu",
+        "fiberG": "smiling-idn-tahu",
+        "sugarsG": "completion-idn-tahu-sugarsg",
+        "sodiumMg": "completion-idn-tahu-sodiummg"
+      }
+    },
+    {
+      "id": "idn-tahu-goreng",
+      "displayName": "Tahu goreng",
+      "aliases": [
+        "tofu, fried"
+      ],
+      "preparation": "tofu, fried",
+      "per100g": {
+        "energyKcal": 125.5,
+        "carbohydrateG": 2.5,
+        "proteinG": 9.7,
+        "fatG": 8.5,
+        "fiberG": 0.1,
+        "sugarsG": 0.77,
+        "sodiumMg": 7.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-tahu-goreng",
+        "carbohydrateG": "smiling-idn-tahu-goreng",
+        "proteinG": "smiling-idn-tahu-goreng",
+        "fatG": "smiling-idn-tahu-goreng",
+        "fiberG": "smiling-idn-tahu-goreng",
+        "sugarsG": "completion-idn-tahu-goreng-sugarsg",
+        "sodiumMg": "completion-idn-tahu-goreng-sodiummg"
+      }
+    },
+    {
+      "id": "idn-telur-ayam",
+      "displayName": "Telur ayam",
+      "aliases": [
+        "egg, chicken"
+      ],
+      "preparation": "egg, chicken",
+      "per100g": {
+        "energyKcal": 149.6,
+        "carbohydrateG": 0.7,
+        "proteinG": 12.4,
+        "fatG": 10.8,
+        "fiberG": 0.0,
+        "sugarsG": 0.36,
+        "sodiumMg": 142.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-telur-ayam",
+        "carbohydrateG": "smiling-idn-telur-ayam",
+        "proteinG": "smiling-idn-telur-ayam",
+        "fatG": "smiling-idn-telur-ayam",
+        "fiberG": "smiling-idn-telur-ayam",
+        "sugarsG": "completion-idn-telur-ayam-sugarsg",
+        "sodiumMg": "completion-idn-telur-ayam-sodiummg"
+      }
+    },
+    {
+      "id": "idn-ikan-mas-bumbu-kuning",
+      "displayName": "ikan mas bumbu kuning",
+      "aliases": [
+        "fish, freshwater, cooked in turmeric spice"
+      ],
+      "preparation": "fish, freshwater, cooked in turmeric spice",
+      "per100g": {
+        "energyKcal": 223.1,
+        "carbohydrateG": 2.9,
+        "proteinG": 16.7,
+        "fatG": 15.7,
+        "fiberG": 1.7,
+        "sugarsG": 1.12,
+        "sodiumMg": 351.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-ikan-mas-bumbu-kuning",
+        "carbohydrateG": "smiling-idn-ikan-mas-bumbu-kuning",
+        "proteinG": "smiling-idn-ikan-mas-bumbu-kuning",
+        "fatG": "smiling-idn-ikan-mas-bumbu-kuning",
+        "fiberG": "smiling-idn-ikan-mas-bumbu-kuning",
+        "sugarsG": "completion-idn-ikan-mas-bumbu-kuning-sugarsg",
+        "sodiumMg": "completion-idn-ikan-mas-bumbu-kuning-sodiummg"
+      }
+    },
+    {
+      "id": "idn-ikan-mas-pepes",
+      "displayName": "ikan mas pepes",
+      "aliases": [
+        "fish, freashwater, steamed in banana leaf"
+      ],
+      "preparation": "fish, freashwater, steamed in banana leaf",
+      "per100g": {
+        "energyKcal": 78.4,
+        "carbohydrateG": 0.0,
+        "proteinG": 11.5,
+        "fatG": 3.6,
+        "fiberG": 0.0,
+        "sugarsG": 0.0,
+        "sodiumMg": 58.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-ikan-mas-pepes",
+        "carbohydrateG": "smiling-idn-ikan-mas-pepes",
+        "proteinG": "smiling-idn-ikan-mas-pepes",
+        "fatG": "smiling-idn-ikan-mas-pepes",
+        "fiberG": "smiling-idn-ikan-mas-pepes",
+        "sugarsG": "completion-idn-ikan-mas-pepes-sugarsg",
+        "sodiumMg": "completion-idn-ikan-mas-pepes-sodiummg"
+      }
+    },
+    {
+      "id": "idn-ikan-asin-asap",
+      "displayName": "ikan asin/asap",
+      "aliases": [
+        "fish, sea, dried, salted"
+      ],
+      "preparation": "fish, sea, dried, salted",
+      "per100g": {
+        "energyKcal": 181.5,
+        "carbohydrateG": 0.0,
+        "proteinG": 42.0,
+        "fatG": 1.5,
+        "fiberG": 0.0,
+        "sugarsG": 0.0,
+        "sodiumMg": 763.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-ikan-asin-asap",
+        "carbohydrateG": "smiling-idn-ikan-asin-asap",
+        "proteinG": "smiling-idn-ikan-asin-asap",
+        "fatG": "smiling-idn-ikan-asin-asap",
+        "fiberG": "smiling-idn-ikan-asin-asap",
+        "sugarsG": "completion-idn-ikan-asin-asap-sugarsg",
+        "sodiumMg": "completion-idn-ikan-asin-asap-sodiummg"
+      }
+    },
+    {
+      "id": "idn-ikan-kembung-goreng-resep",
+      "displayName": "ikan kembung goreng (resep)",
+      "aliases": [
+        "fish, sea, fried"
+      ],
+      "preparation": "fish, sea, fried",
+      "per100g": {
+        "energyKcal": 269.9,
+        "carbohydrateG": 1.8,
+        "proteinG": 17.3,
+        "fatG": 21.5,
+        "fiberG": 0.0,
+        "sugarsG": 0.03,
+        "sodiumMg": 409.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-ikan-kembung-goreng-resep",
+        "carbohydrateG": "smiling-idn-ikan-kembung-goreng-resep",
+        "proteinG": "smiling-idn-ikan-kembung-goreng-resep",
+        "fatG": "smiling-idn-ikan-kembung-goreng-resep",
+        "fiberG": "smiling-idn-ikan-kembung-goreng-resep",
+        "sugarsG": "completion-idn-ikan-kembung-goreng-resep-sugarsg",
+        "sodiumMg": "completion-idn-ikan-kembung-goreng-resep-sodiummg"
+      }
+    },
+    {
+      "id": "idn-hati-ayam",
+      "displayName": "Hati ayam",
+      "aliases": [
+        "chicken liver"
+      ],
+      "preparation": "chicken liver",
+      "per100g": {
+        "energyKcal": 260.9,
+        "carbohydrateG": 1.6,
+        "proteinG": 27.4,
+        "fatG": 16.1,
+        "fiberG": 0.0,
+        "sugarsG": 0.0,
+        "sodiumMg": 1068.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-hati-ayam",
+        "carbohydrateG": "smiling-idn-hati-ayam",
+        "proteinG": "smiling-idn-hati-ayam",
+        "fatG": "smiling-idn-hati-ayam",
+        "fiberG": "smiling-idn-hati-ayam",
+        "sugarsG": "completion-idn-hati-ayam-sugarsg",
+        "sodiumMg": "completion-idn-hati-ayam-sodiummg"
+      }
+    },
+    {
+      "id": "idn-sayur-sop-ayam",
+      "displayName": "sayur sop ayam",
+      "aliases": [
+        "chicken soup"
+      ],
+      "preparation": "chicken soup",
+      "per100g": {
+        "energyKcal": 72.8,
+        "carbohydrateG": 3.4,
+        "proteinG": 5.9,
+        "fatG": 3.8,
+        "fiberG": 0.7,
+        "sugarsG": 0.93,
+        "sodiumMg": 249.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-sayur-sop-ayam",
+        "carbohydrateG": "smiling-idn-sayur-sop-ayam",
+        "proteinG": "smiling-idn-sayur-sop-ayam",
+        "fatG": "smiling-idn-sayur-sop-ayam",
+        "fiberG": "smiling-idn-sayur-sop-ayam",
+        "sugarsG": "completion-idn-sayur-sop-ayam-sugarsg",
+        "sodiumMg": "completion-idn-sayur-sop-ayam-sodiummg"
+      }
+    },
+    {
+      "id": "idn-daging-ayam",
+      "displayName": "Daging ayam",
+      "aliases": [
+        "chicken, meat"
+      ],
+      "preparation": "chicken, meat",
+      "per100g": {
+        "energyKcal": 297.8,
+        "carbohydrateG": 0.0,
+        "proteinG": 18.2,
+        "fatG": 25.0,
+        "fiberG": 0.0,
+        "sugarsG": 0.0,
+        "sodiumMg": 109.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-daging-ayam",
+        "carbohydrateG": "smiling-idn-daging-ayam",
+        "proteinG": "smiling-idn-daging-ayam",
+        "fatG": "smiling-idn-daging-ayam",
+        "fiberG": "smiling-idn-daging-ayam",
+        "sugarsG": "completion-idn-daging-ayam-sugarsg",
+        "sodiumMg": "completion-idn-daging-ayam-sodiummg"
+      }
+    },
+    {
+      "id": "idn-daging-ayam-goreng",
+      "displayName": "Daging ayam goreng",
+      "aliases": [
+        "chicken, meat, fried"
+      ],
+      "preparation": "chicken, meat, fried",
+      "per100g": {
+        "energyKcal": 236.2,
+        "carbohydrateG": 0.3,
+        "proteinG": 33.1,
+        "fatG": 11.4,
+        "fiberG": 0.0,
+        "sugarsG": 0.0,
+        "sodiumMg": 671.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-daging-ayam-goreng",
+        "carbohydrateG": "smiling-idn-daging-ayam-goreng",
+        "proteinG": "smiling-idn-daging-ayam-goreng",
+        "fatG": "smiling-idn-daging-ayam-goreng",
+        "fiberG": "smiling-idn-daging-ayam-goreng",
+        "sugarsG": "completion-idn-daging-ayam-goreng-sugarsg",
+        "sodiumMg": "completion-idn-daging-ayam-goreng-sodiummg"
+      }
+    },
+    {
+      "id": "idn-dendeng-sapi",
+      "displayName": "Dendeng sapi",
+      "aliases": [
+        "beef, dried"
+      ],
+      "preparation": "beef, dried",
+      "per100g": {
+        "energyKcal": 301.0,
+        "carbohydrateG": 0.0,
+        "proteinG": 55.0,
+        "fatG": 9.0,
+        "fiberG": 0.0,
+        "sugarsG": 0.0,
+        "sodiumMg": 1785.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-dendeng-sapi",
+        "carbohydrateG": "smiling-idn-dendeng-sapi",
+        "proteinG": "smiling-idn-dendeng-sapi",
+        "fatG": "smiling-idn-dendeng-sapi",
+        "fiberG": "smiling-idn-dendeng-sapi",
+        "sugarsG": "completion-idn-dendeng-sapi-sugarsg",
+        "sodiumMg": "completion-idn-dendeng-sapi-sodiummg"
+      }
+    },
+    {
+      "id": "idn-daging-sapi",
+      "displayName": "Daging sapi",
+      "aliases": [
+        "beef, meat"
+      ],
+      "preparation": "beef, meat",
+      "per100g": {
+        "energyKcal": 201.2,
+        "carbohydrateG": 0.0,
+        "proteinG": 18.8,
+        "fatG": 14.0,
+        "fiberG": 0.0,
+        "sugarsG": 0.0,
+        "sodiumMg": 105.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-daging-sapi",
+        "carbohydrateG": "smiling-idn-daging-sapi",
+        "proteinG": "smiling-idn-daging-sapi",
+        "fatG": "smiling-idn-daging-sapi",
+        "fiberG": "smiling-idn-daging-sapi",
+        "sugarsG": "completion-idn-daging-sapi-sugarsg",
+        "sodiumMg": "completion-idn-daging-sapi-sodiummg"
+      }
+    },
+    {
+      "id": "idn-ikan-teri",
+      "displayName": "ikan teri",
+      "aliases": [
+        "anchovy"
+      ],
+      "preparation": "anchovy",
+      "per100g": {
+        "energyKcal": 70.2,
+        "carbohydrateG": 4.1,
+        "proteinG": 10.3,
+        "fatG": 1.4,
+        "fiberG": 0.0,
+        "sugarsG": 0.0,
+        "sodiumMg": 554.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-ikan-teri",
+        "carbohydrateG": "smiling-idn-ikan-teri",
+        "proteinG": "smiling-idn-ikan-teri",
+        "fatG": "smiling-idn-ikan-teri",
+        "fiberG": "smiling-idn-ikan-teri",
+        "sugarsG": "completion-idn-ikan-teri-sugarsg",
+        "sodiumMg": "completion-idn-ikan-teri-sodiummg"
+      }
+    },
+    {
+      "id": "idn-ikan-pindang",
+      "displayName": "ikan pindang",
+      "aliases": [
+        "processed fish"
+      ],
+      "preparation": "processed fish",
+      "per100g": {
+        "energyKcal": 331.4,
+        "carbohydrateG": 1.0,
+        "proteinG": 21.1,
+        "fatG": 27.0,
+        "fiberG": 0.0,
+        "sugarsG": 0.0,
+        "sodiumMg": 379.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-ikan-pindang",
+        "carbohydrateG": "smiling-idn-ikan-pindang",
+        "proteinG": "smiling-idn-ikan-pindang",
+        "fatG": "smiling-idn-ikan-pindang",
+        "fiberG": "smiling-idn-ikan-pindang",
+        "sugarsG": "completion-idn-ikan-pindang-sugarsg",
+        "sodiumMg": "completion-idn-ikan-pindang-sodiummg"
+      }
+    },
+    {
+      "id": "idn-bayam-rebus",
+      "displayName": "Bayam rebus",
+      "aliases": [
+        "spinach, cooked"
+      ],
+      "preparation": "spinach, cooked",
+      "per100g": {
+        "energyKcal": 27.2,
+        "carbohydrateG": 3.7,
+        "proteinG": 1.2,
+        "fatG": 0.6,
+        "fiberG": 1.1,
+        "sugarsG": 0.58,
+        "sodiumMg": 16.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-bayam-rebus",
+        "carbohydrateG": "smiling-idn-bayam-rebus",
+        "proteinG": "smiling-idn-bayam-rebus",
+        "fatG": "smiling-idn-bayam-rebus",
+        "fiberG": "smiling-idn-bayam-rebus",
+        "sugarsG": "completion-idn-bayam-rebus-sugarsg",
+        "sodiumMg": "completion-idn-bayam-rebus-sodiummg"
+      }
+    },
+    {
+      "id": "idn-sayur-bayam",
+      "displayName": "Sayur bayam",
+      "aliases": [
+        "spinach, in clear soup"
+      ],
+      "preparation": "spinach, in clear soup",
+      "per100g": {
+        "energyKcal": 17.8,
+        "carbohydrateG": 1.9,
+        "proteinG": 1.5,
+        "fatG": 0.2,
+        "fiberG": 1.2,
+        "sugarsG": 0.3,
+        "sodiumMg": 262.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-sayur-bayam",
+        "carbohydrateG": "smiling-idn-sayur-bayam",
+        "proteinG": "smiling-idn-sayur-bayam",
+        "fatG": "smiling-idn-sayur-bayam",
+        "fiberG": "smiling-idn-sayur-bayam",
+        "sugarsG": "completion-idn-sayur-bayam-sugarsg",
+        "sodiumMg": "completion-idn-sayur-bayam-sodiummg"
+      }
+    },
+    {
+      "id": "idn-tumis-bayam",
+      "displayName": "Tumis bayam",
+      "aliases": [
+        "spinach, stir-fried"
+      ],
+      "preparation": "spinach, stir-fried",
+      "per100g": {
+        "energyKcal": 71.5,
+        "carbohydrateG": 0.9,
+        "proteinG": 0.7,
+        "fatG": 7.1,
+        "fiberG": 0.6,
+        "sugarsG": 0.14,
+        "sodiumMg": 254.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-tumis-bayam",
+        "carbohydrateG": "smiling-idn-tumis-bayam",
+        "proteinG": "smiling-idn-tumis-bayam",
+        "fatG": "smiling-idn-tumis-bayam",
+        "fiberG": "smiling-idn-tumis-bayam",
+        "sugarsG": "completion-idn-tumis-bayam-sugarsg",
+        "sodiumMg": "completion-idn-tumis-bayam-sodiummg"
+      }
+    },
+    {
+      "id": "idn-tumis-kangkung",
+      "displayName": "Tumis Kangkung",
+      "aliases": [
+        "water spinach, stir-fried"
+      ],
+      "preparation": "water spinach, stir-fried",
+      "per100g": {
+        "energyKcal": 103.4,
+        "carbohydrateG": 2.0,
+        "proteinG": 2.2,
+        "fatG": 9.2,
+        "fiberG": 1.9,
+        "sugarsG": 0.32,
+        "sodiumMg": 254.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "smiling-idn-tumis-kangkung",
+        "carbohydrateG": "smiling-idn-tumis-kangkung",
+        "proteinG": "smiling-idn-tumis-kangkung",
+        "fatG": "smiling-idn-tumis-kangkung",
+        "fiberG": "smiling-idn-tumis-kangkung",
+        "sugarsG": "completion-idn-tumis-kangkung-sugarsg",
+        "sodiumMg": "completion-idn-tumis-kangkung-sodiummg"
+      }
+    },
+    {
+      "id": "tkpsi-beras-mentah",
+      "displayName": "Beras",
+      "aliases": [],
+      "preparation": null,
+      "per100g": {
+        "energyKcal": 351.01,
+        "carbohydrateG": 76.29,
+        "proteinG": 9.24,
+        "fatG": 0.19,
+        "fiberG": 3.59,
+        "sugarsG": 0.11,
+        "sodiumMg": 34.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "completion-tkpsi-beras-mentah-energykcal",
+        "carbohydrateG": "src-tkpsi-beras-mentah",
+        "proteinG": "src-tkpsi-beras-mentah",
+        "fatG": "src-tkpsi-beras-mentah",
+        "fiberG": "src-tkpsi-beras-mentah",
+        "sugarsG": "completion-tkpsi-beras-mentah-sugarsg",
+        "sodiumMg": "completion-tkpsi-beras-mentah-sodiummg"
+      }
+    },
+    {
+      "id": "tkpsi-jagung-segar",
+      "displayName": "Jagung Segar",
+      "aliases": [],
+      "preparation": null,
+      "per100g": {
+        "energyKcal": 88.47,
+        "carbohydrateG": 9.86,
+        "proteinG": 4.08,
+        "fatG": 2.47,
+        "fiberG": 5.24,
+        "sugarsG": 3.3,
+        "sodiumMg": 5.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "completion-tkpsi-jagung-segar-energykcal",
+        "carbohydrateG": "src-tkpsi-jagung-segar",
+        "proteinG": "src-tkpsi-jagung-segar",
+        "fatG": "src-tkpsi-jagung-segar",
+        "fiberG": "src-tkpsi-jagung-segar",
+        "sugarsG": "completion-tkpsi-jagung-segar-sugarsg",
+        "sodiumMg": "completion-tkpsi-jagung-segar-sodiummg"
+      }
+    },
+    {
+      "id": "tkpsi-kentang",
+      "displayName": "Kentang",
+      "aliases": [],
+      "preparation": null,
+      "per100g": {
+        "energyKcal": 74.16,
+        "carbohydrateG": 15.51,
+        "proteinG": 2.05,
+        "fatG": 0.02,
+        "fiberG": 1.87,
+        "sugarsG": 0.73,
+        "sodiumMg": 7.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "completion-tkpsi-kentang-energykcal",
+        "carbohydrateG": "src-tkpsi-kentang",
+        "proteinG": "src-tkpsi-kentang",
+        "fatG": "src-tkpsi-kentang",
+        "fiberG": "src-tkpsi-kentang",
+        "sugarsG": "completion-tkpsi-kentang-sugarsg",
+        "sodiumMg": "completion-tkpsi-kentang-sodiummg"
+      }
+    },
+    {
+      "id": "tkpsi-ubi-jalar",
+      "displayName": "Ubi Jalar",
+      "aliases": [],
+      "preparation": null,
+      "per100g": {
+        "energyKcal": 103.94,
+        "carbohydrateG": 20.24,
+        "proteinG": 2.09,
+        "fatG": 0.78,
+        "fiberG": 3.8,
+        "sugarsG": 4.2,
+        "sodiumMg": 3.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "completion-tkpsi-ubi-jalar-energykcal",
+        "carbohydrateG": "src-tkpsi-ubi-jalar",
+        "proteinG": "src-tkpsi-ubi-jalar",
+        "fatG": "src-tkpsi-ubi-jalar",
+        "fiberG": "src-tkpsi-ubi-jalar",
+        "sugarsG": "completion-tkpsi-ubi-jalar-sugarsg",
+        "sodiumMg": "completion-tkpsi-ubi-jalar-sodiummg"
+      }
+    },
+    {
+      "id": "tkpsi-talas",
+      "displayName": "Talas",
+      "aliases": [],
+      "preparation": null,
+      "per100g": {
+        "energyKcal": 113.39,
+        "carbohydrateG": 19.64,
+        "proteinG": 4.91,
+        "fatG": 0.17,
+        "fiberG": 6.83,
+        "sugarsG": 0.3,
+        "sodiumMg": 6.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "completion-tkpsi-talas-energykcal",
+        "carbohydrateG": "src-tkpsi-talas",
+        "proteinG": "src-tkpsi-talas",
+        "fatG": "src-tkpsi-talas",
+        "fiberG": "src-tkpsi-talas",
+        "sugarsG": "completion-tkpsi-talas-sugarsg",
+        "sodiumMg": "completion-tkpsi-talas-sodiummg"
+      }
+    },
+    {
+      "id": "tkpsi-sagu",
+      "displayName": "Sagu",
+      "aliases": [],
+      "preparation": null,
+      "per100g": {
+        "energyKcal": 340.95,
+        "carbohydrateG": 83.13,
+        "proteinG": 0.32,
+        "fatG": 0.25,
+        "fiberG": 2.45,
+        "sugarsG": 3.14,
+        "sodiumMg": 1.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "completion-tkpsi-sagu-energykcal",
+        "carbohydrateG": "src-tkpsi-sagu",
+        "proteinG": "src-tkpsi-sagu",
+        "fatG": "src-tkpsi-sagu",
+        "fiberG": "src-tkpsi-sagu",
+        "sugarsG": "completion-tkpsi-sagu-sugarsg",
+        "sodiumMg": "completion-tkpsi-sagu-sodiummg"
+      }
+    },
+    {
+      "id": "tkpsi-ikan-lele",
+      "displayName": "Ikan Lele",
+      "aliases": [],
+      "preparation": null,
+      "per100g": {
+        "energyKcal": 154.23,
+        "carbohydrateG": 0.0,
+        "proteinG": 16.17,
+        "fatG": 9.95,
+        "fiberG": 0.0,
+        "sugarsG": 0.0,
+        "sodiumMg": 98.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "completion-tkpsi-ikan-lele-energykcal",
+        "carbohydrateG": "completion-tkpsi-ikan-lele-carbohydrateg",
+        "proteinG": "src-tkpsi-ikan-lele",
+        "fatG": "src-tkpsi-ikan-lele",
+        "fiberG": "completion-tkpsi-ikan-lele-fiberg",
+        "sugarsG": "completion-tkpsi-ikan-lele-sugarsg",
+        "sodiumMg": "completion-tkpsi-ikan-lele-sodiummg"
+      }
+    },
+    {
+      "id": "tkpsi-ikan-bandeng",
+      "displayName": "Ikan Bandeng",
+      "aliases": [],
+      "preparation": null,
+      "per100g": {
+        "energyKcal": 136.67,
+        "carbohydrateG": 0.0,
+        "proteinG": 21.59,
+        "fatG": 5.59,
+        "fiberG": 0.0,
+        "sugarsG": 0.0,
+        "sodiumMg": 67.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "completion-tkpsi-ikan-bandeng-energykcal",
+        "carbohydrateG": "completion-tkpsi-ikan-bandeng-carbohydrateg",
+        "proteinG": "src-tkpsi-ikan-bandeng",
+        "fatG": "src-tkpsi-ikan-bandeng",
+        "fiberG": "completion-tkpsi-ikan-bandeng-fiberg",
+        "sugarsG": "completion-tkpsi-ikan-bandeng-sugarsg",
+        "sodiumMg": "completion-tkpsi-ikan-bandeng-sodiummg"
+      }
+    },
+    {
+      "id": "tkpsi-ikan-mujair",
+      "displayName": "Ikan Mujair",
+      "aliases": [],
+      "preparation": null,
+      "per100g": {
+        "energyKcal": 76.99,
+        "carbohydrateG": 0.0,
+        "proteinG": 18.46,
+        "fatG": 0.35,
+        "fiberG": 0.0,
+        "sugarsG": 0.0,
+        "sodiumMg": 51.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "completion-tkpsi-ikan-mujair-energykcal",
+        "carbohydrateG": "completion-tkpsi-ikan-mujair-carbohydrateg",
+        "proteinG": "src-tkpsi-ikan-mujair",
+        "fatG": "src-tkpsi-ikan-mujair",
+        "fiberG": "completion-tkpsi-ikan-mujair-fiberg",
+        "sugarsG": "completion-tkpsi-ikan-mujair-sugarsg",
+        "sodiumMg": "completion-tkpsi-ikan-mujair-sodiummg"
+      }
+    },
+    {
+      "id": "tkpsi-ikan-tongkol",
+      "displayName": "Ikan Tongkol",
+      "aliases": [],
+      "preparation": null,
+      "per100g": {
+        "energyKcal": 99.42,
+        "carbohydrateG": 0.0,
+        "proteinG": 23.91,
+        "fatG": 0.42,
+        "fiberG": 0.0,
+        "sugarsG": 0.0,
+        "sodiumMg": 202.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "completion-tkpsi-ikan-tongkol-energykcal",
+        "carbohydrateG": "completion-tkpsi-ikan-tongkol-carbohydrateg",
+        "proteinG": "src-tkpsi-ikan-tongkol",
+        "fatG": "src-tkpsi-ikan-tongkol",
+        "fiberG": "completion-tkpsi-ikan-tongkol-fiberg",
+        "sugarsG": "completion-tkpsi-ikan-tongkol-sugarsg",
+        "sodiumMg": "completion-tkpsi-ikan-tongkol-sodiummg"
+      }
+    },
+    {
+      "id": "tkpsi-ikan-kembung",
+      "displayName": "Ikan Kembung",
+      "aliases": [],
+      "preparation": null,
+      "per100g": {
+        "energyKcal": 126.26,
+        "carbohydrateG": 0.0,
+        "proteinG": 22.16,
+        "fatG": 4.18,
+        "fiberG": 0.0,
+        "sugarsG": 0.0,
+        "sodiumMg": 214.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "completion-tkpsi-ikan-kembung-energykcal",
+        "carbohydrateG": "completion-tkpsi-ikan-kembung-carbohydrateg",
+        "proteinG": "src-tkpsi-ikan-kembung",
+        "fatG": "src-tkpsi-ikan-kembung",
+        "fiberG": "completion-tkpsi-ikan-kembung-fiberg",
+        "sugarsG": "completion-tkpsi-ikan-kembung-sugarsg",
+        "sodiumMg": "completion-tkpsi-ikan-kembung-sodiummg"
+      }
+    },
+    {
+      "id": "tkpsi-ikan-tuna",
+      "displayName": "Ikan Tuna",
+      "aliases": [],
+      "preparation": null,
+      "per100g": {
+        "energyKcal": 105.47,
+        "carbohydrateG": 0.0,
+        "proteinG": 25.76,
+        "fatG": 0.27,
+        "fiberG": 0.0,
+        "sugarsG": 0.0,
+        "sodiumMg": 45.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "completion-tkpsi-ikan-tuna-energykcal",
+        "carbohydrateG": "completion-tkpsi-ikan-tuna-carbohydrateg",
+        "proteinG": "src-tkpsi-ikan-tuna",
+        "fatG": "src-tkpsi-ikan-tuna",
+        "fiberG": "completion-tkpsi-ikan-tuna-fiberg",
+        "sugarsG": "completion-tkpsi-ikan-tuna-sugarsg",
+        "sodiumMg": "completion-tkpsi-ikan-tuna-sodiummg"
+      }
+    },
+    {
+      "id": "tkpsi-tomat",
+      "displayName": "Tomat",
+      "aliases": [],
+      "preparation": null,
+      "per100g": {
+        "energyKcal": 18.1,
+        "carbohydrateG": 2.54,
+        "proteinG": 0.97,
+        "fatG": 0.02,
+        "fiberG": 1.94,
+        "sugarsG": 1.72,
+        "sodiumMg": 10.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "completion-tkpsi-tomat-energykcal",
+        "carbohydrateG": "src-tkpsi-tomat",
+        "proteinG": "src-tkpsi-tomat",
+        "fatG": "src-tkpsi-tomat",
+        "fiberG": "src-tkpsi-tomat",
+        "sugarsG": "completion-tkpsi-tomat-sugarsg",
+        "sodiumMg": "completion-tkpsi-tomat-sodiummg"
+      }
+    },
+    {
+      "id": "tkpsi-bayam-segar",
+      "displayName": "Bayam",
+      "aliases": [],
+      "preparation": null,
+      "per100g": {
+        "energyKcal": 29.29,
+        "carbohydrateG": 1.72,
+        "proteinG": 2.11,
+        "fatG": 0.55,
+        "fiberG": 4.51,
+        "sugarsG": 0.2,
+        "sodiumMg": 16.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "completion-tkpsi-bayam-segar-energykcal",
+        "carbohydrateG": "src-tkpsi-bayam-segar",
+        "proteinG": "src-tkpsi-bayam-segar",
+        "fatG": "src-tkpsi-bayam-segar",
+        "fiberG": "src-tkpsi-bayam-segar",
+        "sugarsG": "completion-tkpsi-bayam-segar-sugarsg",
+        "sodiumMg": "completion-tkpsi-bayam-segar-sodiummg"
+      }
+    },
+    {
+      "id": "tkpsi-kangkung-segar",
+      "displayName": "Kangkung",
+      "aliases": [],
+      "preparation": null,
+      "per100g": {
+        "energyKcal": 19.33,
+        "carbohydrateG": 1.03,
+        "proteinG": 2.19,
+        "fatG": 0.25,
+        "fiberG": 2.1,
+        "sugarsG": 0.12,
+        "sodiumMg": 65.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "completion-tkpsi-kangkung-segar-energykcal",
+        "carbohydrateG": "completion-tkpsi-kangkung-segar-carbohydrateg",
+        "proteinG": "src-tkpsi-kangkung-segar",
+        "fatG": "src-tkpsi-kangkung-segar",
+        "fiberG": "completion-tkpsi-kangkung-segar-fiberg",
+        "sugarsG": "completion-tkpsi-kangkung-segar-sugarsg",
+        "sodiumMg": "completion-tkpsi-kangkung-segar-sodiummg"
+      }
+    },
+    {
+      "id": "tkpsi-wortel",
+      "displayName": "Wortel",
+      "aliases": [],
+      "preparation": null,
+      "per100g": {
+        "energyKcal": 30.33,
+        "carbohydrateG": 5.57,
+        "proteinG": 0.16,
+        "fatG": 0.05,
+        "fiberG": 3.48,
+        "sugarsG": 2.76,
+        "sodiumMg": 70.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "completion-tkpsi-wortel-energykcal",
+        "carbohydrateG": "src-tkpsi-wortel",
+        "proteinG": "src-tkpsi-wortel",
+        "fatG": "src-tkpsi-wortel",
+        "fiberG": "src-tkpsi-wortel",
+        "sugarsG": "completion-tkpsi-wortel-sugarsg",
+        "sodiumMg": "completion-tkpsi-wortel-sodiummg"
+      }
+    },
+    {
+      "id": "tkpsi-kacang-kedelai",
+      "displayName": "Kacang Kedelai",
+      "aliases": [],
+      "preparation": null,
+      "per100g": {
+        "energyKcal": 346.78,
+        "carbohydrateG": 9.2,
+        "proteinG": 33.22,
+        "fatG": 13.26,
+        "fiberG": 28.88,
+        "sugarsG": 2.24,
+        "sodiumMg": 210.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "completion-tkpsi-kacang-kedelai-energykcal",
+        "carbohydrateG": "src-tkpsi-kacang-kedelai",
+        "proteinG": "src-tkpsi-kacang-kedelai",
+        "fatG": "src-tkpsi-kacang-kedelai",
+        "fiberG": "src-tkpsi-kacang-kedelai",
+        "sugarsG": "completion-tkpsi-kacang-kedelai-sugarsg",
+        "sodiumMg": "completion-tkpsi-kacang-kedelai-sodiummg"
+      }
+    },
+    {
+      "id": "tkpsi-pisang",
+      "displayName": "Pisang",
+      "aliases": [],
+      "preparation": null,
+      "per100g": {
+        "energyKcal": 92.43,
+        "carbohydrateG": 19.47,
+        "proteinG": 1.68,
+        "fatG": 0.03,
+        "fiberG": 3.78,
+        "sugarsG": 10.43,
+        "sodiumMg": 10.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "completion-tkpsi-pisang-energykcal",
+        "carbohydrateG": "src-tkpsi-pisang",
+        "proteinG": "src-tkpsi-pisang",
+        "fatG": "src-tkpsi-pisang",
+        "fiberG": "src-tkpsi-pisang",
+        "sugarsG": "completion-tkpsi-pisang-sugarsg",
+        "sodiumMg": "completion-tkpsi-pisang-sodiummg"
+      }
+    },
+    {
+      "id": "tkpsi-pepaya",
+      "displayName": "Pepaya",
+      "aliases": [],
+      "preparation": null,
+      "per100g": {
+        "energyKcal": 39.02,
+        "carbohydrateG": 7.5,
+        "proteinG": 0.97,
+        "fatG": 0.02,
+        "fiberG": 2.48,
+        "sugarsG": 5.42,
+        "sodiumMg": 4.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "completion-tkpsi-pepaya-energykcal",
+        "carbohydrateG": "src-tkpsi-pepaya",
+        "proteinG": "src-tkpsi-pepaya",
+        "fatG": "src-tkpsi-pepaya",
+        "fiberG": "src-tkpsi-pepaya",
+        "sugarsG": "completion-tkpsi-pepaya-sugarsg",
+        "sodiumMg": "completion-tkpsi-pepaya-sodiummg"
+      }
+    },
+    {
+      "id": "fndds-27510531",
+      "displayName": "Burger sapi fast food, 1 patty kecil",
+      "aliases": [
+        "Hamburger, from fast food, 1 small patty"
+      ],
+      "preparation": "Hamburger, from fast food, 1 small patty",
+      "per100g": {
+        "energyKcal": 285.0,
+        "carbohydrateG": 28.27,
+        "proteinG": 15.51,
+        "fatG": 11.68,
+        "fiberG": 1.0,
+        "sugarsG": 4.11,
+        "sodiumMg": 396.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-27510531-nutrition",
+        "carbohydrateG": "fndds-27510531-nutrition",
+        "proteinG": "fndds-27510531-nutrition",
+        "fatG": "fndds-27510531-nutrition",
+        "fiberG": "fndds-27510531-nutrition",
+        "sugarsG": "fndds-27510531-nutrition",
+        "sodiumMg": "fndds-27510531-nutrition"
+      }
+    },
+    {
+      "id": "fndds-27510601",
+      "displayName": "Burger sapi fast food, 1 patty sedang",
+      "aliases": [
+        "Hamburger, from fast food, 1 medium patty"
+      ],
+      "preparation": "Hamburger, from fast food, 1 medium patty",
+      "per100g": {
+        "energyKcal": 288.0,
+        "carbohydrateG": 20.68,
+        "proteinG": 17.51,
+        "fatG": 14.38,
+        "fiberG": 0.7,
+        "sugarsG": 3.0,
+        "sodiumMg": 355.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-27510601-nutrition",
+        "carbohydrateG": "fndds-27510601-nutrition",
+        "proteinG": "fndds-27510601-nutrition",
+        "fatG": "fndds-27510601-nutrition",
+        "fiberG": "fndds-27510601-nutrition",
+        "sugarsG": "fndds-27510601-nutrition",
+        "sodiumMg": "fndds-27510601-nutrition"
+      }
+    },
+    {
+      "id": "fndds-27510605",
+      "displayName": "Burger sapi fast food, 1 patty besar",
+      "aliases": [
+        "Hamburger, from fast food, 1 large patty"
+      ],
+      "preparation": "Hamburger, from fast food, 1 large patty",
+      "per100g": {
+        "energyKcal": 289.0,
+        "carbohydrateG": 17.12,
+        "proteinG": 18.43,
+        "fatG": 15.63,
+        "fiberG": 0.6,
+        "sugarsG": 2.49,
+        "sodiumMg": 351.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-27510605-nutrition",
+        "carbohydrateG": "fndds-27510605-nutrition",
+        "proteinG": "fndds-27510605-nutrition",
+        "fatG": "fndds-27510605-nutrition",
+        "fiberG": "fndds-27510605-nutrition",
+        "sugarsG": "fndds-27510605-nutrition",
+        "sodiumMg": "fndds-27510605-nutrition"
+      }
+    },
+    {
+      "id": "fndds-27510661",
+      "displayName": "Double burger sapi fast food, 2 patty kecil",
+      "aliases": [
+        "Double hamburger, from fast food, 2 small patties"
+      ],
+      "preparation": "Double hamburger, from fast food, 2 small patties",
+      "per100g": {
+        "energyKcal": 288.0,
+        "carbohydrateG": 19.68,
+        "proteinG": 17.76,
+        "fatG": 14.73,
+        "fiberG": 0.7,
+        "sugarsG": 2.86,
+        "sodiumMg": 357.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-27510661-nutrition",
+        "carbohydrateG": "fndds-27510661-nutrition",
+        "proteinG": "fndds-27510661-nutrition",
+        "fatG": "fndds-27510661-nutrition",
+        "fiberG": "fndds-27510661-nutrition",
+        "sugarsG": "fndds-27510661-nutrition",
+        "sodiumMg": "fndds-27510661-nutrition"
+      }
+    },
+    {
+      "id": "fndds-27510160",
+      "displayName": "Cheeseburger fast food, 1 patty kecil",
+      "aliases": [
+        "Cheeseburger, from fast food, 1 small patty"
+      ],
+      "preparation": "Cheeseburger, from fast food, 1 small patty",
+      "per100g": {
+        "energyKcal": 299.0,
+        "carbohydrateG": 23.96,
+        "proteinG": 16.42,
+        "fatG": 14.78,
+        "fiberG": 0.8,
+        "sugarsG": 3.86,
+        "sodiumMg": 510.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-27510160-nutrition",
+        "carbohydrateG": "fndds-27510160-nutrition",
+        "proteinG": "fndds-27510160-nutrition",
+        "fatG": "fndds-27510160-nutrition",
+        "fiberG": "fndds-27510160-nutrition",
+        "sugarsG": "fndds-27510160-nutrition",
+        "sodiumMg": "fndds-27510160-nutrition"
+      }
+    },
+    {
+      "id": "fndds-27510215",
+      "displayName": "Cheeseburger fast food, 1 patty sedang",
+      "aliases": [
+        "Cheeseburger, from fast food, 1 medium patty"
+      ],
+      "preparation": "Cheeseburger, from fast food, 1 medium patty",
+      "per100g": {
+        "energyKcal": 296.0,
+        "carbohydrateG": 18.71,
+        "proteinG": 17.87,
+        "fatG": 16.15,
+        "fiberG": 0.6,
+        "sugarsG": 2.98,
+        "sodiumMg": 438.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-27510215-nutrition",
+        "carbohydrateG": "fndds-27510215-nutrition",
+        "proteinG": "fndds-27510215-nutrition",
+        "fatG": "fndds-27510215-nutrition",
+        "fiberG": "fndds-27510215-nutrition",
+        "sugarsG": "fndds-27510215-nutrition",
+        "sodiumMg": "fndds-27510215-nutrition"
+      }
+    },
+    {
+      "id": "fndds-27510371",
+      "displayName": "Double cheeseburger fast food, 2 patty kecil",
+      "aliases": [
+        "Double cheeseburger, from fast food, 2 small patties"
+      ],
+      "preparation": "Double cheeseburger, from fast food, 2 small patties",
+      "per100g": {
+        "energyKcal": 297.0,
+        "carbohydrateG": 17.68,
+        "proteinG": 18.12,
+        "fatG": 16.6,
+        "fiberG": 0.6,
+        "sugarsG": 2.85,
+        "sodiumMg": 447.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-27510371-nutrition",
+        "carbohydrateG": "fndds-27510371-nutrition",
+        "proteinG": "fndds-27510371-nutrition",
+        "fatG": "fndds-27510371-nutrition",
+        "fiberG": "fndds-27510371-nutrition",
+        "sugarsG": "fndds-27510371-nutrition",
+        "sodiumMg": "fndds-27510371-nutrition"
+      }
+    },
+    {
+      "id": "fndds-27540146",
+      "displayName": "Burger ayam fillet goreng fast food",
+      "aliases": [
+        "Chicken fillet sandwich, fried, from fast food"
+      ],
+      "preparation": "Chicken fillet sandwich, fried, from fast food",
+      "per100g": {
+        "energyKcal": 281.0,
+        "carbohydrateG": 27.48,
+        "proteinG": 12.17,
+        "fatG": 13.46,
+        "fiberG": 1.7,
+        "sugarsG": 3.07,
+        "sodiumMg": 571.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-27540146-nutrition",
+        "carbohydrateG": "fndds-27540146-nutrition",
+        "proteinG": "fndds-27540146-nutrition",
+        "fatG": "fndds-27540146-nutrition",
+        "fiberG": "fndds-27540146-nutrition",
+        "sugarsG": "fndds-27540146-nutrition",
+        "sodiumMg": "fndds-27540146-nutrition"
+      }
+    },
+    {
+      "id": "fndds-27540152",
+      "displayName": "Burger ayam fillet panggang fast food",
+      "aliases": [
+        "Chicken fillet sandwich, grilled, from fast food"
+      ],
+      "preparation": "Chicken fillet sandwich, grilled, from fast food",
+      "per100g": {
+        "energyKcal": 226.0,
+        "carbohydrateG": 19.4,
+        "proteinG": 21.5,
+        "fatG": 6.18,
+        "fiberG": 0.7,
+        "sugarsG": 2.82,
+        "sodiumMg": 430.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-27540152-nutrition",
+        "carbohydrateG": "fndds-27540152-nutrition",
+        "proteinG": "fndds-27540152-nutrition",
+        "fatG": "fndds-27540152-nutrition",
+        "fiberG": "fndds-27540152-nutrition",
+        "sugarsG": "fndds-27540152-nutrition",
+        "sodiumMg": "fndds-27540152-nutrition"
+      }
+    },
+    {
+      "id": "fndds-27550000",
+      "displayName": "Burger ikan goreng fast food",
+      "aliases": [
+        "Fish sandwich, fried, from fast food"
+      ],
+      "preparation": "Fish sandwich, fried, from fast food",
+      "per100g": {
+        "energyKcal": 235.0,
+        "carbohydrateG": 25.7,
+        "proteinG": 14.46,
+        "fatG": 8.15,
+        "fiberG": 0.9,
+        "sugarsG": 3.13,
+        "sodiumMg": 462.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-27550000-nutrition",
+        "carbohydrateG": "fndds-27550000-nutrition",
+        "proteinG": "fndds-27550000-nutrition",
+        "fatG": "fndds-27550000-nutrition",
+        "fiberG": "fndds-27550000-nutrition",
+        "sugarsG": "fndds-27550000-nutrition",
+        "sodiumMg": "fndds-27550000-nutrition"
+      }
+    },
+    {
+      "id": "fndds-41901010",
+      "displayName": "Burger sayuran dengan roti",
+      "aliases": [
+        "Veggie burger, on bun"
+      ],
+      "preparation": "Veggie burger, on bun",
+      "per100g": {
+        "energyKcal": 224.0,
+        "carbohydrateG": 30.82,
+        "proteinG": 12.96,
+        "fatG": 5.2,
+        "fiberG": 3.5,
+        "sugarsG": 3.94,
+        "sodiumMg": 534.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-41901010-nutrition",
+        "carbohydrateG": "fndds-41901010-nutrition",
+        "proteinG": "fndds-41901010-nutrition",
+        "fatG": "fndds-41901010-nutrition",
+        "fiberG": "fndds-41901010-nutrition",
+        "sugarsG": "fndds-41901010-nutrition",
+        "sodiumMg": "fndds-41901010-nutrition"
+      }
+    },
+    {
+      "id": "fndds-41901020",
+      "displayName": "Burger sayuran dengan roti dan keju",
+      "aliases": [
+        "Veggie burger, on bun, with cheese"
+      ],
+      "preparation": "Veggie burger, on bun, with cheese",
+      "per100g": {
+        "energyKcal": 243.0,
+        "carbohydrateG": 27.23,
+        "proteinG": 14.0,
+        "fatG": 8.43,
+        "fiberG": 3.0,
+        "sugarsG": 3.78,
+        "sodiumMg": 600.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-41901020-nutrition",
+        "carbohydrateG": "fndds-41901020-nutrition",
+        "proteinG": "fndds-41901020-nutrition",
+        "fatG": "fndds-41901020-nutrition",
+        "fiberG": "fndds-41901020-nutrition",
+        "sugarsG": "fndds-41901020-nutrition",
+        "sodiumMg": "fndds-41901020-nutrition"
+      }
+    },
+    {
+      "id": "fndds-27564060",
+      "displayName": "Hot dog sapi dengan roti putih",
+      "aliases": [
+        "Hot dog sandwich, beef, on white bun"
+      ],
+      "preparation": "Hot dog sandwich, beef, on white bun",
+      "per100g": {
+        "energyKcal": 296.0,
+        "carbohydrateG": 23.73,
+        "proteinG": 10.85,
+        "fatG": 17.37,
+        "fiberG": 0.8,
+        "sugarsG": 3.92,
+        "sodiumMg": 681.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-27564060-nutrition",
+        "carbohydrateG": "fndds-27564060-nutrition",
+        "proteinG": "fndds-27564060-nutrition",
+        "fatG": "fndds-27564060-nutrition",
+        "fiberG": "fndds-27564060-nutrition",
+        "sugarsG": "fndds-27564060-nutrition",
+        "sodiumMg": "fndds-27564060-nutrition"
+      }
+    },
+    {
+      "id": "fndds-24198731",
+      "displayName": "Chicken nuggets fast food",
+      "aliases": [
+        "Chicken nuggets, from fast food"
+      ],
+      "preparation": "Chicken nuggets, from fast food",
+      "per100g": {
+        "energyKcal": 307.0,
+        "carbohydrateG": 14.93,
+        "proteinG": 15.92,
+        "fatG": 20.36,
+        "fiberG": 0.9,
+        "sugarsG": 0.08,
+        "sodiumMg": 594.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-24198731-nutrition",
+        "carbohydrateG": "fndds-24198731-nutrition",
+        "proteinG": "fndds-24198731-nutrition",
+        "fatG": "fndds-24198731-nutrition",
+        "fiberG": "fndds-24198731-nutrition",
+        "sugarsG": "fndds-24198731-nutrition",
+        "sodiumMg": "fndds-24198731-nutrition"
+      }
+    },
+    {
+      "id": "fndds-71401030",
+      "displayName": "French fries fast food",
+      "aliases": [
+        "Potato, french fries, fast food"
+      ],
+      "preparation": "Potato, french fries, fast food",
+      "per100g": {
+        "energyKcal": 312.0,
+        "carbohydrateG": 41.44,
+        "proteinG": 3.43,
+        "fatG": 14.73,
+        "fiberG": 3.8,
+        "sugarsG": 0.3,
+        "sodiumMg": 210.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-71401030-nutrition",
+        "carbohydrateG": "fndds-71401030-nutrition",
+        "proteinG": "fndds-71401030-nutrition",
+        "fatG": "fndds-71401030-nutrition",
+        "fiberG": "fndds-71401030-nutrition",
+        "sugarsG": "fndds-71401030-nutrition",
+        "sodiumMg": "fndds-71401030-nutrition"
+      }
+    },
+    {
+      "id": "fndds-71401031",
+      "displayName": "French fries restoran",
+      "aliases": [
+        "Potato, french fries, restaurant"
+      ],
+      "preparation": "Potato, french fries, restaurant",
+      "per100g": {
+        "energyKcal": 289.0,
+        "carbohydrateG": 37.2,
+        "proteinG": 3.49,
+        "fatG": 14.04,
+        "fiberG": 3.9,
+        "sugarsG": 0.28,
+        "sodiumMg": 357.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-71401031-nutrition",
+        "carbohydrateG": "fndds-71401031-nutrition",
+        "proteinG": "fndds-71401031-nutrition",
+        "fatG": "fndds-71401031-nutrition",
+        "fiberG": "fndds-71401031-nutrition",
+        "sugarsG": "fndds-71401031-nutrition",
+        "sodiumMg": "fndds-71401031-nutrition"
+      }
+    },
+    {
+      "id": "fndds-71401010",
+      "displayName": "Kentang segar digoreng",
+      "aliases": [
+        "Potato, french fries, from fresh, fried"
+      ],
+      "preparation": "Potato, french fries, from fresh, fried",
+      "per100g": {
+        "energyKcal": 198.0,
+        "carbohydrateG": 18.5,
+        "proteinG": 1.93,
+        "fatG": 13.1,
+        "fiberG": 1.6,
+        "sugarsG": 1.25,
+        "sodiumMg": 141.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-71401010-nutrition",
+        "carbohydrateG": "fndds-71401010-nutrition",
+        "proteinG": "fndds-71401010-nutrition",
+        "fatG": "fndds-71401010-nutrition",
+        "fiberG": "fndds-71401010-nutrition",
+        "sugarsG": "fndds-71401010-nutrition",
+        "sodiumMg": "fndds-71401010-nutrition"
+      }
+    },
+    {
+      "id": "fndds-71401020",
+      "displayName": "Kentang beku dipanggang",
+      "aliases": [
+        "Potato, french fries, from frozen, baked"
+      ],
+      "preparation": "Potato, french fries, from frozen, baked",
+      "per100g": {
+        "energyKcal": 158.0,
+        "carbohydrateG": 25.55,
+        "proteinG": 2.75,
+        "fatG": 5.48,
+        "fiberG": 2.0,
+        "sugarsG": 0.37,
+        "sodiumMg": 324.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-71401020-nutrition",
+        "carbohydrateG": "fndds-71401020-nutrition",
+        "proteinG": "fndds-71401020-nutrition",
+        "fatG": "fndds-71401020-nutrition",
+        "fiberG": "fndds-71401020-nutrition",
+        "sugarsG": "fndds-71401020-nutrition",
+        "sodiumMg": "fndds-71401020-nutrition"
+      }
+    },
+    {
+      "id": "fndds-71401039",
+      "displayName": "French fries dengan keju, fast food atau restoran",
+      "aliases": [
+        "Potato, french fries, with cheese, fast food / restaurant"
+      ],
+      "preparation": "Potato, french fries, with cheese, fast food / restaurant",
+      "per100g": {
+        "energyKcal": 260.0,
+        "carbohydrateG": 29.76,
+        "proteinG": 3.33,
+        "fatG": 14.22,
+        "fiberG": 2.6,
+        "sugarsG": 0.3,
+        "sodiumMg": 365.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-71401039-nutrition",
+        "carbohydrateG": "fndds-71401039-nutrition",
+        "proteinG": "fndds-71401039-nutrition",
+        "fatG": "fndds-71401039-nutrition",
+        "fiberG": "fndds-71401039-nutrition",
+        "sugarsG": "fndds-71401039-nutrition",
+        "sodiumMg": "fndds-71401039-nutrition"
+      }
+    },
+    {
+      "id": "fndds-71401050",
+      "displayName": "French fries dengan chili dan keju, fast food atau restoran",
+      "aliases": [
+        "Potato, french fries, with chili and cheese, fast food / restaurant"
+      ],
+      "preparation": "Potato, french fries, with chili and cheese, fast food / restaurant",
+      "per100g": {
+        "energyKcal": 221.0,
+        "carbohydrateG": 24.87,
+        "proteinG": 4.66,
+        "fatG": 11.42,
+        "fiberG": 2.7,
+        "sugarsG": 0.59,
+        "sodiumMg": 363.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-71401050-nutrition",
+        "carbohydrateG": "fndds-71401050-nutrition",
+        "proteinG": "fndds-71401050-nutrition",
+        "fatG": "fndds-71401050-nutrition",
+        "fiberG": "fndds-71401050-nutrition",
+        "sugarsG": "fndds-71401050-nutrition",
+        "sodiumMg": "fndds-71401050-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58106220",
+      "displayName": "Pizza keju restoran, thin crust",
+      "aliases": [
+        "Pizza, cheese, from restaurant or fast food, thin crust"
+      ],
+      "preparation": "Pizza, cheese, from restaurant or fast food, thin crust",
+      "per100g": {
+        "energyKcal": 266.0,
+        "carbohydrateG": 33.33,
+        "proteinG": 11.39,
+        "fatG": 9.69,
+        "fiberG": 2.3,
+        "sugarsG": 3.58,
+        "sodiumMg": 540.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58106220-nutrition",
+        "carbohydrateG": "fndds-58106220-nutrition",
+        "proteinG": "fndds-58106220-nutrition",
+        "fatG": "fndds-58106220-nutrition",
+        "fiberG": "fndds-58106220-nutrition",
+        "sugarsG": "fndds-58106220-nutrition",
+        "sodiumMg": "fndds-58106220-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58106225",
+      "displayName": "Pizza keju restoran, medium crust",
+      "aliases": [
+        "Pizza, cheese, from restaurant or fast food, medium crust"
+      ],
+      "preparation": "Pizza, cheese, from restaurant or fast food, medium crust",
+      "per100g": {
+        "energyKcal": 266.0,
+        "carbohydrateG": 33.33,
+        "proteinG": 11.39,
+        "fatG": 9.69,
+        "fiberG": 2.3,
+        "sugarsG": 3.58,
+        "sodiumMg": 540.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58106225-nutrition",
+        "carbohydrateG": "fndds-58106225-nutrition",
+        "proteinG": "fndds-58106225-nutrition",
+        "fatG": "fndds-58106225-nutrition",
+        "fiberG": "fndds-58106225-nutrition",
+        "sugarsG": "fndds-58106225-nutrition",
+        "sodiumMg": "fndds-58106225-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58106230",
+      "displayName": "Pizza keju restoran, thick crust",
+      "aliases": [
+        "Pizza, cheese, from restaurant or fast food, thick crust"
+      ],
+      "preparation": "Pizza, cheese, from restaurant or fast food, thick crust",
+      "per100g": {
+        "energyKcal": 271.0,
+        "carbohydrateG": 33.17,
+        "proteinG": 10.81,
+        "fatG": 10.54,
+        "fiberG": 2.2,
+        "sugarsG": 3.34,
+        "sodiumMg": 540.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58106230-nutrition",
+        "carbohydrateG": "fndds-58106230-nutrition",
+        "proteinG": "fndds-58106230-nutrition",
+        "fatG": "fndds-58106230-nutrition",
+        "fiberG": "fndds-58106230-nutrition",
+        "sugarsG": "fndds-58106230-nutrition",
+        "sodiumMg": "fndds-58106230-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58106233",
+      "displayName": "Pizza keju stuffed crust",
+      "aliases": [
+        "Pizza, cheese, stuffed crust"
+      ],
+      "preparation": "Pizza, cheese, stuffed crust",
+      "per100g": {
+        "energyKcal": 274.0,
+        "carbohydrateG": 30.0,
+        "proteinG": 12.23,
+        "fatG": 11.63,
+        "fiberG": 1.7,
+        "sugarsG": 2.9,
+        "sodiumMg": 615.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58106233-nutrition",
+        "carbohydrateG": "fndds-58106233-nutrition",
+        "proteinG": "fndds-58106233-nutrition",
+        "fatG": "fndds-58106233-nutrition",
+        "fiberG": "fndds-58106233-nutrition",
+        "sugarsG": "fndds-58106233-nutrition",
+        "sodiumMg": "fndds-58106233-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58106320",
+      "displayName": "Pizza keju dan sayuran restoran, thin crust",
+      "aliases": [
+        "Pizza, cheese, with vegetables, from restaurant or fast food, thin crust"
+      ],
+      "preparation": "Pizza, cheese, with vegetables, from restaurant or fast food, thin crust",
+      "per100g": {
+        "energyKcal": 234.0,
+        "carbohydrateG": 29.86,
+        "proteinG": 9.96,
+        "fatG": 8.37,
+        "fiberG": 2.2,
+        "sugarsG": 3.63,
+        "sodiumMg": 465.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58106320-nutrition",
+        "carbohydrateG": "fndds-58106320-nutrition",
+        "proteinG": "fndds-58106320-nutrition",
+        "fatG": "fndds-58106320-nutrition",
+        "fiberG": "fndds-58106320-nutrition",
+        "sugarsG": "fndds-58106320-nutrition",
+        "sodiumMg": "fndds-58106320-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58106325",
+      "displayName": "Pizza keju dan sayuran restoran, medium crust",
+      "aliases": [
+        "Pizza, cheese, with vegetables, from restaurant or fast food, medium crust"
+      ],
+      "preparation": "Pizza, cheese, with vegetables, from restaurant or fast food, medium crust",
+      "per100g": {
+        "energyKcal": 242.0,
+        "carbohydrateG": 30.71,
+        "proteinG": 10.31,
+        "fatG": 8.69,
+        "fiberG": 2.2,
+        "sugarsG": 3.62,
+        "sodiumMg": 484.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58106325-nutrition",
+        "carbohydrateG": "fndds-58106325-nutrition",
+        "proteinG": "fndds-58106325-nutrition",
+        "fatG": "fndds-58106325-nutrition",
+        "fiberG": "fndds-58106325-nutrition",
+        "sugarsG": "fndds-58106325-nutrition",
+        "sodiumMg": "fndds-58106325-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58106550",
+      "displayName": "Pizza pepperoni restoran, thin crust",
+      "aliases": [
+        "Pizza with pepperoni, from restaurant or fast food, thin crust"
+      ],
+      "preparation": "Pizza with pepperoni, from restaurant or fast food, thin crust",
+      "per100g": {
+        "energyKcal": 282.0,
+        "carbohydrateG": 31.98,
+        "proteinG": 11.74,
+        "fatG": 11.91,
+        "fiberG": 2.3,
+        "sugarsG": 3.26,
+        "sodiumMg": 620.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58106550-nutrition",
+        "carbohydrateG": "fndds-58106550-nutrition",
+        "proteinG": "fndds-58106550-nutrition",
+        "fatG": "fndds-58106550-nutrition",
+        "fiberG": "fndds-58106550-nutrition",
+        "sugarsG": "fndds-58106550-nutrition",
+        "sodiumMg": "fndds-58106550-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58106555",
+      "displayName": "Pizza pepperoni restoran, medium crust",
+      "aliases": [
+        "Pizza with pepperoni, from restaurant or fast food,  medium crust"
+      ],
+      "preparation": "Pizza with pepperoni, from restaurant or fast food,  medium crust",
+      "per100g": {
+        "energyKcal": 282.0,
+        "carbohydrateG": 31.98,
+        "proteinG": 11.74,
+        "fatG": 11.91,
+        "fiberG": 2.3,
+        "sugarsG": 3.26,
+        "sodiumMg": 620.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58106555-nutrition",
+        "carbohydrateG": "fndds-58106555-nutrition",
+        "proteinG": "fndds-58106555-nutrition",
+        "fatG": "fndds-58106555-nutrition",
+        "fiberG": "fndds-58106555-nutrition",
+        "sugarsG": "fndds-58106555-nutrition",
+        "sodiumMg": "fndds-58106555-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58106560",
+      "displayName": "Pizza pepperoni restoran, thick crust",
+      "aliases": [
+        "Pizza with pepperoni, from restaurant or fast food, thick crust"
+      ],
+      "preparation": "Pizza with pepperoni, from restaurant or fast food, thick crust",
+      "per100g": {
+        "energyKcal": 287.0,
+        "carbohydrateG": 31.84,
+        "proteinG": 11.49,
+        "fatG": 12.58,
+        "fiberG": 2.2,
+        "sugarsG": 2.93,
+        "sodiumMg": 620.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58106560-nutrition",
+        "carbohydrateG": "fndds-58106560-nutrition",
+        "proteinG": "fndds-58106560-nutrition",
+        "fatG": "fndds-58106560-nutrition",
+        "fiberG": "fndds-58106560-nutrition",
+        "sugarsG": "fndds-58106560-nutrition",
+        "sodiumMg": "fndds-58106560-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58106620",
+      "displayName": "Pizza daging selain pepperoni restoran, thin crust",
+      "aliases": [
+        "Pizza with meat other than pepperoni, from restaurant or fast food, thin crust"
+      ],
+      "preparation": "Pizza with meat other than pepperoni, from restaurant or fast food, thin crust",
+      "per100g": {
+        "energyKcal": 280.0,
+        "carbohydrateG": 30.62,
+        "proteinG": 11.5,
+        "fatG": 12.35,
+        "fiberG": 2.3,
+        "sugarsG": 3.32,
+        "sodiumMg": 570.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58106620-nutrition",
+        "carbohydrateG": "fndds-58106620-nutrition",
+        "proteinG": "fndds-58106620-nutrition",
+        "fatG": "fndds-58106620-nutrition",
+        "fiberG": "fndds-58106620-nutrition",
+        "sugarsG": "fndds-58106620-nutrition",
+        "sodiumMg": "fndds-58106620-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58106625",
+      "displayName": "Pizza daging selain pepperoni restoran, medium crust",
+      "aliases": [
+        "Pizza with meat other than pepperoni, from restaurant or fast food, medium crust"
+      ],
+      "preparation": "Pizza with meat other than pepperoni, from restaurant or fast food, medium crust",
+      "per100g": {
+        "energyKcal": 280.0,
+        "carbohydrateG": 30.62,
+        "proteinG": 11.5,
+        "fatG": 12.35,
+        "fiberG": 2.3,
+        "sugarsG": 3.32,
+        "sodiumMg": 570.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58106625-nutrition",
+        "carbohydrateG": "fndds-58106625-nutrition",
+        "proteinG": "fndds-58106625-nutrition",
+        "fatG": "fndds-58106625-nutrition",
+        "fiberG": "fndds-58106625-nutrition",
+        "sugarsG": "fndds-58106625-nutrition",
+        "sodiumMg": "fndds-58106625-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58106720",
+      "displayName": "Pizza daging dan sayuran restoran, thin crust",
+      "aliases": [
+        "Pizza with meat and vegetables, from restaurant or fast food, thin crust"
+      ],
+      "preparation": "Pizza with meat and vegetables, from restaurant or fast food, thin crust",
+      "per100g": {
+        "energyKcal": 241.0,
+        "carbohydrateG": 26.62,
+        "proteinG": 11.55,
+        "fatG": 9.87,
+        "fiberG": 1.9,
+        "sugarsG": 3.29,
+        "sodiumMg": 464.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58106720-nutrition",
+        "carbohydrateG": "fndds-58106720-nutrition",
+        "proteinG": "fndds-58106720-nutrition",
+        "fatG": "fndds-58106720-nutrition",
+        "fiberG": "fndds-58106720-nutrition",
+        "sugarsG": "fndds-58106720-nutrition",
+        "sodiumMg": "fndds-58106720-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58106725",
+      "displayName": "Pizza daging dan sayuran restoran, medium crust",
+      "aliases": [
+        "Pizza with meat and vegetables, from restaurant or fast food, medium crust"
+      ],
+      "preparation": "Pizza with meat and vegetables, from restaurant or fast food, medium crust",
+      "per100g": {
+        "energyKcal": 248.0,
+        "carbohydrateG": 28.38,
+        "proteinG": 11.5,
+        "fatG": 9.83,
+        "fiberG": 2.0,
+        "sugarsG": 3.37,
+        "sodiumMg": 484.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58106725-nutrition",
+        "carbohydrateG": "fndds-58106725-nutrition",
+        "proteinG": "fndds-58106725-nutrition",
+        "fatG": "fndds-58106725-nutrition",
+        "fiberG": "fndds-58106725-nutrition",
+        "sugarsG": "fndds-58106725-nutrition",
+        "sodiumMg": "fndds-58106725-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58109015",
+      "displayName": "Pizza keju gandum utuh, thin crust",
+      "aliases": [
+        "Pizza, cheese, whole wheat thin crust"
+      ],
+      "preparation": "Pizza, cheese, whole wheat thin crust",
+      "per100g": {
+        "energyKcal": 267.0,
+        "carbohydrateG": 28.62,
+        "proteinG": 11.77,
+        "fatG": 12.38,
+        "fiberG": 3.5,
+        "sugarsG": 3.59,
+        "sodiumMg": 543.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58109015-nutrition",
+        "carbohydrateG": "fndds-58109015-nutrition",
+        "proteinG": "fndds-58109015-nutrition",
+        "fatG": "fndds-58109015-nutrition",
+        "fiberG": "fndds-58109015-nutrition",
+        "sugarsG": "fndds-58109015-nutrition",
+        "sodiumMg": "fndds-58109015-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58109100",
+      "displayName": "Pizza keju gluten-free, thin crust",
+      "aliases": [
+        "Pizza, cheese, gluten-free thin crust"
+      ],
+      "preparation": "Pizza, cheese, gluten-free thin crust",
+      "per100g": {
+        "energyKcal": 264.0,
+        "carbohydrateG": 26.53,
+        "proteinG": 8.73,
+        "fatG": 13.62,
+        "fiberG": 2.5,
+        "sugarsG": 3.2,
+        "sodiumMg": 485.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58109100-nutrition",
+        "carbohydrateG": "fndds-58109100-nutrition",
+        "proteinG": "fndds-58109100-nutrition",
+        "fatG": "fndds-58109100-nutrition",
+        "fiberG": "fndds-58109100-nutrition",
+        "sugarsG": "fndds-58109100-nutrition",
+        "sodiumMg": "fndds-58109100-nutrition"
+      }
+    },
+    {
+      "id": "fndds-56130000",
+      "displayName": "Pasta matang tanpa saus",
+      "aliases": [
+        "Pasta, cooked"
+      ],
+      "preparation": "Pasta, cooked",
+      "per100g": {
+        "energyKcal": 157.0,
+        "carbohydrateG": 30.68,
+        "proteinG": 5.76,
+        "fatG": 0.92,
+        "fiberG": 1.8,
+        "sugarsG": 0.56,
+        "sodiumMg": 232.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-56130000-nutrition",
+        "carbohydrateG": "fndds-56130000-nutrition",
+        "proteinG": "fndds-56130000-nutrition",
+        "fatG": "fndds-56130000-nutrition",
+        "fiberG": "fndds-56130000-nutrition",
+        "sugarsG": "fndds-56130000-nutrition",
+        "sodiumMg": "fndds-56130000-nutrition"
+      }
+    },
+    {
+      "id": "fndds-56132990",
+      "displayName": "Pasta gandum utuh matang tanpa saus",
+      "aliases": [
+        "Pasta, whole grain, cooked"
+      ],
+      "preparation": "Pasta, whole grain, cooked",
+      "per100g": {
+        "energyKcal": 148.0,
+        "carbohydrateG": 29.89,
+        "proteinG": 5.95,
+        "fatG": 1.7,
+        "fiberG": 3.9,
+        "sugarsG": 0.75,
+        "sodiumMg": 235.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-56132990-nutrition",
+        "carbohydrateG": "fndds-56132990-nutrition",
+        "proteinG": "fndds-56132990-nutrition",
+        "fatG": "fndds-56132990-nutrition",
+        "fiberG": "fndds-56132990-nutrition",
+        "sugarsG": "fndds-56132990-nutrition",
+        "sodiumMg": "fndds-56132990-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58146221",
+      "displayName": "Pasta saus tomat, restoran",
+      "aliases": [
+        "Pasta with tomato-based sauce, restaurant"
+      ],
+      "preparation": "Pasta with tomato-based sauce, restaurant",
+      "per100g": {
+        "energyKcal": 160.0,
+        "carbohydrateG": 18.41,
+        "proteinG": 3.41,
+        "fatG": 7.97,
+        "fiberG": 1.7,
+        "sugarsG": 2.72,
+        "sodiumMg": 387.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58146221-nutrition",
+        "carbohydrateG": "fndds-58146221-nutrition",
+        "proteinG": "fndds-58146221-nutrition",
+        "fatG": "fndds-58146221-nutrition",
+        "fiberG": "fndds-58146221-nutrition",
+        "sugarsG": "fndds-58146221-nutrition",
+        "sodiumMg": "fndds-58146221-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58146321",
+      "displayName": "Pasta saus tomat dan daging, restoran",
+      "aliases": [
+        "Pasta with tomato-based sauce and meat, restaurant"
+      ],
+      "preparation": "Pasta with tomato-based sauce and meat, restaurant",
+      "per100g": {
+        "energyKcal": 178.0,
+        "carbohydrateG": 17.74,
+        "proteinG": 5.43,
+        "fatG": 9.25,
+        "fiberG": 1.5,
+        "sugarsG": 2.26,
+        "sodiumMg": 383.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58146321-nutrition",
+        "carbohydrateG": "fndds-58146321-nutrition",
+        "proteinG": "fndds-58146321-nutrition",
+        "fatG": "fndds-58146321-nutrition",
+        "fiberG": "fndds-58146321-nutrition",
+        "sugarsG": "fndds-58146321-nutrition",
+        "sodiumMg": "fndds-58146321-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58146341",
+      "displayName": "Pasta saus tomat dan unggas, restoran",
+      "aliases": [
+        "Pasta with tomato-based sauce and poultry, restaurant"
+      ],
+      "preparation": "Pasta with tomato-based sauce and poultry, restaurant",
+      "per100g": {
+        "energyKcal": 171.0,
+        "carbohydrateG": 17.74,
+        "proteinG": 5.59,
+        "fatG": 8.47,
+        "fiberG": 1.5,
+        "sugarsG": 2.26,
+        "sodiumMg": 382.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58146341-nutrition",
+        "carbohydrateG": "fndds-58146341-nutrition",
+        "proteinG": "fndds-58146341-nutrition",
+        "fatG": "fndds-58146341-nutrition",
+        "fiberG": "fndds-58146341-nutrition",
+        "sugarsG": "fndds-58146341-nutrition",
+        "sodiumMg": "fndds-58146341-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58146361",
+      "displayName": "Pasta saus tomat dan seafood, restoran",
+      "aliases": [
+        "Pasta with tomato-based sauce and seafood, restaurant"
+      ],
+      "preparation": "Pasta with tomato-based sauce and seafood, restaurant",
+      "per100g": {
+        "energyKcal": 166.0,
+        "carbohydrateG": 17.98,
+        "proteinG": 5.16,
+        "fatG": 7.97,
+        "fiberG": 1.5,
+        "sugarsG": 2.26,
+        "sodiumMg": 393.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58146361-nutrition",
+        "carbohydrateG": "fndds-58146361-nutrition",
+        "proteinG": "fndds-58146361-nutrition",
+        "fatG": "fndds-58146361-nutrition",
+        "fiberG": "fndds-58146361-nutrition",
+        "sugarsG": "fndds-58146361-nutrition",
+        "sodiumMg": "fndds-58146361-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58146381",
+      "displayName": "Pasta saus krim, restoran",
+      "aliases": [
+        "Pasta with cream sauce, restaurant"
+      ],
+      "preparation": "Pasta with cream sauce, restaurant",
+      "per100g": {
+        "energyKcal": 204.0,
+        "carbohydrateG": 15.56,
+        "proteinG": 3.72,
+        "fatG": 13.95,
+        "fiberG": 0.9,
+        "sugarsG": 0.67,
+        "sodiumMg": 577.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58146381-nutrition",
+        "carbohydrateG": "fndds-58146381-nutrition",
+        "proteinG": "fndds-58146381-nutrition",
+        "fatG": "fndds-58146381-nutrition",
+        "fiberG": "fndds-58146381-nutrition",
+        "sugarsG": "fndds-58146381-nutrition",
+        "sodiumMg": "fndds-58146381-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58146401",
+      "displayName": "Pasta saus krim dan daging, restoran",
+      "aliases": [
+        "Pasta with cream sauce and meat, restaurant"
+      ],
+      "preparation": "Pasta with cream sauce and meat, restaurant",
+      "per100g": {
+        "energyKcal": 213.0,
+        "carbohydrateG": 15.41,
+        "proteinG": 5.67,
+        "fatG": 14.1,
+        "fiberG": 0.9,
+        "sugarsG": 0.59,
+        "sodiumMg": 562.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58146401-nutrition",
+        "carbohydrateG": "fndds-58146401-nutrition",
+        "proteinG": "fndds-58146401-nutrition",
+        "fatG": "fndds-58146401-nutrition",
+        "fiberG": "fndds-58146401-nutrition",
+        "sugarsG": "fndds-58146401-nutrition",
+        "sodiumMg": "fndds-58146401-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58146421",
+      "displayName": "Pasta saus krim dan unggas, restoran",
+      "aliases": [
+        "Pasta with cream sauce and poultry, restaurant"
+      ],
+      "preparation": "Pasta with cream sauce and poultry, restaurant",
+      "per100g": {
+        "energyKcal": 206.0,
+        "carbohydrateG": 15.41,
+        "proteinG": 5.83,
+        "fatG": 13.33,
+        "fiberG": 0.9,
+        "sugarsG": 0.59,
+        "sodiumMg": 561.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58146421-nutrition",
+        "carbohydrateG": "fndds-58146421-nutrition",
+        "proteinG": "fndds-58146421-nutrition",
+        "fatG": "fndds-58146421-nutrition",
+        "fiberG": "fndds-58146421-nutrition",
+        "sugarsG": "fndds-58146421-nutrition",
+        "sodiumMg": "fndds-58146421-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58146441",
+      "displayName": "Pasta saus krim dan seafood, restoran",
+      "aliases": [
+        "Pasta with cream sauce and seafood, restaurant"
+      ],
+      "preparation": "Pasta with cream sauce and seafood, restaurant",
+      "per100g": {
+        "energyKcal": 202.0,
+        "carbohydrateG": 15.66,
+        "proteinG": 5.4,
+        "fatG": 12.82,
+        "fiberG": 0.9,
+        "sugarsG": 0.59,
+        "sodiumMg": 572.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58146441-nutrition",
+        "carbohydrateG": "fndds-58146441-nutrition",
+        "proteinG": "fndds-58146441-nutrition",
+        "fatG": "fndds-58146441-nutrition",
+        "fiberG": "fndds-58146441-nutrition",
+        "sugarsG": "fndds-58146441-nutrition",
+        "sodiumMg": "fndds-58146441-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58145111",
+      "displayName": "Macaroni and cheese, restoran",
+      "aliases": [
+        "Macaroni or noodles with cheese, from restaurant"
+      ],
+      "preparation": "Macaroni or noodles with cheese, from restaurant",
+      "per100g": {
+        "energyKcal": 151.0,
+        "carbohydrateG": 18.8,
+        "proteinG": 5.42,
+        "fatG": 6.06,
+        "fiberG": 1.1,
+        "sugarsG": 3.09,
+        "sodiumMg": 361.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58145111-nutrition",
+        "carbohydrateG": "fndds-58145111-nutrition",
+        "proteinG": "fndds-58145111-nutrition",
+        "fatG": "fndds-58145111-nutrition",
+        "fiberG": "fndds-58145111-nutrition",
+        "sugarsG": "fndds-58145111-nutrition",
+        "sodiumMg": "fndds-58145111-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58130014",
+      "displayName": "Lasagna daging, restoran",
+      "aliases": [
+        "Lasagna with meat, from restaurant"
+      ],
+      "preparation": "Lasagna with meat, from restaurant",
+      "per100g": {
+        "energyKcal": 185.0,
+        "carbohydrateG": 11.36,
+        "proteinG": 10.83,
+        "fatG": 10.69,
+        "fiberG": 1.5,
+        "sugarsG": 3.15,
+        "sodiumMg": 466.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58130014-nutrition",
+        "carbohydrateG": "fndds-58130014-nutrition",
+        "proteinG": "fndds-58130014-nutrition",
+        "fatG": "fndds-58130014-nutrition",
+        "fiberG": "fndds-58130014-nutrition",
+        "sugarsG": "fndds-58130014-nutrition",
+        "sodiumMg": "fndds-58130014-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58130310",
+      "displayName": "Lasagna tanpa daging",
+      "aliases": [
+        "Lasagna, meatless"
+      ],
+      "preparation": "Lasagna, meatless",
+      "per100g": {
+        "energyKcal": 130.0,
+        "carbohydrateG": 13.84,
+        "proteinG": 6.54,
+        "fatG": 5.33,
+        "fiberG": 1.7,
+        "sugarsG": 4.23,
+        "sodiumMg": 284.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58130310-nutrition",
+        "carbohydrateG": "fndds-58130310-nutrition",
+        "proteinG": "fndds-58130310-nutrition",
+        "fatG": "fndds-58130310-nutrition",
+        "fiberG": "fndds-58130310-nutrition",
+        "sugarsG": "fndds-58130310-nutrition",
+        "sodiumMg": "fndds-58130310-nutrition"
+      }
+    },
+    {
+      "id": "fndds-51166000",
+      "displayName": "Croissant polos",
+      "aliases": [
+        "Croissant"
+      ],
+      "preparation": "Croissant",
+      "per100g": {
+        "energyKcal": 406.0,
+        "carbohydrateG": 45.8,
+        "proteinG": 8.2,
+        "fatG": 21.0,
+        "fiberG": 2.6,
+        "sugarsG": 11.26,
+        "sodiumMg": 300.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-51166000-nutrition",
+        "carbohydrateG": "fndds-51166000-nutrition",
+        "proteinG": "fndds-51166000-nutrition",
+        "fatG": "fndds-51166000-nutrition",
+        "fiberG": "fndds-51166000-nutrition",
+        "sugarsG": "fndds-51166000-nutrition",
+        "sodiumMg": "fndds-51166000-nutrition"
+      }
+    },
+    {
+      "id": "fndds-51166200",
+      "displayName": "Croissant cokelat",
+      "aliases": [
+        "Croissant, chocolate"
+      ],
+      "preparation": "Croissant, chocolate",
+      "per100g": {
+        "energyKcal": 421.0,
+        "carbohydrateG": 49.4,
+        "proteinG": 7.4,
+        "fatG": 22.79,
+        "fiberG": 3.3,
+        "sugarsG": 19.87,
+        "sodiumMg": 242.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-51166200-nutrition",
+        "carbohydrateG": "fndds-51166200-nutrition",
+        "proteinG": "fndds-51166200-nutrition",
+        "fatG": "fndds-51166200-nutrition",
+        "fiberG": "fndds-51166200-nutrition",
+        "sugarsG": "fndds-51166200-nutrition",
+        "sodiumMg": "fndds-51166200-nutrition"
+      }
+    },
+    {
+      "id": "fndds-53520100",
+      "displayName": "Donat tipe cake polos",
+      "aliases": [
+        "Doughnut, cake type, plain"
+      ],
+      "preparation": "Doughnut, cake type, plain",
+      "per100g": {
+        "energyKcal": 434.0,
+        "carbohydrateG": 47.06,
+        "proteinG": 5.31,
+        "fatG": 24.93,
+        "fiberG": 1.7,
+        "sugarsG": 18.15,
+        "sodiumMg": 477.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-53520100-nutrition",
+        "carbohydrateG": "fndds-53520100-nutrition",
+        "proteinG": "fndds-53520100-nutrition",
+        "fatG": "fndds-53520100-nutrition",
+        "fiberG": "fndds-53520100-nutrition",
+        "sugarsG": "fndds-53520100-nutrition",
+        "sodiumMg": "fndds-53520100-nutrition"
+      }
+    },
+    {
+      "id": "fndds-53521110",
+      "displayName": "Donat tipe yeast",
+      "aliases": [
+        "Doughnut, yeast type"
+      ],
+      "preparation": "Doughnut, yeast type",
+      "per100g": {
+        "energyKcal": 421.0,
+        "carbohydrateG": 47.93,
+        "proteinG": 6.14,
+        "fatG": 22.7,
+        "fiberG": 2.1,
+        "sugarsG": 22.75,
+        "sodiumMg": 316.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-53521110-nutrition",
+        "carbohydrateG": "fndds-53521110-nutrition",
+        "proteinG": "fndds-53521110-nutrition",
+        "fatG": "fndds-53521110-nutrition",
+        "fiberG": "fndds-53521110-nutrition",
+        "sugarsG": "fndds-53521110-nutrition",
+        "sodiumMg": "fndds-53521110-nutrition"
+      }
+    },
+    {
+      "id": "fndds-55100050",
+      "displayName": "Pancake polos, fast food atau restoran",
+      "aliases": [
+        "Pancakes, plain, fast food / restaurant"
+      ],
+      "preparation": "Pancakes, plain, fast food / restaurant",
+      "per100g": {
+        "energyKcal": 307.0,
+        "carbohydrateG": 34.14,
+        "proteinG": 7.16,
+        "fatG": 15.48,
+        "fiberG": 2.1,
+        "sugarsG": 6.81,
+        "sodiumMg": 544.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-55100050-nutrition",
+        "carbohydrateG": "fndds-55100050-nutrition",
+        "proteinG": "fndds-55100050-nutrition",
+        "fatG": "fndds-55100050-nutrition",
+        "fiberG": "fndds-55100050-nutrition",
+        "sugarsG": "fndds-55100050-nutrition",
+        "sodiumMg": "fndds-55100050-nutrition"
+      }
+    },
+    {
+      "id": "fndds-55200100",
+      "displayName": "Waffle polos, fast food atau restoran",
+      "aliases": [
+        "Waffle, plain, fast food / restaurant"
+      ],
+      "preparation": "Waffle, plain, fast food / restaurant",
+      "per100g": {
+        "energyKcal": 428.0,
+        "carbohydrateG": 38.92,
+        "proteinG": 8.16,
+        "fatG": 26.36,
+        "fiberG": 2.4,
+        "sugarsG": 7.77,
+        "sodiumMg": 620.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-55200100-nutrition",
+        "carbohydrateG": "fndds-55200100-nutrition",
+        "proteinG": "fndds-55200100-nutrition",
+        "fatG": "fndds-55200100-nutrition",
+        "fiberG": "fndds-55200100-nutrition",
+        "sugarsG": "fndds-55200100-nutrition",
+        "sodiumMg": "fndds-55200100-nutrition"
+      }
+    },
+    {
+      "id": "fndds-55300050",
+      "displayName": "French toast, fast food atau restoran",
+      "aliases": [
+        "French toast, fast food / restaurant"
+      ],
+      "preparation": "French toast, fast food / restaurant",
+      "per100g": {
+        "energyKcal": 310.0,
+        "carbohydrateG": 35.71,
+        "proteinG": 9.84,
+        "fatG": 14.3,
+        "fiberG": 1.3,
+        "sugarsG": 10.08,
+        "sodiumMg": 357.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-55300050-nutrition",
+        "carbohydrateG": "fndds-55300050-nutrition",
+        "proteinG": "fndds-55300050-nutrition",
+        "fatG": "fndds-55300050-nutrition",
+        "fiberG": "fndds-55300050-nutrition",
+        "sugarsG": "fndds-55300050-nutrition",
+        "sodiumMg": "fndds-55300050-nutrition"
+      }
+    },
+    {
+      "id": "fndds-56112000",
+      "displayName": "Mi matang tanpa saus",
+      "aliases": [
+        "Noodles, cooked"
+      ],
+      "preparation": "Noodles, cooked",
+      "per100g": {
+        "energyKcal": 137.0,
+        "carbohydrateG": 25.01,
+        "proteinG": 4.51,
+        "fatG": 2.06,
+        "fiberG": 1.2,
+        "sugarsG": 0.4,
+        "sodiumMg": 236.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-56112000-nutrition",
+        "carbohydrateG": "fndds-56112000-nutrition",
+        "proteinG": "fndds-56112000-nutrition",
+        "fatG": "fndds-56112000-nutrition",
+        "fiberG": "fndds-56112000-nutrition",
+        "sugarsG": "fndds-56112000-nutrition",
+        "sodiumMg": "fndds-56112000-nutrition"
+      }
+    },
+    {
+      "id": "fndds-56113000",
+      "displayName": "Mi gandum utuh matang tanpa saus",
+      "aliases": [
+        "Noodles, whole grain, cooked"
+      ],
+      "preparation": "Noodles, whole grain, cooked",
+      "per100g": {
+        "energyKcal": 148.0,
+        "carbohydrateG": 29.91,
+        "proteinG": 5.96,
+        "fatG": 1.7,
+        "fiberG": 3.9,
+        "sugarsG": 0.75,
+        "sodiumMg": 210.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-56113000-nutrition",
+        "carbohydrateG": "fndds-56113000-nutrition",
+        "proteinG": "fndds-56113000-nutrition",
+        "fatG": "fndds-56113000-nutrition",
+        "fiberG": "fndds-56113000-nutrition",
+        "sugarsG": "fndds-56113000-nutrition",
+        "sodiumMg": "fndds-56113000-nutrition"
+      }
+    },
+    {
+      "id": "fndds-56117090",
+      "displayName": "Mi beras matang tanpa saus",
+      "aliases": [
+        "Rice noodles, cooked"
+      ],
+      "preparation": "Rice noodles, cooked",
+      "per100g": {
+        "energyKcal": 107.0,
+        "carbohydrateG": 23.87,
+        "proteinG": 1.78,
+        "fatG": 0.2,
+        "fiberG": 1.0,
+        "sugarsG": 0.03,
+        "sodiumMg": 250.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-56117090-nutrition",
+        "carbohydrateG": "fndds-56117090-nutrition",
+        "proteinG": "fndds-56117090-nutrition",
+        "fatG": "fndds-56117090-nutrition",
+        "fiberG": "fndds-56117090-nutrition",
+        "sugarsG": "fndds-56117090-nutrition",
+        "sodiumMg": "fndds-56117090-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58136120",
+      "displayName": "Lo mein tanpa daging",
+      "aliases": [
+        "Lo mein, meatless"
+      ],
+      "preparation": "Lo mein, meatless",
+      "per100g": {
+        "energyKcal": 121.0,
+        "carbohydrateG": 20.16,
+        "proteinG": 4.77,
+        "fatG": 2.35,
+        "fiberG": 1.3,
+        "sugarsG": 2.63,
+        "sodiumMg": 430.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58136120-nutrition",
+        "carbohydrateG": "fndds-58136120-nutrition",
+        "proteinG": "fndds-58136120-nutrition",
+        "fatG": "fndds-58136120-nutrition",
+        "fiberG": "fndds-58136120-nutrition",
+        "sugarsG": "fndds-58136120-nutrition",
+        "sodiumMg": "fndds-58136120-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58136130",
+      "displayName": "Lo mein udang",
+      "aliases": [
+        "Lo mein, with shrimp"
+      ],
+      "preparation": "Lo mein, with shrimp",
+      "per100g": {
+        "energyKcal": 121.0,
+        "carbohydrateG": 16.24,
+        "proteinG": 8.56,
+        "fatG": 2.21,
+        "fiberG": 1.0,
+        "sugarsG": 2.08,
+        "sodiumMg": 363.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58136130-nutrition",
+        "carbohydrateG": "fndds-58136130-nutrition",
+        "proteinG": "fndds-58136130-nutrition",
+        "fatG": "fndds-58136130-nutrition",
+        "fiberG": "fndds-58136130-nutrition",
+        "sugarsG": "fndds-58136130-nutrition",
+        "sodiumMg": "fndds-58136130-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58136150",
+      "displayName": "Lo mein sapi",
+      "aliases": [
+        "Lo mein, with beef"
+      ],
+      "preparation": "Lo mein, with beef",
+      "per100g": {
+        "energyKcal": 129.0,
+        "carbohydrateG": 16.18,
+        "proteinG": 9.73,
+        "fatG": 2.77,
+        "fiberG": 1.0,
+        "sugarsG": 2.11,
+        "sodiumMg": 358.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58136150-nutrition",
+        "carbohydrateG": "fndds-58136150-nutrition",
+        "proteinG": "fndds-58136150-nutrition",
+        "fatG": "fndds-58136150-nutrition",
+        "fiberG": "fndds-58136150-nutrition",
+        "sugarsG": "fndds-58136150-nutrition",
+        "sodiumMg": "fndds-58136150-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58136160",
+      "displayName": "Lo mein ayam",
+      "aliases": [
+        "Lo mein, with chicken"
+      ],
+      "preparation": "Lo mein, with chicken",
+      "per100g": {
+        "energyKcal": 130.0,
+        "carbohydrateG": 16.15,
+        "proteinG": 9.15,
+        "fatG": 3.15,
+        "fiberG": 1.0,
+        "sugarsG": 2.11,
+        "sodiumMg": 413.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58136160-nutrition",
+        "carbohydrateG": "fndds-58136160-nutrition",
+        "proteinG": "fndds-58136160-nutrition",
+        "fatG": "fndds-58136160-nutrition",
+        "fiberG": "fndds-58136160-nutrition",
+        "sugarsG": "fndds-58136160-nutrition",
+        "sodiumMg": "fndds-58136160-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58407034",
+      "displayName": "Ramen bowl, komposisi tidak dirinci (rujukan AS)",
+      "aliases": [
+        "Ramen bowl, NFS"
+      ],
+      "preparation": "Ramen bowl, NFS",
+      "per100g": {
+        "energyKcal": 127.0,
+        "carbohydrateG": 13.95,
+        "proteinG": 7.13,
+        "fatG": 4.57,
+        "fiberG": 0.9,
+        "sugarsG": 0.42,
+        "sodiumMg": 333.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58407034-nutrition",
+        "carbohydrateG": "fndds-58407034-nutrition",
+        "proteinG": "fndds-58407034-nutrition",
+        "fatG": "fndds-58407034-nutrition",
+        "fiberG": "fndds-58407034-nutrition",
+        "sugarsG": "fndds-58407034-nutrition",
+        "sodiumMg": "fndds-58407034-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58407038",
+      "displayName": "Ramen bowl dengan sapi (rujukan AS)",
+      "aliases": [
+        "Ramen bowl with beef"
+      ],
+      "preparation": "Ramen bowl with beef",
+      "per100g": {
+        "energyKcal": 137.0,
+        "carbohydrateG": 15.4,
+        "proteinG": 6.81,
+        "fatG": 5.19,
+        "fiberG": 1.0,
+        "sugarsG": 0.44,
+        "sodiumMg": 353.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58407038-nutrition",
+        "carbohydrateG": "fndds-58407038-nutrition",
+        "proteinG": "fndds-58407038-nutrition",
+        "fatG": "fndds-58407038-nutrition",
+        "fiberG": "fndds-58407038-nutrition",
+        "sugarsG": "fndds-58407038-nutrition",
+        "sodiumMg": "fndds-58407038-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58407042",
+      "displayName": "Ramen bowl dengan ayam (rujukan AS)",
+      "aliases": [
+        "Ramen bowl with chicken"
+      ],
+      "preparation": "Ramen bowl with chicken",
+      "per100g": {
+        "energyKcal": 126.0,
+        "carbohydrateG": 15.4,
+        "proteinG": 7.04,
+        "fatG": 3.86,
+        "fiberG": 1.0,
+        "sugarsG": 0.44,
+        "sodiumMg": 354.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58407042-nutrition",
+        "carbohydrateG": "fndds-58407042-nutrition",
+        "proteinG": "fndds-58407042-nutrition",
+        "fatG": "fndds-58407042-nutrition",
+        "fiberG": "fndds-58407042-nutrition",
+        "sugarsG": "fndds-58407042-nutrition",
+        "sodiumMg": "fndds-58407042-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58407046",
+      "displayName": "Ramen bowl dengan ikan (rujukan AS)",
+      "aliases": [
+        "Ramen bowl with fish"
+      ],
+      "preparation": "Ramen bowl with fish",
+      "per100g": {
+        "energyKcal": 112.0,
+        "carbohydrateG": 15.4,
+        "proteinG": 5.78,
+        "fatG": 2.87,
+        "fiberG": 1.0,
+        "sugarsG": 0.44,
+        "sodiumMg": 359.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58407046-nutrition",
+        "carbohydrateG": "fndds-58407046-nutrition",
+        "proteinG": "fndds-58407046-nutrition",
+        "fatG": "fndds-58407046-nutrition",
+        "fiberG": "fndds-58407046-nutrition",
+        "sugarsG": "fndds-58407046-nutrition",
+        "sodiumMg": "fndds-58407046-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58407052",
+      "displayName": "Ramen bowl vegetarian (rujukan AS)",
+      "aliases": [
+        "Ramen bowl, vegetarian"
+      ],
+      "preparation": "Ramen bowl, vegetarian",
+      "per100g": {
+        "energyKcal": 108.0,
+        "carbohydrateG": 15.57,
+        "proteinG": 4.01,
+        "fatG": 3.33,
+        "fiberG": 1.1,
+        "sugarsG": 0.54,
+        "sodiumMg": 344.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58407052-nutrition",
+        "carbohydrateG": "fndds-58407052-nutrition",
+        "proteinG": "fndds-58407052-nutrition",
+        "fatG": "fndds-58407052-nutrition",
+        "fiberG": "fndds-58407052-nutrition",
+        "sugarsG": "fndds-58407052-nutrition",
+        "sodiumMg": "fndds-58407052-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58407056",
+      "displayName": "Ramen bowl dengan daging dan telur (rujukan AS)",
+      "aliases": [
+        "Ramen bowl with meat and egg"
+      ],
+      "preparation": "Ramen bowl with meat and egg",
+      "per100g": {
+        "energyKcal": 127.0,
+        "carbohydrateG": 13.95,
+        "proteinG": 7.13,
+        "fatG": 4.57,
+        "fiberG": 0.9,
+        "sugarsG": 0.42,
+        "sodiumMg": 333.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58407056-nutrition",
+        "carbohydrateG": "fndds-58407056-nutrition",
+        "proteinG": "fndds-58407056-nutrition",
+        "fatG": "fndds-58407056-nutrition",
+        "fiberG": "fndds-58407056-nutrition",
+        "sugarsG": "fndds-58407056-nutrition",
+        "sodiumMg": "fndds-58407056-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58151180",
+      "displayName": "Sushi roll California (rujukan AS)",
+      "aliases": [
+        "Sushi roll, California"
+      ],
+      "preparation": "Sushi roll, California",
+      "per100g": {
+        "energyKcal": 94.0,
+        "carbohydrateG": 18.39,
+        "proteinG": 2.92,
+        "fatG": 0.67,
+        "fiberG": 1.0,
+        "sugarsG": 2.13,
+        "sodiumMg": 428.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58151180-nutrition",
+        "carbohydrateG": "fndds-58151180-nutrition",
+        "proteinG": "fndds-58151180-nutrition",
+        "fatG": "fndds-58151180-nutrition",
+        "fiberG": "fndds-58151180-nutrition",
+        "sugarsG": "fndds-58151180-nutrition",
+        "sodiumMg": "fndds-58151180-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58151200",
+      "displayName": "Sushi roll salmon (rujukan AS)",
+      "aliases": [
+        "Sushi roll, salmon"
+      ],
+      "preparation": "Sushi roll, salmon",
+      "per100g": {
+        "energyKcal": 103.0,
+        "carbohydrateG": 15.3,
+        "proteinG": 6.88,
+        "fatG": 1.28,
+        "fiberG": 0.7,
+        "sugarsG": 0.92,
+        "sodiumMg": 350.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58151200-nutrition",
+        "carbohydrateG": "fndds-58151200-nutrition",
+        "proteinG": "fndds-58151200-nutrition",
+        "fatG": "fndds-58151200-nutrition",
+        "fiberG": "fndds-58151200-nutrition",
+        "sugarsG": "fndds-58151200-nutrition",
+        "sodiumMg": "fndds-58151200-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58151220",
+      "displayName": "Sushi roll tuna (rujukan AS)",
+      "aliases": [
+        "Sushi roll tuna"
+      ],
+      "preparation": "Sushi roll tuna",
+      "per100g": {
+        "energyKcal": 97.0,
+        "carbohydrateG": 15.3,
+        "proteinG": 7.4,
+        "fatG": 0.26,
+        "fiberG": 0.7,
+        "sugarsG": 0.92,
+        "sodiumMg": 342.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58151220-nutrition",
+        "carbohydrateG": "fndds-58151220-nutrition",
+        "proteinG": "fndds-58151220-nutrition",
+        "fatG": "fndds-58151220-nutrition",
+        "fiberG": "fndds-58151220-nutrition",
+        "sugarsG": "fndds-58151220-nutrition",
+        "sodiumMg": "fndds-58151220-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58151230",
+      "displayName": "Sushi roll sayuran (rujukan AS)",
+      "aliases": [
+        "Sushi roll, vegetable"
+      ],
+      "preparation": "Sushi roll, vegetable",
+      "per100g": {
+        "energyKcal": 93.0,
+        "carbohydrateG": 17.65,
+        "proteinG": 1.8,
+        "fatG": 1.47,
+        "fiberG": 1.4,
+        "sugarsG": 1.21,
+        "sodiumMg": 361.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58151230-nutrition",
+        "carbohydrateG": "fndds-58151230-nutrition",
+        "proteinG": "fndds-58151230-nutrition",
+        "fatG": "fndds-58151230-nutrition",
+        "fiberG": "fndds-58151230-nutrition",
+        "sugarsG": "fndds-58151230-nutrition",
+        "sodiumMg": "fndds-58151230-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58151420",
+      "displayName": "Sushi topping salmon (rujukan AS)",
+      "aliases": [
+        "Sushi, topped with salmon"
+      ],
+      "preparation": "Sushi, topped with salmon",
+      "per100g": {
+        "energyKcal": 107.0,
+        "carbohydrateG": 13.39,
+        "proteinG": 8.92,
+        "fatG": 1.74,
+        "fiberG": 0.6,
+        "sugarsG": 0.8,
+        "sodiumMg": 317.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58151420-nutrition",
+        "carbohydrateG": "fndds-58151420-nutrition",
+        "proteinG": "fndds-58151420-nutrition",
+        "fatG": "fndds-58151420-nutrition",
+        "fiberG": "fndds-58151420-nutrition",
+        "sugarsG": "fndds-58151420-nutrition",
+        "sodiumMg": "fndds-58151420-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58151440",
+      "displayName": "Sushi topping tuna (rujukan AS)",
+      "aliases": [
+        "Sushi, topped with tuna"
+      ],
+      "preparation": "Sushi, topped with tuna",
+      "per100g": {
+        "energyKcal": 100.0,
+        "carbohydrateG": 13.39,
+        "proteinG": 9.66,
+        "fatG": 0.29,
+        "fiberG": 0.6,
+        "sugarsG": 0.8,
+        "sodiumMg": 306.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58151440-nutrition",
+        "carbohydrateG": "fndds-58151440-nutrition",
+        "proteinG": "fndds-58151440-nutrition",
+        "fatG": "fndds-58151440-nutrition",
+        "fiberG": "fndds-58151440-nutrition",
+        "sugarsG": "fndds-58151440-nutrition",
+        "sodiumMg": "fndds-58151440-nutrition"
+      }
+    },
+    {
+      "id": "fndds-58151450",
+      "displayName": "Sushi topping telur (rujukan AS)",
+      "aliases": [
+        "Sushi, topped with egg"
+      ],
+      "preparation": "Sushi, topped with egg",
+      "per100g": {
+        "energyKcal": 119.0,
+        "carbohydrateG": 10.25,
+        "proteinG": 7.32,
+        "fatG": 5.23,
+        "fiberG": 0.4,
+        "sugarsG": 0.69,
+        "sodiumMg": 338.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-58151450-nutrition",
+        "carbohydrateG": "fndds-58151450-nutrition",
+        "proteinG": "fndds-58151450-nutrition",
+        "fatG": "fndds-58151450-nutrition",
+        "fiberG": "fndds-58151450-nutrition",
+        "sugarsG": "fndds-58151450-nutrition",
+        "sodiumMg": "fndds-58151450-nutrition"
+      }
+    },
+    {
+      "id": "fndds-75502520",
+      "displayName": "Kimchi (rujukan AS)",
+      "aliases": [
+        "Kimchi"
+      ],
+      "preparation": "Kimchi",
+      "per100g": {
+        "energyKcal": 15.0,
+        "carbohydrateG": 2.4,
+        "proteinG": 1.1,
+        "fatG": 0.5,
+        "fiberG": 1.6,
+        "sugarsG": 1.06,
+        "sodiumMg": 498.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "fndds-75502520-nutrition",
+        "carbohydrateG": "fndds-75502520-nutrition",
+        "proteinG": "fndds-75502520-nutrition",
+        "fatG": "fndds-75502520-nutrition",
+        "fiberG": "fndds-75502520-nutrition",
+        "sugarsG": "fndds-75502520-nutrition",
+        "sodiumMg": "fndds-75502520-nutrition"
+      }
+    },
+    {
+      "id": "mext-01038",
+      "displayName": "Udon segar mentah",
+      "aliases": [
+        "こむぎ　［うどん・そうめん類］　うどん　生"
+      ],
+      "preparation": "こむぎ　［うどん・そうめん類］　うどん　生",
+      "per100g": {
+        "energyKcal": 249.0,
+        "carbohydrateG": 50.1,
+        "proteinG": 6.1,
+        "fatG": 0.6,
+        "fiberG": 3.6,
+        "sugarsG": 2.0,
+        "sodiumMg": 1000.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-01038-nutrition",
+        "carbohydrateG": "mext-01038-nutrition",
+        "proteinG": "mext-01038-nutrition",
+        "fatG": "mext-01038-nutrition",
+        "fiberG": "mext-01038-nutrition",
+        "sugarsG": "completion-mext-01038-sugarsg",
+        "sodiumMg": "mext-01038-nutrition"
+      }
+    },
+    {
+      "id": "mext-01039",
+      "displayName": "Udon segar direbus, tanpa kuah",
+      "aliases": [
+        "こむぎ　［うどん・そうめん類］　うどん　ゆで"
+      ],
+      "preparation": "こむぎ　［うどん・そうめん類］　うどん　ゆで",
+      "per100g": {
+        "energyKcal": 95.0,
+        "carbohydrateG": 19.5,
+        "proteinG": 2.6,
+        "fatG": 0.4,
+        "fiberG": 1.3,
+        "sugarsG": 0.3,
+        "sodiumMg": 120.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-01039-nutrition",
+        "carbohydrateG": "mext-01039-nutrition",
+        "proteinG": "mext-01039-nutrition",
+        "fatG": "mext-01039-nutrition",
+        "fiberG": "mext-01039-nutrition",
+        "sugarsG": "completion-mext-01039-sugarsg",
+        "sodiumMg": "mext-01039-nutrition"
+      }
+    },
+    {
+      "id": "mext-01041",
+      "displayName": "Udon kering, belum dimasak",
+      "aliases": [
+        "こむぎ　［うどん・そうめん類］　干しうどん　乾"
+      ],
+      "preparation": "こむぎ　［うどん・そうめん類］　干しうどん　乾",
+      "per100g": {
+        "energyKcal": 333.0,
+        "carbohydrateG": 69.9,
+        "proteinG": 8.5,
+        "fatG": 1.1,
+        "fiberG": 2.4,
+        "sugarsG": 0.3,
+        "sodiumMg": 1700.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-01041-nutrition",
+        "carbohydrateG": "mext-01041-nutrition",
+        "proteinG": "mext-01041-nutrition",
+        "fatG": "mext-01041-nutrition",
+        "fiberG": "mext-01041-nutrition",
+        "sugarsG": "completion-mext-01041-sugarsg",
+        "sodiumMg": "mext-01041-nutrition"
+      }
+    },
+    {
+      "id": "mext-01042",
+      "displayName": "Udon dari mi kering, direbus tanpa kuah",
+      "aliases": [
+        "こむぎ　［うどん・そうめん類］　干しうどん　ゆで"
+      ],
+      "preparation": "こむぎ　［うどん・そうめん類］　干しうどん　ゆで",
+      "per100g": {
+        "energyKcal": 117.0,
+        "carbohydrateG": 24.2,
+        "proteinG": 3.1,
+        "fatG": 0.5,
+        "fiberG": 0.7,
+        "sugarsG": 0.1,
+        "sodiumMg": 210.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-01042-nutrition",
+        "carbohydrateG": "mext-01042-nutrition",
+        "proteinG": "mext-01042-nutrition",
+        "fatG": "mext-01042-nutrition",
+        "fiberG": "mext-01042-nutrition",
+        "sugarsG": "completion-mext-01042-sugarsg",
+        "sodiumMg": "mext-01042-nutrition"
+      }
+    },
+    {
+      "id": "mext-01044",
+      "displayName": "Somen atau hiyamugi direbus, tanpa kuah",
+      "aliases": [
+        "こむぎ　［うどん・そうめん類］　そうめん・ひやむぎ　ゆで"
+      ],
+      "preparation": "こむぎ　［うどん・そうめん類］　そうめん・ひやむぎ　ゆで",
+      "per100g": {
+        "energyKcal": 114.0,
+        "carbohydrateG": 23.3,
+        "proteinG": 3.5,
+        "fatG": 0.4,
+        "fiberG": 0.9,
+        "sugarsG": 0.4,
+        "sodiumMg": 85.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-01044-nutrition",
+        "carbohydrateG": "mext-01044-nutrition",
+        "proteinG": "mext-01044-nutrition",
+        "fatG": "mext-01044-nutrition",
+        "fiberG": "mext-01044-nutrition",
+        "sugarsG": "completion-mext-01044-sugarsg",
+        "sodiumMg": "mext-01044-nutrition"
+      }
+    },
+    {
+      "id": "mext-01047",
+      "displayName": "Mi chuka mentah, bahan mi ramen",
+      "aliases": [
+        "こむぎ　［中華めん類］　中華めん　生"
+      ],
+      "preparation": "こむぎ　［中華めん類］　中華めん　生",
+      "per100g": {
+        "energyKcal": 249.0,
+        "carbohydrateG": 47.6,
+        "proteinG": 8.6,
+        "fatG": 1.2,
+        "fiberG": 5.4,
+        "sugarsG": 1.0,
+        "sodiumMg": 410.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-01047-nutrition",
+        "carbohydrateG": "mext-01047-nutrition",
+        "proteinG": "mext-01047-nutrition",
+        "fatG": "mext-01047-nutrition",
+        "fiberG": "mext-01047-nutrition",
+        "sugarsG": "completion-mext-01047-sugarsg",
+        "sodiumMg": "mext-01047-nutrition"
+      }
+    },
+    {
+      "id": "mext-01048",
+      "displayName": "Mi chuka direbus, tanpa kuah atau topping ramen",
+      "aliases": [
+        "こむぎ　［中華めん類］　中華めん　ゆで"
+      ],
+      "preparation": "こむぎ　［中華めん類］　中華めん　ゆで",
+      "per100g": {
+        "energyKcal": 133.0,
+        "carbohydrateG": 25.2,
+        "proteinG": 4.9,
+        "fatG": 0.6,
+        "fiberG": 2.8,
+        "sugarsG": 0.1,
+        "sodiumMg": 70.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-01048-nutrition",
+        "carbohydrateG": "mext-01048-nutrition",
+        "proteinG": "mext-01048-nutrition",
+        "fatG": "mext-01048-nutrition",
+        "fiberG": "mext-01048-nutrition",
+        "sugarsG": "completion-mext-01048-sugarsg",
+        "sodiumMg": "mext-01048-nutrition"
+      }
+    },
+    {
+      "id": "mext-01049",
+      "displayName": "Mi chuka dikukus, tanpa saus",
+      "aliases": [
+        "こむぎ　［中華めん類］　蒸し中華めん　蒸し中華めん"
+      ],
+      "preparation": "こむぎ　［中華めん類］　蒸し中華めん　蒸し中華めん",
+      "per100g": {
+        "energyKcal": 162.0,
+        "carbohydrateG": 30.6,
+        "proteinG": 4.9,
+        "fatG": 1.7,
+        "fiberG": 3.1,
+        "sugarsG": 0.3,
+        "sodiumMg": 110.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-01049-nutrition",
+        "carbohydrateG": "mext-01049-nutrition",
+        "proteinG": "mext-01049-nutrition",
+        "fatG": "mext-01049-nutrition",
+        "fiberG": "mext-01049-nutrition",
+        "sugarsG": "completion-mext-01049-sugarsg",
+        "sodiumMg": "mext-01049-nutrition"
+      }
+    },
+    {
+      "id": "mext-01188",
+      "displayName": "Mi chuka kukus ditumis",
+      "aliases": [
+        "こむぎ　［中華めん類］　蒸し中華めん  ソテー"
+      ],
+      "preparation": "こむぎ　［中華めん類］　蒸し中華めん  ソテー",
+      "per100g": {
+        "energyKcal": 211.0,
+        "carbohydrateG": 35.9,
+        "proteinG": 5.2,
+        "fatG": 4.9,
+        "fiberG": 3.6,
+        "sugarsG": 0.4,
+        "sodiumMg": 130.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-01188-nutrition",
+        "carbohydrateG": "mext-01188-nutrition",
+        "proteinG": "mext-01188-nutrition",
+        "fatG": "mext-01188-nutrition",
+        "fiberG": "mext-01188-nutrition",
+        "sugarsG": "completion-mext-01188-sugarsg",
+        "sodiumMg": "mext-01188-nutrition"
+      }
+    },
+    {
+      "id": "mext-01053",
+      "displayName": "Okinawa soba direbus, tanpa kuah",
+      "aliases": [
+        "こむぎ　［中華めん類］　沖縄そば　ゆで"
+      ],
+      "preparation": "こむぎ　［中華めん類］　沖縄そば　ゆで",
+      "per100g": {
+        "energyKcal": 132.0,
+        "carbohydrateG": 24.8,
+        "proteinG": 5.2,
+        "fatG": 0.8,
+        "fiberG": 1.5,
+        "sugarsG": 0.1,
+        "sodiumMg": 170.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-01053-nutrition",
+        "carbohydrateG": "mext-01053-nutrition",
+        "proteinG": "mext-01053-nutrition",
+        "fatG": "mext-01053-nutrition",
+        "fiberG": "mext-01053-nutrition",
+        "sugarsG": "completion-mext-01053-sugarsg",
+        "sodiumMg": "mext-01053-nutrition"
+      }
+    },
+    {
+      "id": "mext-01127",
+      "displayName": "Soba segar mentah",
+      "aliases": [
+        "そば　そば　生"
+      ],
+      "preparation": "そば　そば　生",
+      "per100g": {
+        "energyKcal": 271.0,
+        "carbohydrateG": 51.3,
+        "proteinG": 9.8,
+        "fatG": 1.9,
+        "fiberG": 6.0,
+        "sugarsG": 0.4,
+        "sodiumMg": 1.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-01127-nutrition",
+        "carbohydrateG": "mext-01127-nutrition",
+        "proteinG": "mext-01127-nutrition",
+        "fatG": "mext-01127-nutrition",
+        "fiberG": "mext-01127-nutrition",
+        "sugarsG": "completion-mext-01127-sugarsg",
+        "sodiumMg": "mext-01127-nutrition"
+      }
+    },
+    {
+      "id": "mext-01128",
+      "displayName": "Soba segar direbus, tanpa kuah",
+      "aliases": [
+        "そば　そば　ゆで"
+      ],
+      "preparation": "そば　そば　ゆで",
+      "per100g": {
+        "energyKcal": 130.0,
+        "carbohydrateG": 24.5,
+        "proteinG": 4.8,
+        "fatG": 1.0,
+        "fiberG": 2.9,
+        "sugarsG": 0.2,
+        "sodiumMg": 2.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-01128-nutrition",
+        "carbohydrateG": "mext-01128-nutrition",
+        "proteinG": "mext-01128-nutrition",
+        "fatG": "mext-01128-nutrition",
+        "fiberG": "mext-01128-nutrition",
+        "sugarsG": "completion-mext-01128-sugarsg",
+        "sodiumMg": "mext-01128-nutrition"
+      }
+    },
+    {
+      "id": "mext-01129",
+      "displayName": "Soba kering, belum dimasak",
+      "aliases": [
+        "そば　干しそば　乾"
+      ],
+      "preparation": "そば　干しそば　乾",
+      "per100g": {
+        "energyKcal": 344.0,
+        "carbohydrateG": 65.9,
+        "proteinG": 14.0,
+        "fatG": 2.3,
+        "fiberG": 3.7,
+        "sugarsG": 0.5,
+        "sodiumMg": 850.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-01129-nutrition",
+        "carbohydrateG": "mext-01129-nutrition",
+        "proteinG": "mext-01129-nutrition",
+        "fatG": "mext-01129-nutrition",
+        "fiberG": "mext-01129-nutrition",
+        "sugarsG": "completion-mext-01129-sugarsg",
+        "sodiumMg": "mext-01129-nutrition"
+      }
+    },
+    {
+      "id": "mext-01130",
+      "displayName": "Soba dari mi kering direbus, tanpa kuah",
+      "aliases": [
+        "そば　干しそば　ゆで"
+      ],
+      "preparation": "そば　干しそば　ゆで",
+      "per100g": {
+        "energyKcal": 113.0,
+        "carbohydrateG": 21.5,
+        "proteinG": 4.8,
+        "fatG": 0.7,
+        "fiberG": 1.5,
+        "sugarsG": 0.1,
+        "sodiumMg": 50.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-01130-nutrition",
+        "carbohydrateG": "mext-01130-nutrition",
+        "proteinG": "mext-01130-nutrition",
+        "fatG": "mext-01130-nutrition",
+        "fiberG": "mext-01130-nutrition",
+        "sugarsG": "completion-mext-01130-sugarsg",
+        "sodiumMg": "mext-01130-nutrition"
+      }
+    },
+    {
+      "id": "mext-01057",
+      "displayName": "Mi instan digoreng, kering beserta bumbu",
+      "aliases": [
+        "こむぎ　［即席めん類］　即席中華めん　油揚げ　乾　（添付調味料等を含むもの）"
+      ],
+      "preparation": "こむぎ　［即席めん類］　即席中華めん　油揚げ　乾　（添付調味料等を含むもの）",
+      "per100g": {
+        "energyKcal": 439.0,
+        "carbohydrateG": 54.9,
+        "proteinG": 10.1,
+        "fatG": 19.1,
+        "fiberG": 2.4,
+        "sugarsG": 0.8,
+        "sodiumMg": 2200.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-01057-nutrition",
+        "carbohydrateG": "mext-01057-nutrition",
+        "proteinG": "mext-01057-nutrition",
+        "fatG": "mext-01057-nutrition",
+        "fiberG": "mext-01057-nutrition",
+        "sugarsG": "completion-mext-01057-sugarsg",
+        "sodiumMg": "mext-01057-nutrition"
+      }
+    },
+    {
+      "id": "mext-01198",
+      "displayName": "Mi instan digoreng, dimasak beserta bumbu dan kuah",
+      "aliases": [
+        "こむぎ　［即席めん類］　即席中華めん　油揚げ　調理後全体　（添付調味料等を含むもの）"
+      ],
+      "preparation": "こむぎ　［即席めん類］　即席中華めん　油揚げ　調理後全体　（添付調味料等を含むもの）",
+      "per100g": {
+        "energyKcal": 100.0,
+        "carbohydrateG": 12.2,
+        "proteinG": 2.3,
+        "fatG": 4.4,
+        "fiberG": 0.5,
+        "sugarsG": 0.1,
+        "sodiumMg": 430.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-01198-nutrition",
+        "carbohydrateG": "mext-01198-nutrition",
+        "proteinG": "mext-01198-nutrition",
+        "fatG": "mext-01198-nutrition",
+        "fiberG": "mext-01198-nutrition",
+        "sugarsG": "completion-mext-01198-sugarsg",
+        "sodiumMg": "mext-01198-nutrition"
+      }
+    },
+    {
+      "id": "mext-01189",
+      "displayName": "Mi instan digoreng lalu direbus, tanpa bumbu",
+      "aliases": [
+        "こむぎ　［即席めん類］　即席中華めん　油揚げ　ゆで　（添付調味料等を含まないもの）"
+      ],
+      "preparation": "こむぎ　［即席めん類］　即席中華めん　油揚げ　ゆで　（添付調味料等を含まないもの）",
+      "per100g": {
+        "energyKcal": 189.0,
+        "carbohydrateG": 26.1,
+        "proteinG": 3.9,
+        "fatG": 7.7,
+        "fiberG": 2.6,
+        "sugarsG": 0.4,
+        "sodiumMg": 150.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-01189-nutrition",
+        "carbohydrateG": "mext-01189-nutrition",
+        "proteinG": "mext-01189-nutrition",
+        "fatG": "mext-01189-nutrition",
+        "fiberG": "mext-01189-nutrition",
+        "sugarsG": "completion-mext-01189-sugarsg",
+        "sodiumMg": "mext-01189-nutrition"
+      }
+    },
+    {
+      "id": "mext-01058",
+      "displayName": "Mi instan non-fried, kering beserta bumbu",
+      "aliases": [
+        "こむぎ　［即席めん類］　即席中華めん　非油揚げ　乾　（添付調味料等を含むもの）"
+      ],
+      "preparation": "こむぎ　［即席めん類］　即席中華めん　非油揚げ　乾　（添付調味料等を含むもの）",
+      "per100g": {
+        "energyKcal": 336.0,
+        "carbohydrateG": 59.8,
+        "proteinG": 10.3,
+        "fatG": 5.2,
+        "fiberG": 2.3,
+        "sugarsG": 0.9,
+        "sodiumMg": 2700.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-01058-nutrition",
+        "carbohydrateG": "mext-01058-nutrition",
+        "proteinG": "mext-01058-nutrition",
+        "fatG": "mext-01058-nutrition",
+        "fiberG": "mext-01058-nutrition",
+        "sugarsG": "completion-mext-01058-sugarsg",
+        "sodiumMg": "mext-01058-nutrition"
+      }
+    },
+    {
+      "id": "mext-01199",
+      "displayName": "Mi instan non-fried, dimasak beserta bumbu dan kuah",
+      "aliases": [
+        "こむぎ　［即席めん類］　即席中華めん　非油揚げ　調理後全体　（添付調味料等を含むもの）"
+      ],
+      "preparation": "こむぎ　［即席めん類］　即席中華めん　非油揚げ　調理後全体　（添付調味料等を含むもの）",
+      "per100g": {
+        "energyKcal": 93.0,
+        "carbohydrateG": 15.8,
+        "proteinG": 3.0,
+        "fatG": 0.8,
+        "fiberG": 0.6,
+        "sugarsG": 0.3,
+        "sodiumMg": 430.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-01199-nutrition",
+        "carbohydrateG": "mext-01199-nutrition",
+        "proteinG": "mext-01199-nutrition",
+        "fatG": "mext-01199-nutrition",
+        "fiberG": "mext-01199-nutrition",
+        "sugarsG": "completion-mext-01199-sugarsg",
+        "sodiumMg": "mext-01199-nutrition"
+      }
+    },
+    {
+      "id": "mext-01190",
+      "displayName": "Mi instan non-fried direbus, tanpa bumbu",
+      "aliases": [
+        "こむぎ　［即席めん類］　即席中華めん　非油揚げ　ゆで　（添付調味料等を含まないもの）"
+      ],
+      "preparation": "こむぎ　［即席めん類］　即席中華めん　非油揚げ　ゆで　（添付調味料等を含まないもの）",
+      "per100g": {
+        "energyKcal": 139.0,
+        "carbohydrateG": 26.6,
+        "proteinG": 3.4,
+        "fatG": 0.8,
+        "fiberG": 2.7,
+        "sugarsG": 0.2,
+        "sodiumMg": 230.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-01190-nutrition",
+        "carbohydrateG": "mext-01190-nutrition",
+        "proteinG": "mext-01190-nutrition",
+        "fatG": "mext-01190-nutrition",
+        "fiberG": "mext-01190-nutrition",
+        "sugarsG": "completion-mext-01190-sugarsg",
+        "sodiumMg": "mext-01190-nutrition"
+      }
+    },
+    {
+      "id": "mext-01201",
+      "displayName": "Mi cup shio goreng, siap makan beserta kuah",
+      "aliases": [
+        "こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　塩味　調理後全体　（添付調味料等を含むもの）"
+      ],
+      "preparation": "こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　塩味　調理後全体　（添付調味料等を含むもの）",
+      "per100g": {
+        "energyKcal": 92.0,
+        "carbohydrateG": 3.5,
+        "proteinG": 2.5,
+        "fatG": 4.2,
+        "fiberG": 1.3,
+        "sugarsG": 0.3,
+        "sodiumMg": 520.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-01201-nutrition",
+        "carbohydrateG": "mext-01201-nutrition",
+        "proteinG": "mext-01201-nutrition",
+        "fatG": "mext-01201-nutrition",
+        "fiberG": "mext-01201-nutrition",
+        "sugarsG": "completion-mext-01201-sugarsg",
+        "sodiumMg": "mext-01201-nutrition"
+      }
+    },
+    {
+      "id": "mext-01194",
+      "displayName": "Mi cup shio goreng, matang dengan kuah ditinggalkan",
+      "aliases": [
+        "こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　塩味　調理後のめん　（スープを残したもの）"
+      ],
+      "preparation": "こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　塩味　調理後のめん　（スープを残したもの）",
+      "per100g": {
+        "energyKcal": 175.0,
+        "carbohydrateG": 22.7,
+        "proteinG": 3.8,
+        "fatG": 7.7,
+        "fiberG": 2.2,
+        "sugarsG": 0.5,
+        "sodiumMg": 440.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-01194-nutrition",
+        "carbohydrateG": "mext-01194-nutrition",
+        "proteinG": "mext-01194-nutrition",
+        "fatG": "mext-01194-nutrition",
+        "fiberG": "mext-01194-nutrition",
+        "sugarsG": "completion-mext-01194-sugarsg",
+        "sodiumMg": "mext-01194-nutrition"
+      }
+    },
+    {
+      "id": "mext-01200",
+      "displayName": "Mi cup shoyu goreng, siap makan beserta kuah",
+      "aliases": [
+        "こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　しょうゆ味　調理後全体　（添付調味料等を含むもの）"
+      ],
+      "preparation": "こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　しょうゆ味　調理後全体　（添付調味料等を含むもの）",
+      "per100g": {
+        "energyKcal": 90.0,
+        "carbohydrateG": 6.0,
+        "proteinG": 2.3,
+        "fatG": 4.5,
+        "fiberG": 1.4,
+        "sugarsG": 0.2,
+        "sodiumMg": 590.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-01200-nutrition",
+        "carbohydrateG": "mext-01200-nutrition",
+        "proteinG": "mext-01200-nutrition",
+        "fatG": "mext-01200-nutrition",
+        "fiberG": "mext-01200-nutrition",
+        "sugarsG": "completion-mext-01200-sugarsg",
+        "sodiumMg": "mext-01200-nutrition"
+      }
+    },
+    {
+      "id": "mext-01192",
+      "displayName": "Mi cup shoyu goreng, matang dengan kuah ditinggalkan",
+      "aliases": [
+        "こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　しょうゆ味　調理後のめん　（スープを残したもの）"
+      ],
+      "preparation": "こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　しょうゆ味　調理後のめん　（スープを残したもの）",
+      "per100g": {
+        "energyKcal": 142.0,
+        "carbohydrateG": 16.7,
+        "proteinG": 3.0,
+        "fatG": 5.8,
+        "fiberG": 1.9,
+        "sugarsG": 0.2,
+        "sodiumMg": 450.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-01192-nutrition",
+        "carbohydrateG": "mext-01192-nutrition",
+        "proteinG": "mext-01192-nutrition",
+        "fatG": "mext-01192-nutrition",
+        "fiberG": "mext-01192-nutrition",
+        "sugarsG": "completion-mext-01192-sugarsg",
+        "sodiumMg": "mext-01192-nutrition"
+      }
+    },
+    {
+      "id": "mext-01060",
+      "displayName": "Yakisoba instan cup, kering beserta bumbu",
+      "aliases": [
+        "こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　焼きそば　乾　（添付調味料等を含むもの）"
+      ],
+      "preparation": "こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　焼きそば　乾　（添付調味料等を含むもの）",
+      "per100g": {
+        "energyKcal": 418.0,
+        "carbohydrateG": 54.5,
+        "proteinG": 8.2,
+        "fatG": 18.6,
+        "fiberG": 5.7,
+        "sugarsG": 7.1,
+        "sodiumMg": 1500.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-01060-nutrition",
+        "carbohydrateG": "mext-01060-nutrition",
+        "proteinG": "mext-01060-nutrition",
+        "fatG": "mext-01060-nutrition",
+        "fiberG": "mext-01060-nutrition",
+        "sugarsG": "completion-mext-01060-sugarsg",
+        "sodiumMg": "mext-01060-nutrition"
+      }
+    },
+    {
+      "id": "mext-01202",
+      "displayName": "Yakisoba instan cup, dimasak beserta bumbu",
+      "aliases": [
+        "こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　焼きそば　調理後全体　（添付調味料等を含むもの）"
+      ],
+      "preparation": "こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　焼きそば　調理後全体　（添付調味料等を含むもの）",
+      "per100g": {
+        "energyKcal": 222.0,
+        "carbohydrateG": 13.5,
+        "proteinG": 5.0,
+        "fatG": 11.3,
+        "fiberG": 3.3,
+        "sugarsG": 1.7,
+        "sodiumMg": 910.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-01202-nutrition",
+        "carbohydrateG": "mext-01202-nutrition",
+        "proteinG": "mext-01202-nutrition",
+        "fatG": "mext-01202-nutrition",
+        "fiberG": "mext-01202-nutrition",
+        "sugarsG": "completion-mext-01202-sugarsg",
+        "sodiumMg": "mext-01202-nutrition"
+      }
+    },
+    {
+      "id": "mext-18053",
+      "displayName": "Okonomiyaki siap saji",
+      "aliases": [
+        "和風料理　その他　お好み焼き"
+      ],
+      "preparation": "和風料理　その他　お好み焼き",
+      "per100g": {
+        "energyKcal": 136.0,
+        "carbohydrateG": 12.9,
+        "proteinG": 5.2,
+        "fatG": 6.5,
+        "fiberG": 2.6,
+        "sugarsG": 2.8,
+        "sodiumMg": 310.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-18053-nutrition",
+        "carbohydrateG": "mext-18053-nutrition",
+        "proteinG": "mext-18053-nutrition",
+        "fatG": "mext-18053-nutrition",
+        "fiberG": "mext-18053-nutrition",
+        "sugarsG": "completion-mext-18053-sugarsg",
+        "sodiumMg": "mext-18053-nutrition"
+      }
+    },
+    {
+      "id": "mext-18054",
+      "displayName": "Karaage ayam siap saji",
+      "aliases": [
+        "和風料理　その他　とりから揚げ"
+      ],
+      "preparation": "和風料理　その他　とりから揚げ",
+      "per100g": {
+        "energyKcal": 204.0,
+        "carbohydrateG": 15.3,
+        "proteinG": 15.6,
+        "fatG": 10.1,
+        "fiberG": 1.7,
+        "sugarsG": 1.1,
+        "sodiumMg": 700.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-18054-nutrition",
+        "carbohydrateG": "mext-18054-nutrition",
+        "proteinG": "mext-18054-nutrition",
+        "fatG": "mext-18054-nutrition",
+        "fiberG": "mext-18054-nutrition",
+        "sugarsG": "completion-mext-18054-sugarsg",
+        "sodiumMg": "mext-18054-nutrition"
+      }
+    },
+    {
+      "id": "mext-18040",
+      "displayName": "Kari ayam Jepang, saus dan isi tanpa nasi",
+      "aliases": [
+        "洋風料理　カレー類　チキンカレー"
+      ],
+      "preparation": "洋風料理　カレー類　チキンカレー",
+      "per100g": {
+        "energyKcal": 131.0,
+        "carbohydrateG": 5.6,
+        "proteinG": 5.6,
+        "fatG": 8.8,
+        "fiberG": 1.2,
+        "sugarsG": 2.19,
+        "sodiumMg": 540.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-18040-nutrition",
+        "carbohydrateG": "mext-18040-nutrition",
+        "proteinG": "mext-18040-nutrition",
+        "fatG": "mext-18040-nutrition",
+        "fiberG": "mext-18040-nutrition",
+        "sugarsG": "completion-mext-18040-sugarsg",
+        "sodiumMg": "mext-18040-nutrition"
+      }
+    },
+    {
+      "id": "mext-18001",
+      "displayName": "Kari sapi Jepang, saus dan isi tanpa nasi",
+      "aliases": [
+        "洋風料理　カレー類　ビーフカレー"
+      ],
+      "preparation": "洋風料理　カレー類　ビーフカレー",
+      "per100g": {
+        "energyKcal": 119.0,
+        "carbohydrateG": 5.7,
+        "proteinG": 2.4,
+        "fatG": 9.0,
+        "fiberG": 0.9,
+        "sugarsG": 2.23,
+        "sodiumMg": 680.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-18001-nutrition",
+        "carbohydrateG": "mext-18001-nutrition",
+        "proteinG": "mext-18001-nutrition",
+        "fatG": "mext-18001-nutrition",
+        "fiberG": "mext-18001-nutrition",
+        "sugarsG": "completion-mext-18001-sugarsg",
+        "sodiumMg": "mext-18001-nutrition"
+      }
+    },
+    {
+      "id": "mext-18018",
+      "displayName": "Korokke kentang siap saji",
+      "aliases": [
+        "洋風料理　コロッケ類　ポテトコロッケ"
+      ],
+      "preparation": "洋風料理　コロッケ類　ポテトコロッケ",
+      "per100g": {
+        "energyKcal": 226.0,
+        "carbohydrateG": 23.2,
+        "proteinG": 5.3,
+        "fatG": 12.6,
+        "fiberG": 2.0,
+        "sugarsG": 1.56,
+        "sodiumMg": 280.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-18018-nutrition",
+        "carbohydrateG": "mext-18018-nutrition",
+        "proteinG": "mext-18018-nutrition",
+        "fatG": "mext-18018-nutrition",
+        "fiberG": "mext-18018-nutrition",
+        "sugarsG": "completion-mext-18018-sugarsg",
+        "sodiumMg": "mext-18018-nutrition"
+      }
+    },
+    {
+      "id": "mext-18020",
+      "displayName": "Ebi fry siap saji",
+      "aliases": [
+        "洋風料理　フライ類　えびフライ"
+      ],
+      "preparation": "洋風料理　フライ類　えびフライ",
+      "per100g": {
+        "energyKcal": 236.0,
+        "carbohydrateG": 20.0,
+        "proteinG": 15.9,
+        "fatG": 11.6,
+        "fiberG": 1.0,
+        "sugarsG": 0.32,
+        "sodiumMg": 340.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-18020-nutrition",
+        "carbohydrateG": "mext-18020-nutrition",
+        "proteinG": "mext-18020-nutrition",
+        "fatG": "mext-18020-nutrition",
+        "fiberG": "mext-18020-nutrition",
+        "sugarsG": "completion-mext-18020-sugarsg",
+        "sodiumMg": "mext-18020-nutrition"
+      }
+    },
+    {
+      "id": "mext-18002",
+      "displayName": "Gyoza siap saji",
+      "aliases": [
+        "中国料理　点心類　ぎょうざ"
+      ],
+      "preparation": "中国料理　点心類　ぎょうざ",
+      "per100g": {
+        "energyKcal": 209.0,
+        "carbohydrateG": 19.7,
+        "proteinG": 6.9,
+        "fatG": 11.3,
+        "fiberG": 1.5,
+        "sugarsG": 4.09,
+        "sodiumMg": 460.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-18002-nutrition",
+        "carbohydrateG": "mext-18002-nutrition",
+        "proteinG": "mext-18002-nutrition",
+        "fatG": "mext-18002-nutrition",
+        "fiberG": "mext-18002-nutrition",
+        "sugarsG": "completion-mext-18002-sugarsg",
+        "sodiumMg": "mext-18002-nutrition"
+      }
+    },
+    {
+      "id": "mext-18012",
+      "displayName": "Shumai siap saji",
+      "aliases": [
+        "中国料理　点心類　しゅうまい"
+      ],
+      "preparation": "中国料理　点心類　しゅうまい",
+      "per100g": {
+        "energyKcal": 191.0,
+        "carbohydrateG": 15.9,
+        "proteinG": 9.1,
+        "fatG": 9.2,
+        "fiberG": 1.7,
+        "sugarsG": 3.3,
+        "sodiumMg": 520.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-18012-nutrition",
+        "carbohydrateG": "mext-18012-nutrition",
+        "proteinG": "mext-18012-nutrition",
+        "fatG": "mext-18012-nutrition",
+        "fiberG": "mext-18012-nutrition",
+        "sugarsG": "completion-mext-18012-sugarsg",
+        "sodiumMg": "mext-18012-nutrition"
+      }
+    },
+    {
+      "id": "mext-18030",
+      "displayName": "Isian oyakodon, tanpa nasi",
+      "aliases": [
+        "和風料理　煮物類　親子丼の具"
+      ],
+      "preparation": "和風料理　煮物類　親子丼の具",
+      "per100g": {
+        "energyKcal": 101.0,
+        "carbohydrateG": 3.0,
+        "proteinG": 8.4,
+        "fatG": 5.2,
+        "fiberG": 0.4,
+        "sugarsG": 1.91,
+        "sodiumMg": 380.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-18030-nutrition",
+        "carbohydrateG": "mext-18030-nutrition",
+        "proteinG": "mext-18030-nutrition",
+        "fatG": "mext-18030-nutrition",
+        "fiberG": "mext-18030-nutrition",
+        "sugarsG": "completion-mext-18030-sugarsg",
+        "sodiumMg": "mext-18030-nutrition"
+      }
+    },
+    {
+      "id": "mext-18031",
+      "displayName": "Isian gyumeshi atau gyudon, tanpa nasi",
+      "aliases": [
+        "和風料理　煮物類　牛飯の具"
+      ],
+      "preparation": "和風料理　煮物類　牛飯の具",
+      "per100g": {
+        "energyKcal": 122.0,
+        "carbohydrateG": 4.0,
+        "proteinG": 4.1,
+        "fatG": 9.4,
+        "fiberG": 1.0,
+        "sugarsG": 1.59,
+        "sodiumMg": 400.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-18031-nutrition",
+        "carbohydrateG": "mext-18031-nutrition",
+        "proteinG": "mext-18031-nutrition",
+        "fatG": "mext-18031-nutrition",
+        "fiberG": "mext-18031-nutrition",
+        "sugarsG": "completion-mext-18031-sugarsg",
+        "sodiumMg": "mext-18031-nutrition"
+      }
+    },
+    {
+      "id": "mext-10416",
+      "displayName": "Tempura udang vannamei",
+      "aliases": [
+        "＜えび・かに類＞　（えび類）　バナメイえび　養殖　天ぷら"
+      ],
+      "preparation": "＜えび・かに類＞　（えび類）　バナメイえび　養殖　天ぷら",
+      "per100g": {
+        "energyKcal": 194.0,
+        "carbohydrateG": 6.5,
+        "proteinG": 20.0,
+        "fatG": 10.3,
+        "fiberG": 0.9,
+        "sugarsG": 0.4,
+        "sodiumMg": 140.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-10416-nutrition",
+        "carbohydrateG": "mext-10416-nutrition",
+        "proteinG": "mext-10416-nutrition",
+        "fatG": "mext-10416-nutrition",
+        "fiberG": "mext-10416-nutrition",
+        "sugarsG": "completion-mext-10416-sugarsg",
+        "sodiumMg": "mext-10416-nutrition"
+      }
+    },
+    {
+      "id": "mext-18039",
+      "displayName": "Namul tauge (rujukan Jepang)",
+      "aliases": [
+        "韓国料理　和え物類　もやしのナムル"
+      ],
+      "preparation": "韓国料理　和え物類　もやしのナムル",
+      "per100g": {
+        "energyKcal": 70.0,
+        "carbohydrateG": 2.5,
+        "proteinG": 3.1,
+        "fatG": 4.5,
+        "fiberG": 2.7,
+        "sugarsG": 1.16,
+        "sodiumMg": 510.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mext-18039-nutrition",
+        "carbohydrateG": "mext-18039-nutrition",
+        "proteinG": "mext-18039-nutrition",
+        "fatG": "mext-18039-nutrition",
+        "fiberG": "mext-18039-nutrition",
+        "sugarsG": "completion-mext-18039-sugarsg",
+        "sodiumMg": "mext-18039-nutrition"
+      }
+    },
+    {
+      "id": "mfds-d303-168000000-0001",
+      "displayName": "Jajangmyeon restoran",
+      "aliases": [
+        "자장면"
+      ],
+      "preparation": "자장면",
+      "per100g": {
+        "energyKcal": 123.0,
+        "carbohydrateG": 20.56,
+        "proteinG": 3.04,
+        "fatG": 3.13,
+        "fiberG": 3.3,
+        "sugarsG": 1.2,
+        "sodiumMg": 368.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mfds-d303-168000000-0001-nutrition",
+        "carbohydrateG": "mfds-d303-168000000-0001-nutrition",
+        "proteinG": "mfds-d303-168000000-0001-nutrition",
+        "fatG": "mfds-d303-168000000-0001-nutrition",
+        "fiberG": "mfds-d303-168000000-0001-nutrition",
+        "sugarsG": "mfds-d303-168000000-0001-nutrition",
+        "sodiumMg": "mfds-d303-168000000-0001-nutrition"
+      }
+    },
+    {
+      "id": "mfds-d303-168310000-0001",
+      "displayName": "Samseon jajangmyeon seafood restoran",
+      "aliases": [
+        "자장면_삼선"
+      ],
+      "preparation": "자장면_삼선",
+      "per100g": {
+        "energyKcal": 115.0,
+        "carbohydrateG": 18.08,
+        "proteinG": 4.81,
+        "fatG": 2.59,
+        "fiberG": 1.5,
+        "sugarsG": 1.45,
+        "sodiumMg": 375.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mfds-d303-168310000-0001-nutrition",
+        "carbohydrateG": "mfds-d303-168310000-0001-nutrition",
+        "proteinG": "mfds-d303-168310000-0001-nutrition",
+        "fatG": "mfds-d303-168310000-0001-nutrition",
+        "fiberG": "mfds-d303-168310000-0001-nutrition",
+        "sugarsG": "mfds-d303-168310000-0001-nutrition",
+        "sodiumMg": "mfds-d303-168310000-0001-nutrition"
+      }
+    },
+    {
+      "id": "mfds-d303-172310000-0001",
+      "displayName": "Samseon jjamppong seafood restoran",
+      "aliases": [
+        "짬뽕_삼선"
+      ],
+      "preparation": "짬뽕_삼선",
+      "per100g": {
+        "energyKcal": 74.0,
+        "carbohydrateG": 11.3,
+        "proteinG": 4.4,
+        "fatG": 1.2,
+        "fiberG": 0.9,
+        "sugarsG": 0.12,
+        "sodiumMg": 299.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mfds-d303-172310000-0001-nutrition",
+        "carbohydrateG": "mfds-d303-172310000-0001-nutrition",
+        "proteinG": "mfds-d303-172310000-0001-nutrition",
+        "fatG": "mfds-d303-172310000-0001-nutrition",
+        "fiberG": "mfds-d303-172310000-0001-nutrition",
+        "sugarsG": "mfds-d303-172310000-0001-nutrition",
+        "sodiumMg": "mfds-d303-172310000-0001-nutrition"
+      }
+    },
+    {
+      "id": "mfds-d303-144180000-0001",
+      "displayName": "Mul naengmyeon restoran",
+      "aliases": [
+        "냉면_물냉면"
+      ],
+      "preparation": "냉면_물냉면",
+      "per100g": {
+        "energyKcal": 66.0,
+        "carbohydrateG": 13.12,
+        "proteinG": 1.99,
+        "fatG": 0.63,
+        "fiberG": 0.0,
+        "sugarsG": 2.52,
+        "sodiumMg": 347.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mfds-d303-144180000-0001-nutrition",
+        "carbohydrateG": "mfds-d303-144180000-0001-nutrition",
+        "proteinG": "mfds-d303-144180000-0001-nutrition",
+        "fatG": "mfds-d303-144180000-0001-nutrition",
+        "fiberG": "mfds-d303-144180000-0001-nutrition",
+        "sugarsG": "mfds-d303-144180000-0001-nutrition",
+        "sodiumMg": "mfds-d303-144180000-0001-nutrition"
+      }
+    },
+    {
+      "id": "mfds-d303-144280000-0001",
+      "displayName": "Bibim naengmyeon restoran",
+      "aliases": [
+        "냉면_비빔냉면"
+      ],
+      "preparation": "냉면_비빔냉면",
+      "per100g": {
+        "energyKcal": 131.0,
+        "carbohydrateG": 21.1,
+        "proteinG": 3.43,
+        "fatG": 3.61,
+        "fiberG": 1.2,
+        "sugarsG": 3.79,
+        "sodiumMg": 311.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mfds-d303-144280000-0001-nutrition",
+        "carbohydrateG": "mfds-d303-144280000-0001-nutrition",
+        "proteinG": "mfds-d303-144280000-0001-nutrition",
+        "fatG": "mfds-d303-144280000-0001-nutrition",
+        "fiberG": "mfds-d303-144280000-0001-nutrition",
+        "sugarsG": "mfds-d303-144280000-0001-nutrition",
+        "sodiumMg": "mfds-d303-144280000-0001-nutrition"
+      }
+    },
+    {
+      "id": "mfds-d303-148140000-0001",
+      "displayName": "Ramyeon restoran",
+      "aliases": [
+        "라면_라면만"
+      ],
+      "preparation": "라면_라면만",
+      "per100g": {
+        "energyKcal": 84.0,
+        "carbohydrateG": 14.44,
+        "proteinG": 1.76,
+        "fatG": 2.18,
+        "fiberG": 0.8,
+        "sugarsG": 0.11,
+        "sodiumMg": 306.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mfds-d303-148140000-0001-nutrition",
+        "carbohydrateG": "mfds-d303-148140000-0001-nutrition",
+        "proteinG": "mfds-d303-148140000-0001-nutrition",
+        "fatG": "mfds-d303-148140000-0001-nutrition",
+        "fiberG": "mfds-d303-148140000-0001-nutrition",
+        "sugarsG": "mfds-d303-148140000-0001-nutrition",
+        "sodiumMg": "mfds-d303-148140000-0001-nutrition"
+      }
+    },
+    {
+      "id": "mfds-d303-148470000-0001",
+      "displayName": "Ramyeon keju restoran",
+      "aliases": [
+        "라면_치즈"
+      ],
+      "preparation": "라면_치즈",
+      "per100g": {
+        "energyKcal": 99.0,
+        "carbohydrateG": 13.33,
+        "proteinG": 2.8,
+        "fatG": 3.83,
+        "fiberG": 1.3,
+        "sugarsG": 0.15,
+        "sodiumMg": 352.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mfds-d303-148470000-0001-nutrition",
+        "carbohydrateG": "mfds-d303-148470000-0001-nutrition",
+        "proteinG": "mfds-d303-148470000-0001-nutrition",
+        "fatG": "mfds-d303-148470000-0001-nutrition",
+        "fiberG": "mfds-d303-148470000-0001-nutrition",
+        "sugarsG": "mfds-d303-148470000-0001-nutrition",
+        "sodiumMg": "mfds-d303-148470000-0001-nutrition"
+      }
+    },
+    {
+      "id": "mfds-d303-148050000-0001",
+      "displayName": "Ramyeon kimchi restoran",
+      "aliases": [
+        "라면_김치"
+      ],
+      "preparation": "라면_김치",
+      "per100g": {
+        "energyKcal": 85.0,
+        "carbohydrateG": 13.26,
+        "proteinG": 2.12,
+        "fatG": 2.6,
+        "fiberG": 1.3,
+        "sugarsG": 0.18,
+        "sodiumMg": 389.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mfds-d303-148050000-0001-nutrition",
+        "carbohydrateG": "mfds-d303-148050000-0001-nutrition",
+        "proteinG": "mfds-d303-148050000-0001-nutrition",
+        "fatG": "mfds-d303-148050000-0001-nutrition",
+        "fiberG": "mfds-d303-148050000-0001-nutrition",
+        "sugarsG": "mfds-d303-148050000-0001-nutrition",
+        "sodiumMg": "mfds-d303-148050000-0001-nutrition"
+      }
+    },
+    {
+      "id": "mfds-d303-174500000-0001",
+      "displayName": "Kalguksu seafood restoran",
+      "aliases": [
+        "칼국수_해물"
+      ],
+      "preparation": "칼국수_해물",
+      "per100g": {
+        "energyKcal": 70.0,
+        "carbohydrateG": 13.77,
+        "proteinG": 2.53,
+        "fatG": 0.51,
+        "fiberG": 5.0,
+        "sugarsG": 0.42,
+        "sodiumMg": 262.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mfds-d303-174500000-0001-nutrition",
+        "carbohydrateG": "mfds-d303-174500000-0001-nutrition",
+        "proteinG": "mfds-d303-174500000-0001-nutrition",
+        "fatG": "mfds-d303-174500000-0001-nutrition",
+        "fiberG": "mfds-d303-174500000-0001-nutrition",
+        "sugarsG": "mfds-d303-174500000-0001-nutrition",
+        "sodiumMg": "mfds-d303-174500000-0001-nutrition"
+      }
+    },
+    {
+      "id": "mfds-d110-492000000-0001",
+      "displayName": "Japchae rumahan",
+      "aliases": [
+        "잡채"
+      ],
+      "preparation": "잡채",
+      "per100g": {
+        "energyKcal": 146.0,
+        "carbohydrateG": 24.26,
+        "proteinG": 4.71,
+        "fatG": 3.3,
+        "fiberG": 3.7,
+        "sugarsG": 0.73,
+        "sodiumMg": 360.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mfds-d110-492000000-0001-nutrition",
+        "carbohydrateG": "mfds-d110-492000000-0001-nutrition",
+        "proteinG": "mfds-d110-492000000-0001-nutrition",
+        "fatG": "mfds-d110-492000000-0001-nutrition",
+        "fiberG": "mfds-d110-492000000-0001-nutrition",
+        "sugarsG": "mfds-d110-492000000-0001-nutrition",
+        "sodiumMg": "mfds-d110-492000000-0001-nutrition"
+      }
+    },
+    {
+      "id": "mfds-d110-467000000-0001",
+      "displayName": "Tteokbokki rumahan",
+      "aliases": [
+        "떡볶이"
+      ],
+      "preparation": "떡볶이",
+      "per100g": {
+        "energyKcal": 144.0,
+        "carbohydrateG": 25.96,
+        "proteinG": 3.51,
+        "fatG": 2.96,
+        "fiberG": 1.0,
+        "sugarsG": 4.4,
+        "sodiumMg": 391.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mfds-d110-467000000-0001-nutrition",
+        "carbohydrateG": "mfds-d110-467000000-0001-nutrition",
+        "proteinG": "mfds-d110-467000000-0001-nutrition",
+        "fatG": "mfds-d110-467000000-0001-nutrition",
+        "fiberG": "mfds-d110-467000000-0001-nutrition",
+        "sugarsG": "mfds-d110-467000000-0001-nutrition",
+        "sodiumMg": "mfds-d110-467000000-0001-nutrition"
+      }
+    },
+    {
+      "id": "mfds-d310-467330000-0001",
+      "displayName": "Tteokbokki keju restoran",
+      "aliases": [
+        "떡볶이_치즈"
+      ],
+      "preparation": "떡볶이_치즈",
+      "per100g": {
+        "energyKcal": 164.0,
+        "carbohydrateG": 29.31,
+        "proteinG": 5.54,
+        "fatG": 2.69,
+        "fiberG": 0.8,
+        "sugarsG": 5.76,
+        "sodiumMg": 397.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mfds-d310-467330000-0001-nutrition",
+        "carbohydrateG": "mfds-d310-467330000-0001-nutrition",
+        "proteinG": "mfds-d310-467330000-0001-nutrition",
+        "fatG": "mfds-d310-467330000-0001-nutrition",
+        "fiberG": "mfds-d310-467330000-0001-nutrition",
+        "sugarsG": "mfds-d310-467330000-0001-nutrition",
+        "sodiumMg": "mfds-d310-467330000-0001-nutrition"
+      }
+    },
+    {
+      "id": "mfds-d301-018000000-0002",
+      "displayName": "Bibimbap restoran",
+      "aliases": [
+        "비빔밥"
+      ],
+      "preparation": "비빔밥",
+      "per100g": {
+        "energyKcal": 142.0,
+        "carbohydrateG": 22.5,
+        "proteinG": 4.47,
+        "fatG": 3.81,
+        "fiberG": 1.4,
+        "sugarsG": 3.04,
+        "sodiumMg": 317.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mfds-d301-018000000-0002-nutrition",
+        "carbohydrateG": "mfds-d301-018000000-0002-nutrition",
+        "proteinG": "mfds-d301-018000000-0002-nutrition",
+        "fatG": "mfds-d301-018000000-0002-nutrition",
+        "fiberG": "mfds-d301-018000000-0002-nutrition",
+        "sugarsG": "mfds-d301-018000000-0002-nutrition",
+        "sodiumMg": "mfds-d301-018000000-0002-nutrition"
+      }
+    },
+    {
+      "id": "mfds-d101-007000000-0001",
+      "displayName": "Gimbap rumahan",
+      "aliases": [
+        "김밥"
+      ],
+      "preparation": "김밥",
+      "per100g": {
+        "energyKcal": 140.0,
+        "carbohydrateG": 19.98,
+        "proteinG": 4.84,
+        "fatG": 4.55,
+        "fiberG": 1.4,
+        "sugarsG": 0.0,
+        "sodiumMg": 307.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mfds-d101-007000000-0001-nutrition",
+        "carbohydrateG": "mfds-d101-007000000-0001-nutrition",
+        "proteinG": "mfds-d101-007000000-0001-nutrition",
+        "fatG": "mfds-d101-007000000-0001-nutrition",
+        "fiberG": "mfds-d101-007000000-0001-nutrition",
+        "sugarsG": "mfds-d101-007000000-0001-nutrition",
+        "sodiumMg": "mfds-d101-007000000-0001-nutrition"
+      }
+    },
+    {
+      "id": "mfds-d306-266000000-0001",
+      "displayName": "Kimchi jjigae restoran",
+      "aliases": [
+        "김치찌개"
+      ],
+      "preparation": "김치찌개",
+      "per100g": {
+        "energyKcal": 61.0,
+        "carbohydrateG": 2.98,
+        "proteinG": 3.77,
+        "fatG": 3.75,
+        "fiberG": 2.1,
+        "sugarsG": 0.76,
+        "sodiumMg": 491.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mfds-d306-266000000-0001-nutrition",
+        "carbohydrateG": "mfds-d306-266000000-0001-nutrition",
+        "proteinG": "mfds-d306-266000000-0001-nutrition",
+        "fatG": "mfds-d306-266000000-0001-nutrition",
+        "fiberG": "mfds-d306-266000000-0001-nutrition",
+        "sugarsG": "mfds-d306-266000000-0001-nutrition",
+        "sodiumMg": "mfds-d306-266000000-0001-nutrition"
+      }
+    },
+    {
+      "id": "mfds-d106-275000000-0001",
+      "displayName": "Doenjang jjigae rumahan",
+      "aliases": [
+        "된장찌개"
+      ],
+      "preparation": "된장찌개",
+      "per100g": {
+        "energyKcal": 46.0,
+        "carbohydrateG": 4.44,
+        "proteinG": 3.38,
+        "fatG": 1.63,
+        "fiberG": 1.6,
+        "sugarsG": 0.0,
+        "sodiumMg": 318.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mfds-d106-275000000-0001-nutrition",
+        "carbohydrateG": "mfds-d106-275000000-0001-nutrition",
+        "proteinG": "mfds-d106-275000000-0001-nutrition",
+        "fatG": "mfds-d106-275000000-0001-nutrition",
+        "fiberG": "mfds-d106-275000000-0001-nutrition",
+        "sugarsG": "mfds-d106-275000000-0001-nutrition",
+        "sodiumMg": "mfds-d106-275000000-0001-nutrition"
+      }
+    },
+    {
+      "id": "mfds-d303-151000000-0001",
+      "displayName": "Manduguk restoran",
+      "aliases": [
+        "만두국"
+      ],
+      "preparation": "만두국",
+      "per100g": {
+        "energyKcal": 62.0,
+        "carbohydrateG": 6.83,
+        "proteinG": 3.06,
+        "fatG": 2.49,
+        "fiberG": 4.6,
+        "sugarsG": 0.44,
+        "sodiumMg": 338.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mfds-d303-151000000-0001-nutrition",
+        "carbohydrateG": "mfds-d303-151000000-0001-nutrition",
+        "proteinG": "mfds-d303-151000000-0001-nutrition",
+        "fatG": "mfds-d303-151000000-0001-nutrition",
+        "fiberG": "mfds-d303-151000000-0001-nutrition",
+        "sugarsG": "mfds-d303-151000000-0001-nutrition",
+        "sodiumMg": "mfds-d303-151000000-0001-nutrition"
+      }
+    },
+    {
+      "id": "mfds-d303-146000000-0001",
+      "displayName": "Tteok manduguk restoran",
+      "aliases": [
+        "떡만두국"
+      ],
+      "preparation": "떡만두국",
+      "per100g": {
+        "energyKcal": 89.0,
+        "carbohydrateG": 15.82,
+        "proteinG": 2.87,
+        "fatG": 1.62,
+        "fiberG": 1.2,
+        "sugarsG": 0.02,
+        "sodiumMg": 283.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mfds-d303-146000000-0001-nutrition",
+        "carbohydrateG": "mfds-d303-146000000-0001-nutrition",
+        "proteinG": "mfds-d303-146000000-0001-nutrition",
+        "fatG": "mfds-d303-146000000-0001-nutrition",
+        "fiberG": "mfds-d303-146000000-0001-nutrition",
+        "sugarsG": "mfds-d303-146000000-0001-nutrition",
+        "sodiumMg": "mfds-d303-146000000-0001-nutrition"
+      }
+    },
+    {
+      "id": "mfds-d303-147110000-0001",
+      "displayName": "Tonkotsu ramen restoran (rujukan Korea)",
+      "aliases": [
+        "라멘_돈코츠라멘"
+      ],
+      "preparation": "라멘_돈코츠라멘",
+      "per100g": {
+        "energyKcal": 98.0,
+        "carbohydrateG": 5.87,
+        "proteinG": 4.14,
+        "fatG": 6.42,
+        "fiberG": 0.9,
+        "sugarsG": 0.77,
+        "sodiumMg": 377.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mfds-d303-147110000-0001-nutrition",
+        "carbohydrateG": "mfds-d303-147110000-0001-nutrition",
+        "proteinG": "mfds-d303-147110000-0001-nutrition",
+        "fatG": "mfds-d303-147110000-0001-nutrition",
+        "fiberG": "mfds-d303-147110000-0001-nutrition",
+        "sugarsG": "mfds-d303-147110000-0001-nutrition",
+        "sodiumMg": "mfds-d303-147110000-0001-nutrition"
+      }
+    },
+    {
+      "id": "mfds-d303-147210000-0001",
+      "displayName": "Miso ramen restoran (rujukan Korea)",
+      "aliases": [
+        "라멘_미소라멘"
+      ],
+      "preparation": "라멘_미소라멘",
+      "per100g": {
+        "energyKcal": 89.0,
+        "carbohydrateG": 11.36,
+        "proteinG": 4.57,
+        "fatG": 2.77,
+        "fiberG": 1.1,
+        "sugarsG": 1.1,
+        "sodiumMg": 388.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mfds-d303-147210000-0001-nutrition",
+        "carbohydrateG": "mfds-d303-147210000-0001-nutrition",
+        "proteinG": "mfds-d303-147210000-0001-nutrition",
+        "fatG": "mfds-d303-147210000-0001-nutrition",
+        "fiberG": "mfds-d303-147210000-0001-nutrition",
+        "sugarsG": "mfds-d303-147210000-0001-nutrition",
+        "sodiumMg": "mfds-d303-147210000-0001-nutrition"
+      }
+    },
+    {
+      "id": "mfds-d303-147330000-0001",
+      "displayName": "Shoyu ramen restoran (rujukan Korea)",
+      "aliases": [
+        "라멘_소유라멘"
+      ],
+      "preparation": "라멘_소유라멘",
+      "per100g": {
+        "energyKcal": 72.0,
+        "carbohydrateG": 9.12,
+        "proteinG": 3.65,
+        "fatG": 2.36,
+        "fiberG": 0.7,
+        "sugarsG": 0.84,
+        "sodiumMg": 420.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mfds-d303-147330000-0001-nutrition",
+        "carbohydrateG": "mfds-d303-147330000-0001-nutrition",
+        "proteinG": "mfds-d303-147330000-0001-nutrition",
+        "fatG": "mfds-d303-147330000-0001-nutrition",
+        "fiberG": "mfds-d303-147330000-0001-nutrition",
+        "sugarsG": "mfds-d303-147330000-0001-nutrition",
+        "sodiumMg": "mfds-d303-147330000-0001-nutrition"
+      }
+    },
+    {
+      "id": "mfds-d303-147340000-0001",
+      "displayName": "Shio ramen restoran (rujukan Korea)",
+      "aliases": [
+        "라멘_시오라멘"
+      ],
+      "preparation": "라멘_시오라멘",
+      "per100g": {
+        "energyKcal": 84.0,
+        "carbohydrateG": 11.54,
+        "proteinG": 4.68,
+        "fatG": 2.13,
+        "fiberG": 1.2,
+        "sugarsG": 0.93,
+        "sodiumMg": 292.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mfds-d303-147340000-0001-nutrition",
+        "carbohydrateG": "mfds-d303-147340000-0001-nutrition",
+        "proteinG": "mfds-d303-147340000-0001-nutrition",
+        "fatG": "mfds-d303-147340000-0001-nutrition",
+        "fiberG": "mfds-d303-147340000-0001-nutrition",
+        "sugarsG": "mfds-d303-147340000-0001-nutrition",
+        "sodiumMg": "mfds-d303-147340000-0001-nutrition"
+      }
+    },
+    {
+      "id": "mfds-d303-164400000-0001",
+      "displayName": "Udon kuah gaya Jepang restoran (rujukan Korea)",
+      "aliases": [
+        "우동_일식"
+      ],
+      "preparation": "우동_일식",
+      "per100g": {
+        "energyKcal": 60.0,
+        "carbohydrateG": 10.6,
+        "proteinG": 1.91,
+        "fatG": 1.13,
+        "fiberG": 2.9,
+        "sugarsG": 0.35,
+        "sodiumMg": 341.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mfds-d303-164400000-0001-nutrition",
+        "carbohydrateG": "mfds-d303-164400000-0001-nutrition",
+        "proteinG": "mfds-d303-164400000-0001-nutrition",
+        "fatG": "mfds-d303-164400000-0001-nutrition",
+        "fiberG": "mfds-d303-164400000-0001-nutrition",
+        "sugarsG": "mfds-d303-164400000-0001-nutrition",
+        "sodiumMg": "mfds-d303-164400000-0001-nutrition"
+      }
+    },
+    {
+      "id": "mfds-d303-172040000-0001",
+      "displayName": "Jjamppong tiram restoran",
+      "aliases": [
+        "짬뽕_굴"
+      ],
+      "preparation": "짬뽕_굴",
+      "per100g": {
+        "energyKcal": 76.0,
+        "carbohydrateG": 12.85,
+        "proteinG": 3.65,
+        "fatG": 1.07,
+        "fiberG": 1.0,
+        "sugarsG": 0.19,
+        "sodiumMg": 296.0
+      },
+      "servings": [],
+      "nutrientSourceIds": {
+        "energyKcal": "mfds-d303-172040000-0001-nutrition",
+        "carbohydrateG": "mfds-d303-172040000-0001-nutrition",
+        "proteinG": "mfds-d303-172040000-0001-nutrition",
+        "fatG": "mfds-d303-172040000-0001-nutrition",
+        "fiberG": "mfds-d303-172040000-0001-nutrition",
+        "sugarsG": "mfds-d303-172040000-0001-nutrition",
+        "sodiumMg": "mfds-d303-172040000-0001-nutrition"
+      }
+    }
+  ]
 }

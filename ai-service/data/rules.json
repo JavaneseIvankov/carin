@@ -1,8 +1,3637 @@
 {
   "artifactVersion": "1.0.0-draft",
-  "ruleSetVersion": "rules-unpublished-0.1.0",
-  "catalogVersion": "catalog-unpublished-0.1.0",
-  "nutritionDatasetVersion": "nutrition-unpublished-0.1.0",
-  "conditions": [],
-  "rules": []
+  "ruleSetVersion": "rules-unpublished-0.3.0",
+  "catalogVersion": "catalog-draft-0.4.0",
+  "nutritionDatasetVersion": "nutrition-multicuisine-draft-0.3.0",
+  "conditions": [
+    {
+      "id": "condition.general_nutrition",
+      "displayName": "Gizi umum (bukan diagnosis)",
+      "personalizationSupported": false,
+      "requiredProfileFields": [
+        "ageYears"
+      ],
+      "requiredNutrients": [
+        "carbohydrateG",
+        "energyKcal",
+        "fatG",
+        "fiberG",
+        "proteinG",
+        "sodiumMg"
+      ],
+      "supportedAgeMinimum": null,
+      "supportedAgeMaximum": null
+    },
+    {
+      "id": "condition.hypertension",
+      "displayName": "Hipertensi",
+      "personalizationSupported": false,
+      "requiredProfileFields": [
+        "ageYears",
+        "conditionIds",
+        "diagnosisState"
+      ],
+      "requiredNutrients": [
+        "sodiumMg"
+      ],
+      "supportedAgeMinimum": null,
+      "supportedAgeMaximum": null
+    },
+    {
+      "id": "condition.type_2_diabetes",
+      "displayName": "Diabetes tipe 2",
+      "personalizationSupported": false,
+      "requiredProfileFields": [
+        "ageYears",
+        "conditionIds",
+        "diagnosisState"
+      ],
+      "requiredNutrients": [
+        "carbohydrateG"
+      ],
+      "supportedAgeMinimum": null,
+      "supportedAgeMaximum": null
+    },
+    {
+      "id": "condition.prediabetes",
+      "displayName": "Prediabetes",
+      "personalizationSupported": false,
+      "requiredProfileFields": [
+        "ageYears",
+        "conditionIds",
+        "diagnosisState"
+      ],
+      "requiredNutrients": [
+        "carbohydrateG"
+      ],
+      "supportedAgeMinimum": null,
+      "supportedAgeMaximum": null
+    },
+    {
+      "id": "condition.dyslipidemia",
+      "displayName": "Dislipidemia / kolesterol tinggi",
+      "personalizationSupported": false,
+      "requiredProfileFields": [
+        "ageYears",
+        "conditionIds",
+        "diagnosisState"
+      ],
+      "requiredNutrients": [
+        "fatG"
+      ],
+      "supportedAgeMinimum": null,
+      "supportedAgeMaximum": null
+    },
+    {
+      "id": "condition.overweight_obesity",
+      "displayName": "Berat badan berlebih / obesitas",
+      "personalizationSupported": false,
+      "requiredProfileFields": [
+        "ageYears",
+        "conditionIds",
+        "diagnosisState"
+      ],
+      "requiredNutrients": [
+        "energyKcal"
+      ],
+      "supportedAgeMinimum": null,
+      "supportedAgeMaximum": null
+    },
+    {
+      "id": "condition.gout",
+      "displayName": "Gout / asam urat",
+      "personalizationSupported": false,
+      "requiredProfileFields": [
+        "ageYears",
+        "conditionIds",
+        "diagnosisState"
+      ],
+      "requiredNutrients": [],
+      "supportedAgeMinimum": null,
+      "supportedAgeMaximum": null
+    },
+    {
+      "id": "condition.chronic_kidney_disease",
+      "displayName": "Penyakit ginjal kronis",
+      "personalizationSupported": false,
+      "requiredProfileFields": [
+        "ageYears",
+        "conditionIds",
+        "diagnosisState"
+      ],
+      "requiredNutrients": [
+        "proteinG",
+        "sodiumMg"
+      ],
+      "supportedAgeMinimum": null,
+      "supportedAgeMaximum": null
+    },
+    {
+      "id": "condition.gerd",
+      "displayName": "GERD / refluks",
+      "personalizationSupported": false,
+      "requiredProfileFields": [
+        "ageYears",
+        "conditionIds",
+        "diagnosisState"
+      ],
+      "requiredNutrients": [],
+      "supportedAgeMinimum": null,
+      "supportedAgeMaximum": null
+    },
+    {
+      "id": "condition.constipation",
+      "displayName": "Konstipasi",
+      "personalizationSupported": false,
+      "requiredProfileFields": [
+        "ageYears",
+        "conditionIds",
+        "diagnosisState"
+      ],
+      "requiredNutrients": [
+        "fiberG"
+      ],
+      "supportedAgeMinimum": null,
+      "supportedAgeMaximum": null
+    },
+    {
+      "id": "condition.iron_deficiency_anemia",
+      "displayName": "Anemia defisiensi besi",
+      "personalizationSupported": false,
+      "requiredProfileFields": [
+        "ageYears",
+        "conditionIds",
+        "diagnosisState"
+      ],
+      "requiredNutrients": [],
+      "supportedAgeMinimum": null,
+      "supportedAgeMaximum": null
+    },
+    {
+      "id": "condition.food_allergy",
+      "displayName": "Alergi makanan",
+      "personalizationSupported": false,
+      "requiredProfileFields": [
+        "ageYears",
+        "allergies",
+        "allergyState"
+      ],
+      "requiredNutrients": [],
+      "supportedAgeMinimum": null,
+      "supportedAgeMaximum": null
+    },
+    {
+      "id": "condition.cardiovascular_disease",
+      "displayName": "Penyakit kardiovaskular",
+      "personalizationSupported": false,
+      "requiredProfileFields": [
+        "ageYears",
+        "conditionIds",
+        "diagnosisState"
+      ],
+      "requiredNutrients": [
+        "fatG",
+        "sodiumMg"
+      ],
+      "supportedAgeMinimum": null,
+      "supportedAgeMaximum": null
+    }
+  ],
+  "rules": [
+    {
+      "id": "rule.general-sodium-context",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.general_nutrition",
+      "requiredProfileFields": [
+        "ageYears"
+      ],
+      "requiredNutrients": [
+        "sodiumMg"
+      ],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Kontribusi natrium makanan dapat dibandingkan dengan acuan umum dewasa per hari.",
+      "adjustments": [
+        "Bila bumbu asin terkonfirmasi, pertimbangkan memisahkan saus atau mengurangi garam tambahan."
+      ],
+      "criticalMissingFields": [
+        "ageYears",
+        "nutrients.sodiumMg"
+      ],
+      "conflictSet": null,
+      "citationSourceIds": [
+        "guideline-who-diet",
+        "guideline-kemkes-ggl"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Persentase acuan harian bukan sisa jatah, target pasien, atau klasifikasi tinggi/rendah per sekali makan."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "nutrient_context",
+        "applicability": {
+          "mode": "general",
+          "conditionId": "condition.general_nutrition",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [],
+        "contextAvailability": "current_wire_plus_reviewed_catalog_provenance",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": {
+          "nutrient": "sodiumMg",
+          "value": 2000,
+          "unit": "mg",
+          "window": "day",
+          "bound": "less_than",
+          "purpose": "general_population_context_only"
+        },
+        "calculation": {
+          "operation": "percent_of_general_daily_reference",
+          "numerator": "component.nutrients.sodiumMg",
+          "denominator": 2000,
+          "multiplier": 100,
+          "resultUse": "context_only_not_a_per_meal_cutoff"
+        },
+        "output": {
+          "mode": "scoped_context",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [
+          "reduce_added_sodium"
+        ],
+        "conflictsWith": [],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": []
+      }
+    },
+    {
+      "id": "rule.general-fiber-context",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.general_nutrition",
+      "requiredProfileFields": [
+        "ageYears"
+      ],
+      "requiredNutrients": [
+        "fiberG"
+      ],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Tampilkan kontribusi serat makanan terhadap acuan harian umum.",
+      "adjustments": [],
+      "criticalMissingFields": [
+        "ageYears",
+        "nutrients.fiberG"
+      ],
+      "conflictSet": null,
+      "citationSourceIds": [
+        "guideline-who-diet"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Satu makanan rendah serat tidak membuktikan asupan harian kurang."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "nutrient_context",
+        "applicability": {
+          "mode": "general",
+          "conditionId": "condition.general_nutrition",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [],
+        "contextAvailability": "current_wire_plus_reviewed_catalog_provenance",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": {
+          "nutrient": "fiberG",
+          "value": 25,
+          "unit": "g",
+          "window": "day",
+          "bound": "at_least",
+          "purpose": "general_population_context_only"
+        },
+        "calculation": {
+          "operation": "percent_of_general_daily_reference",
+          "numerator": "component.nutrients.fiberG",
+          "denominator": 25,
+          "multiplier": 100,
+          "resultUse": "context_only_not_a_per_meal_cutoff"
+        },
+        "output": {
+          "mode": "scoped_context",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [],
+        "conflictsWith": [],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": []
+      }
+    },
+    {
+      "id": "rule.general-free-sugar-definition",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.general_nutrition",
+      "requiredProfileFields": [
+        "ageYears"
+      ],
+      "requiredNutrients": [],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Gula total katalog tidak mengukur gula bebas.",
+      "adjustments": [],
+      "criticalMissingFields": [
+        "ageYears",
+        "context.freeSugarsG",
+        "context.plannedDailyEnergyKcal"
+      ],
+      "conflictSet": null,
+      "citationSourceIds": [
+        "guideline-who-diet"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Jangan menerapkan batas ini ke sugarsG atau jumlah parsial gula MEXT.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "coverage_guard",
+        "applicability": {
+          "mode": "general",
+          "conditionId": "condition.general_nutrition",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "freeSugarsG",
+          "plannedDailyEnergyKcal"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": {
+          "nutrient": "freeSugarsG",
+          "value": 10,
+          "unit": "percent_energy",
+          "window": "day",
+          "bound": "less_than",
+          "purpose": "not_computable_from_total_sugars"
+        },
+        "calculation": null,
+        "output": {
+          "mode": "insufficient_information",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [],
+        "conflictsWith": [],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "freeSugarsG",
+            "operator": "nonnegative_number"
+          },
+          {
+            "field": "plannedDailyEnergyKcal",
+            "operator": "nonnegative_number"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule.general-fat-quality",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.general_nutrition",
+      "requiredProfileFields": [
+        "ageYears"
+      ],
+      "requiredNutrients": [
+        "fatG"
+      ],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Lemak total belum menjelaskan lemak jenuh dan trans.",
+      "adjustments": [],
+      "criticalMissingFields": [
+        "ageYears",
+        "nutrients.fatG",
+        "context.saturatedFatG",
+        "context.transFatG",
+        "context.confirmedOilAndCookingMethod"
+      ],
+      "conflictSet": null,
+      "citationSourceIds": [
+        "guideline-who-diet"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Jangan menyatakan tinggi lemak jenuh dari fatG atau foto gorengan saja.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "coverage_guard",
+        "applicability": {
+          "mode": "general",
+          "conditionId": "condition.general_nutrition",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "saturatedFatG",
+          "transFatG",
+          "confirmedOilAndCookingMethod"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "insufficient_information",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [],
+        "conflictsWith": [],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "saturatedFatG",
+            "operator": "nonnegative_number"
+          },
+          {
+            "field": "transFatG",
+            "operator": "nonnegative_number"
+          },
+          {
+            "field": "confirmedOilAndCookingMethod",
+            "operator": "non_empty"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule.general-food-variety",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.general_nutrition",
+      "requiredProfileFields": [
+        "ageYears"
+      ],
+      "requiredNutrients": [],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Keragaman kelompok pangan merupakan konteks pola makan umum.",
+      "adjustments": [
+        "Pertimbangkan variasi sayur, buah, serealia utuh dan sumber protein sesuai batas diet yang sudah ditetapkan."
+      ],
+      "criticalMissingFields": [
+        "ageYears",
+        "context.confirmedFoodGroups",
+        "context.individualDietRestrictions"
+      ],
+      "conflictSet": "individual_diet_constraints",
+      "citationSourceIds": [
+        "guideline-who-diet"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Jangan menyimpulkan kekurangan sayur seluruh hari dari satu foto.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "qualitative_education",
+        "applicability": {
+          "mode": "general",
+          "conditionId": "condition.general_nutrition",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "confirmedFoodGroups",
+          "individualDietRestrictions"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "scoped_context",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [
+          "increase_food_variety"
+        ],
+        "conflictsWith": [
+          "rule.allergy-confirmed-ingredient",
+          "rule.ckd-minerals-fluid-guard"
+        ],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "confirmedFoodGroups",
+            "operator": "non_empty"
+          },
+          {
+            "field": "individualDietRestrictions",
+            "operator": "non_empty"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule.general-energy-context",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.general_nutrition",
+      "requiredProfileFields": [
+        "ageYears"
+      ],
+      "requiredNutrients": [
+        "energyKcal"
+      ],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Energi makanan ditampilkan tanpa menetapkan kebutuhan atau defisit personal.",
+      "adjustments": [],
+      "criticalMissingFields": [
+        "ageYears",
+        "nutrients.energyKcal"
+      ],
+      "conflictSet": null,
+      "citationSourceIds": [
+        "guideline-who-diet"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Tidak mengasumsikan semua orang membutuhkan 2000 kcal atau membagi kebutuhan menjadi tiga porsi sama."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "nutrient_context",
+        "applicability": {
+          "mode": "general",
+          "conditionId": "condition.general_nutrition",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [],
+        "contextAvailability": "current_wire_plus_reviewed_catalog_provenance",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "scoped_context",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [],
+        "conflictsWith": [],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": []
+      }
+    },
+    {
+      "id": "rule.general-macro-literacy",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.general_nutrition",
+      "requiredProfileFields": [
+        "ageYears"
+      ],
+      "requiredNutrients": [
+        "carbohydrateG",
+        "proteinG",
+        "fatG"
+      ],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Tampilkan karbohidrat, protein dan lemak sebagai komponen gizi dengan definisi yang jelas.",
+      "adjustments": [],
+      "criticalMissingFields": [
+        "ageYears",
+        "nutrients.carbohydrateG",
+        "nutrients.proteinG",
+        "nutrients.fatG"
+      ],
+      "conflictSet": null,
+      "citationSourceIds": [
+        "guideline-who-diet"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Gula merupakan bagian karbohidrat; jangan ditambahkan kembali ke karbohidrat. Karbohidrat available dan total belum seragam lintas sumber."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "nutrient_context",
+        "applicability": {
+          "mode": "general",
+          "conditionId": "condition.general_nutrition",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [],
+        "contextAvailability": "current_wire_plus_reviewed_catalog_provenance",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "scoped_context",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [],
+        "conflictsWith": [],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": []
+      }
+    },
+    {
+      "id": "rule.hypertension-sodium-context",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.hypertension",
+      "requiredProfileFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds"
+      ],
+      "requiredNutrients": [
+        "sodiumMg"
+      ],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Natrium relevan untuk pola makan pada hipertensi, tetapi batas pasien harus disesuaikan.",
+      "adjustments": [],
+      "criticalMissingFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds",
+        "nutrients.sodiumMg",
+        "context.clinicianSodiumPlanMgDay"
+      ],
+      "conflictSet": null,
+      "citationSourceIds": [
+        "guideline-dash",
+        "guideline-who-diet"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Tidak otomatis memilih target DASH 1500 atau 2300 mg. Konteks WHO umum tetap bukan resep pasien.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "nutrient_context",
+        "applicability": {
+          "mode": "reported_condition",
+          "conditionId": "condition.hypertension",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "clinicianSodiumPlanMgDay"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "scoped_context",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [],
+        "conflictsWith": [],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "clinicianSodiumPlanMgDay",
+            "operator": "positive_number"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule.hypertension-condiment-choice",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.hypertension",
+      "requiredProfileFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds"
+      ],
+      "requiredNutrients": [],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Saus dan bumbu asin yang terkonfirmasi dapat menjadi sumber natrium.",
+      "adjustments": [
+        "Jika sesuai rencana diet, minta saus atau bumbu asin terpisah."
+      ],
+      "criticalMissingFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds",
+        "context.confirmedHighSodiumCondiments",
+        "context.individualDietRestrictions"
+      ],
+      "conflictSet": null,
+      "citationSourceIds": [
+        "guideline-who-diet",
+        "guideline-dash"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "qualitative_caution",
+        "applicability": {
+          "mode": "reported_condition",
+          "conditionId": "condition.hypertension",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "confirmedHighSodiumCondiments",
+          "individualDietRestrictions"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "scoped_context",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [
+          "reduce_added_sodium"
+        ],
+        "conflictsWith": [],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "confirmedHighSodiumCondiments",
+            "operator": "non_empty"
+          },
+          {
+            "field": "individualDietRestrictions",
+            "operator": "non_empty"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule.hypertension-potassium-salt-guard",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.hypertension",
+      "requiredProfileFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds"
+      ],
+      "requiredNutrients": [],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Pengganti garam berbasis kalium memerlukan penilaian risiko individual.",
+      "adjustments": [],
+      "criticalMissingFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds",
+        "context.kidneyRiskAssessment",
+        "context.confirmedSaltSubstituteIngredients",
+        "context.clinicianPotassiumAdvice"
+      ],
+      "conflictSet": "individual_diet_constraints",
+      "citationSourceIds": [
+        "guideline-who-diet",
+        "guideline-ckd"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Tidak menyarankan garam kalium otomatis dari label hipertensi.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "coverage_guard",
+        "applicability": {
+          "mode": "reported_condition",
+          "conditionId": "condition.hypertension",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "kidneyRiskAssessment",
+          "confirmedSaltSubstituteIngredients",
+          "clinicianPotassiumAdvice"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "insufficient_information",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [
+          "review_potassium_salt"
+        ],
+        "conflictsWith": [
+          "rule.ckd-minerals-fluid-guard"
+        ],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "kidneyRiskAssessment",
+            "operator": "non_empty"
+          },
+          {
+            "field": "confirmedSaltSubstituteIngredients",
+            "operator": "non_empty"
+          },
+          {
+            "field": "clinicianPotassiumAdvice",
+            "operator": "non_empty"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule.diabetes-carbohydrate-context",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.type_2_diabetes",
+      "requiredProfileFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds"
+      ],
+      "requiredNutrients": [
+        "carbohydrateG"
+      ],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Karbohidrat per porsi membantu pembahasan rencana makan diabetes.",
+      "adjustments": [],
+      "criticalMissingFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds",
+        "nutrients.carbohydrateG",
+        "context.carbohydrateDefinitionReviewed"
+      ],
+      "conflictSet": null,
+      "citationSourceIds": [
+        "guideline-diabetes"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Tidak menetapkan universal 45/60 gram per makan, memprediksi lonjakan glukosa, atau menghitung insulin.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "nutrient_context",
+        "applicability": {
+          "mode": "reported_condition",
+          "conditionId": "condition.type_2_diabetes",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "carbohydrateDefinitionReviewed"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "scoped_context",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [],
+        "conflictsWith": [],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "carbohydrateDefinitionReviewed",
+            "operator": "non_empty"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule.diabetes-sugar-only-guard",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.type_2_diabetes",
+      "requiredProfileFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds"
+      ],
+      "requiredNutrients": [],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Penilaian diabetes tidak cukup berdasarkan gula total atau label tanpa gula.",
+      "adjustments": [],
+      "criticalMissingFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds",
+        "context.individualCarbohydratePlan",
+        "context.medicationMealTimingPlan"
+      ],
+      "conflictSet": null,
+      "citationSourceIds": [
+        "guideline-diabetes"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Tidak menganggap gula proxy nol berarti aman; tidak menyarankan melewatkan makan atau mengubah obat.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "coverage_guard",
+        "applicability": {
+          "mode": "reported_condition",
+          "conditionId": "condition.type_2_diabetes",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "individualCarbohydratePlan",
+          "medicationMealTimingPlan"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "insufficient_information",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [],
+        "conflictsWith": [],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "individualCarbohydratePlan",
+            "operator": "non_empty"
+          },
+          {
+            "field": "medicationMealTimingPlan",
+            "operator": "non_empty"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule.diabetes-plate-options",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.type_2_diabetes",
+      "requiredProfileFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds"
+      ],
+      "requiredNutrients": [],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Metode piring dapat menjadi pilihan edukasi yang disesuaikan rencana makan.",
+      "adjustments": [
+        "Diskusikan susunan sayur nonpati, protein dan sumber karbohidrat sesuai rencana makan."
+      ],
+      "criticalMissingFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds",
+        "context.confirmedFoodGroups",
+        "context.individualDietRestrictions"
+      ],
+      "conflictSet": "individual_diet_constraints",
+      "citationSourceIds": [
+        "guideline-diabetes"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "qualitative_education",
+        "applicability": {
+          "mode": "reported_condition",
+          "conditionId": "condition.type_2_diabetes",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "confirmedFoodGroups",
+          "individualDietRestrictions"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "scoped_context",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [
+          "increase_food_variety"
+        ],
+        "conflictsWith": [
+          "rule.allergy-confirmed-ingredient",
+          "rule.ckd-minerals-fluid-guard"
+        ],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "confirmedFoodGroups",
+            "operator": "non_empty"
+          },
+          {
+            "field": "individualDietRestrictions",
+            "operator": "non_empty"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule.prediabetes-carbohydrate-context",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.prediabetes",
+      "requiredProfileFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds"
+      ],
+      "requiredNutrients": [
+        "carbohydrateG"
+      ],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Konteks karbohidrat dan porsi dapat membantu pembahasan pola makan pada prediabetes.",
+      "adjustments": [],
+      "criticalMissingFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds",
+        "nutrients.carbohydrateG"
+      ],
+      "conflictSet": null,
+      "citationSourceIds": [
+        "guideline-prediabetes",
+        "guideline-diabetes"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Tidak mendiagnosis prediabetes dari asupan, berat badan atau hasil gula tersimpan."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "nutrient_context",
+        "applicability": {
+          "mode": "reported_condition",
+          "conditionId": "condition.prediabetes",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [],
+        "contextAvailability": "current_wire_plus_reviewed_catalog_provenance",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "scoped_context",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [],
+        "conflictsWith": [],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": []
+      }
+    },
+    {
+      "id": "rule.prediabetes-food-pattern",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.prediabetes",
+      "requiredProfileFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds"
+      ],
+      "requiredNutrients": [],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Pencegahan diabetes memerlukan pola makan individual, bukan larangan satu makanan.",
+      "adjustments": [
+        "Pertimbangkan kualitas bahan dan porsi bersama tenaga kesehatan sesuai kebutuhan."
+      ],
+      "criticalMissingFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds",
+        "context.confirmedFoodGroups",
+        "context.individualDietRestrictions"
+      ],
+      "conflictSet": "individual_diet_constraints",
+      "citationSourceIds": [
+        "guideline-prediabetes"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "qualitative_education",
+        "applicability": {
+          "mode": "reported_condition",
+          "conditionId": "condition.prediabetes",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "confirmedFoodGroups",
+          "individualDietRestrictions"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "scoped_context",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [
+          "increase_food_variety"
+        ],
+        "conflictsWith": [
+          "rule.allergy-confirmed-ingredient",
+          "rule.ckd-minerals-fluid-guard"
+        ],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "confirmedFoodGroups",
+            "operator": "non_empty"
+          },
+          {
+            "field": "individualDietRestrictions",
+            "operator": "non_empty"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule.lipids-saturated-fat-guard",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.dyslipidemia",
+      "requiredProfileFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds"
+      ],
+      "requiredNutrients": [
+        "fatG"
+      ],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Penilaian lemak jenuh tidak dapat dilakukan hanya dari lemak total.",
+      "adjustments": [],
+      "criticalMissingFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds",
+        "nutrients.fatG",
+        "context.saturatedFatG",
+        "context.transFatG",
+        "context.clinicianLipidDietPlan"
+      ],
+      "conflictSet": null,
+      "citationSourceIds": [
+        "guideline-lipids"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Tidak menganggap fatG sebagai saturatedFatG atau menjamin makanan menurunkan LDL.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "coverage_guard",
+        "applicability": {
+          "mode": "reported_condition",
+          "conditionId": "condition.dyslipidemia",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "saturatedFatG",
+          "transFatG",
+          "clinicianLipidDietPlan"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "insufficient_information",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [],
+        "conflictsWith": [],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "saturatedFatG",
+            "operator": "nonnegative_number"
+          },
+          {
+            "field": "transFatG",
+            "operator": "nonnegative_number"
+          },
+          {
+            "field": "clinicianLipidDietPlan",
+            "operator": "non_empty"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule.lipids-preparation-choice",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.dyslipidemia",
+      "requiredProfileFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds"
+      ],
+      "requiredNutrients": [],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Metode memasak yang terkonfirmasi dapat dibahas sebagai bagian pola makan sehat jantung.",
+      "adjustments": [
+        "Pertimbangkan pilihan kukus atau rebus sebagai alternatif gorengan sesuai bahan dan rencana diet."
+      ],
+      "criticalMissingFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds",
+        "context.confirmedDeepFrying",
+        "context.confirmedAlternativePreparation",
+        "context.individualDietRestrictions"
+      ],
+      "conflictSet": null,
+      "citationSourceIds": [
+        "guideline-lipids",
+        "guideline-who-diet"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Tidak mengarang pengurangan gram lemak/kalori atau menyimpulkan jenis minyak dari foto.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "qualitative_education",
+        "applicability": {
+          "mode": "reported_condition",
+          "conditionId": "condition.dyslipidemia",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "confirmedDeepFrying",
+          "confirmedAlternativePreparation",
+          "individualDietRestrictions"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "scoped_context",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [
+          "replace_deep_frying"
+        ],
+        "conflictsWith": [],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "confirmedDeepFrying",
+            "operator": "is_true"
+          },
+          {
+            "field": "confirmedAlternativePreparation",
+            "operator": "non_empty"
+          },
+          {
+            "field": "individualDietRestrictions",
+            "operator": "non_empty"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule.weight-energy-plan-guard",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.overweight_obesity",
+      "requiredProfileFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds"
+      ],
+      "requiredNutrients": [
+        "energyKcal"
+      ],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Target energi dan pengelolaan berat badan perlu rencana individual.",
+      "adjustments": [],
+      "criticalMissingFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds",
+        "nutrients.energyKcal",
+        "context.clinicianEnergyPlanKcalDay",
+        "context.completeConfirmedDailyConsumption"
+      ],
+      "conflictSet": null,
+      "citationSourceIds": [
+        "guideline-weight"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Tidak mendiagnosis obesitas, memberi defisit tetap, atau mengklaim sisa kalori dari riwayat yang tidak lengkap.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "coverage_guard",
+        "applicability": {
+          "mode": "reported_condition",
+          "conditionId": "condition.overweight_obesity",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "clinicianEnergyPlanKcalDay",
+          "completeConfirmedDailyConsumption"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "insufficient_information",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [],
+        "conflictsWith": [],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "clinicianEnergyPlanKcalDay",
+            "operator": "positive_number"
+          },
+          {
+            "field": "completeConfirmedDailyConsumption",
+            "operator": "non_empty"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule.weight-portion-options",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.overweight_obesity",
+      "requiredProfileFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds"
+      ],
+      "requiredNutrients": [
+        "energyKcal"
+      ],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Pilihan porsi dapat dibahas tanpa menetapkan diet ekstrem.",
+      "adjustments": [
+        "Bila sesuai rencana makan, pertimbangkan porsi yang nyaman dan seimbang; gram bisa dikoreksi pengguna."
+      ],
+      "criticalMissingFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds",
+        "nutrients.energyKcal",
+        "context.individualDietRestrictions",
+        "context.medicationMealTimingPlan"
+      ],
+      "conflictSet": null,
+      "citationSourceIds": [
+        "guideline-weight"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Tidak memberikan target berat badan, puasa atau pengurangan porsi otomatis untuk semua orang.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "qualitative_education",
+        "applicability": {
+          "mode": "reported_condition",
+          "conditionId": "condition.overweight_obesity",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "individualDietRestrictions",
+          "medicationMealTimingPlan"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "scoped_context",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [
+          "review_portion"
+        ],
+        "conflictsWith": [],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "individualDietRestrictions",
+            "operator": "non_empty"
+          },
+          {
+            "field": "medicationMealTimingPlan",
+            "operator": "non_empty"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule.gout-confirmed-organ-meat",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.gout",
+      "requiredProfileFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds"
+      ],
+      "requiredNutrients": [],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Jeroan yang dikonfirmasi relevan untuk pembahasan diet gout.",
+      "adjustments": [
+        "Pertimbangkan alternatif protein yang sesuai rencana gout dan kondisi lain."
+      ],
+      "criticalMissingFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds",
+        "context.confirmedOrganMeat",
+        "context.individualDietRestrictions"
+      ],
+      "conflictSet": "individual_diet_constraints",
+      "citationSourceIds": [
+        "guideline-gout"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Food name/VLM tag saja bukan konfirmasi bahan; jangan melarang semua protein atau semua makanan laut.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "qualitative_caution",
+        "applicability": {
+          "mode": "reported_condition",
+          "conditionId": "condition.gout",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "confirmedOrganMeat",
+          "individualDietRestrictions"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "scoped_context",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [
+          "avoid_organ_meat"
+        ],
+        "conflictsWith": [
+          "rule.anemia-food-pairing"
+        ],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "confirmedOrganMeat",
+            "operator": "is_true"
+          },
+          {
+            "field": "individualDietRestrictions",
+            "operator": "non_empty"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule.gout-purine-guard",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.gout",
+      "requiredProfileFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds"
+      ],
+      "requiredNutrients": [],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Katalog belum memiliki kadar purin untuk menghitung beban purin.",
+      "adjustments": [],
+      "criticalMissingFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds",
+        "context.purinesMg",
+        "context.confirmedRecipe"
+      ],
+      "conflictSet": null,
+      "citationSourceIds": [
+        "guideline-gout"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Tidak menebak purin dari proteinG; tidak mengartikan kadar asam urat darah dari foto.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "coverage_guard",
+        "applicability": {
+          "mode": "reported_condition",
+          "conditionId": "condition.gout",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "purinesMg",
+          "confirmedRecipe"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "insufficient_information",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [],
+        "conflictsWith": [],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "purinesMg",
+            "operator": "nonnegative_number"
+          },
+          {
+            "field": "confirmedRecipe",
+            "operator": "non_empty"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule.gout-drink-context",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.gout",
+      "requiredProfileFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds"
+      ],
+      "requiredNutrients": [],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Minuman alkohol atau berpemanis yang dikonfirmasi perlu dibahas dalam rencana gout.",
+      "adjustments": [
+        "Periksa label dan bahan minuman bersama rencana diet gout."
+      ],
+      "criticalMissingFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds",
+        "context.confirmedAlcoholOrSweetenedDrink",
+        "context.individualDietRestrictions"
+      ],
+      "conflictSet": null,
+      "citationSourceIds": [
+        "guideline-gout"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Gula total tidak menunjukkan fruktosa, gula tambahan, atau alkohol secara pasti; tidak menyatakan diet menggantikan obat.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "qualitative_caution",
+        "applicability": {
+          "mode": "reported_condition",
+          "conditionId": "condition.gout",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "confirmedAlcoholOrSweetenedDrink",
+          "individualDietRestrictions"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "scoped_context",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [
+          "review_sweetened_alcoholic_drink"
+        ],
+        "conflictsWith": [],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "confirmedAlcoholOrSweetenedDrink",
+            "operator": "is_true"
+          },
+          {
+            "field": "individualDietRestrictions",
+            "operator": "non_empty"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule.ckd-sodium-plan-guard",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.chronic_kidney_disease",
+      "requiredProfileFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds"
+      ],
+      "requiredNutrients": [
+        "sodiumMg"
+      ],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Batas natrium pada penyakit ginjal ditentukan secara individual.",
+      "adjustments": [],
+      "criticalMissingFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds",
+        "nutrients.sodiumMg",
+        "context.ckdStage",
+        "context.dialysisStatus",
+        "context.clinicianSodiumPlanMgDay"
+      ],
+      "conflictSet": null,
+      "citationSourceIds": [
+        "guideline-ckd"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Tidak menerapkan angka WHO/DASH sebagai batas pasien ginjal tanpa rencana individual.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "coverage_guard",
+        "applicability": {
+          "mode": "reported_condition",
+          "conditionId": "condition.chronic_kidney_disease",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "ckdStage",
+          "dialysisStatus",
+          "clinicianSodiumPlanMgDay"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "insufficient_information",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [],
+        "conflictsWith": [],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "ckdStage",
+            "operator": "non_empty"
+          },
+          {
+            "field": "dialysisStatus",
+            "operator": "non_empty"
+          },
+          {
+            "field": "clinicianSodiumPlanMgDay",
+            "operator": "positive_number"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule.ckd-protein-plan-guard",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.chronic_kidney_disease",
+      "requiredProfileFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds"
+      ],
+      "requiredNutrients": [
+        "proteinG"
+      ],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Kebutuhan protein bergantung pada keadaan ginjal dan terapi.",
+      "adjustments": [],
+      "criticalMissingFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds",
+        "nutrients.proteinG",
+        "context.ckdStage",
+        "context.dialysisStatus",
+        "context.clinicianProteinPlan"
+      ],
+      "conflictSet": "individual_diet_constraints",
+      "citationSourceIds": [
+        "guideline-ckd"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Tidak menetapkan diet rendah/tinggi protein atau gram per kg hanya dari berat badan.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "coverage_guard",
+        "applicability": {
+          "mode": "reported_condition",
+          "conditionId": "condition.chronic_kidney_disease",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "ckdStage",
+          "dialysisStatus",
+          "clinicianProteinPlan"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "insufficient_information",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [
+          "review_protein_plan"
+        ],
+        "conflictsWith": [
+          "rule.anemia-food-pairing"
+        ],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "ckdStage",
+            "operator": "non_empty"
+          },
+          {
+            "field": "dialysisStatus",
+            "operator": "non_empty"
+          },
+          {
+            "field": "clinicianProteinPlan",
+            "operator": "non_empty"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule.ckd-minerals-fluid-guard",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.chronic_kidney_disease",
+      "requiredProfileFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds"
+      ],
+      "requiredNutrients": [],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Kalium, fosfor dan cairan memerlukan data serta rencana ginjal yang belum tersedia.",
+      "adjustments": [],
+      "criticalMissingFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds",
+        "context.potassiumMg",
+        "context.phosphorusMg",
+        "context.ckdStage",
+        "context.dialysisStatus",
+        "context.clinicianFluidAndMineralPlan"
+      ],
+      "conflictSet": "individual_diet_constraints",
+      "citationSourceIds": [
+        "guideline-ckd"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Tidak melarang semua buah/sayur pada semua pasien ginjal; tidak menyarankan garam kalium atau jumlah cairan generik.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "coverage_guard",
+        "applicability": {
+          "mode": "reported_condition",
+          "conditionId": "condition.chronic_kidney_disease",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "potassiumMg",
+          "phosphorusMg",
+          "ckdStage",
+          "dialysisStatus",
+          "clinicianFluidAndMineralPlan"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "insufficient_information",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [
+          "review_mineral_fluid_plan"
+        ],
+        "conflictsWith": [
+          "rule.anemia-food-pairing",
+          "rule.constipation-fluid-context",
+          "rule.diabetes-plate-options",
+          "rule.general-food-variety",
+          "rule.hypertension-potassium-salt-guard",
+          "rule.prediabetes-food-pattern"
+        ],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "potassiumMg",
+            "operator": "nonnegative_number"
+          },
+          {
+            "field": "phosphorusMg",
+            "operator": "nonnegative_number"
+          },
+          {
+            "field": "ckdStage",
+            "operator": "non_empty"
+          },
+          {
+            "field": "dialysisStatus",
+            "operator": "non_empty"
+          },
+          {
+            "field": "clinicianFluidAndMineralPlan",
+            "operator": "non_empty"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule.gerd-personal-trigger",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.gerd",
+      "requiredProfileFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds"
+      ],
+      "requiredNutrients": [],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Pemicu GERD bersifat individual dan perlu dikonfirmasi pengguna.",
+      "adjustments": [
+        "Pertimbangkan mengurangi pemicu yang memang berulang pada diri pengguna."
+      ],
+      "criticalMissingFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds",
+        "context.userConfirmedRefluxTrigger",
+        "context.confirmedIngredients"
+      ],
+      "conflictSet": null,
+      "citationSourceIds": [
+        "guideline-gerd"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Tidak otomatis melarang kopi, pedas, tomat atau semua lemak kepada semua pengguna.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "qualitative_caution",
+        "applicability": {
+          "mode": "reported_condition",
+          "conditionId": "condition.gerd",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "userConfirmedRefluxTrigger",
+          "confirmedIngredients"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "scoped_context",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [
+          "review_individual_trigger"
+        ],
+        "conflictsWith": [],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "userConfirmedRefluxTrigger",
+            "operator": "non_empty"
+          },
+          {
+            "field": "confirmedIngredients",
+            "operator": "non_empty"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule.gerd-bedtime-context",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.gerd",
+      "requiredProfileFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds"
+      ],
+      "requiredNutrients": [],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Untuk gejala saat malam atau berbaring, jarak makan dengan waktu berbaring dapat dibahas.",
+      "adjustments": [
+        "Jika sesuai saran tenaga kesehatan, beri jarak makan setidaknya tiga jam sebelum berbaring."
+      ],
+      "criticalMissingFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds",
+        "context.userReportedNighttimeReflux",
+        "context.plannedMealTime",
+        "context.plannedLyingDownTime"
+      ],
+      "conflictSet": null,
+      "citationSourceIds": [
+        "guideline-gerd"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Tidak menebak jam tidur atau gejala dari foto; bukan larangan makan universal.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "behavior_context",
+        "applicability": {
+          "mode": "reported_condition",
+          "conditionId": "condition.gerd",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "userReportedNighttimeReflux",
+          "plannedMealTime",
+          "plannedLyingDownTime"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": {
+          "value": 3,
+          "unit": "hours",
+          "window": "meal_to_lying_down",
+          "bound": "at_least",
+          "purpose": "nighttime_or_lying_down_symptoms_only"
+        },
+        "calculation": null,
+        "output": {
+          "mode": "scoped_context",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [
+          "review_meal_timing"
+        ],
+        "conflictsWith": [],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "userReportedNighttimeReflux",
+            "operator": "is_true"
+          },
+          {
+            "field": "plannedMealTime",
+            "operator": "non_empty"
+          },
+          {
+            "field": "plannedLyingDownTime",
+            "operator": "non_empty"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule.constipation-fiber-context",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.constipation",
+      "requiredProfileFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds"
+      ],
+      "requiredNutrients": [
+        "fiberG"
+      ],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Serat makanan dapat ditampilkan dalam konteks pola makan untuk konstipasi.",
+      "adjustments": [
+        "Jika sesuai arahan perawatan, tingkatkan serat bertahap sesuai toleransi."
+      ],
+      "criticalMissingFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds",
+        "nutrients.fiberG",
+        "context.individualDietRestrictions"
+      ],
+      "conflictSet": null,
+      "citationSourceIds": [
+        "guideline-constipation",
+        "guideline-who-diet"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Tidak mendiagnosis penyebab konstipasi atau menganggap serat tinggi selalu cocok.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "nutrient_context",
+        "applicability": {
+          "mode": "reported_condition",
+          "conditionId": "condition.constipation",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "individualDietRestrictions"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "scoped_context",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [
+          "review_gradual_fiber"
+        ],
+        "conflictsWith": [],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "individualDietRestrictions",
+            "operator": "non_empty"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule.constipation-fluid-context",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.constipation",
+      "requiredProfileFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds"
+      ],
+      "requiredNutrients": [],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Kebutuhan cairan untuk mendukung serat bergantung pada kondisi pengguna.",
+      "adjustments": [
+        "Bahas kebutuhan cairan individual; ikuti pembatasan cairan bila ada."
+      ],
+      "criticalMissingFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds",
+        "context.clinicianFluidAndMineralPlan",
+        "context.individualDietRestrictions"
+      ],
+      "conflictSet": "individual_diet_constraints",
+      "citationSourceIds": [
+        "guideline-constipation",
+        "guideline-ckd"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Tidak menentukan dua/tiga liter untuk semua pengguna; CKD atau kondisi lain dapat membatasi cairan.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "behavior_context",
+        "applicability": {
+          "mode": "reported_condition",
+          "conditionId": "condition.constipation",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "clinicianFluidAndMineralPlan",
+          "individualDietRestrictions"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "scoped_context",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [
+          "review_fluid_intake"
+        ],
+        "conflictsWith": [
+          "rule.ckd-minerals-fluid-guard"
+        ],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "clinicianFluidAndMineralPlan",
+            "operator": "non_empty"
+          },
+          {
+            "field": "individualDietRestrictions",
+            "operator": "non_empty"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule.anemia-iron-guard",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.iron_deficiency_anemia",
+      "requiredProfileFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds"
+      ],
+      "requiredNutrients": [],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Katalog belum memiliki zat besi untuk menilai kandungan besi makanan.",
+      "adjustments": [],
+      "criticalMissingFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds",
+        "context.ironMg",
+        "context.clinicianConfirmedIronDeficiency"
+      ],
+      "conflictSet": null,
+      "citationSourceIds": [
+        "guideline-iron"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Tidak menebak zat besi dari protein atau menganggap semua anemia karena kekurangan besi; tidak memberi dosis suplemen.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "coverage_guard",
+        "applicability": {
+          "mode": "reported_condition",
+          "conditionId": "condition.iron_deficiency_anemia",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "ironMg",
+          "clinicianConfirmedIronDeficiency"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "insufficient_information",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [],
+        "conflictsWith": [],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "ironMg",
+            "operator": "nonnegative_number"
+          },
+          {
+            "field": "clinicianConfirmedIronDeficiency",
+            "operator": "is_true"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule.anemia-food-pairing",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.iron_deficiency_anemia",
+      "requiredProfileFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds"
+      ],
+      "requiredNutrients": [],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Sumber besi dan pasangan pangan bervitamin C dapat dibahas setelah bahan dikonfirmasi.",
+      "adjustments": [
+        "Pertimbangkan sumber besi dan pendamping vitamin C yang sesuai pembatasan diet."
+      ],
+      "criticalMissingFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds",
+        "context.confirmedIronFoodSource",
+        "context.confirmedVitaminCFoodSource",
+        "context.individualDietRestrictions"
+      ],
+      "conflictSet": "individual_diet_constraints",
+      "citationSourceIds": [
+        "guideline-iron"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Tidak merekomendasikan hati/jeroan otomatis, terutama bila ada gout; bukan terapi anemia.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "qualitative_education",
+        "applicability": {
+          "mode": "reported_condition",
+          "conditionId": "condition.iron_deficiency_anemia",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "confirmedIronFoodSource",
+          "confirmedVitaminCFoodSource",
+          "individualDietRestrictions"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "scoped_context",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [
+          "review_iron_food_sources"
+        ],
+        "conflictsWith": [
+          "rule.allergy-confirmed-ingredient",
+          "rule.ckd-minerals-fluid-guard",
+          "rule.ckd-protein-plan-guard",
+          "rule.gout-confirmed-organ-meat"
+        ],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "confirmedIronFoodSource",
+            "operator": "non_empty"
+          },
+          {
+            "field": "confirmedVitaminCFoodSource",
+            "operator": "non_empty"
+          },
+          {
+            "field": "individualDietRestrictions",
+            "operator": "non_empty"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule.allergy-confirmed-ingredient",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.food_allergy",
+      "requiredProfileFields": [
+        "ageYears",
+        "allergyState",
+        "allergies"
+      ],
+      "requiredNutrients": [],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Bahan alergen yang cocok dengan alergi yang dilaporkan memerlukan perhatian.",
+      "adjustments": [
+        "Hindari alergen yang telah diketahui dan periksa label atau tanyakan bahan kepada penyedia makanan."
+      ],
+      "criticalMissingFields": [
+        "ageYears",
+        "allergyState",
+        "allergies",
+        "context.verifiedIngredientAllergenMatch",
+        "context.ingredientLabelOrProviderEvidence"
+      ],
+      "conflictSet": "individual_diet_constraints",
+      "citationSourceIds": [
+        "guideline-allergy"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Makro tidak mendeteksi alergen. Daftar alergen utama AS bukan batas semua kemungkinan alergi.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "qualitative_caution",
+        "applicability": {
+          "mode": "reported_allergy",
+          "conditionId": "condition.food_allergy",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "verifiedIngredientAllergenMatch",
+          "ingredientLabelOrProviderEvidence"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "scoped_context",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [
+          "avoid_confirmed_allergen"
+        ],
+        "conflictsWith": [
+          "rule.anemia-food-pairing",
+          "rule.diabetes-plate-options",
+          "rule.general-food-variety",
+          "rule.prediabetes-food-pattern"
+        ],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "verifiedIngredientAllergenMatch",
+            "operator": "is_true"
+          },
+          {
+            "field": "ingredientLabelOrProviderEvidence",
+            "operator": "non_empty"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule.allergy-photo-uncertainty",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.food_allergy",
+      "requiredProfileFields": [
+        "ageYears",
+        "allergyState",
+        "allergies"
+      ],
+      "requiredNutrients": [],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Foto tidak dapat menjamin ketiadaan alergen atau kontak silang.",
+      "adjustments": [
+        "Periksa bahan, label dan risiko kontak silang sebelum menentukan pilihan."
+      ],
+      "criticalMissingFields": [
+        "ageYears",
+        "allergyState",
+        "allergies",
+        "context.ingredientLabelOrProviderEvidence",
+        "context.crossContactEvidence"
+      ],
+      "conflictSet": null,
+      "citationSourceIds": [
+        "guideline-allergy"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Tidak mengeluarkan label bebas alergen atau considerable hanya karena alergen tidak terlihat. Tidak melakukan triase alergi.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "coverage_guard",
+        "applicability": {
+          "mode": "reported_allergy",
+          "conditionId": "condition.food_allergy",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "ingredientLabelOrProviderEvidence",
+          "crossContactEvidence"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "insufficient_information",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [],
+        "conflictsWith": [],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "ingredientLabelOrProviderEvidence",
+            "operator": "non_empty"
+          },
+          {
+            "field": "crossContactEvidence",
+            "operator": "non_empty"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule.heart-sodium-context",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.cardiovascular_disease",
+      "requiredProfileFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds"
+      ],
+      "requiredNutrients": [
+        "sodiumMg"
+      ],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Natrium makanan dapat dibahas sebagai bagian rencana makan kesehatan jantung.",
+      "adjustments": [],
+      "criticalMissingFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds",
+        "nutrients.sodiumMg",
+        "context.clinicianCardiovascularDietPlan"
+      ],
+      "conflictSet": null,
+      "citationSourceIds": [
+        "guideline-heart",
+        "guideline-who-diet"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Tidak menganggap semua penyakit jantung memiliki batas cairan/natrium yang sama.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "nutrient_context",
+        "applicability": {
+          "mode": "reported_condition",
+          "conditionId": "condition.cardiovascular_disease",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "clinicianCardiovascularDietPlan"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "scoped_context",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [],
+        "conflictsWith": [],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "clinicianCardiovascularDietPlan",
+            "operator": "non_empty"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule.heart-fat-type-guard",
+      "version": "rules-unpublished-0.3.0",
+      "conditionId": "condition.cardiovascular_disease",
+      "requiredProfileFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds"
+      ],
+      "requiredNutrients": [
+        "fatG"
+      ],
+      "scope": {
+        "foodIds": [],
+        "preparation": null,
+        "portionBasis": "Per component: confirmed food identity, finite positive grams, and explicit portion uncertainty. Empty foodIds means no food-specific restriction within this draft; it is not a supported-food claim."
+      },
+      "reason": "Jenis lemak dibutuhkan sebelum membuat penilaian khusus lemak jenuh/trans.",
+      "adjustments": [],
+      "criticalMissingFields": [
+        "ageYears",
+        "diagnosisState",
+        "conditionIds",
+        "nutrients.fatG",
+        "context.saturatedFatG",
+        "context.transFatG",
+        "context.clinicianCardiovascularDietPlan"
+      ],
+      "conflictSet": null,
+      "citationSourceIds": [
+        "guideline-heart",
+        "guideline-lipids"
+      ],
+      "limitations": [
+        "Kandidat draft; belum disetujui atau dijalankan oleh service.",
+        "Tidak menganggap lemak total sebagai lemak jenuh atau memprediksi kejadian penyakit jantung.",
+        "Input konteks tambahan belum tersedia pada kontrak request saat ini; jangan diminta sebagai field wire baru diam-diam."
+      ],
+      "ruleBody": {
+        "kind": "nutrition_policy_v1",
+        "executionStatus": "draft_not_executable",
+        "enabled": false,
+        "ruleType": "coverage_guard",
+        "applicability": {
+          "mode": "reported_condition",
+          "conditionId": "condition.cardiovascular_disease",
+          "ageMinimum": 18,
+          "ageMaximum": 50,
+          "ageScopeReason": "Current Carin adult MVP scope, not a claim that the source guideline is restricted to these ages.",
+          "allRequiredContextMustBePresent": true
+        },
+        "requiredContextFields": [
+          "saturatedFatG",
+          "transFatG",
+          "clinicianCardiovascularDietPlan"
+        ],
+        "contextAvailability": "requires_context_not_in_current_wire_contract",
+        "dataQuality": {
+          "reviewedCatalogAndRuleRequired": true,
+          "reviewedSourcesRequired": true,
+          "estimatedNutrientPolicy": "insufficient_information_for_any_dependent_personal_rule",
+          "missingNutrientPolicy": "insufficient_information",
+          "ambiguousFoodPolicy": "insufficient_information",
+          "portionUncertaintyMustBeExposed": true,
+          "unknownProfileMustNotMeanNoCondition": true
+        },
+        "reference": null,
+        "calculation": null,
+        "output": {
+          "mode": "insufficient_information",
+          "positiveSuitabilityAllowed": false,
+          "clinicalPredictionAllowed": false,
+          "defaultPersonalTargetAllowed": false,
+          "sourceIdsRequired": true,
+          "templateOnlyOrConstrainedParaphrase": true
+        },
+        "onCriticalMissing": "insufficient_information",
+        "onConflict": "suppress_conflicting_adjustments_keep_scoped_facts",
+        "adjustmentEffects": [],
+        "conflictsWith": [],
+        "prohibitedActions": [
+          "diagnose_from_profile_or_labs",
+          "interpret_blood_test_values",
+          "change_or_dose_medication",
+          "guarantee_allergen_absence",
+          "invent_universal_per_meal_limits",
+          "count_unconfirmed_photo_as_consumed"
+        ],
+        "contextPredicates": [
+          {
+            "field": "saturatedFatG",
+            "operator": "nonnegative_number"
+          },
+          {
+            "field": "transFatG",
+            "operator": "nonnegative_number"
+          },
+          {
+            "field": "clinicianCardiovascularDietPlan",
+            "operator": "non_empty"
+          }
+        ]
+      }
+    }
+  ]
 }

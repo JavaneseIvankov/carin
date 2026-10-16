@@ -1,0 +1,5445 @@
+{
+  "retrievedOn": "2026-10-15",
+  "upstreamFiles": {
+    "fndds": {
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "sha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a"
+    },
+    "mext": {
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "sha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c"
+    }
+  },
+  "rows": [
+    {
+      "source": "fndds",
+      "code": "27510531",
+      "displayName": "Burger sapi fast food, 1 patty kecil",
+      "originalName": "Hamburger, from fast food, 1 small patty",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=1540; food code=27510531; original name=Hamburger, from fast food, 1 small patty",
+      "raw": {
+        "energyKcal": 285,
+        "carbohydrateG": 28.27,
+        "proteinG": 15.51,
+        "fatG": 11.68,
+        "fiberG": 1,
+        "sugarsG": 4.11,
+        "sodiumMg": 396
+      },
+      "per100g": {
+        "energyKcal": 285.0,
+        "carbohydrateG": 28.27,
+        "proteinG": 15.51,
+        "fatG": 11.68,
+        "fiberG": 1.0,
+        "sugarsG": 4.11,
+        "sodiumMg": 396.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "27510601",
+      "displayName": "Burger sapi fast food, 1 patty sedang",
+      "originalName": "Hamburger, from fast food, 1 medium patty",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=1548; food code=27510601; original name=Hamburger, from fast food, 1 medium patty",
+      "raw": {
+        "energyKcal": 288,
+        "carbohydrateG": 20.68,
+        "proteinG": 17.51,
+        "fatG": 14.38,
+        "fiberG": 0.7,
+        "sugarsG": 3,
+        "sodiumMg": 355
+      },
+      "per100g": {
+        "energyKcal": 288.0,
+        "carbohydrateG": 20.68,
+        "proteinG": 17.51,
+        "fatG": 14.38,
+        "fiberG": 0.7,
+        "sugarsG": 3.0,
+        "sodiumMg": 355.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "27510605",
+      "displayName": "Burger sapi fast food, 1 patty besar",
+      "originalName": "Hamburger, from fast food, 1 large patty",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=1549; food code=27510605; original name=Hamburger, from fast food, 1 large patty",
+      "raw": {
+        "energyKcal": 289,
+        "carbohydrateG": 17.12,
+        "proteinG": 18.43,
+        "fatG": 15.63,
+        "fiberG": 0.6,
+        "sugarsG": 2.49,
+        "sodiumMg": 351
+      },
+      "per100g": {
+        "energyKcal": 289.0,
+        "carbohydrateG": 17.12,
+        "proteinG": 18.43,
+        "fatG": 15.63,
+        "fiberG": 0.6,
+        "sugarsG": 2.49,
+        "sodiumMg": 351.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "27510661",
+      "displayName": "Double burger sapi fast food, 2 patty kecil",
+      "originalName": "Double hamburger, from fast food, 2 small patties",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=1561; food code=27510661; original name=Double hamburger, from fast food, 2 small patties",
+      "raw": {
+        "energyKcal": 288,
+        "carbohydrateG": 19.68,
+        "proteinG": 17.76,
+        "fatG": 14.73,
+        "fiberG": 0.7,
+        "sugarsG": 2.86,
+        "sodiumMg": 357
+      },
+      "per100g": {
+        "energyKcal": 288.0,
+        "carbohydrateG": 19.68,
+        "proteinG": 17.76,
+        "fatG": 14.73,
+        "fiberG": 0.7,
+        "sugarsG": 2.86,
+        "sodiumMg": 357.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "27510160",
+      "displayName": "Cheeseburger fast food, 1 patty kecil",
+      "originalName": "Cheeseburger, from fast food, 1 small patty",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=1508; food code=27510160; original name=Cheeseburger, from fast food, 1 small patty",
+      "raw": {
+        "energyKcal": 299,
+        "carbohydrateG": 23.96,
+        "proteinG": 16.42,
+        "fatG": 14.78,
+        "fiberG": 0.8,
+        "sugarsG": 3.86,
+        "sodiumMg": 510
+      },
+      "per100g": {
+        "energyKcal": 299.0,
+        "carbohydrateG": 23.96,
+        "proteinG": 16.42,
+        "fatG": 14.78,
+        "fiberG": 0.8,
+        "sugarsG": 3.86,
+        "sodiumMg": 510.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "27510215",
+      "displayName": "Cheeseburger fast food, 1 patty sedang",
+      "originalName": "Cheeseburger, from fast food, 1 medium patty",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=1516; food code=27510215; original name=Cheeseburger, from fast food, 1 medium patty",
+      "raw": {
+        "energyKcal": 296,
+        "carbohydrateG": 18.71,
+        "proteinG": 17.87,
+        "fatG": 16.15,
+        "fiberG": 0.6,
+        "sugarsG": 2.98,
+        "sodiumMg": 438
+      },
+      "per100g": {
+        "energyKcal": 296.0,
+        "carbohydrateG": 18.71,
+        "proteinG": 17.87,
+        "fatG": 16.15,
+        "fiberG": 0.6,
+        "sugarsG": 2.98,
+        "sodiumMg": 438.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "27510371",
+      "displayName": "Double cheeseburger fast food, 2 patty kecil",
+      "originalName": "Double cheeseburger, from fast food, 2 small patties",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=1531; food code=27510371; original name=Double cheeseburger, from fast food, 2 small patties",
+      "raw": {
+        "energyKcal": 297,
+        "carbohydrateG": 17.68,
+        "proteinG": 18.12,
+        "fatG": 16.6,
+        "fiberG": 0.6,
+        "sugarsG": 2.85,
+        "sodiumMg": 447
+      },
+      "per100g": {
+        "energyKcal": 297.0,
+        "carbohydrateG": 17.68,
+        "proteinG": 18.12,
+        "fatG": 16.6,
+        "fiberG": 0.6,
+        "sugarsG": 2.85,
+        "sodiumMg": 447.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "27540146",
+      "displayName": "Burger ayam fillet goreng fast food",
+      "originalName": "Chicken fillet sandwich, fried, from fast food",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=1622; food code=27540146; original name=Chicken fillet sandwich, fried, from fast food",
+      "raw": {
+        "energyKcal": 281,
+        "carbohydrateG": 27.48,
+        "proteinG": 12.17,
+        "fatG": 13.46,
+        "fiberG": 1.7,
+        "sugarsG": 3.07,
+        "sodiumMg": 571
+      },
+      "per100g": {
+        "energyKcal": 281.0,
+        "carbohydrateG": 27.48,
+        "proteinG": 12.17,
+        "fatG": 13.46,
+        "fiberG": 1.7,
+        "sugarsG": 3.07,
+        "sodiumMg": 571.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "27540152",
+      "displayName": "Burger ayam fillet panggang fast food",
+      "originalName": "Chicken fillet sandwich, grilled, from fast food",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=1624; food code=27540152; original name=Chicken fillet sandwich, grilled, from fast food",
+      "raw": {
+        "energyKcal": 226,
+        "carbohydrateG": 19.4,
+        "proteinG": 21.5,
+        "fatG": 6.18,
+        "fiberG": 0.7,
+        "sugarsG": 2.82,
+        "sodiumMg": 430
+      },
+      "per100g": {
+        "energyKcal": 226.0,
+        "carbohydrateG": 19.4,
+        "proteinG": 21.5,
+        "fatG": 6.18,
+        "fiberG": 0.7,
+        "sugarsG": 2.82,
+        "sodiumMg": 430.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "27550000",
+      "displayName": "Burger ikan goreng fast food",
+      "originalName": "Fish sandwich, fried, from fast food",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=1639; food code=27550000; original name=Fish sandwich, fried, from fast food",
+      "raw": {
+        "energyKcal": 235,
+        "carbohydrateG": 25.7,
+        "proteinG": 14.46,
+        "fatG": 8.15,
+        "fiberG": 0.9,
+        "sugarsG": 3.13,
+        "sodiumMg": 462
+      },
+      "per100g": {
+        "energyKcal": 235.0,
+        "carbohydrateG": 25.7,
+        "proteinG": 14.46,
+        "fatG": 8.15,
+        "fiberG": 0.9,
+        "sugarsG": 3.13,
+        "sodiumMg": 462.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "41901010",
+      "displayName": "Burger sayuran dengan roti",
+      "originalName": "Veggie burger, on bun",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=2100; food code=41901010; original name=Veggie burger, on bun",
+      "raw": {
+        "energyKcal": 224,
+        "carbohydrateG": 30.82,
+        "proteinG": 12.96,
+        "fatG": 5.2,
+        "fiberG": 3.5,
+        "sugarsG": 3.94,
+        "sodiumMg": 534
+      },
+      "per100g": {
+        "energyKcal": 224.0,
+        "carbohydrateG": 30.82,
+        "proteinG": 12.96,
+        "fatG": 5.2,
+        "fiberG": 3.5,
+        "sugarsG": 3.94,
+        "sodiumMg": 534.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "41901020",
+      "displayName": "Burger sayuran dengan roti dan keju",
+      "originalName": "Veggie burger, on bun, with cheese",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=2101; food code=41901020; original name=Veggie burger, on bun, with cheese",
+      "raw": {
+        "energyKcal": 243,
+        "carbohydrateG": 27.23,
+        "proteinG": 14,
+        "fatG": 8.43,
+        "fiberG": 3,
+        "sugarsG": 3.78,
+        "sodiumMg": 600
+      },
+      "per100g": {
+        "energyKcal": 243.0,
+        "carbohydrateG": 27.23,
+        "proteinG": 14.0,
+        "fatG": 8.43,
+        "fiberG": 3.0,
+        "sugarsG": 3.78,
+        "sodiumMg": 600.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "27564060",
+      "displayName": "Hot dog sapi dengan roti putih",
+      "originalName": "Hot dog sandwich, beef, on white bun",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=1679; food code=27564060; original name=Hot dog sandwich, beef, on white bun",
+      "raw": {
+        "energyKcal": 296,
+        "carbohydrateG": 23.73,
+        "proteinG": 10.85,
+        "fatG": 17.37,
+        "fiberG": 0.8,
+        "sugarsG": 3.92,
+        "sodiumMg": 681
+      },
+      "per100g": {
+        "energyKcal": 296.0,
+        "carbohydrateG": 23.73,
+        "proteinG": 10.85,
+        "fatG": 17.37,
+        "fiberG": 0.8,
+        "sugarsG": 3.92,
+        "sodiumMg": 681.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "24198731",
+      "displayName": "Chicken nuggets fast food",
+      "originalName": "Chicken nuggets, from fast food",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=712; food code=24198731; original name=Chicken nuggets, from fast food",
+      "raw": {
+        "energyKcal": 307,
+        "carbohydrateG": 14.93,
+        "proteinG": 15.92,
+        "fatG": 20.36,
+        "fiberG": 0.9,
+        "sugarsG": 0.08,
+        "sodiumMg": 594
+      },
+      "per100g": {
+        "energyKcal": 307.0,
+        "carbohydrateG": 14.93,
+        "proteinG": 15.92,
+        "fatG": 20.36,
+        "fiberG": 0.9,
+        "sugarsG": 0.08,
+        "sodiumMg": 594.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "71401030",
+      "displayName": "French fries fast food",
+      "originalName": "Potato, french fries, fast food",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=4080; food code=71401030; original name=Potato, french fries, fast food",
+      "raw": {
+        "energyKcal": 312,
+        "carbohydrateG": 41.44,
+        "proteinG": 3.43,
+        "fatG": 14.73,
+        "fiberG": 3.8,
+        "sugarsG": 0.3,
+        "sodiumMg": 210
+      },
+      "per100g": {
+        "energyKcal": 312.0,
+        "carbohydrateG": 41.44,
+        "proteinG": 3.43,
+        "fatG": 14.73,
+        "fiberG": 3.8,
+        "sugarsG": 0.3,
+        "sodiumMg": 210.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "71401031",
+      "displayName": "French fries restoran",
+      "originalName": "Potato, french fries, restaurant",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=4081; food code=71401031; original name=Potato, french fries, restaurant",
+      "raw": {
+        "energyKcal": 289,
+        "carbohydrateG": 37.2,
+        "proteinG": 3.49,
+        "fatG": 14.04,
+        "fiberG": 3.9,
+        "sugarsG": 0.28,
+        "sodiumMg": 357
+      },
+      "per100g": {
+        "energyKcal": 289.0,
+        "carbohydrateG": 37.2,
+        "proteinG": 3.49,
+        "fatG": 14.04,
+        "fiberG": 3.9,
+        "sugarsG": 0.28,
+        "sodiumMg": 357.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "71401010",
+      "displayName": "Kentang segar digoreng",
+      "originalName": "Potato, french fries, from fresh, fried",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=4077; food code=71401010; original name=Potato, french fries, from fresh, fried",
+      "raw": {
+        "energyKcal": 198,
+        "carbohydrateG": 18.5,
+        "proteinG": 1.93,
+        "fatG": 13.1,
+        "fiberG": 1.6,
+        "sugarsG": 1.25,
+        "sodiumMg": 141
+      },
+      "per100g": {
+        "energyKcal": 198.0,
+        "carbohydrateG": 18.5,
+        "proteinG": 1.93,
+        "fatG": 13.1,
+        "fiberG": 1.6,
+        "sugarsG": 1.25,
+        "sodiumMg": 141.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "71401020",
+      "displayName": "Kentang beku dipanggang",
+      "originalName": "Potato, french fries, from frozen, baked",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=4079; food code=71401020; original name=Potato, french fries, from frozen, baked",
+      "raw": {
+        "energyKcal": 158,
+        "carbohydrateG": 25.55,
+        "proteinG": 2.75,
+        "fatG": 5.48,
+        "fiberG": 2,
+        "sugarsG": 0.37,
+        "sodiumMg": 324
+      },
+      "per100g": {
+        "energyKcal": 158.0,
+        "carbohydrateG": 25.55,
+        "proteinG": 2.75,
+        "fatG": 5.48,
+        "fiberG": 2.0,
+        "sugarsG": 0.37,
+        "sodiumMg": 324.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "71401039",
+      "displayName": "French fries dengan keju, fast food atau restoran",
+      "originalName": "Potato, french fries, with cheese, fast food / restaurant",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=4084; food code=71401039; original name=Potato, french fries, with cheese, fast food / restaurant",
+      "raw": {
+        "energyKcal": 260,
+        "carbohydrateG": 29.76,
+        "proteinG": 3.33,
+        "fatG": 14.22,
+        "fiberG": 2.6,
+        "sugarsG": 0.3,
+        "sodiumMg": 365
+      },
+      "per100g": {
+        "energyKcal": 260.0,
+        "carbohydrateG": 29.76,
+        "proteinG": 3.33,
+        "fatG": 14.22,
+        "fiberG": 2.6,
+        "sugarsG": 0.3,
+        "sodiumMg": 365.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "71401050",
+      "displayName": "French fries dengan chili dan keju, fast food atau restoran",
+      "originalName": "Potato, french fries, with chili and cheese, fast food / restaurant",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=4087; food code=71401050; original name=Potato, french fries, with chili and cheese, fast food / restaurant",
+      "raw": {
+        "energyKcal": 221,
+        "carbohydrateG": 24.87,
+        "proteinG": 4.66,
+        "fatG": 11.42,
+        "fiberG": 2.7,
+        "sugarsG": 0.59,
+        "sodiumMg": 363
+      },
+      "per100g": {
+        "energyKcal": 221.0,
+        "carbohydrateG": 24.87,
+        "proteinG": 4.66,
+        "fatG": 11.42,
+        "fiberG": 2.7,
+        "sugarsG": 0.59,
+        "sodiumMg": 363.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58106220",
+      "displayName": "Pizza keju restoran, thin crust",
+      "originalName": "Pizza, cheese, from restaurant or fast food, thin crust",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3234; food code=58106220; original name=Pizza, cheese, from restaurant or fast food, thin crust",
+      "raw": {
+        "energyKcal": 266,
+        "carbohydrateG": 33.33,
+        "proteinG": 11.39,
+        "fatG": 9.69,
+        "fiberG": 2.3,
+        "sugarsG": 3.58,
+        "sodiumMg": 540
+      },
+      "per100g": {
+        "energyKcal": 266.0,
+        "carbohydrateG": 33.33,
+        "proteinG": 11.39,
+        "fatG": 9.69,
+        "fiberG": 2.3,
+        "sugarsG": 3.58,
+        "sodiumMg": 540.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58106225",
+      "displayName": "Pizza keju restoran, medium crust",
+      "originalName": "Pizza, cheese, from restaurant or fast food, medium crust",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3235; food code=58106225; original name=Pizza, cheese, from restaurant or fast food, medium crust",
+      "raw": {
+        "energyKcal": 266,
+        "carbohydrateG": 33.33,
+        "proteinG": 11.39,
+        "fatG": 9.69,
+        "fiberG": 2.3,
+        "sugarsG": 3.58,
+        "sodiumMg": 540
+      },
+      "per100g": {
+        "energyKcal": 266.0,
+        "carbohydrateG": 33.33,
+        "proteinG": 11.39,
+        "fatG": 9.69,
+        "fiberG": 2.3,
+        "sugarsG": 3.58,
+        "sodiumMg": 540.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58106230",
+      "displayName": "Pizza keju restoran, thick crust",
+      "originalName": "Pizza, cheese, from restaurant or fast food, thick crust",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3236; food code=58106230; original name=Pizza, cheese, from restaurant or fast food, thick crust",
+      "raw": {
+        "energyKcal": 271,
+        "carbohydrateG": 33.17,
+        "proteinG": 10.81,
+        "fatG": 10.54,
+        "fiberG": 2.2,
+        "sugarsG": 3.34,
+        "sodiumMg": 540
+      },
+      "per100g": {
+        "energyKcal": 271.0,
+        "carbohydrateG": 33.17,
+        "proteinG": 10.81,
+        "fatG": 10.54,
+        "fiberG": 2.2,
+        "sugarsG": 3.34,
+        "sodiumMg": 540.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58106233",
+      "displayName": "Pizza keju stuffed crust",
+      "originalName": "Pizza, cheese, stuffed crust",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3237; food code=58106233; original name=Pizza, cheese, stuffed crust",
+      "raw": {
+        "energyKcal": 274,
+        "carbohydrateG": 30,
+        "proteinG": 12.23,
+        "fatG": 11.63,
+        "fiberG": 1.7,
+        "sugarsG": 2.9,
+        "sodiumMg": 615
+      },
+      "per100g": {
+        "energyKcal": 274.0,
+        "carbohydrateG": 30.0,
+        "proteinG": 12.23,
+        "fatG": 11.63,
+        "fiberG": 1.7,
+        "sugarsG": 2.9,
+        "sodiumMg": 615.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58106320",
+      "displayName": "Pizza keju dan sayuran restoran, thin crust",
+      "originalName": "Pizza, cheese, with vegetables, from restaurant or fast food, thin crust",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3245; food code=58106320; original name=Pizza, cheese, with vegetables, from restaurant or fast food, thin crust",
+      "raw": {
+        "energyKcal": 234,
+        "carbohydrateG": 29.86,
+        "proteinG": 9.96,
+        "fatG": 8.37,
+        "fiberG": 2.2,
+        "sugarsG": 3.63,
+        "sodiumMg": 465
+      },
+      "per100g": {
+        "energyKcal": 234.0,
+        "carbohydrateG": 29.86,
+        "proteinG": 9.96,
+        "fatG": 8.37,
+        "fiberG": 2.2,
+        "sugarsG": 3.63,
+        "sodiumMg": 465.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58106325",
+      "displayName": "Pizza keju dan sayuran restoran, medium crust",
+      "originalName": "Pizza, cheese, with vegetables, from restaurant or fast food, medium crust",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3246; food code=58106325; original name=Pizza, cheese, with vegetables, from restaurant or fast food, medium crust",
+      "raw": {
+        "energyKcal": 242,
+        "carbohydrateG": 30.71,
+        "proteinG": 10.31,
+        "fatG": 8.69,
+        "fiberG": 2.2,
+        "sugarsG": 3.62,
+        "sodiumMg": 484
+      },
+      "per100g": {
+        "energyKcal": 242.0,
+        "carbohydrateG": 30.71,
+        "proteinG": 10.31,
+        "fatG": 8.69,
+        "fiberG": 2.2,
+        "sugarsG": 3.62,
+        "sodiumMg": 484.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58106550",
+      "displayName": "Pizza pepperoni restoran, thin crust",
+      "originalName": "Pizza with pepperoni, from restaurant or fast food, thin crust",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3258; food code=58106550; original name=Pizza with pepperoni, from restaurant or fast food, thin crust",
+      "raw": {
+        "energyKcal": 282,
+        "carbohydrateG": 31.98,
+        "proteinG": 11.74,
+        "fatG": 11.91,
+        "fiberG": 2.3,
+        "sugarsG": 3.26,
+        "sodiumMg": 620
+      },
+      "per100g": {
+        "energyKcal": 282.0,
+        "carbohydrateG": 31.98,
+        "proteinG": 11.74,
+        "fatG": 11.91,
+        "fiberG": 2.3,
+        "sugarsG": 3.26,
+        "sodiumMg": 620.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58106555",
+      "displayName": "Pizza pepperoni restoran, medium crust",
+      "originalName": "Pizza with pepperoni, from restaurant or fast food,  medium crust",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3259; food code=58106555; original name=Pizza with pepperoni, from restaurant or fast food,  medium crust",
+      "raw": {
+        "energyKcal": 282,
+        "carbohydrateG": 31.98,
+        "proteinG": 11.74,
+        "fatG": 11.91,
+        "fiberG": 2.3,
+        "sugarsG": 3.26,
+        "sodiumMg": 620
+      },
+      "per100g": {
+        "energyKcal": 282.0,
+        "carbohydrateG": 31.98,
+        "proteinG": 11.74,
+        "fatG": 11.91,
+        "fiberG": 2.3,
+        "sugarsG": 3.26,
+        "sodiumMg": 620.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58106560",
+      "displayName": "Pizza pepperoni restoran, thick crust",
+      "originalName": "Pizza with pepperoni, from restaurant or fast food, thick crust",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3260; food code=58106560; original name=Pizza with pepperoni, from restaurant or fast food, thick crust",
+      "raw": {
+        "energyKcal": 287,
+        "carbohydrateG": 31.84,
+        "proteinG": 11.49,
+        "fatG": 12.58,
+        "fiberG": 2.2,
+        "sugarsG": 2.93,
+        "sodiumMg": 620
+      },
+      "per100g": {
+        "energyKcal": 287.0,
+        "carbohydrateG": 31.84,
+        "proteinG": 11.49,
+        "fatG": 12.58,
+        "fiberG": 2.2,
+        "sugarsG": 2.93,
+        "sodiumMg": 620.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58106620",
+      "displayName": "Pizza daging selain pepperoni restoran, thin crust",
+      "originalName": "Pizza with meat other than pepperoni, from restaurant or fast food, thin crust",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3269; food code=58106620; original name=Pizza with meat other than pepperoni, from restaurant or fast food, thin crust",
+      "raw": {
+        "energyKcal": 280,
+        "carbohydrateG": 30.62,
+        "proteinG": 11.5,
+        "fatG": 12.35,
+        "fiberG": 2.3,
+        "sugarsG": 3.32,
+        "sodiumMg": 570
+      },
+      "per100g": {
+        "energyKcal": 280.0,
+        "carbohydrateG": 30.62,
+        "proteinG": 11.5,
+        "fatG": 12.35,
+        "fiberG": 2.3,
+        "sugarsG": 3.32,
+        "sodiumMg": 570.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58106625",
+      "displayName": "Pizza daging selain pepperoni restoran, medium crust",
+      "originalName": "Pizza with meat other than pepperoni, from restaurant or fast food, medium crust",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3270; food code=58106625; original name=Pizza with meat other than pepperoni, from restaurant or fast food, medium crust",
+      "raw": {
+        "energyKcal": 280,
+        "carbohydrateG": 30.62,
+        "proteinG": 11.5,
+        "fatG": 12.35,
+        "fiberG": 2.3,
+        "sugarsG": 3.32,
+        "sodiumMg": 570
+      },
+      "per100g": {
+        "energyKcal": 280.0,
+        "carbohydrateG": 30.62,
+        "proteinG": 11.5,
+        "fatG": 12.35,
+        "fiberG": 2.3,
+        "sugarsG": 3.32,
+        "sodiumMg": 570.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58106720",
+      "displayName": "Pizza daging dan sayuran restoran, thin crust",
+      "originalName": "Pizza with meat and vegetables, from restaurant or fast food, thin crust",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3282; food code=58106720; original name=Pizza with meat and vegetables, from restaurant or fast food, thin crust",
+      "raw": {
+        "energyKcal": 241,
+        "carbohydrateG": 26.62,
+        "proteinG": 11.55,
+        "fatG": 9.87,
+        "fiberG": 1.9,
+        "sugarsG": 3.29,
+        "sodiumMg": 464
+      },
+      "per100g": {
+        "energyKcal": 241.0,
+        "carbohydrateG": 26.62,
+        "proteinG": 11.55,
+        "fatG": 9.87,
+        "fiberG": 1.9,
+        "sugarsG": 3.29,
+        "sodiumMg": 464.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58106725",
+      "displayName": "Pizza daging dan sayuran restoran, medium crust",
+      "originalName": "Pizza with meat and vegetables, from restaurant or fast food, medium crust",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3283; food code=58106725; original name=Pizza with meat and vegetables, from restaurant or fast food, medium crust",
+      "raw": {
+        "energyKcal": 248,
+        "carbohydrateG": 28.38,
+        "proteinG": 11.5,
+        "fatG": 9.83,
+        "fiberG": 2,
+        "sugarsG": 3.37,
+        "sodiumMg": 484
+      },
+      "per100g": {
+        "energyKcal": 248.0,
+        "carbohydrateG": 28.38,
+        "proteinG": 11.5,
+        "fatG": 9.83,
+        "fiberG": 2.0,
+        "sugarsG": 3.37,
+        "sodiumMg": 484.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58109015",
+      "displayName": "Pizza keju gandum utuh, thin crust",
+      "originalName": "Pizza, cheese, whole wheat thin crust",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3306; food code=58109015; original name=Pizza, cheese, whole wheat thin crust",
+      "raw": {
+        "energyKcal": 267,
+        "carbohydrateG": 28.62,
+        "proteinG": 11.77,
+        "fatG": 12.38,
+        "fiberG": 3.5,
+        "sugarsG": 3.59,
+        "sodiumMg": 543
+      },
+      "per100g": {
+        "energyKcal": 267.0,
+        "carbohydrateG": 28.62,
+        "proteinG": 11.77,
+        "fatG": 12.38,
+        "fiberG": 3.5,
+        "sugarsG": 3.59,
+        "sodiumMg": 543.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58109100",
+      "displayName": "Pizza keju gluten-free, thin crust",
+      "originalName": "Pizza, cheese, gluten-free thin crust",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3312; food code=58109100; original name=Pizza, cheese, gluten-free thin crust",
+      "raw": {
+        "energyKcal": 264,
+        "carbohydrateG": 26.53,
+        "proteinG": 8.73,
+        "fatG": 13.62,
+        "fiberG": 2.5,
+        "sugarsG": 3.2,
+        "sodiumMg": 485
+      },
+      "per100g": {
+        "energyKcal": 264.0,
+        "carbohydrateG": 26.53,
+        "proteinG": 8.73,
+        "fatG": 13.62,
+        "fiberG": 2.5,
+        "sugarsG": 3.2,
+        "sodiumMg": 485.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "56130000",
+      "displayName": "Pasta matang tanpa saus",
+      "originalName": "Pasta, cooked",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=2976; food code=56130000; original name=Pasta, cooked",
+      "raw": {
+        "energyKcal": 157,
+        "carbohydrateG": 30.68,
+        "proteinG": 5.76,
+        "fatG": 0.92,
+        "fiberG": 1.8,
+        "sugarsG": 0.56,
+        "sodiumMg": 232
+      },
+      "per100g": {
+        "energyKcal": 157.0,
+        "carbohydrateG": 30.68,
+        "proteinG": 5.76,
+        "fatG": 0.92,
+        "fiberG": 1.8,
+        "sugarsG": 0.56,
+        "sodiumMg": 232.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "56132990",
+      "displayName": "Pasta gandum utuh matang tanpa saus",
+      "originalName": "Pasta, whole grain, cooked",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=2977; food code=56132990; original name=Pasta, whole grain, cooked",
+      "raw": {
+        "energyKcal": 148,
+        "carbohydrateG": 29.89,
+        "proteinG": 5.95,
+        "fatG": 1.7,
+        "fiberG": 3.9,
+        "sugarsG": 0.75,
+        "sodiumMg": 235
+      },
+      "per100g": {
+        "energyKcal": 148.0,
+        "carbohydrateG": 29.89,
+        "proteinG": 5.95,
+        "fatG": 1.7,
+        "fiberG": 3.9,
+        "sugarsG": 0.75,
+        "sodiumMg": 235.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58146221",
+      "displayName": "Pasta saus tomat, restoran",
+      "originalName": "Pasta with tomato-based sauce, restaurant",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3449; food code=58146221; original name=Pasta with tomato-based sauce, restaurant",
+      "raw": {
+        "energyKcal": 160,
+        "carbohydrateG": 18.41,
+        "proteinG": 3.41,
+        "fatG": 7.97,
+        "fiberG": 1.7,
+        "sugarsG": 2.72,
+        "sodiumMg": 387
+      },
+      "per100g": {
+        "energyKcal": 160.0,
+        "carbohydrateG": 18.41,
+        "proteinG": 3.41,
+        "fatG": 7.97,
+        "fiberG": 1.7,
+        "sugarsG": 2.72,
+        "sodiumMg": 387.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58146321",
+      "displayName": "Pasta saus tomat dan daging, restoran",
+      "originalName": "Pasta with tomato-based sauce and meat, restaurant",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3456; food code=58146321; original name=Pasta with tomato-based sauce and meat, restaurant",
+      "raw": {
+        "energyKcal": 178,
+        "carbohydrateG": 17.74,
+        "proteinG": 5.43,
+        "fatG": 9.25,
+        "fiberG": 1.5,
+        "sugarsG": 2.26,
+        "sodiumMg": 383
+      },
+      "per100g": {
+        "energyKcal": 178.0,
+        "carbohydrateG": 17.74,
+        "proteinG": 5.43,
+        "fatG": 9.25,
+        "fiberG": 1.5,
+        "sugarsG": 2.26,
+        "sodiumMg": 383.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58146341",
+      "displayName": "Pasta saus tomat dan unggas, restoran",
+      "originalName": "Pasta with tomato-based sauce and poultry, restaurant",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3462; food code=58146341; original name=Pasta with tomato-based sauce and poultry, restaurant",
+      "raw": {
+        "energyKcal": 171,
+        "carbohydrateG": 17.74,
+        "proteinG": 5.59,
+        "fatG": 8.47,
+        "fiberG": 1.5,
+        "sugarsG": 2.26,
+        "sodiumMg": 382
+      },
+      "per100g": {
+        "energyKcal": 171.0,
+        "carbohydrateG": 17.74,
+        "proteinG": 5.59,
+        "fatG": 8.47,
+        "fiberG": 1.5,
+        "sugarsG": 2.26,
+        "sodiumMg": 382.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58146361",
+      "displayName": "Pasta saus tomat dan seafood, restoran",
+      "originalName": "Pasta with tomato-based sauce and seafood, restaurant",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3468; food code=58146361; original name=Pasta with tomato-based sauce and seafood, restaurant",
+      "raw": {
+        "energyKcal": 166,
+        "carbohydrateG": 17.98,
+        "proteinG": 5.16,
+        "fatG": 7.97,
+        "fiberG": 1.5,
+        "sugarsG": 2.26,
+        "sodiumMg": 393
+      },
+      "per100g": {
+        "energyKcal": 166.0,
+        "carbohydrateG": 17.98,
+        "proteinG": 5.16,
+        "fatG": 7.97,
+        "fiberG": 1.5,
+        "sugarsG": 2.26,
+        "sodiumMg": 393.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58146381",
+      "displayName": "Pasta saus krim, restoran",
+      "originalName": "Pasta with cream sauce, restaurant",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3474; food code=58146381; original name=Pasta with cream sauce, restaurant",
+      "raw": {
+        "energyKcal": 204,
+        "carbohydrateG": 15.56,
+        "proteinG": 3.72,
+        "fatG": 13.95,
+        "fiberG": 0.9,
+        "sugarsG": 0.67,
+        "sodiumMg": 577
+      },
+      "per100g": {
+        "energyKcal": 204.0,
+        "carbohydrateG": 15.56,
+        "proteinG": 3.72,
+        "fatG": 13.95,
+        "fiberG": 0.9,
+        "sugarsG": 0.67,
+        "sodiumMg": 577.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58146401",
+      "displayName": "Pasta saus krim dan daging, restoran",
+      "originalName": "Pasta with cream sauce and meat, restaurant",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3480; food code=58146401; original name=Pasta with cream sauce and meat, restaurant",
+      "raw": {
+        "energyKcal": 213,
+        "carbohydrateG": 15.41,
+        "proteinG": 5.67,
+        "fatG": 14.1,
+        "fiberG": 0.9,
+        "sugarsG": 0.59,
+        "sodiumMg": 562
+      },
+      "per100g": {
+        "energyKcal": 213.0,
+        "carbohydrateG": 15.41,
+        "proteinG": 5.67,
+        "fatG": 14.1,
+        "fiberG": 0.9,
+        "sugarsG": 0.59,
+        "sodiumMg": 562.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58146421",
+      "displayName": "Pasta saus krim dan unggas, restoran",
+      "originalName": "Pasta with cream sauce and poultry, restaurant",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3486; food code=58146421; original name=Pasta with cream sauce and poultry, restaurant",
+      "raw": {
+        "energyKcal": 206,
+        "carbohydrateG": 15.41,
+        "proteinG": 5.83,
+        "fatG": 13.33,
+        "fiberG": 0.9,
+        "sugarsG": 0.59,
+        "sodiumMg": 561
+      },
+      "per100g": {
+        "energyKcal": 206.0,
+        "carbohydrateG": 15.41,
+        "proteinG": 5.83,
+        "fatG": 13.33,
+        "fiberG": 0.9,
+        "sugarsG": 0.59,
+        "sodiumMg": 561.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58146441",
+      "displayName": "Pasta saus krim dan seafood, restoran",
+      "originalName": "Pasta with cream sauce and seafood, restaurant",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3492; food code=58146441; original name=Pasta with cream sauce and seafood, restaurant",
+      "raw": {
+        "energyKcal": 202,
+        "carbohydrateG": 15.66,
+        "proteinG": 5.4,
+        "fatG": 12.82,
+        "fiberG": 0.9,
+        "sugarsG": 0.59,
+        "sodiumMg": 572
+      },
+      "per100g": {
+        "energyKcal": 202.0,
+        "carbohydrateG": 15.66,
+        "proteinG": 5.4,
+        "fatG": 12.82,
+        "fiberG": 0.9,
+        "sugarsG": 0.59,
+        "sodiumMg": 572.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58145111",
+      "displayName": "Macaroni and cheese, restoran",
+      "originalName": "Macaroni or noodles with cheese, from restaurant",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3431; food code=58145111; original name=Macaroni or noodles with cheese, from restaurant",
+      "raw": {
+        "energyKcal": 151,
+        "carbohydrateG": 18.8,
+        "proteinG": 5.42,
+        "fatG": 6.06,
+        "fiberG": 1.1,
+        "sugarsG": 3.09,
+        "sodiumMg": 361
+      },
+      "per100g": {
+        "energyKcal": 151.0,
+        "carbohydrateG": 18.8,
+        "proteinG": 5.42,
+        "fatG": 6.06,
+        "fiberG": 1.1,
+        "sugarsG": 3.09,
+        "sodiumMg": 361.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58130014",
+      "displayName": "Lasagna daging, restoran",
+      "originalName": "Lasagna with meat, from restaurant",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3371; food code=58130014; original name=Lasagna with meat, from restaurant",
+      "raw": {
+        "energyKcal": 185,
+        "carbohydrateG": 11.36,
+        "proteinG": 10.83,
+        "fatG": 10.69,
+        "fiberG": 1.5,
+        "sugarsG": 3.15,
+        "sodiumMg": 466
+      },
+      "per100g": {
+        "energyKcal": 185.0,
+        "carbohydrateG": 11.36,
+        "proteinG": 10.83,
+        "fatG": 10.69,
+        "fiberG": 1.5,
+        "sugarsG": 3.15,
+        "sodiumMg": 466.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58130310",
+      "displayName": "Lasagna tanpa daging",
+      "originalName": "Lasagna, meatless",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3377; food code=58130310; original name=Lasagna, meatless",
+      "raw": {
+        "energyKcal": 130,
+        "carbohydrateG": 13.84,
+        "proteinG": 6.54,
+        "fatG": 5.33,
+        "fiberG": 1.7,
+        "sugarsG": 4.23,
+        "sodiumMg": 284
+      },
+      "per100g": {
+        "energyKcal": 130.0,
+        "carbohydrateG": 13.84,
+        "proteinG": 6.54,
+        "fatG": 5.33,
+        "fiberG": 1.7,
+        "sugarsG": 4.23,
+        "sodiumMg": 284.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "51166000",
+      "displayName": "Croissant polos",
+      "originalName": "Croissant",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=2297; food code=51166000; original name=Croissant",
+      "raw": {
+        "energyKcal": 406,
+        "carbohydrateG": 45.8,
+        "proteinG": 8.2,
+        "fatG": 21,
+        "fiberG": 2.6,
+        "sugarsG": 11.26,
+        "sodiumMg": 300
+      },
+      "per100g": {
+        "energyKcal": 406.0,
+        "carbohydrateG": 45.8,
+        "proteinG": 8.2,
+        "fatG": 21.0,
+        "fiberG": 2.6,
+        "sugarsG": 11.26,
+        "sodiumMg": 300.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "51166200",
+      "displayName": "Croissant cokelat",
+      "originalName": "Croissant, chocolate",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=2299; food code=51166200; original name=Croissant, chocolate",
+      "raw": {
+        "energyKcal": 421,
+        "carbohydrateG": 49.4,
+        "proteinG": 7.4,
+        "fatG": 22.79,
+        "fiberG": 3.3,
+        "sugarsG": 19.87,
+        "sodiumMg": 242
+      },
+      "per100g": {
+        "energyKcal": 421.0,
+        "carbohydrateG": 49.4,
+        "proteinG": 7.4,
+        "fatG": 22.79,
+        "fiberG": 3.3,
+        "sugarsG": 19.87,
+        "sodiumMg": 242.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "53520100",
+      "displayName": "Donat tipe cake polos",
+      "originalName": "Doughnut, cake type, plain",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=2682; food code=53520100; original name=Doughnut, cake type, plain",
+      "raw": {
+        "energyKcal": 434,
+        "carbohydrateG": 47.06,
+        "proteinG": 5.31,
+        "fatG": 24.93,
+        "fiberG": 1.7,
+        "sugarsG": 18.15,
+        "sodiumMg": 477
+      },
+      "per100g": {
+        "energyKcal": 434.0,
+        "carbohydrateG": 47.06,
+        "proteinG": 5.31,
+        "fatG": 24.93,
+        "fiberG": 1.7,
+        "sugarsG": 18.15,
+        "sodiumMg": 477.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "53521110",
+      "displayName": "Donat tipe yeast",
+      "originalName": "Doughnut, yeast type",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=2691; food code=53521110; original name=Doughnut, yeast type",
+      "raw": {
+        "energyKcal": 421,
+        "carbohydrateG": 47.93,
+        "proteinG": 6.14,
+        "fatG": 22.7,
+        "fiberG": 2.1,
+        "sugarsG": 22.75,
+        "sodiumMg": 316
+      },
+      "per100g": {
+        "energyKcal": 421.0,
+        "carbohydrateG": 47.93,
+        "proteinG": 6.14,
+        "fatG": 22.7,
+        "fiberG": 2.1,
+        "sugarsG": 22.75,
+        "sodiumMg": 316.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "55100050",
+      "displayName": "Pancake polos, fast food atau restoran",
+      "originalName": "Pancakes, plain, fast food / restaurant",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=2918; food code=55100050; original name=Pancakes, plain, fast food / restaurant",
+      "raw": {
+        "energyKcal": 307,
+        "carbohydrateG": 34.14,
+        "proteinG": 7.16,
+        "fatG": 15.48,
+        "fiberG": 2.1,
+        "sugarsG": 6.81,
+        "sodiumMg": 544
+      },
+      "per100g": {
+        "energyKcal": 307.0,
+        "carbohydrateG": 34.14,
+        "proteinG": 7.16,
+        "fatG": 15.48,
+        "fiberG": 2.1,
+        "sugarsG": 6.81,
+        "sodiumMg": 544.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "55200100",
+      "displayName": "Waffle polos, fast food atau restoran",
+      "originalName": "Waffle, plain, fast food / restaurant",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=2939; food code=55200100; original name=Waffle, plain, fast food / restaurant",
+      "raw": {
+        "energyKcal": 428,
+        "carbohydrateG": 38.92,
+        "proteinG": 8.16,
+        "fatG": 26.36,
+        "fiberG": 2.4,
+        "sugarsG": 7.77,
+        "sodiumMg": 620
+      },
+      "per100g": {
+        "energyKcal": 428.0,
+        "carbohydrateG": 38.92,
+        "proteinG": 8.16,
+        "fatG": 26.36,
+        "fiberG": 2.4,
+        "sugarsG": 7.77,
+        "sodiumMg": 620.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "55300050",
+      "displayName": "French toast, fast food atau restoran",
+      "originalName": "French toast, fast food / restaurant",
+      "category": "western",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=2952; food code=55300050; original name=French toast, fast food / restaurant",
+      "raw": {
+        "energyKcal": 310,
+        "carbohydrateG": 35.71,
+        "proteinG": 9.84,
+        "fatG": 14.3,
+        "fiberG": 1.3,
+        "sugarsG": 10.08,
+        "sodiumMg": 357
+      },
+      "per100g": {
+        "energyKcal": 310.0,
+        "carbohydrateG": 35.71,
+        "proteinG": 9.84,
+        "fatG": 14.3,
+        "fiberG": 1.3,
+        "sugarsG": 10.08,
+        "sodiumMg": 357.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "56112000",
+      "displayName": "Mi matang tanpa saus",
+      "originalName": "Noodles, cooked",
+      "category": "asian-fndds",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=2971; food code=56112000; original name=Noodles, cooked",
+      "raw": {
+        "energyKcal": 137,
+        "carbohydrateG": 25.01,
+        "proteinG": 4.51,
+        "fatG": 2.06,
+        "fiberG": 1.2,
+        "sugarsG": 0.4,
+        "sodiumMg": 236
+      },
+      "per100g": {
+        "energyKcal": 137.0,
+        "carbohydrateG": 25.01,
+        "proteinG": 4.51,
+        "fatG": 2.06,
+        "fiberG": 1.2,
+        "sugarsG": 0.4,
+        "sodiumMg": 236.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "56113000",
+      "displayName": "Mi gandum utuh matang tanpa saus",
+      "originalName": "Noodles, whole grain, cooked",
+      "category": "asian-fndds",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=2972; food code=56113000; original name=Noodles, whole grain, cooked",
+      "raw": {
+        "energyKcal": 148,
+        "carbohydrateG": 29.91,
+        "proteinG": 5.96,
+        "fatG": 1.7,
+        "fiberG": 3.9,
+        "sugarsG": 0.75,
+        "sodiumMg": 210
+      },
+      "per100g": {
+        "energyKcal": 148.0,
+        "carbohydrateG": 29.91,
+        "proteinG": 5.96,
+        "fatG": 1.7,
+        "fiberG": 3.9,
+        "sugarsG": 0.75,
+        "sodiumMg": 210.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "56117090",
+      "displayName": "Mi beras matang tanpa saus",
+      "originalName": "Rice noodles, cooked",
+      "category": "asian-fndds",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=2975; food code=56117090; original name=Rice noodles, cooked",
+      "raw": {
+        "energyKcal": 107,
+        "carbohydrateG": 23.87,
+        "proteinG": 1.78,
+        "fatG": 0.2,
+        "fiberG": 1,
+        "sugarsG": 0.03,
+        "sodiumMg": 250
+      },
+      "per100g": {
+        "energyKcal": 107.0,
+        "carbohydrateG": 23.87,
+        "proteinG": 1.78,
+        "fatG": 0.2,
+        "fiberG": 1.0,
+        "sugarsG": 0.03,
+        "sodiumMg": 250.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58136120",
+      "displayName": "Lo mein tanpa daging",
+      "originalName": "Lo mein, meatless",
+      "category": "asian-fndds",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3418; food code=58136120; original name=Lo mein, meatless",
+      "raw": {
+        "energyKcal": 121,
+        "carbohydrateG": 20.16,
+        "proteinG": 4.77,
+        "fatG": 2.35,
+        "fiberG": 1.3,
+        "sugarsG": 2.63,
+        "sodiumMg": 430
+      },
+      "per100g": {
+        "energyKcal": 121.0,
+        "carbohydrateG": 20.16,
+        "proteinG": 4.77,
+        "fatG": 2.35,
+        "fiberG": 1.3,
+        "sugarsG": 2.63,
+        "sodiumMg": 430.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58136130",
+      "displayName": "Lo mein udang",
+      "originalName": "Lo mein, with shrimp",
+      "category": "asian-fndds",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3419; food code=58136130; original name=Lo mein, with shrimp",
+      "raw": {
+        "energyKcal": 121,
+        "carbohydrateG": 16.24,
+        "proteinG": 8.56,
+        "fatG": 2.21,
+        "fiberG": 1,
+        "sugarsG": 2.08,
+        "sodiumMg": 363
+      },
+      "per100g": {
+        "energyKcal": 121.0,
+        "carbohydrateG": 16.24,
+        "proteinG": 8.56,
+        "fatG": 2.21,
+        "fiberG": 1.0,
+        "sugarsG": 2.08,
+        "sodiumMg": 363.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58136150",
+      "displayName": "Lo mein sapi",
+      "originalName": "Lo mein, with beef",
+      "category": "asian-fndds",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3421; food code=58136150; original name=Lo mein, with beef",
+      "raw": {
+        "energyKcal": 129,
+        "carbohydrateG": 16.18,
+        "proteinG": 9.73,
+        "fatG": 2.77,
+        "fiberG": 1,
+        "sugarsG": 2.11,
+        "sodiumMg": 358
+      },
+      "per100g": {
+        "energyKcal": 129.0,
+        "carbohydrateG": 16.18,
+        "proteinG": 9.73,
+        "fatG": 2.77,
+        "fiberG": 1.0,
+        "sugarsG": 2.11,
+        "sodiumMg": 358.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58136160",
+      "displayName": "Lo mein ayam",
+      "originalName": "Lo mein, with chicken",
+      "category": "asian-fndds",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3422; food code=58136160; original name=Lo mein, with chicken",
+      "raw": {
+        "energyKcal": 130,
+        "carbohydrateG": 16.15,
+        "proteinG": 9.15,
+        "fatG": 3.15,
+        "fiberG": 1,
+        "sugarsG": 2.11,
+        "sodiumMg": 413
+      },
+      "per100g": {
+        "energyKcal": 130.0,
+        "carbohydrateG": 16.15,
+        "proteinG": 9.15,
+        "fatG": 3.15,
+        "fiberG": 1.0,
+        "sugarsG": 2.11,
+        "sodiumMg": 413.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58407034",
+      "displayName": "Ramen bowl, komposisi tidak dirinci (rujukan AS)",
+      "originalName": "Ramen bowl, NFS",
+      "category": "asian-fndds",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3772; food code=58407034; original name=Ramen bowl, NFS",
+      "raw": {
+        "energyKcal": 127,
+        "carbohydrateG": 13.95,
+        "proteinG": 7.13,
+        "fatG": 4.57,
+        "fiberG": 0.9,
+        "sugarsG": 0.42,
+        "sodiumMg": 333
+      },
+      "per100g": {
+        "energyKcal": 127.0,
+        "carbohydrateG": 13.95,
+        "proteinG": 7.13,
+        "fatG": 4.57,
+        "fiberG": 0.9,
+        "sugarsG": 0.42,
+        "sodiumMg": 333.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58407038",
+      "displayName": "Ramen bowl dengan sapi (rujukan AS)",
+      "originalName": "Ramen bowl with beef",
+      "category": "asian-fndds",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3773; food code=58407038; original name=Ramen bowl with beef",
+      "raw": {
+        "energyKcal": 137,
+        "carbohydrateG": 15.4,
+        "proteinG": 6.81,
+        "fatG": 5.19,
+        "fiberG": 1,
+        "sugarsG": 0.44,
+        "sodiumMg": 353
+      },
+      "per100g": {
+        "energyKcal": 137.0,
+        "carbohydrateG": 15.4,
+        "proteinG": 6.81,
+        "fatG": 5.19,
+        "fiberG": 1.0,
+        "sugarsG": 0.44,
+        "sodiumMg": 353.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58407042",
+      "displayName": "Ramen bowl dengan ayam (rujukan AS)",
+      "originalName": "Ramen bowl with chicken",
+      "category": "asian-fndds",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3774; food code=58407042; original name=Ramen bowl with chicken",
+      "raw": {
+        "energyKcal": 126,
+        "carbohydrateG": 15.4,
+        "proteinG": 7.04,
+        "fatG": 3.86,
+        "fiberG": 1,
+        "sugarsG": 0.44,
+        "sodiumMg": 354
+      },
+      "per100g": {
+        "energyKcal": 126.0,
+        "carbohydrateG": 15.4,
+        "proteinG": 7.04,
+        "fatG": 3.86,
+        "fiberG": 1.0,
+        "sugarsG": 0.44,
+        "sodiumMg": 354.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58407046",
+      "displayName": "Ramen bowl dengan ikan (rujukan AS)",
+      "originalName": "Ramen bowl with fish",
+      "category": "asian-fndds",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3775; food code=58407046; original name=Ramen bowl with fish",
+      "raw": {
+        "energyKcal": 112,
+        "carbohydrateG": 15.4,
+        "proteinG": 5.78,
+        "fatG": 2.87,
+        "fiberG": 1,
+        "sugarsG": 0.44,
+        "sodiumMg": 359
+      },
+      "per100g": {
+        "energyKcal": 112.0,
+        "carbohydrateG": 15.4,
+        "proteinG": 5.78,
+        "fatG": 2.87,
+        "fiberG": 1.0,
+        "sugarsG": 0.44,
+        "sodiumMg": 359.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58407052",
+      "displayName": "Ramen bowl vegetarian (rujukan AS)",
+      "originalName": "Ramen bowl, vegetarian",
+      "category": "asian-fndds",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3776; food code=58407052; original name=Ramen bowl, vegetarian",
+      "raw": {
+        "energyKcal": 108,
+        "carbohydrateG": 15.57,
+        "proteinG": 4.01,
+        "fatG": 3.33,
+        "fiberG": 1.1,
+        "sugarsG": 0.54,
+        "sodiumMg": 344
+      },
+      "per100g": {
+        "energyKcal": 108.0,
+        "carbohydrateG": 15.57,
+        "proteinG": 4.01,
+        "fatG": 3.33,
+        "fiberG": 1.1,
+        "sugarsG": 0.54,
+        "sodiumMg": 344.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58407056",
+      "displayName": "Ramen bowl dengan daging dan telur (rujukan AS)",
+      "originalName": "Ramen bowl with meat and egg",
+      "category": "asian-fndds",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3777; food code=58407056; original name=Ramen bowl with meat and egg",
+      "raw": {
+        "energyKcal": 127,
+        "carbohydrateG": 13.95,
+        "proteinG": 7.13,
+        "fatG": 4.57,
+        "fiberG": 0.9,
+        "sugarsG": 0.42,
+        "sodiumMg": 333
+      },
+      "per100g": {
+        "energyKcal": 127.0,
+        "carbohydrateG": 13.95,
+        "proteinG": 7.13,
+        "fatG": 4.57,
+        "fiberG": 0.9,
+        "sugarsG": 0.42,
+        "sodiumMg": 333.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58151180",
+      "displayName": "Sushi roll California (rujukan AS)",
+      "originalName": "Sushi roll, California",
+      "category": "asian-fndds",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3580; food code=58151180; original name=Sushi roll, California",
+      "raw": {
+        "energyKcal": 94,
+        "carbohydrateG": 18.39,
+        "proteinG": 2.92,
+        "fatG": 0.67,
+        "fiberG": 1,
+        "sugarsG": 2.13,
+        "sodiumMg": 428
+      },
+      "per100g": {
+        "energyKcal": 94.0,
+        "carbohydrateG": 18.39,
+        "proteinG": 2.92,
+        "fatG": 0.67,
+        "fiberG": 1.0,
+        "sugarsG": 2.13,
+        "sodiumMg": 428.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58151200",
+      "displayName": "Sushi roll salmon (rujukan AS)",
+      "originalName": "Sushi roll, salmon",
+      "category": "asian-fndds",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3582; food code=58151200; original name=Sushi roll, salmon",
+      "raw": {
+        "energyKcal": 103,
+        "carbohydrateG": 15.3,
+        "proteinG": 6.88,
+        "fatG": 1.28,
+        "fiberG": 0.7,
+        "sugarsG": 0.92,
+        "sodiumMg": 350
+      },
+      "per100g": {
+        "energyKcal": 103.0,
+        "carbohydrateG": 15.3,
+        "proteinG": 6.88,
+        "fatG": 1.28,
+        "fiberG": 0.7,
+        "sugarsG": 0.92,
+        "sodiumMg": 350.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58151220",
+      "displayName": "Sushi roll tuna (rujukan AS)",
+      "originalName": "Sushi roll tuna",
+      "category": "asian-fndds",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3584; food code=58151220; original name=Sushi roll tuna",
+      "raw": {
+        "energyKcal": 97,
+        "carbohydrateG": 15.3,
+        "proteinG": 7.4,
+        "fatG": 0.26,
+        "fiberG": 0.7,
+        "sugarsG": 0.92,
+        "sodiumMg": 342
+      },
+      "per100g": {
+        "energyKcal": 97.0,
+        "carbohydrateG": 15.3,
+        "proteinG": 7.4,
+        "fatG": 0.26,
+        "fiberG": 0.7,
+        "sugarsG": 0.92,
+        "sodiumMg": 342.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58151230",
+      "displayName": "Sushi roll sayuran (rujukan AS)",
+      "originalName": "Sushi roll, vegetable",
+      "category": "asian-fndds",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3585; food code=58151230; original name=Sushi roll, vegetable",
+      "raw": {
+        "energyKcal": 93,
+        "carbohydrateG": 17.65,
+        "proteinG": 1.8,
+        "fatG": 1.47,
+        "fiberG": 1.4,
+        "sugarsG": 1.21,
+        "sodiumMg": 361
+      },
+      "per100g": {
+        "energyKcal": 93.0,
+        "carbohydrateG": 17.65,
+        "proteinG": 1.8,
+        "fatG": 1.47,
+        "fiberG": 1.4,
+        "sugarsG": 1.21,
+        "sodiumMg": 361.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58151420",
+      "displayName": "Sushi topping salmon (rujukan AS)",
+      "originalName": "Sushi, topped with salmon",
+      "category": "asian-fndds",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3588; food code=58151420; original name=Sushi, topped with salmon",
+      "raw": {
+        "energyKcal": 107,
+        "carbohydrateG": 13.39,
+        "proteinG": 8.92,
+        "fatG": 1.74,
+        "fiberG": 0.6,
+        "sugarsG": 0.8,
+        "sodiumMg": 317
+      },
+      "per100g": {
+        "energyKcal": 107.0,
+        "carbohydrateG": 13.39,
+        "proteinG": 8.92,
+        "fatG": 1.74,
+        "fiberG": 0.6,
+        "sugarsG": 0.8,
+        "sodiumMg": 317.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58151440",
+      "displayName": "Sushi topping tuna (rujukan AS)",
+      "originalName": "Sushi, topped with tuna",
+      "category": "asian-fndds",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3590; food code=58151440; original name=Sushi, topped with tuna",
+      "raw": {
+        "energyKcal": 100,
+        "carbohydrateG": 13.39,
+        "proteinG": 9.66,
+        "fatG": 0.29,
+        "fiberG": 0.6,
+        "sugarsG": 0.8,
+        "sodiumMg": 306
+      },
+      "per100g": {
+        "energyKcal": 100.0,
+        "carbohydrateG": 13.39,
+        "proteinG": 9.66,
+        "fatG": 0.29,
+        "fiberG": 0.6,
+        "sugarsG": 0.8,
+        "sodiumMg": 306.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "58151450",
+      "displayName": "Sushi topping telur (rujukan AS)",
+      "originalName": "Sushi, topped with egg",
+      "category": "asian-fndds",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=3591; food code=58151450; original name=Sushi, topped with egg",
+      "raw": {
+        "energyKcal": 119,
+        "carbohydrateG": 10.25,
+        "proteinG": 7.32,
+        "fatG": 5.23,
+        "fiberG": 0.4,
+        "sugarsG": 0.69,
+        "sodiumMg": 338
+      },
+      "per100g": {
+        "energyKcal": 119.0,
+        "carbohydrateG": 10.25,
+        "proteinG": 7.32,
+        "fatG": 5.23,
+        "fiberG": 0.4,
+        "sugarsG": 0.69,
+        "sodiumMg": 338.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "fndds",
+      "code": "75502520",
+      "displayName": "Kimchi (rujukan AS)",
+      "originalName": "Kimchi",
+      "category": "asian-fndds",
+      "url": "https://www.ars.usda.gov/ARSUserFiles/80400530/apps/2021-2023%20FNDDS%20At%20A%20Glance%20-%20FNDDS%20Nutrient%20Values.xlsx",
+      "upstreamSha256": "518ea282df6e9dc949cbcfff0e95d458ae479ce7b19244fd36e66457939ea77a",
+      "location": "sheet=FNDDS Nutrient Values; row=4696; food code=75502520; original name=Kimchi",
+      "raw": {
+        "energyKcal": 15,
+        "carbohydrateG": 2.4,
+        "proteinG": 1.1,
+        "fatG": 0.5,
+        "fiberG": 1.6,
+        "sugarsG": 1.06,
+        "sodiumMg": 498
+      },
+      "per100g": {
+        "energyKcal": 15.0,
+        "carbohydrateG": 2.4,
+        "proteinG": 1.1,
+        "fatG": 0.5,
+        "fiberG": 1.6,
+        "sugarsG": 1.06,
+        "sodiumMg": 498.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 4,
+          "carbohydrateG": 6,
+          "proteinG": 5,
+          "fatG": 9,
+          "fiberG": 8,
+          "sugarsG": 7,
+          "sodiumMg": 45
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "01038",
+      "displayName": "Udon segar mentah",
+      "originalName": "こむぎ　［うどん・そうめん類］　うどん　生",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=63; food code=01038; original name=こむぎ　［うどん・そうめん類］　うどん　生",
+      "raw": {
+        "energyKcal": 249,
+        "carbohydrateG": 50.1,
+        "proteinG": 6.1,
+        "fatG": 0.6,
+        "fiberG": "(3.6)",
+        "sugarsG": null,
+        "sodiumMg": 1000
+      },
+      "per100g": {
+        "energyKcal": 249.0,
+        "carbohydrateG": 50.1,
+        "proteinG": 6.1,
+        "fatG": 0.6,
+        "fiberG": 3.6,
+        "sugarsG": null,
+        "sodiumMg": 1000.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "01039",
+      "displayName": "Udon segar direbus, tanpa kuah",
+      "originalName": "こむぎ　［うどん・そうめん類］　うどん　ゆで",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=64; food code=01039; original name=こむぎ　［うどん・そうめん類］　うどん　ゆで",
+      "raw": {
+        "energyKcal": 95,
+        "carbohydrateG": 19.5,
+        "proteinG": 2.6,
+        "fatG": 0.4,
+        "fiberG": "(1.3)",
+        "sugarsG": null,
+        "sodiumMg": 120
+      },
+      "per100g": {
+        "energyKcal": 95.0,
+        "carbohydrateG": 19.5,
+        "proteinG": 2.6,
+        "fatG": 0.4,
+        "fiberG": 1.3,
+        "sugarsG": null,
+        "sodiumMg": 120.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "01041",
+      "displayName": "Udon kering, belum dimasak",
+      "originalName": "こむぎ　［うどん・そうめん類］　干しうどん　乾",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=66; food code=01041; original name=こむぎ　［うどん・そうめん類］　干しうどん　乾",
+      "raw": {
+        "energyKcal": 333,
+        "carbohydrateG": "(69.9)",
+        "proteinG": 8.5,
+        "fatG": 1.1,
+        "fiberG": 2.4,
+        "sugarsG": null,
+        "sodiumMg": 1700
+      },
+      "per100g": {
+        "energyKcal": 333.0,
+        "carbohydrateG": 69.9,
+        "proteinG": 8.5,
+        "fatG": 1.1,
+        "fiberG": 2.4,
+        "sugarsG": null,
+        "sodiumMg": 1700.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "01042",
+      "displayName": "Udon dari mi kering, direbus tanpa kuah",
+      "originalName": "こむぎ　［うどん・そうめん類］　干しうどん　ゆで",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=67; food code=01042; original name=こむぎ　［うどん・そうめん類］　干しうどん　ゆで",
+      "raw": {
+        "energyKcal": 117,
+        "carbohydrateG": "(24.2)",
+        "proteinG": 3.1,
+        "fatG": 0.5,
+        "fiberG": 0.7,
+        "sugarsG": null,
+        "sodiumMg": 210
+      },
+      "per100g": {
+        "energyKcal": 117.0,
+        "carbohydrateG": 24.2,
+        "proteinG": 3.1,
+        "fatG": 0.5,
+        "fiberG": 0.7,
+        "sugarsG": null,
+        "sodiumMg": 210.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "01044",
+      "displayName": "Somen atau hiyamugi direbus, tanpa kuah",
+      "originalName": "こむぎ　［うどん・そうめん類］　そうめん・ひやむぎ　ゆで",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=69; food code=01044; original name=こむぎ　［うどん・そうめん類］　そうめん・ひやむぎ　ゆで",
+      "raw": {
+        "energyKcal": 114,
+        "carbohydrateG": 23.3,
+        "proteinG": 3.5,
+        "fatG": 0.4,
+        "fiberG": 0.9,
+        "sugarsG": null,
+        "sodiumMg": 85
+      },
+      "per100g": {
+        "energyKcal": 114.0,
+        "carbohydrateG": 23.3,
+        "proteinG": 3.5,
+        "fatG": 0.4,
+        "fiberG": 0.9,
+        "sugarsG": null,
+        "sodiumMg": 85.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "01047",
+      "displayName": "Mi chuka mentah, bahan mi ramen",
+      "originalName": "こむぎ　［中華めん類］　中華めん　生",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=72; food code=01047; original name=こむぎ　［中華めん類］　中華めん　生",
+      "raw": {
+        "energyKcal": 249,
+        "carbohydrateG": 47.6,
+        "proteinG": 8.6,
+        "fatG": 1.2,
+        "fiberG": "(5.4)",
+        "sugarsG": null,
+        "sodiumMg": 410
+      },
+      "per100g": {
+        "energyKcal": 249.0,
+        "carbohydrateG": 47.6,
+        "proteinG": 8.6,
+        "fatG": 1.2,
+        "fiberG": 5.4,
+        "sugarsG": null,
+        "sodiumMg": 410.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "01048",
+      "displayName": "Mi chuka direbus, tanpa kuah atau topping ramen",
+      "originalName": "こむぎ　［中華めん類］　中華めん　ゆで",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=73; food code=01048; original name=こむぎ　［中華めん類］　中華めん　ゆで",
+      "raw": {
+        "energyKcal": 133,
+        "carbohydrateG": 25.2,
+        "proteinG": 4.9,
+        "fatG": 0.6,
+        "fiberG": "(2.8)",
+        "sugarsG": null,
+        "sodiumMg": 70
+      },
+      "per100g": {
+        "energyKcal": 133.0,
+        "carbohydrateG": 25.2,
+        "proteinG": 4.9,
+        "fatG": 0.6,
+        "fiberG": 2.8,
+        "sugarsG": null,
+        "sodiumMg": 70.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "01049",
+      "displayName": "Mi chuka dikukus, tanpa saus",
+      "originalName": "こむぎ　［中華めん類］　蒸し中華めん　蒸し中華めん",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=75; food code=01049; original name=こむぎ　［中華めん類］　蒸し中華めん　蒸し中華めん",
+      "raw": {
+        "energyKcal": 162,
+        "carbohydrateG": 30.6,
+        "proteinG": 4.9,
+        "fatG": 1.7,
+        "fiberG": 3.1,
+        "sugarsG": null,
+        "sodiumMg": 110
+      },
+      "per100g": {
+        "energyKcal": 162.0,
+        "carbohydrateG": 30.6,
+        "proteinG": 4.9,
+        "fatG": 1.7,
+        "fiberG": 3.1,
+        "sugarsG": null,
+        "sodiumMg": 110.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "01188",
+      "displayName": "Mi chuka kukus ditumis",
+      "originalName": "こむぎ　［中華めん類］　蒸し中華めん  ソテー",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=76; food code=01188; original name=こむぎ　［中華めん類］　蒸し中華めん  ソテー",
+      "raw": {
+        "energyKcal": 211,
+        "carbohydrateG": 35.9,
+        "proteinG": 5.2,
+        "fatG": 4.9,
+        "fiberG": 3.6,
+        "sugarsG": null,
+        "sodiumMg": 130
+      },
+      "per100g": {
+        "energyKcal": 211.0,
+        "carbohydrateG": 35.9,
+        "proteinG": 5.2,
+        "fatG": 4.9,
+        "fiberG": 3.6,
+        "sugarsG": null,
+        "sodiumMg": 130.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "01053",
+      "displayName": "Okinawa soba direbus, tanpa kuah",
+      "originalName": "こむぎ　［中華めん類］　沖縄そば　ゆで",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=80; food code=01053; original name=こむぎ　［中華めん類］　沖縄そば　ゆで",
+      "raw": {
+        "energyKcal": 132,
+        "carbohydrateG": "(24.8)",
+        "proteinG": 5.2,
+        "fatG": 0.8,
+        "fiberG": 1.5,
+        "sugarsG": null,
+        "sodiumMg": 170
+      },
+      "per100g": {
+        "energyKcal": 132.0,
+        "carbohydrateG": 24.8,
+        "proteinG": 5.2,
+        "fatG": 0.8,
+        "fiberG": 1.5,
+        "sugarsG": null,
+        "sodiumMg": 170.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "01127",
+      "displayName": "Soba segar mentah",
+      "originalName": "そば　そば　生",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=199; food code=01127; original name=そば　そば　生",
+      "raw": {
+        "energyKcal": 271,
+        "carbohydrateG": "(51.3)",
+        "proteinG": 9.8,
+        "fatG": 1.9,
+        "fiberG": "(6.0)",
+        "sugarsG": null,
+        "sodiumMg": 1
+      },
+      "per100g": {
+        "energyKcal": 271.0,
+        "carbohydrateG": 51.3,
+        "proteinG": 9.8,
+        "fatG": 1.9,
+        "fiberG": 6.0,
+        "sugarsG": null,
+        "sodiumMg": 1.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "01128",
+      "displayName": "Soba segar direbus, tanpa kuah",
+      "originalName": "そば　そば　ゆで",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=200; food code=01128; original name=そば　そば　ゆで",
+      "raw": {
+        "energyKcal": 130,
+        "carbohydrateG": "(24.5)",
+        "proteinG": 4.8,
+        "fatG": "1.0",
+        "fiberG": "(2.9)",
+        "sugarsG": null,
+        "sodiumMg": 2
+      },
+      "per100g": {
+        "energyKcal": 130.0,
+        "carbohydrateG": 24.5,
+        "proteinG": 4.8,
+        "fatG": 1.0,
+        "fiberG": 2.9,
+        "sugarsG": null,
+        "sodiumMg": 2.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "01129",
+      "displayName": "Soba kering, belum dimasak",
+      "originalName": "そば　干しそば　乾",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=202; food code=01129; original name=そば　干しそば　乾",
+      "raw": {
+        "energyKcal": 344,
+        "carbohydrateG": "(65.9)",
+        "proteinG": "14.0",
+        "fatG": 2.3,
+        "fiberG": 3.7,
+        "sugarsG": null,
+        "sodiumMg": 850
+      },
+      "per100g": {
+        "energyKcal": 344.0,
+        "carbohydrateG": 65.9,
+        "proteinG": 14.0,
+        "fatG": 2.3,
+        "fiberG": 3.7,
+        "sugarsG": null,
+        "sodiumMg": 850.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "01130",
+      "displayName": "Soba dari mi kering direbus, tanpa kuah",
+      "originalName": "そば　干しそば　ゆで",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=203; food code=01130; original name=そば　干しそば　ゆで",
+      "raw": {
+        "energyKcal": 113,
+        "carbohydrateG": "(21.5)",
+        "proteinG": 4.8,
+        "fatG": 0.7,
+        "fiberG": 1.5,
+        "sugarsG": null,
+        "sodiumMg": 50
+      },
+      "per100g": {
+        "energyKcal": 113.0,
+        "carbohydrateG": 21.5,
+        "proteinG": 4.8,
+        "fatG": 0.7,
+        "fiberG": 1.5,
+        "sugarsG": null,
+        "sodiumMg": 50.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "01057",
+      "displayName": "Mi instan digoreng, kering beserta bumbu",
+      "originalName": "こむぎ　［即席めん類］　即席中華めん　油揚げ　乾　（添付調味料等を含むもの）",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=84; food code=01057; original name=こむぎ　［即席めん類］　即席中華めん　油揚げ　乾　（添付調味料等を含むもの）",
+      "raw": {
+        "energyKcal": 439,
+        "carbohydrateG": "(54.9)",
+        "proteinG": 10.1,
+        "fatG": 19.1,
+        "fiberG": 2.4,
+        "sugarsG": null,
+        "sodiumMg": 2200
+      },
+      "per100g": {
+        "energyKcal": 439.0,
+        "carbohydrateG": 54.9,
+        "proteinG": 10.1,
+        "fatG": 19.1,
+        "fiberG": 2.4,
+        "sugarsG": null,
+        "sodiumMg": 2200.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "01198",
+      "displayName": "Mi instan digoreng, dimasak beserta bumbu dan kuah",
+      "originalName": "こむぎ　［即席めん類］　即席中華めん　油揚げ　調理後全体　（添付調味料等を含むもの）",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=85; food code=01198; original name=こむぎ　［即席めん類］　即席中華めん　油揚げ　調理後全体　（添付調味料等を含むもの）",
+      "raw": {
+        "energyKcal": 100,
+        "carbohydrateG": "(12.2)",
+        "proteinG": "(2.3)",
+        "fatG": "(4.4)",
+        "fiberG": "(0.5)",
+        "sugarsG": null,
+        "sodiumMg": "(430)"
+      },
+      "per100g": {
+        "energyKcal": 100.0,
+        "carbohydrateG": 12.2,
+        "proteinG": 2.3,
+        "fatG": 4.4,
+        "fiberG": 0.5,
+        "sugarsG": null,
+        "sodiumMg": 430.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "01189",
+      "displayName": "Mi instan digoreng lalu direbus, tanpa bumbu",
+      "originalName": "こむぎ　［即席めん類］　即席中華めん　油揚げ　ゆで　（添付調味料等を含まないもの）",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=86; food code=01189; original name=こむぎ　［即席めん類］　即席中華めん　油揚げ　ゆで　（添付調味料等を含まないもの）",
+      "raw": {
+        "energyKcal": 189,
+        "carbohydrateG": 26.1,
+        "proteinG": 3.9,
+        "fatG": 7.7,
+        "fiberG": 2.6,
+        "sugarsG": null,
+        "sodiumMg": 150
+      },
+      "per100g": {
+        "energyKcal": 189.0,
+        "carbohydrateG": 26.1,
+        "proteinG": 3.9,
+        "fatG": 7.7,
+        "fiberG": 2.6,
+        "sugarsG": null,
+        "sodiumMg": 150.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "01058",
+      "displayName": "Mi instan non-fried, kering beserta bumbu",
+      "originalName": "こむぎ　［即席めん類］　即席中華めん　非油揚げ　乾　（添付調味料等を含むもの）",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=88; food code=01058; original name=こむぎ　［即席めん類］　即席中華めん　非油揚げ　乾　（添付調味料等を含むもの）",
+      "raw": {
+        "energyKcal": 336,
+        "carbohydrateG": "(59.8)",
+        "proteinG": 10.3,
+        "fatG": 5.2,
+        "fiberG": 2.3,
+        "sugarsG": null,
+        "sodiumMg": 2700
+      },
+      "per100g": {
+        "energyKcal": 336.0,
+        "carbohydrateG": 59.8,
+        "proteinG": 10.3,
+        "fatG": 5.2,
+        "fiberG": 2.3,
+        "sugarsG": null,
+        "sodiumMg": 2700.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "01199",
+      "displayName": "Mi instan non-fried, dimasak beserta bumbu dan kuah",
+      "originalName": "こむぎ　［即席めん類］　即席中華めん　非油揚げ　調理後全体　（添付調味料等を含むもの）",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=89; food code=01199; original name=こむぎ　［即席めん類］　即席中華めん　非油揚げ　調理後全体　（添付調味料等を含むもの）",
+      "raw": {
+        "energyKcal": 93,
+        "carbohydrateG": "(15.8)",
+        "proteinG": "(3.0)",
+        "fatG": "(0.8)",
+        "fiberG": "(0.6)",
+        "sugarsG": null,
+        "sodiumMg": "(430)"
+      },
+      "per100g": {
+        "energyKcal": 93.0,
+        "carbohydrateG": 15.8,
+        "proteinG": 3.0,
+        "fatG": 0.8,
+        "fiberG": 0.6,
+        "sugarsG": null,
+        "sodiumMg": 430.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "01190",
+      "displayName": "Mi instan non-fried direbus, tanpa bumbu",
+      "originalName": "こむぎ　［即席めん類］　即席中華めん　非油揚げ　ゆで　（添付調味料等を含まないもの）",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=90; food code=01190; original name=こむぎ　［即席めん類］　即席中華めん　非油揚げ　ゆで　（添付調味料等を含まないもの）",
+      "raw": {
+        "energyKcal": 139,
+        "carbohydrateG": 26.6,
+        "proteinG": 3.4,
+        "fatG": 0.8,
+        "fiberG": 2.7,
+        "sugarsG": null,
+        "sodiumMg": 230
+      },
+      "per100g": {
+        "energyKcal": 139.0,
+        "carbohydrateG": 26.6,
+        "proteinG": 3.4,
+        "fatG": 0.8,
+        "fiberG": 2.7,
+        "sugarsG": null,
+        "sodiumMg": 230.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "01201",
+      "displayName": "Mi cup shio goreng, siap makan beserta kuah",
+      "originalName": "こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　塩味　調理後全体　（添付調味料等を含むもの）",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=93; food code=01201; original name=こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　塩味　調理後全体　（添付調味料等を含むもの）",
+      "raw": {
+        "energyKcal": 92,
+        "carbohydrateG": "(3.5)",
+        "proteinG": "(2.5)",
+        "fatG": "(4.2)",
+        "fiberG": "(1.3)",
+        "sugarsG": null,
+        "sodiumMg": "(520)"
+      },
+      "per100g": {
+        "energyKcal": 92.0,
+        "carbohydrateG": 3.5,
+        "proteinG": 2.5,
+        "fatG": 4.2,
+        "fiberG": 1.3,
+        "sugarsG": null,
+        "sodiumMg": 520.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "01194",
+      "displayName": "Mi cup shio goreng, matang dengan kuah ditinggalkan",
+      "originalName": "こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　塩味　調理後のめん　（スープを残したもの）",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=94; food code=01194; original name=こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　塩味　調理後のめん　（スープを残したもの）",
+      "raw": {
+        "energyKcal": 175,
+        "carbohydrateG": 22.7,
+        "proteinG": 3.8,
+        "fatG": 7.7,
+        "fiberG": 2.2,
+        "sugarsG": null,
+        "sodiumMg": 440
+      },
+      "per100g": {
+        "energyKcal": 175.0,
+        "carbohydrateG": 22.7,
+        "proteinG": 3.8,
+        "fatG": 7.7,
+        "fiberG": 2.2,
+        "sugarsG": null,
+        "sodiumMg": 440.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "01200",
+      "displayName": "Mi cup shoyu goreng, siap makan beserta kuah",
+      "originalName": "こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　しょうゆ味　調理後全体　（添付調味料等を含むもの）",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=96; food code=01200; original name=こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　しょうゆ味　調理後全体　（添付調味料等を含むもの）",
+      "raw": {
+        "energyKcal": 90,
+        "carbohydrateG": "(6.0)",
+        "proteinG": "(2.3)",
+        "fatG": "(4.5)",
+        "fiberG": "(1.4)",
+        "sugarsG": null,
+        "sodiumMg": "(590)"
+      },
+      "per100g": {
+        "energyKcal": 90.0,
+        "carbohydrateG": 6.0,
+        "proteinG": 2.3,
+        "fatG": 4.5,
+        "fiberG": 1.4,
+        "sugarsG": null,
+        "sodiumMg": 590.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "01192",
+      "displayName": "Mi cup shoyu goreng, matang dengan kuah ditinggalkan",
+      "originalName": "こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　しょうゆ味　調理後のめん　（スープを残したもの）",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=97; food code=01192; original name=こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　しょうゆ味　調理後のめん　（スープを残したもの）",
+      "raw": {
+        "energyKcal": 142,
+        "carbohydrateG": 16.7,
+        "proteinG": "3.0",
+        "fatG": 5.8,
+        "fiberG": 1.9,
+        "sugarsG": null,
+        "sodiumMg": 450
+      },
+      "per100g": {
+        "energyKcal": 142.0,
+        "carbohydrateG": 16.7,
+        "proteinG": 3.0,
+        "fatG": 5.8,
+        "fiberG": 1.9,
+        "sugarsG": null,
+        "sodiumMg": 450.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "01060",
+      "displayName": "Yakisoba instan cup, kering beserta bumbu",
+      "originalName": "こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　焼きそば　乾　（添付調味料等を含むもの）",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=98; food code=01060; original name=こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　焼きそば　乾　（添付調味料等を含むもの）",
+      "raw": {
+        "energyKcal": 418,
+        "carbohydrateG": 54.5,
+        "proteinG": 8.2,
+        "fatG": 18.6,
+        "fiberG": 5.7,
+        "sugarsG": null,
+        "sodiumMg": 1500
+      },
+      "per100g": {
+        "energyKcal": 418.0,
+        "carbohydrateG": 54.5,
+        "proteinG": 8.2,
+        "fatG": 18.6,
+        "fiberG": 5.7,
+        "sugarsG": null,
+        "sodiumMg": 1500.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "01202",
+      "displayName": "Yakisoba instan cup, dimasak beserta bumbu",
+      "originalName": "こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　焼きそば　調理後全体　（添付調味料等を含むもの）",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=99; food code=01202; original name=こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　焼きそば　調理後全体　（添付調味料等を含むもの）",
+      "raw": {
+        "energyKcal": 222,
+        "carbohydrateG": "(13.5)",
+        "proteinG": "(5.0)",
+        "fatG": "(11.3)",
+        "fiberG": "(3.3)",
+        "sugarsG": null,
+        "sodiumMg": "(910)"
+      },
+      "per100g": {
+        "energyKcal": 222.0,
+        "carbohydrateG": 13.5,
+        "proteinG": 5.0,
+        "fatG": 11.3,
+        "fiberG": 3.3,
+        "sugarsG": null,
+        "sodiumMg": 910.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "18053",
+      "displayName": "Okonomiyaki siap saji",
+      "originalName": "和風料理　その他　お好み焼き",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=2511; food code=18053; original name=和風料理　その他　お好み焼き",
+      "raw": {
+        "energyKcal": 136,
+        "carbohydrateG": 12.9,
+        "proteinG": 5.2,
+        "fatG": 6.5,
+        "fiberG": 2.6,
+        "sugarsG": null,
+        "sodiumMg": 310
+      },
+      "per100g": {
+        "energyKcal": 136.0,
+        "carbohydrateG": 12.9,
+        "proteinG": 5.2,
+        "fatG": 6.5,
+        "fiberG": 2.6,
+        "sugarsG": null,
+        "sodiumMg": 310.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "18054",
+      "displayName": "Karaage ayam siap saji",
+      "originalName": "和風料理　その他　とりから揚げ",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=2512; food code=18054; original name=和風料理　その他　とりから揚げ",
+      "raw": {
+        "energyKcal": 204,
+        "carbohydrateG": 15.3,
+        "proteinG": 15.6,
+        "fatG": 10.1,
+        "fiberG": 1.7,
+        "sugarsG": null,
+        "sodiumMg": 700
+      },
+      "per100g": {
+        "energyKcal": 204.0,
+        "carbohydrateG": 15.3,
+        "proteinG": 15.6,
+        "fatG": 10.1,
+        "fiberG": 1.7,
+        "sugarsG": null,
+        "sodiumMg": 700.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "18040",
+      "displayName": "Kari ayam Jepang, saus dan isi tanpa nasi",
+      "originalName": "洋風料理　カレー類　チキンカレー",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=2514; food code=18040; original name=洋風料理　カレー類　チキンカレー",
+      "raw": {
+        "energyKcal": 131,
+        "carbohydrateG": "(5.6)",
+        "proteinG": "(5.6)",
+        "fatG": "(8.8)",
+        "fiberG": "(1.2)",
+        "sugarsG": null,
+        "sodiumMg": "(540)"
+      },
+      "per100g": {
+        "energyKcal": 131.0,
+        "carbohydrateG": 5.6,
+        "proteinG": 5.6,
+        "fatG": 8.8,
+        "fiberG": 1.2,
+        "sugarsG": null,
+        "sodiumMg": 540.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "18001",
+      "displayName": "Kari sapi Jepang, saus dan isi tanpa nasi",
+      "originalName": "洋風料理　カレー類　ビーフカレー",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=2515; food code=18001; original name=洋風料理　カレー類　ビーフカレー",
+      "raw": {
+        "energyKcal": 119,
+        "carbohydrateG": "(5.7)",
+        "proteinG": "(2.4)",
+        "fatG": "(9.0)",
+        "fiberG": "(0.9)",
+        "sugarsG": null,
+        "sodiumMg": "(680)"
+      },
+      "per100g": {
+        "energyKcal": 119.0,
+        "carbohydrateG": 5.7,
+        "proteinG": 2.4,
+        "fatG": 9.0,
+        "fiberG": 0.9,
+        "sugarsG": null,
+        "sodiumMg": 680.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "18018",
+      "displayName": "Korokke kentang siap saji",
+      "originalName": "洋風料理　コロッケ類　ポテトコロッケ",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=2519; food code=18018; original name=洋風料理　コロッケ類　ポテトコロッケ",
+      "raw": {
+        "energyKcal": 226,
+        "carbohydrateG": "(23.2)",
+        "proteinG": "(5.3)",
+        "fatG": "(12.6)",
+        "fiberG": "(2.0)",
+        "sugarsG": null,
+        "sodiumMg": "(280)"
+      },
+      "per100g": {
+        "energyKcal": 226.0,
+        "carbohydrateG": 23.2,
+        "proteinG": 5.3,
+        "fatG": 12.6,
+        "fiberG": 2.0,
+        "sugarsG": null,
+        "sodiumMg": 280.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "18020",
+      "displayName": "Ebi fry siap saji",
+      "originalName": "洋風料理　フライ類　えびフライ",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=2530; food code=18020; original name=洋風料理　フライ類　えびフライ",
+      "raw": {
+        "energyKcal": 236,
+        "carbohydrateG": "(20.0)",
+        "proteinG": "(15.9)",
+        "fatG": "(11.6)",
+        "fiberG": "(1.0)",
+        "sugarsG": null,
+        "sodiumMg": "(340)"
+      },
+      "per100g": {
+        "energyKcal": 236.0,
+        "carbohydrateG": 20.0,
+        "proteinG": 15.9,
+        "fatG": 11.6,
+        "fiberG": 1.0,
+        "sugarsG": null,
+        "sodiumMg": 340.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "18002",
+      "displayName": "Gyoza siap saji",
+      "originalName": "中国料理　点心類　ぎょうざ",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=2542; food code=18002; original name=中国料理　点心類　ぎょうざ",
+      "raw": {
+        "energyKcal": 209,
+        "carbohydrateG": "(19.7)",
+        "proteinG": "(6.9)",
+        "fatG": "(11.3)",
+        "fiberG": "(1.5)",
+        "sugarsG": null,
+        "sodiumMg": "(460)"
+      },
+      "per100g": {
+        "energyKcal": 209.0,
+        "carbohydrateG": 19.7,
+        "proteinG": 6.9,
+        "fatG": 11.3,
+        "fiberG": 1.5,
+        "sugarsG": null,
+        "sodiumMg": 460.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "18012",
+      "displayName": "Shumai siap saji",
+      "originalName": "中国料理　点心類　しゅうまい",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=2543; food code=18012; original name=中国料理　点心類　しゅうまい",
+      "raw": {
+        "energyKcal": 191,
+        "carbohydrateG": "(15.9)",
+        "proteinG": "(9.1)",
+        "fatG": "(9.2)",
+        "fiberG": "(1.7)",
+        "sugarsG": null,
+        "sodiumMg": "(520)"
+      },
+      "per100g": {
+        "energyKcal": 191.0,
+        "carbohydrateG": 15.9,
+        "proteinG": 9.1,
+        "fatG": 9.2,
+        "fiberG": 1.7,
+        "sugarsG": null,
+        "sodiumMg": 520.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "18030",
+      "displayName": "Isian oyakodon, tanpa nasi",
+      "originalName": "和風料理　煮物類　親子丼の具",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=2502; food code=18030; original name=和風料理　煮物類　親子丼の具",
+      "raw": {
+        "energyKcal": 101,
+        "carbohydrateG": "(3.0)",
+        "proteinG": "(8.4)",
+        "fatG": "(5.2)",
+        "fiberG": "(0.4)",
+        "sugarsG": null,
+        "sodiumMg": "(380)"
+      },
+      "per100g": {
+        "energyKcal": 101.0,
+        "carbohydrateG": 3.0,
+        "proteinG": 8.4,
+        "fatG": 5.2,
+        "fiberG": 0.4,
+        "sugarsG": null,
+        "sodiumMg": 380.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "18031",
+      "displayName": "Isian gyumeshi atau gyudon, tanpa nasi",
+      "originalName": "和風料理　煮物類　牛飯の具",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=2503; food code=18031; original name=和風料理　煮物類　牛飯の具",
+      "raw": {
+        "energyKcal": 122,
+        "carbohydrateG": "(4.0)",
+        "proteinG": "(4.1)",
+        "fatG": "(9.4)",
+        "fiberG": "(1.0)",
+        "sugarsG": null,
+        "sodiumMg": "(400)"
+      },
+      "per100g": {
+        "energyKcal": 122.0,
+        "carbohydrateG": 4.0,
+        "proteinG": 4.1,
+        "fatG": 9.4,
+        "fiberG": 1.0,
+        "sugarsG": null,
+        "sodiumMg": 400.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "10416",
+      "displayName": "Tempura udang vannamei",
+      "originalName": "＜えび・かに類＞　（えび類）　バナメイえび　養殖　天ぷら",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=1592; food code=10416; original name=＜えび・かに類＞　（えび類）　バナメイえび　養殖　天ぷら",
+      "raw": {
+        "energyKcal": 194,
+        "carbohydrateG": 6.5,
+        "proteinG": "20.0",
+        "fatG": 10.3,
+        "fiberG": 0.9,
+        "sugarsG": null,
+        "sodiumMg": 140
+      },
+      "per100g": {
+        "energyKcal": 194.0,
+        "carbohydrateG": 6.5,
+        "proteinG": 20.0,
+        "fatG": 10.3,
+        "fiberG": 0.9,
+        "sugarsG": null,
+        "sodiumMg": 140.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mext",
+      "code": "18039",
+      "displayName": "Namul tauge (rujukan Jepang)",
+      "originalName": "韓国料理　和え物類　もやしのナムル",
+      "category": "japan-mext",
+      "url": "https://www.mext.go.jp/content/20260327-mxt_kagsei-mext-000029402_02.xlsx",
+      "upstreamSha256": "0d5a77077dd6cd91cbc2e6e317b8b218a38728c409eed452f1c10635a0d3099c",
+      "location": "sheet=表全体; row=2550; food code=18039; original name=韓国料理　和え物類　もやしのナムル",
+      "raw": {
+        "energyKcal": 70,
+        "carbohydrateG": "(2.5)",
+        "proteinG": "(3.1)",
+        "fatG": "(4.5)",
+        "fiberG": "(2.7)",
+        "sugarsG": null,
+        "sodiumMg": "(510)"
+      },
+      "per100g": {
+        "energyKcal": 70.0,
+        "carbohydrateG": 2.5,
+        "proteinG": 3.1,
+        "fatG": 4.5,
+        "fiberG": 2.7,
+        "sugarsG": null,
+        "sodiumMg": 510.0
+      },
+      "metadata": {
+        "columnIndicesZeroBased": {
+          "energyKcal": 6,
+          "carbohydrateG": 15,
+          "proteinG": 9,
+          "fatG": 12,
+          "fiberG": 18,
+          "sugarsG": null,
+          "sodiumMg": 23
+        }
+      }
+    },
+    {
+      "source": "mfds",
+      "code": "D303-168000000-0001",
+      "displayName": "Jajangmyeon restoran",
+      "originalName": "자장면",
+      "category": "korea-mfds",
+      "url": "https://various.foodsafetykorea.go.kr/nutrient/general/food/detail.do?searchFoodCd=D303-168000000-0001&searchRegionCd=ZZ&searchMonthCd=AVG",
+      "upstreamSha256": "64dfa6dfe845146d647bf648b3f89d5ed1b011a7169f8dbb4900c86c5ffa1f68",
+      "location": "foodCd=D303-168000000-0001; region=ZZ; month=AVG; original name=자장면",
+      "raw": {
+        "energyKcal": "123.00㎉",
+        "carbohydrateG": "20.56g",
+        "proteinG": "3.04g",
+        "fatG": "3.13g",
+        "fiberG": "3.30g",
+        "sugarsG": "1.20g",
+        "sodiumMg": "368.00㎎"
+      },
+      "per100g": {
+        "energyKcal": 123.0,
+        "carbohydrateG": 20.56,
+        "proteinG": 3.04,
+        "fatG": 3.13,
+        "fiberG": 3.3,
+        "sugarsG": 1.2,
+        "sodiumMg": 368.0
+      },
+      "metadata": {
+        "데이터구분": "음식",
+        "식품기원": "외식",
+        "대표식품명": "자장면",
+        "식품분류": "면 및 만두류해당없음해당없음",
+        "품목대표/상용제품": "품목대표",
+        "총 내용량": "650g",
+        "영양성분 함량 기준량": "100g",
+        "1회 섭취참고량": "-",
+        "데이터 생성 방법명": "분석",
+        "데이터 생성일자": "2012-02-28",
+        "데이터 기준일자": "2026-08-28"
+      }
+    },
+    {
+      "source": "mfds",
+      "code": "D303-168310000-0001",
+      "displayName": "Samseon jajangmyeon seafood restoran",
+      "originalName": "자장면_삼선",
+      "category": "korea-mfds",
+      "url": "https://various.foodsafetykorea.go.kr/nutrient/general/food/detail.do?searchFoodCd=D303-168310000-0001&searchRegionCd=ZZ&searchMonthCd=AVG",
+      "upstreamSha256": "ee743f10da0b50ff8de236891f2cd6fea399f0585fadbd3889402c2ad905fc9b",
+      "location": "foodCd=D303-168310000-0001; region=ZZ; month=AVG; original name=자장면_삼선",
+      "raw": {
+        "energyKcal": "115.00㎉",
+        "carbohydrateG": "18.08g",
+        "proteinG": "4.81g",
+        "fatG": "2.59g",
+        "fiberG": "1.50g",
+        "sugarsG": "1.45g",
+        "sodiumMg": "375.00㎎"
+      },
+      "per100g": {
+        "energyKcal": 115.0,
+        "carbohydrateG": 18.08,
+        "proteinG": 4.81,
+        "fatG": 2.59,
+        "fiberG": 1.5,
+        "sugarsG": 1.45,
+        "sodiumMg": 375.0
+      },
+      "metadata": {
+        "데이터구분": "음식",
+        "식품기원": "외식",
+        "대표식품명": "자장면",
+        "식품분류": "면 및 만두류삼선해당없음",
+        "품목대표/상용제품": "품목대표",
+        "총 내용량": "700g",
+        "영양성분 함량 기준량": "100g",
+        "1회 섭취참고량": "-",
+        "데이터 생성 방법명": "분석",
+        "데이터 생성일자": "2013-03-31",
+        "데이터 기준일자": "2026-08-28"
+      }
+    },
+    {
+      "source": "mfds",
+      "code": "D303-172310000-0001",
+      "displayName": "Samseon jjamppong seafood restoran",
+      "originalName": "짬뽕_삼선",
+      "category": "korea-mfds",
+      "url": "https://various.foodsafetykorea.go.kr/nutrient/general/food/detail.do?searchFoodCd=D303-172310000-0001&searchRegionCd=ZZ&searchMonthCd=AVG",
+      "upstreamSha256": "cd3b39ceef49de14d4a0cc536855acfdbe9b059dfde2a7b03c30a00757a76692",
+      "location": "foodCd=D303-172310000-0001; region=ZZ; month=AVG; original name=짬뽕_삼선",
+      "raw": {
+        "energyKcal": "74.00㎉",
+        "carbohydrateG": "11.30g",
+        "proteinG": "4.40g",
+        "fatG": "1.20g",
+        "fiberG": "0.90g",
+        "sugarsG": "0.12g",
+        "sodiumMg": "299.00㎎"
+      },
+      "per100g": {
+        "energyKcal": 74.0,
+        "carbohydrateG": 11.3,
+        "proteinG": 4.4,
+        "fatG": 1.2,
+        "fiberG": 0.9,
+        "sugarsG": 0.12,
+        "sodiumMg": 299.0
+      },
+      "metadata": {
+        "데이터구분": "음식",
+        "식품기원": "외식",
+        "대표식품명": "짬뽕",
+        "식품분류": "면 및 만두류삼선해당없음",
+        "품목대표/상용제품": "품목대표",
+        "총 내용량": "900g",
+        "영양성분 함량 기준량": "100g",
+        "1회 섭취참고량": "-",
+        "데이터 생성 방법명": "분석",
+        "데이터 생성일자": "2013-03-31",
+        "데이터 기준일자": "2026-08-28"
+      }
+    },
+    {
+      "source": "mfds",
+      "code": "D303-144180000-0001",
+      "displayName": "Mul naengmyeon restoran",
+      "originalName": "냉면_물냉면",
+      "category": "korea-mfds",
+      "url": "https://various.foodsafetykorea.go.kr/nutrient/general/food/detail.do?searchFoodCd=D303-144180000-0001&searchRegionCd=ZZ&searchMonthCd=AVG",
+      "upstreamSha256": "698c9ddb9f3bf15da83608b989ff563b89721308560a44b2d215e89fb0db0186",
+      "location": "foodCd=D303-144180000-0001; region=ZZ; month=AVG; original name=냉면_물냉면",
+      "raw": {
+        "energyKcal": "66.00㎉",
+        "carbohydrateG": "13.12g",
+        "proteinG": "1.99g",
+        "fatG": "0.63g",
+        "fiberG": "0.00g",
+        "sugarsG": "2.52g",
+        "sodiumMg": "347.00㎎"
+      },
+      "per100g": {
+        "energyKcal": 66.0,
+        "carbohydrateG": 13.12,
+        "proteinG": 1.99,
+        "fatG": 0.63,
+        "fiberG": 0.0,
+        "sugarsG": 2.52,
+        "sodiumMg": 347.0
+      },
+      "metadata": {
+        "데이터구분": "음식",
+        "식품기원": "외식",
+        "대표식품명": "냉면",
+        "식품분류": "면 및 만두류물냉면해당없음",
+        "품목대표/상용제품": "품목대표",
+        "총 내용량": "100g",
+        "영양성분 함량 기준량": "100g",
+        "1회 섭취참고량": "-",
+        "데이터 생성 방법명": "분석",
+        "데이터 생성일자": "2022-06-30",
+        "데이터 기준일자": "2026-08-28"
+      }
+    },
+    {
+      "source": "mfds",
+      "code": "D303-144280000-0001",
+      "displayName": "Bibim naengmyeon restoran",
+      "originalName": "냉면_비빔냉면",
+      "category": "korea-mfds",
+      "url": "https://various.foodsafetykorea.go.kr/nutrient/general/food/detail.do?searchFoodCd=D303-144280000-0001&searchRegionCd=ZZ&searchMonthCd=AVG",
+      "upstreamSha256": "0ef439b8a84f2af77d0806116cafae396d58f158224e7a3bf5278bd00d8794b1",
+      "location": "foodCd=D303-144280000-0001; region=ZZ; month=AVG; original name=냉면_비빔냉면",
+      "raw": {
+        "energyKcal": "131.00㎉",
+        "carbohydrateG": "21.10g",
+        "proteinG": "3.43g",
+        "fatG": "3.61g",
+        "fiberG": "1.20g",
+        "sugarsG": "3.79g",
+        "sodiumMg": "311.00㎎"
+      },
+      "per100g": {
+        "energyKcal": 131.0,
+        "carbohydrateG": 21.1,
+        "proteinG": 3.43,
+        "fatG": 3.61,
+        "fiberG": 1.2,
+        "sugarsG": 3.79,
+        "sodiumMg": 311.0
+      },
+      "metadata": {
+        "데이터구분": "음식",
+        "식품기원": "외식",
+        "대표식품명": "냉면",
+        "식품분류": "면 및 만두류비빔냉면해당없음",
+        "품목대표/상용제품": "품목대표",
+        "총 내용량": "100g",
+        "영양성분 함량 기준량": "100g",
+        "1회 섭취참고량": "-",
+        "데이터 생성 방법명": "분석",
+        "데이터 생성일자": "2022-06-30",
+        "데이터 기준일자": "2026-08-28"
+      }
+    },
+    {
+      "source": "mfds",
+      "code": "D303-148140000-0001",
+      "displayName": "Ramyeon restoran",
+      "originalName": "라면_라면만",
+      "category": "korea-mfds",
+      "url": "https://various.foodsafetykorea.go.kr/nutrient/general/food/detail.do?searchFoodCd=D303-148140000-0001&searchRegionCd=ZZ&searchMonthCd=AVG",
+      "upstreamSha256": "ee26b957335ed4dfacb7c5baf6f22de1dd90fe0e429578b618ebad4e78c408c0",
+      "location": "foodCd=D303-148140000-0001; region=ZZ; month=AVG; original name=라면_라면만",
+      "raw": {
+        "energyKcal": "84.00㎉",
+        "carbohydrateG": "14.44g",
+        "proteinG": "1.76g",
+        "fatG": "2.18g",
+        "fiberG": "0.80g",
+        "sugarsG": "0.11g",
+        "sodiumMg": "306.00㎎"
+      },
+      "per100g": {
+        "energyKcal": 84.0,
+        "carbohydrateG": 14.44,
+        "proteinG": 1.76,
+        "fatG": 2.18,
+        "fiberG": 0.8,
+        "sugarsG": 0.11,
+        "sodiumMg": 306.0
+      },
+      "metadata": {
+        "데이터구분": "음식",
+        "식품기원": "외식",
+        "대표식품명": "라면",
+        "식품분류": "면 및 만두류라면만해당없음",
+        "품목대표/상용제품": "품목대표",
+        "총 내용량": "100g",
+        "영양성분 함량 기준량": "100g",
+        "1회 섭취참고량": "-",
+        "데이터 생성 방법명": "분석",
+        "데이터 생성일자": "2022-06-30",
+        "데이터 기준일자": "2026-08-28"
+      }
+    },
+    {
+      "source": "mfds",
+      "code": "D303-148470000-0001",
+      "displayName": "Ramyeon keju restoran",
+      "originalName": "라면_치즈",
+      "category": "korea-mfds",
+      "url": "https://various.foodsafetykorea.go.kr/nutrient/general/food/detail.do?searchFoodCd=D303-148470000-0001&searchRegionCd=ZZ&searchMonthCd=AVG",
+      "upstreamSha256": "17e4b1907338b80a4d8bf26d49a62d1353c06e709e48ac0d620b99471a4caf88",
+      "location": "foodCd=D303-148470000-0001; region=ZZ; month=AVG; original name=라면_치즈",
+      "raw": {
+        "energyKcal": "99.00㎉",
+        "carbohydrateG": "13.33g",
+        "proteinG": "2.80g",
+        "fatG": "3.83g",
+        "fiberG": "1.30g",
+        "sugarsG": "0.15g",
+        "sodiumMg": "352.00㎎"
+      },
+      "per100g": {
+        "energyKcal": 99.0,
+        "carbohydrateG": 13.33,
+        "proteinG": 2.8,
+        "fatG": 3.83,
+        "fiberG": 1.3,
+        "sugarsG": 0.15,
+        "sodiumMg": 352.0
+      },
+      "metadata": {
+        "데이터구분": "음식",
+        "식품기원": "외식",
+        "대표식품명": "라면",
+        "식품분류": "면 및 만두류치즈해당없음",
+        "품목대표/상용제품": "품목대표",
+        "총 내용량": "600g",
+        "영양성분 함량 기준량": "100g",
+        "1회 섭취참고량": "-",
+        "데이터 생성 방법명": "분석",
+        "데이터 생성일자": "2015-06-30",
+        "데이터 기준일자": "2026-08-28"
+      }
+    },
+    {
+      "source": "mfds",
+      "code": "D303-148050000-0001",
+      "displayName": "Ramyeon kimchi restoran",
+      "originalName": "라면_김치",
+      "category": "korea-mfds",
+      "url": "https://various.foodsafetykorea.go.kr/nutrient/general/food/detail.do?searchFoodCd=D303-148050000-0001&searchRegionCd=ZZ&searchMonthCd=AVG",
+      "upstreamSha256": "97b28c58cca8eeb1df88eb46b2ca23199282294184a6aef80880a61f3f4442bd",
+      "location": "foodCd=D303-148050000-0001; region=ZZ; month=AVG; original name=라면_김치",
+      "raw": {
+        "energyKcal": "85.00㎉",
+        "carbohydrateG": "13.26g",
+        "proteinG": "2.12g",
+        "fatG": "2.60g",
+        "fiberG": "1.30g",
+        "sugarsG": "0.18g",
+        "sodiumMg": "389.00㎎"
+      },
+      "per100g": {
+        "energyKcal": 85.0,
+        "carbohydrateG": 13.26,
+        "proteinG": 2.12,
+        "fatG": 2.6,
+        "fiberG": 1.3,
+        "sugarsG": 0.18,
+        "sodiumMg": 389.0
+      },
+      "metadata": {
+        "데이터구분": "음식",
+        "식품기원": "외식",
+        "대표식품명": "라면",
+        "식품분류": "면 및 만두류김치해당없음",
+        "품목대표/상용제품": "품목대표",
+        "총 내용량": "650g",
+        "영양성분 함량 기준량": "100g",
+        "1회 섭취참고량": "-",
+        "데이터 생성 방법명": "분석",
+        "데이터 생성일자": "2015-06-30",
+        "데이터 기준일자": "2026-08-28"
+      }
+    },
+    {
+      "source": "mfds",
+      "code": "D303-174500000-0001",
+      "displayName": "Kalguksu seafood restoran",
+      "originalName": "칼국수_해물",
+      "category": "korea-mfds",
+      "url": "https://various.foodsafetykorea.go.kr/nutrient/general/food/detail.do?searchFoodCd=D303-174500000-0001&searchRegionCd=ZZ&searchMonthCd=AVG",
+      "upstreamSha256": "8f11aa5df4cc339889aa04b5e903371428139edaeac350a9a5c9a2e468d93fb1",
+      "location": "foodCd=D303-174500000-0001; region=ZZ; month=AVG; original name=칼국수_해물",
+      "raw": {
+        "energyKcal": "70.00㎉",
+        "carbohydrateG": "13.77g",
+        "proteinG": "2.53g",
+        "fatG": "0.51g",
+        "fiberG": "5.00g",
+        "sugarsG": "0.42g",
+        "sodiumMg": "262.00㎎"
+      },
+      "per100g": {
+        "energyKcal": 70.0,
+        "carbohydrateG": 13.77,
+        "proteinG": 2.53,
+        "fatG": 0.51,
+        "fiberG": 5.0,
+        "sugarsG": 0.42,
+        "sodiumMg": 262.0
+      },
+      "metadata": {
+        "데이터구분": "음식",
+        "식품기원": "외식",
+        "대표식품명": "칼국수",
+        "식품분류": "면 및 만두류해물해당없음",
+        "품목대표/상용제품": "품목대표",
+        "총 내용량": "900g",
+        "영양성분 함량 기준량": "100g",
+        "1회 섭취참고량": "-",
+        "데이터 생성 방법명": "분석",
+        "데이터 생성일자": "2012-02-28",
+        "데이터 기준일자": "2026-08-28"
+      }
+    },
+    {
+      "source": "mfds",
+      "code": "D110-492000000-0001",
+      "displayName": "Japchae rumahan",
+      "originalName": "잡채",
+      "category": "korea-mfds",
+      "url": "https://various.foodsafetykorea.go.kr/nutrient/general/food/detail.do?searchFoodCd=D110-492000000-0001&searchRegionCd=ZZ&searchMonthCd=AVG",
+      "upstreamSha256": "00257705ba5f8b4dc3665d84cc2e23bd59862292326d15198f9b08e461d986ea",
+      "location": "foodCd=D110-492000000-0001; region=ZZ; month=AVG; original name=잡채",
+      "raw": {
+        "energyKcal": "146.00㎉",
+        "carbohydrateG": "24.26g",
+        "proteinG": "4.71g",
+        "fatG": "3.30g",
+        "fiberG": "3.70g",
+        "sugarsG": "0.73g",
+        "sodiumMg": "360.00㎎"
+      },
+      "per100g": {
+        "energyKcal": 146.0,
+        "carbohydrateG": 24.26,
+        "proteinG": 4.71,
+        "fatG": 3.3,
+        "fiberG": 3.7,
+        "sugarsG": 0.73,
+        "sodiumMg": 360.0
+      },
+      "metadata": {
+        "데이터구분": "음식",
+        "식품기원": "가정식",
+        "대표식품명": "잡채",
+        "식품분류": "볶음류해당없음해당없음",
+        "품목대표/상용제품": "품목대표",
+        "총 내용량": "200g",
+        "영양성분 함량 기준량": "100g",
+        "1회 섭취참고량": "-",
+        "데이터 생성 방법명": "분석",
+        "데이터 생성일자": "2018-12-31",
+        "데이터 기준일자": "2026-08-28"
+      }
+    },
+    {
+      "source": "mfds",
+      "code": "D110-467000000-0001",
+      "displayName": "Tteokbokki rumahan",
+      "originalName": "떡볶이",
+      "category": "korea-mfds",
+      "url": "https://various.foodsafetykorea.go.kr/nutrient/general/food/detail.do?searchFoodCd=D110-467000000-0001&searchRegionCd=ZZ&searchMonthCd=AVG",
+      "upstreamSha256": "0c1c2977292c59a91e047ccb5afe375df15c9c5283669fb29a1587397d65d707",
+      "location": "foodCd=D110-467000000-0001; region=ZZ; month=AVG; original name=떡볶이",
+      "raw": {
+        "energyKcal": "144.00㎉",
+        "carbohydrateG": "25.96g",
+        "proteinG": "3.51g",
+        "fatG": "2.96g",
+        "fiberG": "1.00g",
+        "sugarsG": "4.40g",
+        "sodiumMg": "391.00㎎"
+      },
+      "per100g": {
+        "energyKcal": 144.0,
+        "carbohydrateG": 25.96,
+        "proteinG": 3.51,
+        "fatG": 2.96,
+        "fiberG": 1.0,
+        "sugarsG": 4.4,
+        "sodiumMg": 391.0
+      },
+      "metadata": {
+        "데이터구분": "음식",
+        "식품기원": "가정식",
+        "대표식품명": "떡볶이",
+        "식품분류": "볶음류해당없음해당없음",
+        "품목대표/상용제품": "품목대표",
+        "총 내용량": "180g",
+        "영양성분 함량 기준량": "100g",
+        "1회 섭취참고량": "-",
+        "데이터 생성 방법명": "분석",
+        "데이터 생성일자": "2018-12-31",
+        "데이터 기준일자": "2026-08-28"
+      }
+    },
+    {
+      "source": "mfds",
+      "code": "D310-467330000-0001",
+      "displayName": "Tteokbokki keju restoran",
+      "originalName": "떡볶이_치즈",
+      "category": "korea-mfds",
+      "url": "https://various.foodsafetykorea.go.kr/nutrient/general/food/detail.do?searchFoodCd=D310-467330000-0001&searchRegionCd=ZZ&searchMonthCd=AVG",
+      "upstreamSha256": "e0d298f291c7186316f6d8ee19f8695a1da0770bf3f3561722758bfd5dbc25b9",
+      "location": "foodCd=D310-467330000-0001; region=ZZ; month=AVG; original name=떡볶이_치즈",
+      "raw": {
+        "energyKcal": "164.00㎉",
+        "carbohydrateG": "29.31g",
+        "proteinG": "5.54g",
+        "fatG": "2.69g",
+        "fiberG": "0.80g",
+        "sugarsG": "5.76g",
+        "sodiumMg": "397.00㎎"
+      },
+      "per100g": {
+        "energyKcal": 164.0,
+        "carbohydrateG": 29.31,
+        "proteinG": 5.54,
+        "fatG": 2.69,
+        "fiberG": 0.8,
+        "sugarsG": 5.76,
+        "sodiumMg": 397.0
+      },
+      "metadata": {
+        "데이터구분": "음식",
+        "식품기원": "외식",
+        "대표식품명": "떡볶이",
+        "식품분류": "볶음류치즈해당없음",
+        "품목대표/상용제품": "품목대표",
+        "총 내용량": "100g",
+        "영양성분 함량 기준량": "100g",
+        "1회 섭취참고량": "-",
+        "데이터 생성 방법명": "분석",
+        "데이터 생성일자": "2022-06-30",
+        "데이터 기준일자": "2026-08-28"
+      }
+    },
+    {
+      "source": "mfds",
+      "code": "D301-018000000-0002",
+      "displayName": "Bibimbap restoran",
+      "originalName": "비빔밥",
+      "category": "korea-mfds",
+      "url": "https://various.foodsafetykorea.go.kr/nutrient/general/food/detail.do?searchFoodCd=D301-018000000-0002&searchRegionCd=ZZ&searchMonthCd=AVG",
+      "upstreamSha256": "7463dc8b837294eaa344525937be6d5a43c526cbebe4fad1c501529f516f0a62",
+      "location": "foodCd=D301-018000000-0002; region=ZZ; month=AVG; original name=비빔밥",
+      "raw": {
+        "energyKcal": "142.00㎉",
+        "carbohydrateG": "22.50g",
+        "proteinG": "4.47g",
+        "fatG": "3.81g",
+        "fiberG": "1.40g",
+        "sugarsG": "3.04g",
+        "sodiumMg": "317.00㎎"
+      },
+      "per100g": {
+        "energyKcal": 142.0,
+        "carbohydrateG": 22.5,
+        "proteinG": 4.47,
+        "fatG": 3.81,
+        "fiberG": 1.4,
+        "sugarsG": 3.04,
+        "sodiumMg": 317.0
+      },
+      "metadata": {
+        "데이터구분": "음식",
+        "식품기원": "외식",
+        "대표식품명": "비빔밥",
+        "식품분류": "밥류해당없음해당없음",
+        "품목대표/상용제품": "품목대표",
+        "총 내용량": "100g",
+        "영양성분 함량 기준량": "100g",
+        "1회 섭취참고량": "-",
+        "데이터 생성 방법명": "분석",
+        "데이터 생성일자": "2022-06-30",
+        "데이터 기준일자": "2026-08-28"
+      }
+    },
+    {
+      "source": "mfds",
+      "code": "D101-007000000-0001",
+      "displayName": "Gimbap rumahan",
+      "originalName": "김밥",
+      "category": "korea-mfds",
+      "url": "https://various.foodsafetykorea.go.kr/nutrient/general/food/detail.do?searchFoodCd=D101-007000000-0001&searchRegionCd=ZZ&searchMonthCd=AVG",
+      "upstreamSha256": "1d60bb35ff19d00422be396de9609f47762043af89bc0e72d7e6c1ad93241e03",
+      "location": "foodCd=D101-007000000-0001; region=ZZ; month=AVG; original name=김밥",
+      "raw": {
+        "energyKcal": "140.00㎉",
+        "carbohydrateG": "19.98g",
+        "proteinG": "4.84g",
+        "fatG": "4.55g",
+        "fiberG": "1.40g",
+        "sugarsG": "0.00g",
+        "sodiumMg": "307.00㎎"
+      },
+      "per100g": {
+        "energyKcal": 140.0,
+        "carbohydrateG": 19.98,
+        "proteinG": 4.84,
+        "fatG": 4.55,
+        "fiberG": 1.4,
+        "sugarsG": 0.0,
+        "sodiumMg": 307.0
+      },
+      "metadata": {
+        "데이터구분": "음식",
+        "식품기원": "가정식",
+        "대표식품명": "김밥",
+        "식품분류": "밥류해당없음해당없음",
+        "품목대표/상용제품": "품목대표",
+        "총 내용량": "230g",
+        "영양성분 함량 기준량": "100g",
+        "1회 섭취참고량": "-",
+        "데이터 생성 방법명": "분석",
+        "데이터 생성일자": "2018-12-31",
+        "데이터 기준일자": "2026-08-28"
+      }
+    },
+    {
+      "source": "mfds",
+      "code": "D306-266000000-0001",
+      "displayName": "Kimchi jjigae restoran",
+      "originalName": "김치찌개",
+      "category": "korea-mfds",
+      "url": "https://various.foodsafetykorea.go.kr/nutrient/general/food/detail.do?searchFoodCd=D306-266000000-0001&searchRegionCd=ZZ&searchMonthCd=AVG",
+      "upstreamSha256": "18a21a9d81f0727c27305b9730474cab346b5ffe3630d21ff8d4c300e830e1a7",
+      "location": "foodCd=D306-266000000-0001; region=ZZ; month=AVG; original name=김치찌개",
+      "raw": {
+        "energyKcal": "61.00㎉",
+        "carbohydrateG": "2.98g",
+        "proteinG": "3.77g",
+        "fatG": "3.75g",
+        "fiberG": "2.10g",
+        "sugarsG": "0.76g",
+        "sodiumMg": "491.00㎎"
+      },
+      "per100g": {
+        "energyKcal": 61.0,
+        "carbohydrateG": 2.98,
+        "proteinG": 3.77,
+        "fatG": 3.75,
+        "fiberG": 2.1,
+        "sugarsG": 0.76,
+        "sodiumMg": 491.0
+      },
+      "metadata": {
+        "데이터구분": "음식",
+        "식품기원": "외식",
+        "대표식품명": "김치찌개",
+        "식품분류": "찌개 및 전골류해당없음해당없음",
+        "품목대표/상용제품": "품목대표",
+        "총 내용량": "400g",
+        "영양성분 함량 기준량": "100g",
+        "1회 섭취참고량": "-",
+        "데이터 생성 방법명": "분석",
+        "데이터 생성일자": "2012-02-28",
+        "데이터 기준일자": "2026-08-28"
+      }
+    },
+    {
+      "source": "mfds",
+      "code": "D106-275000000-0001",
+      "displayName": "Doenjang jjigae rumahan",
+      "originalName": "된장찌개",
+      "category": "korea-mfds",
+      "url": "https://various.foodsafetykorea.go.kr/nutrient/general/food/detail.do?searchFoodCd=D106-275000000-0001&searchRegionCd=ZZ&searchMonthCd=AVG",
+      "upstreamSha256": "b31bb12e354c1b9a77b678fc2f26b7d051c16de8a313dd8d0157a42a4b24a585",
+      "location": "foodCd=D106-275000000-0001; region=ZZ; month=AVG; original name=된장찌개",
+      "raw": {
+        "energyKcal": "46.00㎉",
+        "carbohydrateG": "4.44g",
+        "proteinG": "3.38g",
+        "fatG": "1.63g",
+        "fiberG": "1.60g",
+        "sugarsG": "0.00g",
+        "sodiumMg": "318.00㎎"
+      },
+      "per100g": {
+        "energyKcal": 46.0,
+        "carbohydrateG": 4.44,
+        "proteinG": 3.38,
+        "fatG": 1.63,
+        "fiberG": 1.6,
+        "sugarsG": 0.0,
+        "sodiumMg": 318.0
+      },
+      "metadata": {
+        "데이터구분": "음식",
+        "식품기원": "가정식",
+        "대표식품명": "된장찌개",
+        "식품분류": "찌개 및 전골류해당없음해당없음",
+        "품목대표/상용제품": "품목대표",
+        "총 내용량": "200g",
+        "영양성분 함량 기준량": "100g",
+        "1회 섭취참고량": "-",
+        "데이터 생성 방법명": "분석",
+        "데이터 생성일자": "2018-12-31",
+        "데이터 기준일자": "2026-08-28"
+      }
+    },
+    {
+      "source": "mfds",
+      "code": "D303-151000000-0001",
+      "displayName": "Manduguk restoran",
+      "originalName": "만두국",
+      "category": "korea-mfds",
+      "url": "https://various.foodsafetykorea.go.kr/nutrient/general/food/detail.do?searchFoodCd=D303-151000000-0001&searchRegionCd=ZZ&searchMonthCd=AVG",
+      "upstreamSha256": "1a89a8984dccc6ec739590fa948aa0eb7721401a0db54e10b06e276a7b4934f2",
+      "location": "foodCd=D303-151000000-0001; region=ZZ; month=AVG; original name=만두국",
+      "raw": {
+        "energyKcal": "62.00㎉",
+        "carbohydrateG": "6.83g",
+        "proteinG": "3.06g",
+        "fatG": "2.49g",
+        "fiberG": "4.60g",
+        "sugarsG": "0.44g",
+        "sodiumMg": "338.00㎎"
+      },
+      "per100g": {
+        "energyKcal": 62.0,
+        "carbohydrateG": 6.83,
+        "proteinG": 3.06,
+        "fatG": 2.49,
+        "fiberG": 4.6,
+        "sugarsG": 0.44,
+        "sodiumMg": 338.0
+      },
+      "metadata": {
+        "데이터구분": "음식",
+        "식품기원": "외식",
+        "대표식품명": "만두국",
+        "식품분류": "면 및 만두류해당없음해당없음",
+        "품목대표/상용제품": "품목대표",
+        "총 내용량": "700g",
+        "영양성분 함량 기준량": "100g",
+        "1회 섭취참고량": "-",
+        "데이터 생성 방법명": "분석",
+        "데이터 생성일자": "2012-02-28",
+        "데이터 기준일자": "2026-08-28"
+      }
+    },
+    {
+      "source": "mfds",
+      "code": "D303-146000000-0001",
+      "displayName": "Tteok manduguk restoran",
+      "originalName": "떡만두국",
+      "category": "korea-mfds",
+      "url": "https://various.foodsafetykorea.go.kr/nutrient/general/food/detail.do?searchFoodCd=D303-146000000-0001&searchRegionCd=ZZ&searchMonthCd=AVG",
+      "upstreamSha256": "a175d0a0a87fdcb1a5be12214bae91f9a7134fd5b710275ac252c4b9108ef4ba",
+      "location": "foodCd=D303-146000000-0001; region=ZZ; month=AVG; original name=떡만두국",
+      "raw": {
+        "energyKcal": "89.00㎉",
+        "carbohydrateG": "15.82g",
+        "proteinG": "2.87g",
+        "fatG": "1.62g",
+        "fiberG": "1.20g",
+        "sugarsG": "0.02g",
+        "sodiumMg": "283.00㎎"
+      },
+      "per100g": {
+        "energyKcal": 89.0,
+        "carbohydrateG": 15.82,
+        "proteinG": 2.87,
+        "fatG": 1.62,
+        "fiberG": 1.2,
+        "sugarsG": 0.02,
+        "sodiumMg": 283.0
+      },
+      "metadata": {
+        "데이터구분": "음식",
+        "식품기원": "외식",
+        "대표식품명": "떡만두국",
+        "식품분류": "면 및 만두류해당없음해당없음",
+        "품목대표/상용제품": "품목대표",
+        "총 내용량": "700g",
+        "영양성분 함량 기준량": "100g",
+        "1회 섭취참고량": "-",
+        "데이터 생성 방법명": "분석",
+        "데이터 생성일자": "2012-02-28",
+        "데이터 기준일자": "2026-08-28"
+      }
+    },
+    {
+      "source": "mfds",
+      "code": "D303-147110000-0001",
+      "displayName": "Tonkotsu ramen restoran (rujukan Korea)",
+      "originalName": "라멘_돈코츠라멘",
+      "category": "korea-mfds",
+      "url": "https://various.foodsafetykorea.go.kr/nutrient/general/food/detail.do?searchFoodCd=D303-147110000-0001&searchRegionCd=ZZ&searchMonthCd=AVG",
+      "upstreamSha256": "882624e69e8144bc0ebcc6e0b32db41bb3b2bfea59400d4eadf72d02427b13c9",
+      "location": "foodCd=D303-147110000-0001; region=ZZ; month=AVG; original name=라멘_돈코츠라멘",
+      "raw": {
+        "energyKcal": "98.00㎉",
+        "carbohydrateG": "5.87g",
+        "proteinG": "4.14g",
+        "fatG": "6.42g",
+        "fiberG": "0.90g",
+        "sugarsG": "0.77g",
+        "sodiumMg": "377.00㎎"
+      },
+      "per100g": {
+        "energyKcal": 98.0,
+        "carbohydrateG": 5.87,
+        "proteinG": 4.14,
+        "fatG": 6.42,
+        "fiberG": 0.9,
+        "sugarsG": 0.77,
+        "sodiumMg": 377.0
+      },
+      "metadata": {
+        "데이터구분": "음식",
+        "식품기원": "외식",
+        "대표식품명": "라멘",
+        "식품분류": "면 및 만두류돈코츠라멘해당없음",
+        "품목대표/상용제품": "품목대표",
+        "총 내용량": "100g",
+        "영양성분 함량 기준량": "100g",
+        "1회 섭취참고량": "-",
+        "데이터 생성 방법명": "분석",
+        "데이터 생성일자": "2022-06-30",
+        "데이터 기준일자": "2026-08-28"
+      }
+    },
+    {
+      "source": "mfds",
+      "code": "D303-147210000-0001",
+      "displayName": "Miso ramen restoran (rujukan Korea)",
+      "originalName": "라멘_미소라멘",
+      "category": "korea-mfds",
+      "url": "https://various.foodsafetykorea.go.kr/nutrient/general/food/detail.do?searchFoodCd=D303-147210000-0001&searchRegionCd=ZZ&searchMonthCd=AVG",
+      "upstreamSha256": "df5be8fed57e00d94e24a597f04644ba07ff60fffe70597948cef2b607a2ba09",
+      "location": "foodCd=D303-147210000-0001; region=ZZ; month=AVG; original name=라멘_미소라멘",
+      "raw": {
+        "energyKcal": "89.00㎉",
+        "carbohydrateG": "11.36g",
+        "proteinG": "4.57g",
+        "fatG": "2.77g",
+        "fiberG": "1.10g",
+        "sugarsG": "1.10g",
+        "sodiumMg": "388.00㎎"
+      },
+      "per100g": {
+        "energyKcal": 89.0,
+        "carbohydrateG": 11.36,
+        "proteinG": 4.57,
+        "fatG": 2.77,
+        "fiberG": 1.1,
+        "sugarsG": 1.1,
+        "sodiumMg": 388.0
+      },
+      "metadata": {
+        "데이터구분": "음식",
+        "식품기원": "외식",
+        "대표식품명": "라멘",
+        "식품분류": "면 및 만두류미소라멘해당없음",
+        "품목대표/상용제품": "품목대표",
+        "총 내용량": "100g",
+        "영양성분 함량 기준량": "100g",
+        "1회 섭취참고량": "-",
+        "데이터 생성 방법명": "분석",
+        "데이터 생성일자": "2022-06-30",
+        "데이터 기준일자": "2026-08-28"
+      }
+    },
+    {
+      "source": "mfds",
+      "code": "D303-147330000-0001",
+      "displayName": "Shoyu ramen restoran (rujukan Korea)",
+      "originalName": "라멘_소유라멘",
+      "category": "korea-mfds",
+      "url": "https://various.foodsafetykorea.go.kr/nutrient/general/food/detail.do?searchFoodCd=D303-147330000-0001&searchRegionCd=ZZ&searchMonthCd=AVG",
+      "upstreamSha256": "1b3d679e5722eaf908c1ee48378caafe597a7feab3c44f45e7a24eb5b38d5215",
+      "location": "foodCd=D303-147330000-0001; region=ZZ; month=AVG; original name=라멘_소유라멘",
+      "raw": {
+        "energyKcal": "72.00㎉",
+        "carbohydrateG": "9.12g",
+        "proteinG": "3.65g",
+        "fatG": "2.36g",
+        "fiberG": "0.70g",
+        "sugarsG": "0.84g",
+        "sodiumMg": "420.00㎎"
+      },
+      "per100g": {
+        "energyKcal": 72.0,
+        "carbohydrateG": 9.12,
+        "proteinG": 3.65,
+        "fatG": 2.36,
+        "fiberG": 0.7,
+        "sugarsG": 0.84,
+        "sodiumMg": 420.0
+      },
+      "metadata": {
+        "데이터구분": "음식",
+        "식품기원": "외식",
+        "대표식품명": "라멘",
+        "식품분류": "면 및 만두류소유라멘해당없음",
+        "품목대표/상용제품": "품목대표",
+        "총 내용량": "100g",
+        "영양성분 함량 기준량": "100g",
+        "1회 섭취참고량": "-",
+        "데이터 생성 방법명": "분석",
+        "데이터 생성일자": "2022-06-30",
+        "데이터 기준일자": "2026-08-28"
+      }
+    },
+    {
+      "source": "mfds",
+      "code": "D303-147340000-0001",
+      "displayName": "Shio ramen restoran (rujukan Korea)",
+      "originalName": "라멘_시오라멘",
+      "category": "korea-mfds",
+      "url": "https://various.foodsafetykorea.go.kr/nutrient/general/food/detail.do?searchFoodCd=D303-147340000-0001&searchRegionCd=ZZ&searchMonthCd=AVG",
+      "upstreamSha256": "8cc2d96712d28a00542c6ca0d6641b41904ef5c08f6f8b4c10ed49bee83078ee",
+      "location": "foodCd=D303-147340000-0001; region=ZZ; month=AVG; original name=라멘_시오라멘",
+      "raw": {
+        "energyKcal": "84.00㎉",
+        "carbohydrateG": "11.54g",
+        "proteinG": "4.68g",
+        "fatG": "2.13g",
+        "fiberG": "1.20g",
+        "sugarsG": "0.93g",
+        "sodiumMg": "292.00㎎"
+      },
+      "per100g": {
+        "energyKcal": 84.0,
+        "carbohydrateG": 11.54,
+        "proteinG": 4.68,
+        "fatG": 2.13,
+        "fiberG": 1.2,
+        "sugarsG": 0.93,
+        "sodiumMg": 292.0
+      },
+      "metadata": {
+        "데이터구분": "음식",
+        "식품기원": "외식",
+        "대표식품명": "라멘",
+        "식품분류": "면 및 만두류시오라멘해당없음",
+        "품목대표/상용제품": "품목대표",
+        "총 내용량": "100g",
+        "영양성분 함량 기준량": "100g",
+        "1회 섭취참고량": "-",
+        "데이터 생성 방법명": "분석",
+        "데이터 생성일자": "2022-06-30",
+        "데이터 기준일자": "2026-08-28"
+      }
+    },
+    {
+      "source": "mfds",
+      "code": "D303-164400000-0001",
+      "displayName": "Udon kuah gaya Jepang restoran (rujukan Korea)",
+      "originalName": "우동_일식",
+      "category": "korea-mfds",
+      "url": "https://various.foodsafetykorea.go.kr/nutrient/general/food/detail.do?searchFoodCd=D303-164400000-0001&searchRegionCd=ZZ&searchMonthCd=AVG",
+      "upstreamSha256": "05953ee33fb48f6db3789e2f8fcb967bfe50280a3ec7217fb990c3d78593aab3",
+      "location": "foodCd=D303-164400000-0001; region=ZZ; month=AVG; original name=우동_일식",
+      "raw": {
+        "energyKcal": "60.00㎉",
+        "carbohydrateG": "10.60g",
+        "proteinG": "1.91g",
+        "fatG": "1.13g",
+        "fiberG": "2.90g",
+        "sugarsG": "0.35g",
+        "sodiumMg": "341.00㎎"
+      },
+      "per100g": {
+        "energyKcal": 60.0,
+        "carbohydrateG": 10.6,
+        "proteinG": 1.91,
+        "fatG": 1.13,
+        "fiberG": 2.9,
+        "sugarsG": 0.35,
+        "sodiumMg": 341.0
+      },
+      "metadata": {
+        "데이터구분": "음식",
+        "식품기원": "외식",
+        "대표식품명": "우동",
+        "식품분류": "면 및 만두류일식해당없음",
+        "품목대표/상용제품": "품목대표",
+        "총 내용량": "700g",
+        "영양성분 함량 기준량": "100g",
+        "1회 섭취참고량": "-",
+        "데이터 생성 방법명": "분석",
+        "데이터 생성일자": "2012-02-28",
+        "데이터 기준일자": "2026-08-28"
+      }
+    },
+    {
+      "source": "mfds",
+      "code": "D303-172040000-0001",
+      "displayName": "Jjamppong tiram restoran",
+      "originalName": "짬뽕_굴",
+      "category": "korea-mfds",
+      "url": "https://various.foodsafetykorea.go.kr/nutrient/general/food/detail.do?searchFoodCd=D303-172040000-0001&searchRegionCd=ZZ&searchMonthCd=AVG",
+      "upstreamSha256": "09e472daef88cdbfe3817c89d47b4183dbb4baf195cf129e29bbaf7c5b07aee4",
+      "location": "foodCd=D303-172040000-0001; region=ZZ; month=AVG; original name=짬뽕_굴",
+      "raw": {
+        "energyKcal": "76.00㎉",
+        "carbohydrateG": "12.85g",
+        "proteinG": "3.65g",
+        "fatG": "1.07g",
+        "fiberG": "1.00g",
+        "sugarsG": "0.19g",
+        "sodiumMg": "296.00㎎"
+      },
+      "per100g": {
+        "energyKcal": 76.0,
+        "carbohydrateG": 12.85,
+        "proteinG": 3.65,
+        "fatG": 1.07,
+        "fiberG": 1.0,
+        "sugarsG": 0.19,
+        "sodiumMg": 296.0
+      },
+      "metadata": {
+        "데이터구분": "음식",
+        "식품기원": "외식",
+        "대표식품명": "짬뽕",
+        "식품분류": "면 및 만두류굴해당없음",
+        "품목대표/상용제품": "품목대표",
+        "총 내용량": "900g",
+        "영양성분 함량 기준량": "100g",
+        "1회 섭취참고량": "-",
+        "데이터 생성 방법명": "분석",
+        "데이터 생성일자": "2013-03-31",
+        "데이터 기준일자": "2026-08-28"
+      }
+    }
+  ]
+}

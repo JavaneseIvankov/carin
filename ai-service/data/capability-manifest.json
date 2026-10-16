@@ -2,12 +2,205 @@
   "artifactVersion": "1.0.0-draft",
   "publicationStatus": "unpublished",
   "contractVersion": "2.0.0",
-  "catalogVersion": "catalog-unpublished-0.1.0",
-  "nutritionDatasetVersion": "nutrition-unpublished-0.1.0",
-  "ruleSetVersion": "rules-unpublished-0.1.0",
-  "conditions": [],
+  "catalogVersion": "catalog-draft-0.4.0",
+  "nutritionDatasetVersion": "nutrition-multicuisine-draft-0.3.0",
+  "ruleSetVersion": "rules-unpublished-0.3.0",
+  "conditions": [
+    {
+      "id": "condition.general_nutrition",
+      "displayName": "Gizi umum (bukan diagnosis)",
+      "personalizationSupported": false,
+      "requiredProfileFields": [
+        "ageYears"
+      ],
+      "requiredNutrients": [
+        "carbohydrateG",
+        "energyKcal",
+        "fatG",
+        "fiberG",
+        "proteinG",
+        "sodiumMg"
+      ],
+      "supportedAgeMinimum": null,
+      "supportedAgeMaximum": null
+    },
+    {
+      "id": "condition.hypertension",
+      "displayName": "Hipertensi",
+      "personalizationSupported": false,
+      "requiredProfileFields": [
+        "ageYears",
+        "conditionIds",
+        "diagnosisState"
+      ],
+      "requiredNutrients": [
+        "sodiumMg"
+      ],
+      "supportedAgeMinimum": null,
+      "supportedAgeMaximum": null
+    },
+    {
+      "id": "condition.type_2_diabetes",
+      "displayName": "Diabetes tipe 2",
+      "personalizationSupported": false,
+      "requiredProfileFields": [
+        "ageYears",
+        "conditionIds",
+        "diagnosisState"
+      ],
+      "requiredNutrients": [
+        "carbohydrateG"
+      ],
+      "supportedAgeMinimum": null,
+      "supportedAgeMaximum": null
+    },
+    {
+      "id": "condition.prediabetes",
+      "displayName": "Prediabetes",
+      "personalizationSupported": false,
+      "requiredProfileFields": [
+        "ageYears",
+        "conditionIds",
+        "diagnosisState"
+      ],
+      "requiredNutrients": [
+        "carbohydrateG"
+      ],
+      "supportedAgeMinimum": null,
+      "supportedAgeMaximum": null
+    },
+    {
+      "id": "condition.dyslipidemia",
+      "displayName": "Dislipidemia / kolesterol tinggi",
+      "personalizationSupported": false,
+      "requiredProfileFields": [
+        "ageYears",
+        "conditionIds",
+        "diagnosisState"
+      ],
+      "requiredNutrients": [
+        "fatG"
+      ],
+      "supportedAgeMinimum": null,
+      "supportedAgeMaximum": null
+    },
+    {
+      "id": "condition.overweight_obesity",
+      "displayName": "Berat badan berlebih / obesitas",
+      "personalizationSupported": false,
+      "requiredProfileFields": [
+        "ageYears",
+        "conditionIds",
+        "diagnosisState"
+      ],
+      "requiredNutrients": [
+        "energyKcal"
+      ],
+      "supportedAgeMinimum": null,
+      "supportedAgeMaximum": null
+    },
+    {
+      "id": "condition.gout",
+      "displayName": "Gout / asam urat",
+      "personalizationSupported": false,
+      "requiredProfileFields": [
+        "ageYears",
+        "conditionIds",
+        "diagnosisState"
+      ],
+      "requiredNutrients": [],
+      "supportedAgeMinimum": null,
+      "supportedAgeMaximum": null
+    },
+    {
+      "id": "condition.chronic_kidney_disease",
+      "displayName": "Penyakit ginjal kronis",
+      "personalizationSupported": false,
+      "requiredProfileFields": [
+        "ageYears",
+        "conditionIds",
+        "diagnosisState"
+      ],
+      "requiredNutrients": [
+        "proteinG",
+        "sodiumMg"
+      ],
+      "supportedAgeMinimum": null,
+      "supportedAgeMaximum": null
+    },
+    {
+      "id": "condition.gerd",
+      "displayName": "GERD / refluks",
+      "personalizationSupported": false,
+      "requiredProfileFields": [
+        "ageYears",
+        "conditionIds",
+        "diagnosisState"
+      ],
+      "requiredNutrients": [],
+      "supportedAgeMinimum": null,
+      "supportedAgeMaximum": null
+    },
+    {
+      "id": "condition.constipation",
+      "displayName": "Konstipasi",
+      "personalizationSupported": false,
+      "requiredProfileFields": [
+        "ageYears",
+        "conditionIds",
+        "diagnosisState"
+      ],
+      "requiredNutrients": [
+        "fiberG"
+      ],
+      "supportedAgeMinimum": null,
+      "supportedAgeMaximum": null
+    },
+    {
+      "id": "condition.iron_deficiency_anemia",
+      "displayName": "Anemia defisiensi besi",
+      "personalizationSupported": false,
+      "requiredProfileFields": [
+        "ageYears",
+        "conditionIds",
+        "diagnosisState"
+      ],
+      "requiredNutrients": [],
+      "supportedAgeMinimum": null,
+      "supportedAgeMaximum": null
+    },
+    {
+      "id": "condition.food_allergy",
+      "displayName": "Alergi makanan",
+      "personalizationSupported": false,
+      "requiredProfileFields": [
+        "ageYears",
+        "allergies",
+        "allergyState"
+      ],
+      "requiredNutrients": [],
+      "supportedAgeMinimum": null,
+      "supportedAgeMaximum": null
+    },
+    {
+      "id": "condition.cardiovascular_disease",
+      "displayName": "Penyakit kardiovaskular",
+      "personalizationSupported": false,
+      "requiredProfileFields": [
+        "ageYears",
+        "conditionIds",
+        "diagnosisState"
+      ],
+      "requiredNutrients": [
+        "fatG",
+        "sodiumMg"
+      ],
+      "supportedAgeMinimum": null,
+      "supportedAgeMaximum": null
+    }
+  ],
   "supportedPhotoFoodIds": [],
   "nutrients": [],
-  "dataMode": "synthetic",
+  "dataMode": "real",
   "publishedAt": "1970-01-01T00:00:00Z"
 }

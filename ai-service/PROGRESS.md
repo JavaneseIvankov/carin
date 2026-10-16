@@ -1,12 +1,25 @@
 # AI Service Progress
 
-Last updated: 2026-10-15
+Last updated: 2026-10-16
 Branch: `feat/t32-real-ai-service`
 Scope: C32 AI service for the shared Carin API contract
 
 ## Status
 
-The FastAPI service and both A1V1 evaluation routes are implemented. Both aliases have returned valid responses from live Alibaba calls. The service remains a bootstrap: production nutrition results are not enabled because the approved T31 catalog, nutrient sources, rules, and capability manifest are not present in this checkout.
+The FastAPI service and both A1V1 evaluation routes are implemented. `/internal/v1/analyses` now returns seven per-portion nutrient estimates from a single structured VLM call, even without a catalog match. These are labeled `model_estimate`, not verified catalog facts. Disease-based recommendations are not implemented; the existing 2.0.0 contract still requires an insufficient personal-assessment status in this situation.
+
+## 2026-10-16: dev integration and MVP estimates
+
+- Fast-forwarded `feat/t32-real-ai-service` from `8a53051` to `origin/dev` at `1578724`. Preserved all pre-existing draft data/scripts/tests. Resolved the stash-application conflict in `data/capability-manifest.json` by retaining local catalog/rule metadata and using dev's existing `contractVersion: 2.0.0`.
+- Updated only the production VLM prompt/internal schema: visual geometry before mass, best-effort recipe assumptions, seven numeric per-component nutrient estimates, explicit gram/milligram units, strict JSON, `temperature=0`, `enable_thinking=false`, and a 4096-token output ceiling. User profiles are not sent to the VLM. The two locked A1V1 benchmark prompts/routes retain their original payloads.
+- Inline estimates populate the existing component nutrient, provenance, total and coverage fields without a second request. Catalog values take precedence; duplicate food names keep separate component identities. A legacy second-call failure preserves valid inline estimates.
+- No OpenAPI schema/path/type/enum or generated consumer change was made beyond the changes already brought in from `dev`. Numeric nutrition is available while the existing `overallAttention` continues to describe the unimplemented personal assessment.
+- Verification: AI-service tests **111 passed**; shared contract validator **PASS** (2 documents, 42 operations, 453 local references, 6 fixtures, 3 negative probes); draft artifact validator **PASS**.
+- Live smoke: one existing LeFood-Set image, real provider plus ASGI endpoint dispatch and local HTTP media download. HTTP **200**, **1 provider call**, all **7 nutrient totals numeric**, **5.425 s** endpoint time. See [sanitized live result](docs/nutrition-estimation-live-2026-10-16.json). This verifies execution/format only; no MAE or medical recommendation evaluation was run.
+- Backend checks: TypeScript build **PASS**; **65 targeted consumer/analysis-validator tests passed**. The exact live result was also accepted by the compiled backend's source, portion, total/coverage and status validation. The pnpm wrapper initially stopped on ignored dependency build scripts; running the installed TypeScript/Vitest entry points directly succeeded without changing dependency permissions or repository configuration.
+- Handoff: implementation and pre-existing data work remain uncommitted on `feat/t32-real-ai-service`; no push or draft catalog/rule activation. A pre-merge stash backup is retained. Profile-based recommendation rules are the next integration step and are not part of the verified nutrition-estimation output.
+
+The historical implementation notes and original endpoint benchmark below describe the earlier service state.
 
 ## Implemented
 

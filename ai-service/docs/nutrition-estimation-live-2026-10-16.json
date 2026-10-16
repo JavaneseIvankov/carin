@@ -1,0 +1,242 @@
+{
+  "date": "2026-10-16",
+  "kind": "live-provider-and-ASGI-endpoint-smoke-not-accuracy-evaluation",
+  "image": "../experiments/model-evaluation/data/lefood-set/images/lefood-308.jpg",
+  "profile": "synthetic empty profile",
+  "httpStatus": 200,
+  "endpointLatencySeconds": 5.425,
+  "providerCalls": 1,
+  "providerLatencySeconds": 5.319,
+  "providerStatus": 200,
+  "usage": {
+    "completion_tokens": 304,
+    "completion_tokens_details": {
+      "text_tokens": 304
+    },
+    "prompt_tokens": 637,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "image_tokens": 167,
+      "text_tokens": 470
+    },
+    "total_tokens": 941
+  },
+  "servedModel": "qwen3.7-flash-2026-07-15",
+  "checks": {
+    "http200": true,
+    "singleProviderCall": true,
+    "sharedSchema": true,
+    "sevenNumericTotals": true,
+    "modelEstimateProvenance": true,
+    "backendProvenanceAndMath": true
+  },
+  "result": {
+    "contractVersion": "2.0.0",
+    "operationId": "d4cc4781-8ff1-4c5b-8c30-71eb0f28a8f5",
+    "inputKind": "photo",
+    "supportStatus": "unrecognized",
+    "overallAttention": "insufficient_information",
+    "profileVersion": 0,
+    "catalogVersion": "unconfigured",
+    "nutritionDatasetVersion": "unconfigured",
+    "ruleSetVersion": "unconfigured",
+    "computedAt": "2026-10-15T17:05:40Z",
+    "components": [
+      {
+        "id": "d7137271-e8dc-43f5-b895-90ffd156eaf6",
+        "displayName": "Ayam Goreng",
+        "catalogFoodId": null,
+        "preparation": "Goreng dengan tepung panir",
+        "matchStatus": "unrecognized",
+        "portion": {
+          "quantity": 80,
+          "unit": "g",
+          "servingId": null,
+          "grams": 80,
+          "origin": "photo_estimate",
+          "basis": "Estimasi visual VLM; belum dicocokkan atau dikalibrasi dengan artifact porsi terverifikasi.",
+          "sourceId": null
+        },
+        "nutrients": {
+          "energyKcal": 210,
+          "carbohydrateG": 8,
+          "proteinG": 14,
+          "fatG": 12,
+          "fiberG": 0,
+          "sugarsG": 0,
+          "sodiumMg": 350
+        },
+        "per100g": {
+          "energyKcal": null,
+          "carbohydrateG": null,
+          "proteinG": null,
+          "fatG": null,
+          "fiberG": null,
+          "sugarsG": null,
+          "sodiumMg": null
+        },
+        "nutrientSourceIds": {
+          "energyKcal": "vlm-estimate-d7137271-e8dc-43f5-b895-90ffd156eaf6",
+          "carbohydrateG": "vlm-estimate-d7137271-e8dc-43f5-b895-90ffd156eaf6",
+          "proteinG": "vlm-estimate-d7137271-e8dc-43f5-b895-90ffd156eaf6",
+          "fatG": "vlm-estimate-d7137271-e8dc-43f5-b895-90ffd156eaf6",
+          "fiberG": "vlm-estimate-d7137271-e8dc-43f5-b895-90ffd156eaf6",
+          "sugarsG": "vlm-estimate-d7137271-e8dc-43f5-b895-90ffd156eaf6",
+          "sodiumMg": "vlm-estimate-d7137271-e8dc-43f5-b895-90ffd156eaf6"
+        },
+        "sourceIds": [
+          "vlm-estimate-d7137271-e8dc-43f5-b895-90ffd156eaf6"
+        ]
+      },
+      {
+        "id": "e293578a-74a3-4f29-9a9b-d423f45be777",
+        "displayName": "Saus Merah",
+        "catalogFoodId": null,
+        "preparation": "Saus tomat atau saus cabai manis",
+        "matchStatus": "unrecognized",
+        "portion": {
+          "quantity": 30,
+          "unit": "g",
+          "servingId": null,
+          "grams": 30,
+          "origin": "photo_estimate",
+          "basis": "Estimasi visual VLM; belum dicocokkan atau dikalibrasi dengan artifact porsi terverifikasi.",
+          "sourceId": null
+        },
+        "nutrients": {
+          "energyKcal": 25,
+          "carbohydrateG": 5,
+          "proteinG": 0,
+          "fatG": 0,
+          "fiberG": 0,
+          "sugarsG": 4,
+          "sodiumMg": 400
+        },
+        "per100g": {
+          "energyKcal": null,
+          "carbohydrateG": null,
+          "proteinG": null,
+          "fatG": null,
+          "fiberG": null,
+          "sugarsG": null,
+          "sodiumMg": null
+        },
+        "nutrientSourceIds": {
+          "energyKcal": "vlm-estimate-e293578a-74a3-4f29-9a9b-d423f45be777",
+          "carbohydrateG": "vlm-estimate-e293578a-74a3-4f29-9a9b-d423f45be777",
+          "proteinG": "vlm-estimate-e293578a-74a3-4f29-9a9b-d423f45be777",
+          "fatG": "vlm-estimate-e293578a-74a3-4f29-9a9b-d423f45be777",
+          "fiberG": "vlm-estimate-e293578a-74a3-4f29-9a9b-d423f45be777",
+          "sugarsG": "vlm-estimate-e293578a-74a3-4f29-9a9b-d423f45be777",
+          "sodiumMg": "vlm-estimate-e293578a-74a3-4f29-9a9b-d423f45be777"
+        },
+        "sourceIds": [
+          "vlm-estimate-e293578a-74a3-4f29-9a9b-d423f45be777"
+        ]
+      }
+    ],
+    "totals": {
+      "energyKcal": 235,
+      "carbohydrateG": 13,
+      "proteinG": 14,
+      "fatG": 12,
+      "fiberG": 0,
+      "sugarsG": 4,
+      "sodiumMg": 750
+    },
+    "coverage": {
+      "energyKcal": {
+        "knownComponentCount": 2,
+        "totalComponentCount": 2
+      },
+      "carbohydrateG": {
+        "knownComponentCount": 2,
+        "totalComponentCount": 2
+      },
+      "proteinG": {
+        "knownComponentCount": 2,
+        "totalComponentCount": 2
+      },
+      "fatG": {
+        "knownComponentCount": 2,
+        "totalComponentCount": 2
+      },
+      "fiberG": {
+        "knownComponentCount": 2,
+        "totalComponentCount": 2
+      },
+      "sugarsG": {
+        "knownComponentCount": 2,
+        "totalComponentCount": 2
+      },
+      "sodiumMg": {
+        "knownComponentCount": 2,
+        "totalComponentCount": 2
+      }
+    },
+    "attentions": [],
+    "limitations": [
+      {
+        "code": "NUTRITION_ARTIFACT_UNAVAILABLE",
+        "message": "Katalog gizi belum dipasang; angka gizi yang tersedia berasal dari estimasi VLM dan bukan nilai katalog terverifikasi.",
+        "componentIds": [
+          "d7137271-e8dc-43f5-b895-90ffd156eaf6",
+          "e293578a-74a3-4f29-9a9b-d423f45be777"
+        ],
+        "critical": true
+      },
+      {
+        "code": "RULE_ARTIFACT_UNAVAILABLE",
+        "message": "Rule kesehatan bersumber belum dipasang; tidak ada penilaian personal yang dijalankan.",
+        "componentIds": [],
+        "critical": true
+      },
+      {
+        "code": "ALLERGEN_UNVERIFIED",
+        "message": "Foto tidak dapat memastikan seluruh bahan atau ketiadaan alergen.",
+        "componentIds": [
+          "d7137271-e8dc-43f5-b895-90ffd156eaf6",
+          "e293578a-74a3-4f29-9a9b-d423f45be777"
+        ],
+        "critical": true
+      },
+      {
+        "code": "UNRECOGNIZED_COMPONENT",
+        "message": "Model mengusulkan nama makanan, tetapi belum ada katalog terverifikasi untuk memadankannya.",
+        "componentIds": [
+          "d7137271-e8dc-43f5-b895-90ffd156eaf6",
+          "e293578a-74a3-4f29-9a9b-d423f45be777"
+        ],
+        "critical": true
+      },
+      {
+        "code": "VLM_NUTRIENT_ESTIMATE",
+        "message": "Nilai gizi untuk makanan tanpa match katalog adalah estimasi visual VLM, bukan data terverifikasi.",
+        "componentIds": [
+          "d7137271-e8dc-43f5-b895-90ffd156eaf6",
+          "e293578a-74a3-4f29-9a9b-d423f45be777"
+        ],
+        "critical": true
+      }
+    ],
+    "sources": [
+      {
+        "id": "vlm-estimate-d7137271-e8dc-43f5-b895-90ffd156eaf6",
+        "kind": "model_estimate",
+        "title": "Estimasi visual VLM untuk porsi pada foto",
+        "datasetVersion": "vlm-estimate-v1",
+        "itemRef": "d4cc4781-8ff1-4c5b-8c30-71eb0f28a8f5/d7137271-e8dc-43f5-b895-90ffd156eaf6",
+        "url": null
+      },
+      {
+        "id": "vlm-estimate-e293578a-74a3-4f29-9a9b-d423f45be777",
+        "kind": "model_estimate",
+        "title": "Estimasi visual VLM untuk porsi pada foto",
+        "datasetVersion": "vlm-estimate-v1",
+        "itemRef": "d4cc4781-8ff1-4c5b-8c30-71eb0f28a8f5/e293578a-74a3-4f29-9a9b-d423f45be777",
+        "url": null
+      }
+    ],
+    "dataMode": "real"
+  }
+}
