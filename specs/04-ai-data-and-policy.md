@@ -59,10 +59,14 @@ policy/contract. Tidak ada user session, email, DOB, DB credential, atau raw
 pemeriksaan dalam request P0. Foto URL harus berasal dari allowlist host MinIO,
 tidak boleh arbitrary URL/redirect ke jaringan lain.
 
-Photo pipeline: validate input → propose components/portion → match versioned
-catalog → deterministic nutrient math → estimate nutrients for unmatched photo
-components with a separately scoped VLM request → evaluate supported rules →
-structured result. Catalog-matched values remain deterministic and catalog-backed.
+Photo pipeline: validate input → propose components/portion and per-component
+visual nutrients in one structured VLM request → match versioned catalog →
+deterministic catalog nutrient math → apply visual nutrients only to unmatched
+photo components → evaluate supported rules → structured result. Legacy/internal
+observations without inline estimates may use a separately scoped estimator.
+Catalog-matched values remain deterministic and catalog-backed. Unknown component
+mass or nutrients may remain null without discarding recognition or known values;
+missing fields, malformed responses and invalid numeric values remain errors.
 Visual nutrient estimates are allowed only for unmatched photo components, are
 returned per component with `model_estimate` provenance, and are included in
 result totals and coverage. They are not per-100-g values and are never used for

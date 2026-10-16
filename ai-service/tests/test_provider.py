@@ -55,7 +55,7 @@ async def test_observation_requests_all_seven_nutrients_in_one_structured_call()
 
 
 @pytest.mark.parametrize("case", [
-    "missing", "null", "negative", "string", "infinite", "nan", "blank_name", "zero_mass",
+    "missing", "negative", "string", "infinite", "nan", "blank_name", "zero_mass",
     "extra", "nonfood_components", "nonfood_geometry", "empty_food", "truncated",
 ])
 async def test_observation_rejects_invalid_or_incomplete_estimates(case):
@@ -63,9 +63,9 @@ async def test_observation_rejects_invalid_or_incomplete_estimates(case):
     nutrients = body["components"][0]["estimatedNutrients"]
     if case == "missing":
         del nutrients["sodiumMg"]
-    elif case in {"null", "negative", "string", "infinite", "nan"}:
+    elif case in {"negative", "string", "infinite", "nan"}:
         nutrients["sodiumMg"] = {
-            "null": None, "negative": -1, "string": "650", "infinite": float("inf"), "nan": float("nan"),
+            "negative": -1, "string": "650", "infinite": float("inf"), "nan": float("nan"),
         }[case]
     elif case == "blank_name":
         body["components"][0]["displayName"] = "   "

@@ -436,6 +436,59 @@ async def test_photo_single_call_exposes_seven_nutrients_without_overwriting_cat
     assert "containerDiameterCm" not in result
 
 
+@pytest.mark.parametrize("unavailable", ["sodium", "mass", "all_nutrients"])
+async def test_photo_preserves_recognition_when_inline_estimates_are_partial(client, monkeypatch, unavailable):
+    nutrients = {"energyKcal": 320, "carbohydrateG": 42, "proteinG": 9, "fatG": 12,
+                 "fiberG": 2, "sugarsG": 3, "sodiumMg": 650}
+    if unavailable == "sodium":
+        nutrients["sodiumMg"] = None
+    elif unavailable == "all_nutrients":
+        nutrients = dict.fromkeys(nutrients)
+    observation = {
+        "isFood": True, "containerDiameterCm": None, "apparentVolumeCm3": None,
+        "components": [{
+            "displayName": "nasi goreng", "preparation": "digoreng",
+            "estimatedMassGrams": None if unavailable == "mass" else 180,
+            "estimatedNutrients": nutrients,
+        }],
+    }
+    requests = []
+
+    def handler(request):
+        requests.append(json.loads(request.content))
+        return httpx.Response(200, json={"choices": [{
+            "finish_reason": "stop", "message": {"content": json.dumps(observation)},
+        }]})
+
+    async def fake_fetch(image, settings):
+        return NormalizedImage(b"normalized-photo")
+
+    monkeypatch.setattr(main, "fetch_and_normalize", fake_fetch)
+    main.app.state.vlm_client_factory = lambda settings: VLMClient(settings, transport=httpx.MockTransport(handler))
+    response = await client.post("/internal/v1/analyses", headers=HEADERS, json=photo_request())
+    assert response.status_code == 200
+    assert len(requests) == 1  # Uncertainty must not trigger fallback calls or retries.
+    result = response.json()
+    validate_payload("AnalysisResult", result)
+    component = result["components"][0]
+    assert component["displayName"] == "nasi goreng"
+    assert component["portion"]["grams"] == observation["components"][0]["estimatedMassGrams"]
+    assert component["nutrients"] == nutrients
+    assert result["totals"] == nutrients
+    assert result["supportStatus"] == "unrecognized"
+    assert result["overallAttention"] == "insufficient_information"
+    for key, value in nutrients.items():
+        assert result["coverage"][key] == {"knownComponentCount": int(value is not None), "totalComponentCount": 1}
+        source_id = component["nutrientSourceIds"][key]
+        if value is None:
+            assert source_id is None
+        else:
+            assert any(source["id"] == source_id and source["kind"] == "model_estimate" for source in result["sources"])
+    if unavailable == "all_nutrients":
+        assert not result["sources"]
+        assert any(item["code"] == "VLM_NUTRITION_UNAVAILABLE" for item in result["limitations"])
+
+
 async def test_inline_estimates_survive_failure_for_other_components(client, monkeypatch):
     nutrients = {"energyKcal": 320, "carbohydrateG": 42, "proteinG": 9, "fatG": 12,
                  "fiberG": 2, "sugarsG": 3, "sodiumMg": 650}

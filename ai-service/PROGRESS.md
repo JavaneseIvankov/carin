@@ -1,8 +1,20 @@
 # AI Service Progress
 
 Last updated: 2026-10-16
-Branch: `feat/t32-real-ai-service`
+Branch: `dev` (integrated from `feat/t32-real-ai-service`)
 Scope: C32 AI service for the shared Carin API contract
+
+## Current dev integration
+
+Task / scope: Merge AI-service commit `536d4ae` into the current app/API code and preserve valid partial photo analyses. The merge is recorded in `dc6e7eb`.
+
+Changes: The single-call VLM path is retained. Unknown component mass or individual nutrients may be `null`; recognized food and known values remain available without an extra fallback call. Missing fields, invalid structure, negative/nonfinite values and truncated responses remain errors. The provider prompt/schema, API regression tests, README and AI data policy spec describe the same behavior. Draft catalog and health-rule activation remain separate work.
+
+Verification (2026-10-16): Using the isolated Python 3.12.13 environment, `python -m pytest -q` from `ai-service/` passed all 113 tests. The three new endpoint cases first reproduced HTTP 503, then passed with HTTP 200 after the fix. From the repository root, `python ai-service/validate_data_artifacts.py` and `python specs/validate-contracts.py` passed. From `carin-api/`, the targeted adapter, analysis-validation, consumption-nutrition and evaluation Vitest suites passed all 78 tests. `git diff --check` passed.
+
+Unverified work: The merged runtime has not been rebuilt/deployed, and this integration pass did not call a live provider or operate a phone. Next step: rebuild the AI-service container and verify photo analysis, explicit consumption confirmation and dashboard intake on the connected device.
+
+Worktree state: Main workspace is on `dev`. The earlier `real-ai-live-integration` worktree is preserved at detached `623d216`; the source feature branches are preserved. This integration has not been pushed.
 
 ## Status
 
